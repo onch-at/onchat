@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#ffc107">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link rel="stylesheet" href="../../css/login.css">
+    <link rel="stylesheet" href="../../css/input.css">
+    <link rel="stylesheet" href="../../css/modal.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <title>OnChat - 登录</title>
+</head>
+
+<body>
+    <div class="brand-container text-center">
+        <h1 class="brand text-warning">
+            <span class="text-secondary">On</span>Chat
+        </h1>
+
+        <p class="text-black-50 font-weight-bold">世界都在聊</p>
+    </div>
+
+    <form class="text-center">
+        <div class="form-group">
+            <input type="text" class="form-control form-control-lg text-center bg-light" id="username" name="username" placeholder="用户名" maxLength="30">
+        
+            <div class="form-tip invalid-feedback">
+                <i class="fas fa-exclamation-triangle"></i> 用户名长度必须在5~30位字符之间！
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <input type="password" class="form-control form-control-lg text-center bg-light" id="password" name="password" placeholder="密码" maxLength="50">
+        
+            <div class="form-tip invalid-feedback confirm-password-feedback">
+                <i class="fas fa-exclamation-triangle"></i> 密码长度必须在8~50位字符之间！
+            </div>
+        </div>
+
+        <a class="btn btn-warning btn-lg float-left register-link" href="../register">注册</a>
+        <button type="button" class="btn btn-warning btn-lg login-btn float-right">登录</button>
+    </form>
+
+    <div class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning">
+                        <span class="text-secondary">On</span>Chat
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script src="../../js/tooltip.js"></script>
+    <script src="../../js/user/login.js"></script>
+</body>
+</html>

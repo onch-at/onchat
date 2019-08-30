@@ -1,0 +1,15 @@
+{
+    "require": {
+        "catfan/medoo": "^1.7",
+        "twig/twig": "^2.0"
+    },
+
+    "autoload": {
+        "files": [
+            "config/config.php"
+        ],
+        "psr-4": {
+            "hypergo\\": "libs/src/"
+        }
+    }
+}

@@ -1,0 +1,8 @@
+.x-layout {
+    display: flex;
+    display: -webkit-flex;
+}
+
+.x-layout > * {
+    flex: 1;
+}

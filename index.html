@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#ffc107">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/input.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <title>OnChat - 世界都在聊</title>
+</head>
+
+<body>
+    <nav class="title-bar bg-light text-center float-shadow">
+        <span class="navbar-brand text-warning m-0 p-0">
+            <span class="text-secondary">On</span>Chat
+        </span>
+
+        <a tabindex="0" class="text-secondary text-decoration-none right-btn" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="<a href=./user/action/logout.php>登出</a>">
+            <i class="fas fa-bars"></i>
+        </a>
+    </nav>
+
+    <ul class="msg-list">
+        <li class="history-item d-none">
+            <button type="button" class="btn btn-light btn-sm float-shadow-sm history-btn" title="查看更多消息">
+                <i class="fas fa-history text-warning"></i>
+            </button>
+        </li>
+        <!-- <li class="msg-item left-item">
+            <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">
+            <div class="info">
+                <div class="username">HyperLife1119</div>
+                <div class="msg-bubble">Hello!</div>
+            </div>
+        </li>
+
+        <li class="msg-item right-item">
+            <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">
+            <div class="info">
+                <div class="username">HyperLife1119</div>
+                <div class="msg-bubble">Hi!</div>
+            </div>
+        </li>
+
+        <li class="time-item text-center">10:30</li> -->
+
+    </ul>
+
+    <div class="bottom-bar bg-light form-inline float-shadow">
+        <input type="text" class="form-control form-control-sm" placeholder="来说点什么吧？" name="message" id="message">
+        <button type="button" class="btn btn-warning btn-sm font-weight-bold send-btn" disabled="disabled">Send!</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script src="./js/index.js"></script>
+    <script src="./js/popover.js"></script>
+
+</body>
+</html>
