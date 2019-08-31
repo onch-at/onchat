@@ -1,4 +1,6 @@
 <?php
+if (empty($_POST)) exit;
+
 require_once '../vendor/autoload.php';
 
 use hypergo\utils\Session;

@@ -7,7 +7,7 @@
 
     Session::start();
     var_dump(empty($_SESSION["login_info"]));
-    var_dump(json_decode(json_encode(false)));
+    var_dump(json_decode("json_encode()"));
     
     // $loader = new \Twig\Loader\FilesystemLoader('./templates');
     // $twig = new \Twig\Environment($loader, [

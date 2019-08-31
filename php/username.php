@@ -5,9 +5,9 @@ use hypergo\utils\Session;
 
 Session::start();
 
-if(!isset($_SESSION["login_info"])) exit(json_encode(["username" => ""]));
+if(!isset($_SESSION["login_info"])) exit(json_encode(""));
 
 $info = json_decode($_SESSION["login_info"]);
 
-exit(json_encode(["username" => $info->username]));
+exit(json_encode($info->username));
 ?>

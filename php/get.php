@@ -1,5 +1,6 @@
 <?php
-$oldCount = $_POST["count"]; //旧消息记录条数
+if (empty($_GET)) exit;
+$oldCount = $_GET["count"]; //旧消息记录条数
 
 $data = json_decode(file_get_contents("../log.json")); //读取数据文件并将其解析为数组
 $count = count($data); //消息记录条数

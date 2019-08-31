@@ -1,6 +1,8 @@
 <?php
+if (empty($_GET)) exit;
+
 $quantity = 10; //每次读取的历史记录消息条数
-$history = $_POST["history"]; //历史记录条数 15 10-15 (9-14)
+$history = $_GET["history"]; //历史记录条数 15 10-15 (9-14)
 //$history = 15;
 
 $data = json_decode(file_get_contents("../log.json")); //读取数据文件并将其解析为数组

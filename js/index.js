@@ -31,7 +31,7 @@ $(function () {
 
     $(".history-btn").click(function () {
         $.ajax({
-            type: "POST",
+            type: "GET",
             url: "./php/history.php",
             dataType: "JSON",
             data: {
@@ -126,9 +126,8 @@ $(function () {
         });
     });
 
-    //预先加载出最后5条消息
     $.ajax({
-        type: "POST",
+        type: "GET",
         url: "./php/username.php",
         dataType: "JSON",
         beforeSend: function (XHR) { },
@@ -136,15 +135,16 @@ $(function () {
             
         },
         success: function (data) {
-            username = data.username;
+            username = data;
             last();
         },
         error: function (XHR) { }
     });
 
+    //预先加载出最后5条消息
     function last() {
         $.ajax({
-            type: "POST",
+            type: "GET",
             url: "./php/last.php",
             dataType: "JSON",
             beforeSend: function (XHR) { },
@@ -201,7 +201,7 @@ $(function () {
     function loop() {
         setTimeout(() => {
             $.ajax({
-                type: "POST",
+                type: "GET",
                 url: "./php/get.php",
                 dataType: "JSON",
                 data: {
