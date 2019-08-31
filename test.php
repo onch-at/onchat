@@ -3,16 +3,10 @@
     use hypergo\user\User;
     use hypergo\utils\Database;
     use hypergo\utils\Code;
-    $u = new User("123456","12345678");
-    var_dump($u->register());
-    var_dump($u->login());
-    var_dump(User::checkLogin());
-    var_dump(Code::getRandomCode(2, 5));
-    var_dump((json_decode($_SESSION["login_info"]))->username);
-    $a = [];
-    $a["ss"] = "fff";
-    $a[] = "aaa";
-    var_dump(ini_get("session.gc_maxlifetime"));
+    use hypergo\utils\Session;
+
+    Session::start();
+    var_dump(empty($_SESSION["login_info"]));
     
     // $loader = new \Twig\Loader\FilesystemLoader('./templates');
     // $twig = new \Twig\Environment($loader, [

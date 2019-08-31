@@ -225,9 +225,7 @@ class User {
     public static function logout() {
         Session::start();
 
-        if(isset($_SESSION["login_info"])) {
-            unset($_SESSION["login_info"]);
-        }
+        if (!empty($_SESSION["login_info"])) unset($_SESSION["login_info"]);
     }
     /**
      * 检查用户是否已经登录
