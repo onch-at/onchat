@@ -19,6 +19,8 @@ if (!empty($_SESSION["login_info"])) {
     
     file_put_contents("../log.json", json_encode($data)); //更新数据
     
-    exit(json_encode($data));
+    exit(json_encode(true));
+} else {
+    exit(json_encode(false));
 }
 ?>

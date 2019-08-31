@@ -8,6 +8,11 @@ $(function () {
 
     var username;
 
+    var showModal = function (text) {
+        $(".modal-body").text(text);
+        $(".modal").modal("show");
+    };
+
     function backToTop(time) {
         $("html").animate({scrollTop: 0}, time);
     }
@@ -48,7 +53,7 @@ $(function () {
 
                         setTimeout(() => {
                             historyItem.fadeOut("1500");
-                        }, 1500);
+                        }, 1000);
                     }
                 }, 1000);
             },
@@ -104,10 +109,18 @@ $(function () {
                 sendBtn.removeAttr("disabled");
             },
             success: function (data) {
-                msgInput.val(""); //清空消息输入框
-                setTimeout(() => { //并禁用发送按钮（必须延迟执行，否则无法禁用）
-                    sendBtn.attr("disabled", "disabled");
-                }, 0);
+                if (data) {
+                    msgInput.val(""); //清空消息输入框
+                    setTimeout(() => { //并禁用发送按钮（必须延迟执行，否则无法禁用）
+                        sendBtn.attr("disabled", "disabled");
+                    }, 0);
+                } else {
+                    showModal("请先登录再进行操作！");
+
+                    setTimeout(() => {
+                        location.href='./user/login'; //跳到登录页面
+                    }, 2000);
+                }
             },
             error: function (XHR) { }
         });

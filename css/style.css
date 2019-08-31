@@ -175,14 +175,18 @@ li {
 }
 
 #message {
-    width: 80%;
-    border-radius: 999rem 0 0 999rem;
+    width: 100%;
+    margin-right: calc(1.5em + 1rem + 2px);
+    border-radius: 999rem;
 }
 
 .send-btn {
-    width: 20%;
-    padding-right: .55rem !important;
-    border-radius: 0 999rem 999rem 0 !important;
+    position: fixed;
+    right: .5rem;
+    width: calc(1.5em + .5rem + 2px);
+    height: calc(1.5em + .5rem + 2px);
+    margin-left: .5rem !important;
+    border-radius: 999rem !important;
 }
 
 .send-btn:focus {
