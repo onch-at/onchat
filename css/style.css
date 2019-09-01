@@ -44,6 +44,25 @@
     font-size: 1.175rem;
 }
 
+.popover .popover-list {
+    margin: 0;
+    padding: 0;
+}
+
+.popover-body {
+    padding: .35rem 0 !important;
+}
+
+.popover-list .item {
+    margin: 0;
+    padding: 0;
+}
+
+.popover-list .item a {
+    display: block;
+    padding: .25rem 1rem;
+}
+
 .msg-list {
     width: 100%;
     margin: 0;
@@ -160,6 +179,7 @@ li {
 
 .time-item {
     font-size: .8rem;
+    padding-top: .85rem;
 }
 
 .bottom-bar {

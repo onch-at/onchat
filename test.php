@@ -5,9 +5,13 @@
     use hypergo\utils\Code;
     use hypergo\utils\Session;
 
-    Session::start();
-    var_dump(empty($_SESSION["login_info"]));
-    var_dump(json_decode("json_encode()"));
+    //echo date("Y-n-j H:i", time());
+    var_dump((5 > 1)?"0":"1");
+
+    
+    // Session::start();
+    // var_dump(empty($_SESSION["login_info"]));
+    // var_dump(json_decode("json_encode()"));
     
     // $loader = new \Twig\Loader\FilesystemLoader('./templates');
     // $twig = new \Twig\Environment($loader, [
@@ -24,7 +28,7 @@
 
 // $memcache->connect('127.0.0.1',11211) or die('shit');
 
-// //$memcache->set('key','hello memcache!');
+// $memcache->set('key','hello memcache!');
 
 // $out = $memcache->get('key');
 

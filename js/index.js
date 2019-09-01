@@ -1,4 +1,6 @@
 $(function () {
+    var rightBtn = $(".right-btn");
+    var msgList = $(".msg-list");
     var historyItem = $(".history-item");
     var msgInput = $("#message");
     var sendBtn = $(".send-btn");
@@ -21,6 +23,36 @@ $(function () {
         $("html").animate({scrollTop: $(".msg-list")[0].scrollHeight}, time);
     }
 
+    function addTime(time) {
+        msgList.append('<li class="time-item text-center">'+time+'</li>');
+    }
+
+    function addMsgItem(msgObj) {
+        if (msgObj.displayTime !== false) addTime(msgObj.displayTime);
+
+        if (msgObj.name == username) {
+            msgList.append('\
+                <li class="msg-item right-item">\
+                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
+                    <div class="info">\
+                        <div class="username">'+msgObj.name+'</div>\
+                        <div class="msg-bubble">'+msgObj.msg+'</div>\
+                    </div>\
+                </li>\
+            ');
+        } else {
+            msgList.append('\
+                <li class="msg-item left-item">\
+                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
+                    <div class="info">\
+                        <div class="username">'+msgObj.name+'</div>\
+                        <div class="msg-bubble">'+msgObj.msg+'</div>\
+                    </div>\
+                </li>\
+            ');
+        }
+    }
+ 
     msgInput.on("input", function () {
         if ($.trim($(this).val()) == "") { //如果压缩空格后内容仍然为空
             sendBtn.attr("disabled", "disabled");
@@ -63,6 +95,8 @@ $(function () {
                         history = v;
                     } else {
                         setTimeout(() => {
+                            if (v.displayTime !== false) historyItem.after('<li class="time-item text-center">'+v.displayTime+'</li>');
+
                             if (v.name == username) {
                                 historyItem.after('\
                                     <li class="msg-item right-item">\
@@ -126,21 +160,6 @@ $(function () {
         });
     });
 
-    $.ajax({
-        type: "GET",
-        url: "./php/username.php",
-        dataType: "JSON",
-        beforeSend: function (XHR) { },
-        complete: function (XHR, TS) {
-            
-        },
-        success: function (data) {
-            username = data;
-            last();
-        },
-        error: function (XHR) { }
-    });
-
     //预先加载出最后5条消息
     function last() {
         $.ajax({
@@ -160,27 +179,7 @@ $(function () {
                             historyItem.removeClass("d-none");
                         }
                     } else {
-                        if (v.name == username) {
-                            $(".msg-list").append('\
-                                <li class="msg-item right-item">\
-                                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-                                    <div class="info">\
-                                        <div class="username">'+v.name+'</div>\
-                                        <div class="msg-bubble">'+v.msg+'</div>\
-                                    </div>\
-                                </li>\
-                            ');
-                        } else {
-                            $(".msg-list").append('\
-                                <li class="msg-item left-item">\
-                                <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-                                    <div class="info">\
-                                        <div class="username">'+v.name+'</div>\
-                                        <div class="msg-bubble">'+v.msg+'</div>\
-                                    </div>\
-                                </li>\
-                            ');
-                        }
+                        addMsgItem(v);
                     }
                 });
     
@@ -216,27 +215,8 @@ $(function () {
                         if (k == "count") { //如果不是对象，则该值为旧消息记录的条数
                             count = v;
                         } else {
-                            if (v.name == username) {
-                                $(".msg-list").append('\
-                                    <li class="msg-item right-item">\
-                                        <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-                                        <div class="info">\
-                                            <div class="username">'+v.name+'</div>\
-                                            <div class="msg-bubble">'+v.msg+'</div>\
-                                        </div>\
-                                    </li>\
-                                ');
-                            } else {
-                                $(".msg-list").append('\
-                                    <li class="msg-item left-item">\
-                                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-                                        <div class="info">\
-                                            <div class="username">'+v.name+'</div>\
-                                            <div class="msg-bubble">'+v.msg+'</div>\
-                                        </div>\
-                                    </li>\
-                                ');
-                            }
+
+                            addMsgItem(v);
 
                             backToBottom(500);
                         }
@@ -247,4 +227,65 @@ $(function () {
             });
         }, 500);
     }
+
+    //初始化
+    function init() {
+        $.ajax({
+            type: "GET",
+            url: "./php/get-username.php",
+            dataType: "JSON",
+            beforeSend: function (XHR) { },
+            complete: function (XHR, TS) {
+                
+            },
+            success: function (data) {
+                username = data;
+                last();
+            },
+            error: function (XHR) { }
+        });
+    }
+
+    $.ajax({
+        type: "GET",
+        url: "./php/is-login.php",
+        dataType: "JSON",
+        beforeSend: function (XHR) { },
+        complete: function (XHR, TS) {
+            
+        },
+        success: function (data) {
+            if (data) {
+                rightBtn.attr("data-content", '\
+                    <ul class="popover-list">\
+                        <li class="item">\
+                            <a class="text-decoration-none text-secondary" href="./user/action/logout.php">\
+                                <i class="fas fa-sign-out-alt"></i>\
+                                登出\
+                            </a>\
+                        </li>\
+                    </ul>\
+                ');
+            } else {
+                rightBtn.attr("data-content", '\
+                    <ul class="popover-list">\
+                        <li class="item">\
+                            <a class="text-decoration-none text-secondary" href="./user/login">\
+                                <i class="fas fa-sign-in-alt"></i>\
+                                登录\
+                            </a>\
+                        </li>\
+                    </ul>\
+                ');
+
+                rightBtn.popover("show");
+
+                msgInput.attr("placeholder", "登录后即可开始聊天！");
+                msgInput.attr("readonly", "readonly");
+            }
+
+            init();
+        },
+        error: function (XHR) { }
+    });
 });

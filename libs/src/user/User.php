@@ -154,7 +154,6 @@ class User {
         $data = [
             "username" => $this->getUsername(),
             "password" => $password, //密文
-            "sessid" => session_id(),
             "expire" => time() + 86400, //1天后清除登录缓存
         ];
         $_SESSION["login_info"] = json_encode($data);
@@ -237,7 +236,7 @@ class User {
         Session::start();
 
         //如果服务器上没有对应的session
-        if(!isset($_SESSION["login_info"]) or empty($_SESSION["login_info"])) return false;
+        if(empty($_SESSION["login_info"])) return false;
         
         $obj = json_decode($_SESSION["login_info"]);
           
