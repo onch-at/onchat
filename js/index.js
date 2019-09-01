@@ -95,8 +95,6 @@ $(function () {
                         history = v;
                     } else {
                         setTimeout(() => {
-                            if (v.displayTime !== false) historyItem.after('<li class="time-item text-center">'+v.displayTime+'</li>');
-
                             if (v.name == username) {
                                 historyItem.after('\
                                     <li class="msg-item right-item">\
@@ -118,6 +116,8 @@ $(function () {
                                     </li>\
                                 ');
                             }
+
+                            if (v.displayTime !== false) historyItem.after('<li class="time-item text-center">'+v.displayTime+'</li>');
                             
                         }, k * 50);
                     }

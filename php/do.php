@@ -15,7 +15,7 @@ $count = count($data); //消息条数
 $displayTime;
 
 if ($count == 0) {
-    $displayTime = false;
+    $displayTime = date("Y-n-j H:i", $time);
 } else {
     $lastMsgObj = $data[$count - 1]; //获得上一条消息的对象实例
     $displayTime = (($time - $lastMsgObj->time) >= 300) ? date("Y-n-j H:i", $time) : false;
