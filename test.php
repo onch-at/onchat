@@ -48,3 +48,20 @@
 // echo session_create_id()."<br>";
 // echo session_create_id()."<br>";
 ?>
+
+<div class="f" style="height: 3rem; overflow:hidden;background: #448aff">
+    <div id="ddd" style="background: #ffab40; height: 0">11111111 11111111111 11111111111111 1111111 1111111 11111111 1111</div>
+    <div style="background: #f50057">11111111 11111111111 11111111111111 1111111 1111111 11111111 1111</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+            $(".f").mouseover(
+                function() {
+                    $("#ddd",this).animate({height:"3rem"});
+                });
+            $(".f").mouseleave(
+                function() {
+                    $("#ddd",this).animate({height:"0"});
+                });
+        </script>

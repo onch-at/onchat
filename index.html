@@ -28,8 +28,14 @@
     </nav>
 
     <ul class="msg-list">
-        <li class="history-item d-none">
-            <button type="button" class="btn btn-light btn-sm float-shadow-sm history-btn" title="查看更多消息">
+        <li class="spinner-item pt-3">
+            <button type="button" class="btn btn-light btn-sm d-flex justify-content-center float-shadow-sm spinner" data-toggle="tooltip" data-placement="bottom" title="载入中...">
+                <i class="fas fa-spinner text-warning ease-shun-spin"></i>
+            </button>
+        </li>
+
+        <li class="history-item pt-3 d-none">
+            <button type="button" class="btn btn-light btn-sm d-flex justify-content-center float-shadow-sm history-btn" data-toggle="tooltip" data-placement="bottom" title="点击查看更多消息">
                 <i class="fas fa-history text-warning"></i>
             </button>
         </li>
@@ -82,6 +88,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <script src="./js/index.js"></script>
+    <script src="./js/tooltip.js"></script>
     <script src="./js/popover.js"></script>
 
 </body>

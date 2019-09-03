@@ -2,6 +2,7 @@ $(function () {
     var rightBtn = $(".right-btn");
     var msgList = $(".msg-list");
     var historyItem = $(".history-item");
+    var historyBtn = $(".history-btn");
     var msgInput = $("#message");
     var sendBtn = $(".send-btn");
 
@@ -61,7 +62,7 @@ $(function () {
         }
     });
 
-    $(".history-btn").click(function () {
+    historyBtn.click(function () {
         $.ajax({
             type: "GET",
             url: "./php/history.php",
@@ -71,17 +72,19 @@ $(function () {
             },
             beforeSend: function (XHR) {
                 $(".history-btn > i").addClass("ease-reverse-spin");
-                $(".history-btn").attr("disabled", "disabled");
+                historyBtn.attr("disabled", "disabled");
             },
             complete: function (XHR, TS) {
                 setTimeout(() => {
                     $(".history-btn > i").removeClass("ease-reverse-spin");
-                    $(".history-btn").removeAttr("disabled"); 
+                    historyBtn.removeAttr("disabled"); 
 
                     if (history == 0) {
-                        $(".history-btn").attr("disabled", "disabled");
+                        historyBtn.attr("disabled", "disabled");
                         $(".history-btn > i").addClass("fa-check");
                         $(".history-btn > i").removeClass("fa-history");
+
+                        historyBtn.tooltip('hide');
 
                         setTimeout(() => {
                             historyItem.fadeOut("1500");
@@ -171,6 +174,7 @@ $(function () {
                 loop();
             },
             success: function (data) {
+                $(".spinner-item").addClass("d-none"); //隐藏loading
                 $.each(data, function (k, v) {
                     if (k == "count") { //如果不是对象，则该值为旧消息记录的条数
                         count = v;
@@ -245,6 +249,7 @@ $(function () {
             error: function (XHR) { }
         });
     }
+
 
     $.ajax({
         type: "GET",

@@ -12,19 +12,45 @@
 
 @-webkit-keyframes ease-reverse-spin {
     0% {
-      -webkit-transform: rotate(0deg);
-              transform: rotate(0deg); }
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg); }
     100% {
-      -webkit-transform: rotate(-360deg);
-              transform: rotate(-360deg); } }
+        -webkit-transform: rotate(-360deg);
+                transform: rotate(-360deg); } }
   
   @keyframes ease-reverse-spin {
     0% {
-      -webkit-transform: rotate(0deg);
-              transform: rotate(0deg); }
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg); }
     100% {
-      -webkit-transform: rotate(-360deg);
-              transform: rotate(-360deg); } }
+        -webkit-transform: rotate(-360deg);
+                transform: rotate(-360deg);
+    }
+}
+
+.ease-shun-spin {
+    -webkit-animation: ease-shun-spin 1s infinite ease;
+            animation: ease-shun-spin 1s infinite ease; }
+
+@-webkit-keyframes ease-shun-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg); }
+    100% {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg); } }
+  
+  @keyframes ease-shun-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+                transform: rotate(0deg); }
+    100% {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+    }
+}
+
+
 
 .title-bar {
     position: fixed;
@@ -76,18 +102,18 @@ li {
     clear: both;
 }
 
-.history-item {
-    padding-top: 1rem;
+.spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 auto;
+    font-size: 1.5rem !important;
+    border-radius: 999rem !important;
 }
 
 .history-btn {
     width: 2.5rem;
     height: 2.5rem;
     margin: 0 auto;
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    padding: .5rem !important;
     font-size: 1.2rem !important;
     border-radius: 999rem !important;
 }
