@@ -1,4 +1,10 @@
 <?php
+/**
+ * Undocumented function
+ *
+ * @param [type] $key
+ * @return void
+ */
 function getConfig($key) {
     $config = [
         "database" => [
@@ -6,14 +12,14 @@ function getConfig($key) {
             "name"      => "onchat",
             "server"    => "localhost",
             "username"  => "root",
-            "password"  => "",
+            "password"  => "root",
             "charset"   => "utf8mb4",
             "collation" => "utf8mb4_general_ci",
         ],
 
         "session" => [
-            "save_handler"   => "memcache",
-            "save_path"      => "tcp://127.0.0.1:11211",
+            "save_handler"   => "redis",
+            "save_path"      => "tcp://127.0.0.1:6379",
             "gc_maxlifetime" => 86400,
         ]
     ];
