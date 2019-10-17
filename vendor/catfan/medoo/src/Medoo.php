@@ -2,7 +2,7 @@
 /*!
  * Medoo database framework
  * https://medoo.in
- * Version 1.7.3
+ * Version 1.7.5
  *
  * Copyright 2019, Angel Lai
  * Released under the MIT license
@@ -360,12 +360,15 @@ class Medoo
 				$statement->bindValue($key, $value[ 0 ], $value[ 1 ]);
 			}
 
-			$statement->execute();
+			if ($statement->execute())
+			{
+				$this->statement = $statement;
 
-			$this->statement = $statement;
-
-			return $statement;
+				return $statement;
+			}
 		}
+
+		$this->statement = null;
 
 		return false;
 	}
@@ -497,6 +500,11 @@ class Medoo
 
 	protected function columnQuote($string)
 	{
+		if (!preg_match('/^[a-zA-Z0-9_]+(\.?[a-zA-Z0-9_]+)?$/i', $string))
+		{
+			throw new InvalidArgumentException("Incorrect column name \"$string\"");
+		}
+
 		if (strpos($string, '.') !== false)
 		{
 			return '"' . $this->prefix . str_replace('.', '"."', $string) . '"';
@@ -1736,6 +1744,11 @@ class Medoo
 
 	public function id()
 	{
+		if ($this->statement == null)
+		{
+			return null;
+		}
+
 		$type = $this->type;
 
 		if ($type === 'oracle')
@@ -1747,7 +1760,14 @@ class Medoo
 			return $this->pdo->query('SELECT LASTVAL()')->fetchColumn();
 		}
 
-		return $this->pdo->lastInsertId();
+		$lastId = $this->pdo->lastInsertId();
+
+		if ($lastId != "0" && $lastId != "")
+		{
+			return $lastId;
+		}
+
+		return null;
 	}
 
 	public function debug()

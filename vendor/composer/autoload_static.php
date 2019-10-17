@@ -17,6 +17,10 @@ class ComposerStaticInita664237a9288384b1b5d0ddaa1a9ff04
         array (
             'hypergo\\' => 8,
         ),
+        'W' => 
+        array (
+            'WebSocket\\' => 10,
+        ),
         'T' => 
         array (
             'Twig\\' => 5,
@@ -36,6 +40,10 @@ class ComposerStaticInita664237a9288384b1b5d0ddaa1a9ff04
         'hypergo\\' => 
         array (
             0 => __DIR__ . '/../..' . '/libs/src',
+        ),
+        'WebSocket\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/textalk/websocket/lib',
         ),
         'Twig\\' => 
         array (

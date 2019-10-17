@@ -7,6 +7,7 @@ use hypergo\utils\Database;
 use Medoo\Medoo;
 
 class User {
+    private $uid; //UserID
     private $username; //用户名
     private $password; //用户密码(明文)
     
@@ -42,6 +43,25 @@ class User {
         $this->setUsername($username);
         $this->setPassword($password);
         $this->setDatabase(Database::getInstance());
+    }
+
+    /**
+     * 获取用户UID
+     *
+     * @return integer
+     */
+    public function getUid():int {
+        return $this->uid;
+    }
+
+    /**
+     * 设置用户UID
+     *
+     * @param integer $uid
+     * @return void
+     */
+    public function setUid(int $uid) {
+        $this->uid = $uid;
     }
 
     /**
@@ -136,9 +156,8 @@ class User {
         //如果密码长度不符合
         if ($check !== self::STATUS_SUCCESS) return $check;
 
-        $data = $database->select("account", "password", [
-            "username" => $this->getUsername()
-        ], [
+        $data = $database->select("account", ["id", "password"], [
+            "username" => $this->getUsername(),
             "LIMIT" => 1
         ]);
             
@@ -149,9 +168,12 @@ class User {
         //如果密码错误
         if (!User::verify($this->getPassword(), $password)) return self::STATUS_USER_PASSWORD_ERROR;
         
+        $this->setUid($data[0]["id"]);
+
         Session::start();
 
         $data = [
+            "uid" => $data[0]["id"],
             "username" => $this->getUsername(),
             "password" => $password, //密文
             "expire" => time() + 86400, //1天后清除登录缓存
@@ -189,9 +211,8 @@ class User {
         if ($check !== self::STATUS_SUCCESS) return $check;
 
         //查询该用户是否已存在
-        $data = $database->select("account", "uid", [
-            "username" => $this->getUsername()
-        ], [
+        $data = $database->select("account", "id", [
+            "username" => $this->getUsername(),
             "LIMIT" => 1
         ]);
 
@@ -254,8 +275,7 @@ class User {
         ]);
 
         $data = $database->select("account", "password", [
-            "username" => $obj->username
-        ], [
+            "username" => $obj->username,
             "LIMIT" => 1
         ]);
 

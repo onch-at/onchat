@@ -1,0 +1,26 @@
+<meta charset="UTF-8">
+<input type="text" name="msg" id="msg">
+<button onclick="send()">Send</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js"></script>
+<script>
+    const socket = new WebSocket("ws://test.hypergo.net:9501?sessid=" + Cookies.get("PHPSESSID") + "&rid=1");
+    // Connection opened
+    socket.addEventListener('open', function (event) {
+        console.log("与服务器握手成功！");
+    });
+    // Listen for messages
+    socket.addEventListener('message', function (event) {
+        console.log("服务器对客户端说：", event.data);
+    });
+
+    function send() {
+        var msg = $("#msg").val();
+        $("#msg").val("");
+        socket.send(msg);
+    }
+</script>
+<br>
+<img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="">
+<div style="background-color: aquamarine;">&nbsp;</div>

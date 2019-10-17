@@ -1,7 +1,8 @@
 {
     "require": {
         "catfan/medoo": "^1.7",
-        "twig/twig": "^2.0"
+        "twig/twig": "^2.0",
+        "textalk/websocket": "1.2.*"
     },
 
     "autoload": {

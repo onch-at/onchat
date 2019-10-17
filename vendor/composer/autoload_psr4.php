@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'hypergo\\' => array($baseDir . '/libs/src'),
+    'WebSocket\\' => array($vendorDir . '/textalk/websocket/lib'),
     'Twig\\' => array($vendorDir . '/twig/twig/src'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),

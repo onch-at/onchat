@@ -28,6 +28,10 @@ $(function () {
         msgList.append('<li class="time-item text-center">'+time+'</li>');
     }
 
+    msgInput.click(function () { //点击输入框，回到消息列表最底部
+        backToBottom(500);
+    });
+
     function addMsgItem(msgObj) {
         if (msgObj.displayTime !== false) addTime(msgObj.displayTime);
 
