@@ -16,8 +16,14 @@
     });
 
     function send() {
-        var msg = $("#msg").val();
+        var data = JSON.stringify({
+            cmd: "chat",
+            data: {
+                msg: $("#msg").val(),
+                style: []
+            }
+        });
         $("#msg").val("");
-        socket.send(msg);
+        socket.send(data);
     }
 </script>
