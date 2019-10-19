@@ -74,7 +74,17 @@ class MessageManager extends RedisManager {
      */
     public function getKey():string {
        return self::ONCHAT_MSGRECORD . $this->getRid();
-    }
+	}
+	
+	/**
+	 * 获取这个房间聊天记录的消息段条数
+	 *
+	 * @return boolean
+	 */
+	public function getLenght():bool {
+		$key = $this->getKey();
+		return $this->getRedis()->hLen($key);
+	}
     
     /**
      * 写入消息到Redis
@@ -121,7 +131,7 @@ class MessageManager extends RedisManager {
 			"uid"	   => $msgData["uid"],	 // 消息发送者User ID
 			"msg"	   => $msgData["msg"],	 // 消息内容
 			"time"	   => $time,			 // 消息发送的时间戳
-			"timeout"  => $timeout,			 // 是否超时，超时时则显示时间
+			"timeout"  => $timeout,			 // 是否超时，超时则显示时间
 			"style"    => $msgData["style"], // 消息样式
 			"isCancel" => false 			 // 是否撤回（默认无撤回）
 		];

@@ -173,7 +173,7 @@ class User {
         Session::start();
 
         $data = [
-            "uid" => $data[0]["id"],
+            "uid" => (int) $data[0]["id"],
             "username" => $this->getUsername(),
             "password" => $password, //密文
             "expire" => time() + 86400, //1天后清除登录缓存

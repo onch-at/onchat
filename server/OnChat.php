@@ -135,7 +135,16 @@ class OnChat {
         $cm->setChatter($request->fd, $userdata); //设置一个聊天者的信息
         
         $mm = new MessageManager($rid);
-        $this->getServer()->push($request->fd, $mm->read());
+        $lenght = $mm->getLenght();
+        if ($lenght > 0) { //如果有消息记录
+            $data = json_decode($mm->read());
+            $data["lenght"] = $lenght;
+            $msgJson = json_encode([
+                "cmd" => "last",
+                "data" => $data
+            ]);
+            $this->getServer()->push($request->fd, $msgJson);
+        }
 		
 		echo "服务器与{$request->fd}号客户端握手成功！{$request->fd}号客户端已加入{$rid}号房间\n";
 		echo "{$rid}号房间当前在线人数：" . $rm->getChatterNum() . "人\n\n";
@@ -196,18 +205,37 @@ class OnChat {
                 ];
                 $mm->write($msgData); //储存消息
                 
-                $msgJson = json_encode($mm->getMsgData()); //json打包刚刚MessageManager封装好的消息数据
+                $msgJson = json_encode([
+                    "cmd" => "chat",
+                    "data" => $mm->getMsgData() //刚刚MessageManager封装好的消息数据
+                ]);
                 
                 foreach ($room as $fd) { // 给该客户端所在的房间内的所有人广播
                     // 需要先判断是否是正确的websocket连接，否则有可能会push失败
                     if ($this->getServer()->isEstablished($fd)) {
-                        $this->getServer()->push($fd, "{$frame->fd}号客户端说：" . $frame->data);
                         $this->getServer()->push($fd, $msgJson);
                     } else {
                         $rm->removeChatter($fd);
                         $cm->removeChatter($fd);
                     }
                 }
+                break;
+
+            case "history":
+                if (!$cmd->isHistoryCmd()) return false; //这不是一个正确的HISTORY命令
+
+                $cm = new ChatterManager();
+                if (!$cm->hasChatter($frame->fd)) return false; //如果不存在该聊天者
+
+                $chatter = $cm->getChatter($frame->fd); // 拿到这个客户端的信息
+                
+                $mm = new MessageManager($chatter->rid);
+                
+                $msgJson = json_encode([
+                    "cmd" => "history",
+                    "data" => json_decode($mm->read($data->num))
+                ]);
+                $this->getServer()->push($frame->fd, $msgJson);
                 break;
 
             default:

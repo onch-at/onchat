@@ -5,41 +5,8 @@ use hypergo\utils\Database;
 use hypergo\utils\Code;
 use hypergo\utils\Session;
 use hypergo\redis\MessageManager;
-
-
-$obj = json_decode('{
-    "cmd": "chat",
-    "data": {
-        "msg": "message",
-        "style": []
-    }
-}');
-function isCmd($json) {
-    $obj = json_decode($json);
-    if (is_null($obj->cmd) or is_null($obj->data)) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-function inChatCmd(string $json):bool {
-    $data = (json_decode($json))->data;
-    if (is_null($data->msg) or is_null($data->style) or !is_array($data->style)) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-echo "<pre>";
-var_dump(inChatCmd('{
-    "cmd": "chat",
-    "data": {
-        "msgs": "message",
-        "style": []
-    }
-}'));
+echo "<PRE>";
+var_dump(json_decode('{"cmd":"last","data":[{"mid":51,"uid":"1","msg":"2222","time":1571415572,"timeout":false,"style":[],"isCancel":false},{"mid":52,"uid":"1","msg":"11111","time":1571416707,"timeout":"2019-10-19 00:38","style":[],"isCancel":false},{"mid":53,"uid":"1","msg":"111111111111111","time":1571416773,"timeout":false,"style":[],"isCancel":false},{"mid":54,"uid":"1","msg":"2222","time":1571417485,"timeout":"2019-10-19 00:51","style":[],"isCancel":false},{"mid":55,"uid":"1","msg":"3333333333333","time":1571417616,"timeout":false,"style":[],"isCancel":false},{"mid":56,"uid":"1","msg":"1111","time":1571454676,"timeout":"2019-10-19 11:11","style":[],"isCancel":false}]}'));
 
 //use WebSocket\Client; //is_null($obj->data->msg) or is_null($obj->data->style)
 
