@@ -59,17 +59,8 @@ $(function () {
                 switch(data.status_code) {
                     case 0: //成功
                         showModal("登录成功，准备跳转...");
-
-                        var $_GET = {};
-                        document.location.search.replace(/\??(?:([^=]+)=([^&]*)&?)/g, function () {
-                            function decode(s) {
-                                return decodeURIComponent(s.split("+").join(" "));
-                            }
-                            
-                            $_GET[decode(arguments[1])] = decode(arguments[2]);
-                        });
             
-                        var url = $_GET["jump"]; //这里get到的URL是用户跳转到登录界面的原地址
+                        var url = Arg("jump"); //这里get到的URL是用户跳转到登录界面的原地址
             
                         if (url == "null" || url == "" || typeof url == "undefined") url = "../../"; //如果没有就回首页
                         

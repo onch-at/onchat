@@ -36,7 +36,7 @@ class Command {
 
     public function isHistoryCmd():bool {
         $data = $this->getCmd()->data;
-        if (is_null($data->num) or !is_int($data->num)) {
+        if (is_null($data->rid) or is_null($data->num) or !is_int($data->num)) {
             return false;
         } else {
             return true;

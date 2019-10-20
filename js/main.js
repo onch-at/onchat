@@ -1,4 +1,5 @@
 $(function () {
+    var html = $("html");
     var rightBtn = $(".right-btn");
     var msgList = $(".msg-list");
     var historyItem = $(".history-item");
@@ -6,19 +7,23 @@ $(function () {
     var msgInput = $("#message");
     var sendBtn = $(".send-btn");
 
+    var rid = 0;
+    var uid;
+    var username;
+
     var lenght; //旧消息段条数
 
-    var showModal = function (text) {
+    function showModal(text) {
         $(".modal-body").text(text);
         $(".modal").modal("show");
-    };
+    }
 
     function backToTop(time) {
-        $("html").animate({scrollTop: 0}, time);
+        html.animate({scrollTop: 0}, time);
     }
 
     function backToBottom(time) {
-        $("html").animate({scrollTop: $(".msg-list")[0].scrollHeight}, time);
+        html.animate({scrollTop: $(".msg-list")[0].scrollHeight}, time);
     }
 
     function addTime(time) {
@@ -28,45 +33,28 @@ $(function () {
     function addMsgItem(msgObj) {
         if (msgObj.timeout !== false) addTime(msgObj.timeout);
 
-        // if (msgObj.name == username) {
-        //     msgList.append('\
-        //         <li class="msg-item right-item">\
-        //             <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-        //             <div class="info">\
-        //                 <div class="username">'+msgObj.name+'</div>\
-        //                 <div class="msg-bubble">'+msgObj.msg+'</div>\
-        //             </div>\
-        //         </li>\
-        //     ');
-        // } else {
+        if (msgObj.uid == uid) {
+            msgList.append('\
+                <li class="msg-item right-item">\
+                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
+                    <div class="info">\
+                        <div class="username">' + username + '</div>\
+                        <div class="msg-bubble">' + msgObj.msg + '</div>\
+                    </div>\
+                </li>\
+            ');
+        } else {
             msgList.append('\
                 <li class="msg-item left-item">\
                     <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
                     <div class="info">\
-                        <div class="username">'+msgObj.uid+'</div>\
-                        <div class="msg-bubble">'+msgObj.msg+'</div>\
+                        <div class="username">' + msgObj.uid + '</div>\
+                        <div class="msg-bubble">' + msgObj.msg + '</div>\
                     </div>\
                 </li>\
             ');
-        // }
+        }
     }
-
-    $.ajax({
-        type: "GET",
-        url: "../php/is-login.php",
-        dataType: "JSON",
-        beforeSend: function (XHR) { },
-        complete: function (XHR, TS) { },
-        success: function (data) {
-            if (!data) {
-                //showModal("请先登录！");
-                // setTimeout(function () { location.href = "../user/login"; }, 1500);
-                // msgInput.attr("placeholder", "登录后即可开始聊天！");
-                // msgInput.attr("readonly", "readonly");
-            }
-        },
-        error: function (XHR) { }
-    });
 
     msgInput.click(function () { //点击输入框，回到消息列表最底部
         backToBottom(500);
@@ -80,19 +68,47 @@ $(function () {
         }
     });
 
-    Cookies.set("PHPSESSID", "eicp48n8lf7bkt900eidvkvdp6");
-    const socket = new WebSocket("ws://test.hypergo.net:9501?sessid=" + Cookies.get("PHPSESSID") + "&rid=0");
-    // Connection opened
-    socket.addEventListener('open', function (event) {
+    //Cookies.set("PHPSESSID", "eicp48n8lf7bkt900eidvkvdp6");
+    const socket = new WebSocket("ws://test.hypergo.net:9501?sessid=" + Cookies.get("PHPSESSID") + "&rid=" + rid);
+    
+    var HeartCheck = {
+        timeout: 60000, //一分钟
+        timeoutObj: null,
+        reset: function () {
+            clearTimeout(this.timeoutObj);
+            this.start();
+        },
+        start: function () {
+            this.timeoutObj = setTimeout(() => {
+                socket.send('{"cmd":"ping","data":{}}');
+            }, this.timeout);
+        },
+    };
+
+    socket.addEventListener("open", function (event) {
         console.log("与服务器握手成功！");
+        HeartCheck.start();
     });
-    // Listen for messages
-    socket.addEventListener('message', function (event) {
+
+    socket.addEventListener("error", function (event) {
+        showModal("未知错误！与服务器断开连接");
+        location.reload();
+    });
+    
+    socket.addEventListener("message", function (event) {
+        HeartCheck.reset();
         console.log("服务器对客户端说：", event.data);
+
+        if (event.data === "") return false;
 
         var msgObj = JSON.parse(event.data);
         
         switch (msgObj.cmd) {
+            case "info":
+                uid = msgObj.data.uid;
+                username = msgObj.data.username;
+                break;
+
             case "last":
                 $(".spinner-item").addClass("d-none"); //隐藏loading
 
@@ -102,19 +118,17 @@ $(function () {
                         lenght = --v;
                     } else {
                         addMsgItem(v);
-                        // $("html").stop();
-                        // backToBottom(500);
                     }
                 });
 
                 
                 $(".msg-item").hide().each(function (index) {
                     var time = 50 * index;
-                    $(this).delay(time).fadeIn(500);
+                    $(this).delay(time).fadeIn(250);
 
                     setTimeout(() => {
-                        $("html").stop();
-                        backToBottom(250);
+                        html.stop();
+                        backToBottom(125);
                     }, time);
                 });
                 
@@ -128,15 +142,27 @@ $(function () {
             case "history":
                 $.each(msgObj.data.reverse(), function (k, v) {
                     setTimeout(() => {
-                        historyItem.after('\
-                            <li class="msg-item left-item">\
-                                <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-                                <div class="info">\
-                                    <div class="username">'+v.uid+'</div>\
-                                    <div class="msg-bubble">'+v.msg+'</div>\
-                                </div>\
-                            </li>\
-                        ');
+                        if (v.uid == uid) {
+                            historyItem.after('\
+                                <li class="msg-item right-item">\
+                                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
+                                    <div class="info">\
+                                        <div class="username">' + username + '</div>\
+                                        <div class="msg-bubble">' + v.msg + '</div>\
+                                    </div>\
+                                </li>\
+                            ');
+                        } else {
+                            historyItem.after('\
+                                <li class="msg-item left-item">\
+                                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
+                                    <div class="info">\
+                                        <div class="username">' + v.uid + '</div>\
+                                        <div class="msg-bubble">' + v.msg + '</div>\
+                                    </div>\
+                                </li>\
+                            ');
+                        }
 
                         if (v.timeout !== false) historyItem.after('<li class="time-item text-center">'+v.timeout+'</li>');
                     }, k * 50);
@@ -146,7 +172,7 @@ $(function () {
                     $(".history-btn > i").removeClass("ease-reverse-spin");
                     historyBtn.removeAttr("disabled"); 
 
-                    if (lenght == 0) {
+                    if (lenght === 0) {
                         historyBtn.attr("disabled", "disabled");
                         $(".history-btn > i").addClass("fa-check");
                         $(".history-btn > i").removeClass("fa-history");
@@ -158,6 +184,34 @@ $(function () {
                         }, 1000);
                     }
                 }, 1000);
+                break;
+
+            case "error":
+                var goHome = function () {
+                    setTimeout(function () { location.href = "../"; }, 1500);
+                };
+
+                switch (msgObj.data.code) {
+                    case 0:
+                        showModal("未知错误！");
+                        goHome();
+                        break;
+
+                    case 1:
+                        msgInput.attr("placeholder", "登录后即可开始聊天！");
+                        msgInput.attr("readonly", "readonly");
+                        break;
+
+                    case 2:
+                        showModal("房间号错误！");
+                        goHome();
+                        break;
+                    
+                    default:
+                        showModal("未知错误！");
+                        goHome();
+                        break;
+                }
                 break;
 
             default:
@@ -173,6 +227,7 @@ $(function () {
         var data = JSON.stringify({
             cmd: "history",
             data: {
+                rid: rid,
                 num: lenght--
             }
         });
@@ -181,15 +236,18 @@ $(function () {
     });
 
     sendBtn.click(function () {
+        var msg = $("#message").val();
+        if ($.trim(msg) === "") return false;
+
         var data = JSON.stringify({
             cmd: "chat",
             data: {
-                msg: $("#message").val(),
+                msg: msg,
                 style: []
             }
         });
         
-        $("#message").val("");
+        msgInput.val("");
         socket.send(data);
     });
 

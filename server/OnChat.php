@@ -18,6 +18,10 @@ class OnChat {
     
 	const WS_HOST = "0.0.0.0"; //WebSocket服务器的IP
     const WS_PORT = 9501; //WebSocket服务器的端口
+
+    const ERROR_UNKONW = 0;
+    const ERROR_NO_LOGIN = 1; //没有登录
+    const ERROR_NO_ROOM = 2; //没有房间
     
     const SESSID_PREFIX = "PHPREDIS_SESSION:"; //session id 前缀
 	
@@ -80,7 +84,7 @@ class OnChat {
      */
     public function connectRedis() {
         $this->getRedis()->pconnect("127.0.0.1", 6379);
-  }
+    }
 
     /**
      * 通过SESSION ID找到对应的SESSION并将其填充到$_SESSION
@@ -113,26 +117,52 @@ class OnChat {
 	public function onOpen(WebSocketServer $server, Request $request) {
         $rid = $request->get["rid"]; // room id
         $sessid = $request->get["sessid"]; // session id
-
-        if (!$this->hasSession($sessid)) return false; //如果不存在session，即未登录！
         
         $rm = new RoomManager($rid);
-        if (!$rm->hasRoom()) return false; //如果不存在该房间
+        if (!$rm->hasRoom()) { //如果不存在该房间
+            $msgJson = json_encode([
+                "cmd" => "error",
+                "data" => [
+                    "code" => self::ERROR_NO_ROOM,
+                ]
+            ]);
+            $this->getServer()->push($request->fd, $msgJson);
+            return false;
+        }
 
-        $cm = new ChatterManager();
+        $rm->addChatter($request->fd); //将该聊天者添加到房间
+
+        if ($this->hasSession($sessid)) { //如果不存在session，即未登录！
+            $cm = new ChatterManager();
 		
-		// 取得session
-		$this->getSession($sessid);
-		$info = json_decode($_SESSION["login_info"]);
-		
-		$rm->addChatter($request->fd); //添加一个聊天者到房间
-		
-		$userdata = [
-			"uid"	   => $info->uid,
-			"username" => $info->username,
-			"rid"      => $rid
-		];
-        $cm->setChatter($request->fd, $userdata); //设置一个聊天者的信息
+            // 取得session
+            $this->getSession($sessid);
+            $info = json_decode($_SESSION["login_info"]);
+            
+            $userdata = [
+                "uid"	   => $info->uid,
+                "username" => $info->username,
+                "rid"      => $rid
+            ];
+            $cm->setChatter($request->fd, $userdata); //设置一个聊天者的信息
+
+            $msgJson = json_encode([
+                "cmd" => "info",
+                "data" => [
+                    "uid" => $info->uid,
+                    "username" => $info->username
+                ]
+            ]);
+            $this->getServer()->push($request->fd, $msgJson);
+        } else {
+            $msgJson = json_encode([
+                "cmd" => "error",
+                "data" => [
+                    "code" => self::ERROR_NO_LOGIN,
+                ]
+            ]);
+            $this->getServer()->push($request->fd, $msgJson);
+        }
         
         $mm = new MessageManager($rid);
         $lenght = $mm->getLenght();
@@ -186,6 +216,7 @@ class OnChat {
         switch ($cmd->getCmd()->cmd) {
             case "chat":
                 if (!$cmd->isChatCmd()) return false; //这不是一个正确的CHAT命令
+                if (str_replace(" ", "", $data->msg) == "") return false; //该消息内容全为空格
 
                 $cm = new ChatterManager();
                 if (!$cm->hasChatter($frame->fd)) return false; //如果不存在该聊天者
@@ -224,18 +255,17 @@ class OnChat {
             case "history":
                 if (!$cmd->isHistoryCmd()) return false; //这不是一个正确的HISTORY命令
 
-                $cm = new ChatterManager();
-                if (!$cm->hasChatter($frame->fd)) return false; //如果不存在该聊天者
-
-                $chatter = $cm->getChatter($frame->fd); // 拿到这个客户端的信息
-                
-                $mm = new MessageManager($chatter->rid);
+                $mm = new MessageManager($data->rid);
                 
                 $msgJson = json_encode([
                     "cmd" => "history",
                     "data" => json_decode($mm->read($data->num))
                 ]);
                 $this->getServer()->push($frame->fd, $msgJson);
+                break;
+
+            case "ping":
+                $this->getServer()->push($frame->fd, '{"cmd":"ping","data":{}}');
                 break;
 
             default:

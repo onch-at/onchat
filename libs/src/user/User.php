@@ -156,7 +156,7 @@ class User {
         //如果密码长度不符合
         if ($check !== self::STATUS_SUCCESS) return $check;
 
-        $data = $database->select("account", ["id", "password"], [
+        $data = $database->select("account", ["uid", "password"], [
             "username" => $this->getUsername(),
             "LIMIT" => 1
         ]);
@@ -168,12 +168,12 @@ class User {
         //如果密码错误
         if (!User::verify($this->getPassword(), $password)) return self::STATUS_USER_PASSWORD_ERROR;
         
-        $this->setUid($data[0]["id"]);
+        $this->setUid($data[0]["uid"]);
 
         Session::start();
 
         $data = [
-            "uid" => (int) $data[0]["id"],
+            "uid" => (int) $data[0]["uid"],
             "username" => $this->getUsername(),
             "password" => $password, //密文
             "expire" => time() + 86400, //1天后清除登录缓存
@@ -211,7 +211,7 @@ class User {
         if ($check !== self::STATUS_SUCCESS) return $check;
 
         //查询该用户是否已存在
-        $data = $database->select("account", "id", [
+        $data = $database->select("account", "uid", [
             "username" => $this->getUsername(),
             "LIMIT" => 1
         ]);
@@ -263,16 +263,7 @@ class User {
           
         if ($obj->expire < time()) return false; //如果缓存时间过期
 
-        $config = Config::get("database");
-        $database = new Medoo([
-            'database_type' => $config["type"],
-            'database_name' => $config["name"],
-            'server'        => $config["server"],
-            'username'      => $config["username"],
-            'password'      => $config["password"],
-            'charset'       => $config["charset"],
-            'collation'     => $config["collation"],
-        ]);
+        $database = Database::getInstance();
 
         $data = $database->select("account", "password", [
             "username" => $obj->username,
@@ -281,7 +272,7 @@ class User {
 
         if (empty($data)) return false; //查询不到该用户
 
-        if ($obj->password !== $data[0]["password"]) return false; //密码错误
+        if ($obj->password !== $data[0]) return false; //密码错误
     
         return true;
     }
@@ -345,6 +336,22 @@ class User {
      */
     public static function verify(string $str, string $hash):bool {
         return password_verify($str, $hash);
+    }
+
+    /**
+     * 通过用户UID获取用户名
+     *
+     * @param integer $uid
+     * @return mixed
+     */
+    public static function getUsernameByUid(int $uid) {
+        $database = Database::getInstance();
+        $data = $database->select("account", "username", [
+            "uid" => $uid,
+            "LIMIT" => 1
+        ]);
+
+        return (empty($data)) ? false : $data[0];
     }
 }
 ?>
