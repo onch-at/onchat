@@ -8,7 +8,7 @@ $(function () {
     var sendBtn = $(".send-btn");
 
     var rid = 0;
-    var uid;
+    var uid = 0;
     var username;
 
     var lenght; //旧消息段条数
@@ -104,6 +104,9 @@ $(function () {
         var msgObj = JSON.parse(event.data);
         
         switch (msgObj.cmd) {
+            case "ping":
+                break;
+
             case "info":
                 uid = msgObj.data.uid;
                 username = msgObj.data.username;

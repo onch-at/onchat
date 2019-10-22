@@ -1,6 +1,8 @@
 <?php
 require_once '../vendor/autoload.php';
 
+use hypergo\user\User;
+
 use hypergo\utils\Session;
 use hypergo\utils\Command;
 
@@ -93,7 +95,7 @@ class OnChat {
      * @return void
      */
     public function getSession(string $sessid) {
-		session_decode($this->getRedis()->get(self::SESSID_PREFIX . $sessid));
+	 	return session_decode($this->getRedis()->get(self::SESSID_PREFIX . $sessid));
     }
     
     /**
@@ -132,11 +134,9 @@ class OnChat {
 
         $rm->addChatter($request->fd); //将该聊天者添加到房间
 
-        if ($this->hasSession($sessid)) { //如果不存在session，即未登录！
+        if ($this->getSession($sessid) and User::checkLogin()) { //如果不存在session，即未登录！
             $cm = new ChatterManager();
-		
-            // 取得session
-            $this->getSession($sessid);
+            
             $info = json_decode($_SESSION["login_info"]);
             
             $userdata = [
@@ -194,7 +194,9 @@ class OnChat {
 		$rm = new RoomManager($chatter->rid);
 		$rm->removeChatter($fd); //将该客户端移除出房间
 		
-		$cm->removeChatter($fd); //移除掉这个客户端的信息
+        $cm->removeChatter($fd); //移除掉这个客户端的信息
+        
+        session_destroy(); //清空session
 		
 		echo "{$fd}号客户端与服务器连接中断！\n";
 		echo "{$chatter->rid}号房间当前在线人数：" . $rm->getChatterNum() . "人\n\n";
