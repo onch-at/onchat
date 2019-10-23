@@ -6,9 +6,11 @@ use hypergo\user\User;
 use hypergo\utils\Session;
 use hypergo\utils\Command;
 
-use hypergo\redis\RoomManager;
-use hypergo\redis\ChatterManager;
+use hypergo\room\RoomManager;
 use hypergo\redis\MessageManager;
+
+use hypergo\chatter\Chatter;
+use hypergo\chatter\ChatterManager;
 
 use Swoole\Http\Request;
 use Swoole\WebSocket\Frame;
@@ -17,6 +19,9 @@ use Swoole\WebSocket\Server as WebSocketServer;
 class OnChat {
 	public $server;
     public $redis;
+
+    public $rooms = [0 => []];
+    public $chatters = [];
     
 	const WS_HOST = "0.0.0.0"; //WebSocket服务器的IP
     const WS_PORT = 9501; //WebSocket服务器的端口
@@ -60,6 +65,22 @@ class OnChat {
         $this->server = $server;
     }
 
+    public function getRooms():array {
+        return $this->rooms;
+    }
+
+    public function setRooms(array $rooms) {
+        $this->rooms = $rooms;
+    }
+
+    public function getChatters():array {
+        return $this->chatters;
+    }
+
+    public function setChatters(array $chatters) {
+        $this->chatters = $chatters;
+    }
+
     /**
      * 获取Redis实例
      *
@@ -95,6 +116,7 @@ class OnChat {
      * @return void
      */
     public function getSession(string $sessid) {
+        $_SESSION = []; //先清空掉session
 	 	return session_decode($this->getRedis()->get(self::SESSID_PREFIX . $sessid));
     }
     
@@ -120,8 +142,8 @@ class OnChat {
         $rid = $request->get["rid"]; // room id
         $sessid = $request->get["sessid"]; // session id
         
-        $rm = new RoomManager($rid);
-        if (!$rm->hasRoom()) { //如果不存在该房间
+        $rm = new RoomManager($this->getRooms());
+        if (!$rm->hasRoom($rid)) { //如果不存在该房间
             $msgJson = json_encode([
                 "cmd" => "error",
                 "data" => [
@@ -132,19 +154,15 @@ class OnChat {
             return false;
         }
 
-        $rm->addChatter($request->fd); //将该聊天者添加到房间
+        $rm->addChatter($rid, $request->fd); //将该聊天者添加到房间
+        $this->setRooms($rm->getRooms());
 
         if ($this->getSession($sessid) and User::checkLogin()) { //如果不存在session，即未登录！
-            $cm = new ChatterManager();
-            
             $info = json_decode($_SESSION["login_info"]);
-            
-            $userdata = [
-                "uid"	   => $info->uid,
-                "username" => $info->username,
-                "rid"      => $rid
-            ];
-            $cm->setChatter($request->fd, $userdata); //设置一个聊天者的信息
+
+            $cm = new ChatterManager($this->getChatters());
+            $cm->setChatter($request->fd, new Chatter($info->uid, $rid)); //设置一个聊天者的信息
+            $this->setChatters($cm->getChatters());
 
             $msgJson = json_encode([
                 "cmd" => "info",
@@ -177,7 +195,7 @@ class OnChat {
         }
 		
 		echo "服务器与{$request->fd}号客户端握手成功！{$request->fd}号客户端已加入{$rid}号房间\n";
-		echo "{$rid}号房间当前在线人数：" . $rm->getChatterNum() . "人\n\n";
+		echo "{$rid}号房间当前在线人数：" . $rm->getChatterNum($rid) . "人\n\n";
     }
     
     /**
@@ -188,18 +206,18 @@ class OnChat {
      * @return void
      */
     public function onClose(WebSocketServer $server, $fd) {
-		$cm = new ChatterManager();
+        $rm = new RoomManager($this->getRooms());
+		$cm = new ChatterManager($this->getChatters());
 		$chatter = $cm->getChatter($fd); // 拿到这个客户端的信息
 		
-		$rm = new RoomManager($chatter->rid);
-		$rm->removeChatter($fd); //将该客户端移除出房间
-		
+		$rm->removeChatter($chatter->getRid(), $fd); //将该客户端移除出房间
         $cm->removeChatter($fd); //移除掉这个客户端的信息
-        
-        session_destroy(); //清空session
+
+        $this->setRooms($rm->getRooms());
+        $this->setChatters($cm->getChatters());
 		
 		echo "{$fd}号客户端与服务器连接中断！\n";
-		echo "{$chatter->rid}号房间当前在线人数：" . $rm->getChatterNum() . "人\n\n";
+		echo $chatter->getRid() . "号房间当前在线人数：" . $rm->getChatterNum($chatter->getRid()) . "人\n\n";
 	}
     
     /**
@@ -220,19 +238,17 @@ class OnChat {
                 if (!$cmd->isChatCmd()) return false; //这不是一个正确的CHAT命令
                 if (str_replace(" ", "", $data->msg) == "") return false; //该消息内容全为空格
 
-                $cm = new ChatterManager();
+                $cm = new ChatterManager($this->getChatters());
                 if (!$cm->hasChatter($frame->fd)) return false; //如果不存在该聊天者
 
                 $chatter = $cm->getChatter($frame->fd); // 拿到这个客户端的信息
                 
-                $rm = new RoomManager($chatter->rid);
-                $mm = new MessageManager($chatter->rid);
-                
-                $room = json_decode($rm->getRoom()); // 拿到这个客户端所在房间的房间信息
+                $rm = new RoomManager($this->getRooms());
+                $mm = new MessageManager($chatter->getRid());
                 
                 $msg = htmlspecialchars($data->msg); //格式化一下消息
                 $msgData = [
-                    "uid"	=> $chatter->uid, // 消息发送者User ID
+                    "uid"	=> $chatter->getUid(), // 消息发送者User ID
                     "msg"	=> $msg,		  // 消息内容
                     "style" => $data->style   // 样式
                 ];
@@ -243,13 +259,16 @@ class OnChat {
                     "data" => $mm->getMsgData() //刚刚MessageManager封装好的消息数据
                 ]);
                 
-                foreach ($room as $fd) { // 给该客户端所在的房间内的所有人广播
+                foreach ($rm->getRoom($chatter->getRid()) as $fd) { // 给该客户端所在的房间内的所有人广播
                     // 需要先判断是否是正确的websocket连接，否则有可能会push失败
                     if ($this->getServer()->isEstablished($fd)) {
                         $this->getServer()->push($fd, $msgJson);
                     } else {
-                        $rm->removeChatter($fd);
+                        $rm->removeChatter($chatter->getRid(), $fd);
                         $cm->removeChatter($fd);
+
+                        $this->setRooms($rm->getRooms());
+                        $this->setChatters($cm-getChatters());
                     }
                 }
                 break;

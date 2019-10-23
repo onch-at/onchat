@@ -141,7 +141,7 @@ class Captcha {
             $color = imagecolorallocate($this->getImage(), mt_rand(150,225), mt_rand(150,225), mt_rand(150,225));
             for ($j = 0; $j < 3; $j++) {
                 imagestring($this->getImage(), 4, mt_rand(3, $this->getWidth() - 12), mt_rand(1, $this->getHeight() - 16), Code::getRandomCode(2, 1), $color);   
-            }   
+            }
         }
     }
     

@@ -125,7 +125,7 @@ $(function () {
                 });
 
                 
-                $(".msg-item").hide().each(function (index) {
+                $(".msg-item, .time-item").hide().each(function (index) {
                     var time = 50 * index;
                     $(this).delay(time).fadeIn(250);
 
@@ -183,7 +183,8 @@ $(function () {
                         historyBtn.tooltip('hide');
 
                         setTimeout(() => {
-                            historyItem.fadeOut("1500");
+                            historyItem.fadeTo("fast", 0);
+                            historyItem.animate({height: "hide"}, "fast");
                         }, 1000);
                     }
                 }, 1000);

@@ -18,6 +18,10 @@
 
 <body>
     <nav class="title-bar bg-light text-center float-shadow">
+        <a href="../" tabindex="0" class="text-secondary text-decoration-none left-btn" data-toggle="popover" data-trigger="focus" data-placement="bottom">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+
         <span class="navbar-brand text-warning m-0 p-0">
             <span class="text-secondary">On</span>Chat
         </span>
@@ -59,9 +63,9 @@
 
     </ul>
 
-    <div class="bottom-bar bg-light form-inline float-shadow pb-3">
-        <input type="text" class="form-control form-control-sm" placeholder="来说点什么吧？" name="message" id="message">
-        <button type="button" class="btn btn-warning btn-sm font-weight-bold p-1 send-btn" disabled="disabled">
+    <div class="bottom-bar bg-light form-inline float-shadow">
+        <input type="text" class="form-control" placeholder="来说点什么吧？" name="message" id="message">
+        <button type="button" class="btn btn-warning font-weight-bold p-1 send-btn" disabled="disabled">
             <i class="fas fa-arrow-up"></i>
         </button>
     </div>
