@@ -21,10 +21,10 @@ class MessageManager extends RedisManager {
     /**
      * Undocumented function
      *
-     * @param mixed $rid 房间号
+     * @param integer $rid 房间号
      * @return void
      */
-	public function __construct1($rid) {
+	public function __construct1(int $rid) {
 		$this->setRid($rid);
 		$this->__construct0();
 	}
@@ -32,19 +32,19 @@ class MessageManager extends RedisManager {
     /**
      * 获得房间号
      *
-     * @return mixed
+     * @return integer
      */
-	public function getRid() {
+	public function getRid():int {
 		return $this->rid;
 	}
     
     /**
      * 设置房间号
      *
-     * @param mixed $rid 房间号
+     * @param integer $rid 房间号
      * @return void
      */
-	public function setRid($rid) {
+	public function setRid(int $rid) {
 		$this->rid = $rid;
 	}
     

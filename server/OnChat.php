@@ -20,9 +20,10 @@ class OnChat {
 	public $server;
     public $redis;
 
-    public $rooms = [0 => []];
-    public $chatters = [];
-    
+    public $roomManager;
+    public $chatterManager;
+    public $messageManager;
+
 	const WS_HOST = "0.0.0.0"; //WebSocket服务器的IP
     const WS_PORT = 9501; //WebSocket服务器的端口
 
@@ -37,6 +38,15 @@ class OnChat {
 		
         $this->setRedis(new \Redis());
         $this->connectRedis();
+
+        $rooms = [
+            0 => [],
+            1 => [],
+            2 => []
+        ];
+        $this->setRoomManager(new RoomManager($rooms));
+        $this->setChatterManager(new ChatterManager());
+        $this->setMessageManager(new MessageManager());
 		
         $this->setServer(new WebSocketServer(self::WS_HOST, self::WS_PORT));
         $server = $this->getServer();
@@ -65,20 +75,29 @@ class OnChat {
         $this->server = $server;
     }
 
-    public function getRooms():array {
-        return $this->rooms;
+    public function getRoomManager():RoomManager {
+        return $this->roomManager;
     }
 
-    public function setRooms(array $rooms) {
-        $this->rooms = $rooms;
+    public function setRoomManager(RoomManager $rm) {
+        $this->roomManager = $rm;
     }
 
-    public function getChatters():array {
-        return $this->chatters;
+    public function getChatterManager():ChatterManager {
+        return $this->chatterManager;
     }
 
-    public function setChatters(array $chatters) {
-        $this->chatters = $chatters;
+    public function setChatterManager(ChatterManager $cm) {
+        $this->chatterManager = $cm;
+    }
+
+    public function getMessageManager(int $rid):MessageManager {
+        $this->messageManager->setRid($rid);
+        return $this->messageManager;
+    }
+
+    public function setMessageManager(MessageManager $mm) {
+        $this->messageManager = $mm;
     }
 
     /**
@@ -139,10 +158,11 @@ class OnChat {
      * @return void
      */
 	public function onOpen(WebSocketServer $server, Request $request) {
-        $rid = $request->get["rid"]; // room id
+        $rid = (int) $request->get["rid"]; // room id
         $sessid = $request->get["sessid"]; // session id
-        
-        $rm = new RoomManager($this->getRooms());
+
+        $cm = $this->getChatterManager();
+        $rm = $this->getRoomManager();
         if (!$rm->hasRoom($rid)) { //如果不存在该房间
             $msgJson = json_encode([
                 "cmd" => "error",
@@ -155,14 +175,13 @@ class OnChat {
         }
 
         $rm->addChatter($rid, $request->fd); //将该聊天者添加到房间
-        $this->setRooms($rm->getRooms());
 
-        if ($this->getSession($sessid) and User::checkLogin()) { //如果不存在session，即未登录！
+        $isLogin = User::checkLogin();
+
+        if ($this->getSession($sessid) and $isLogin) { //如果不存在session，即未登录！
             $info = json_decode($_SESSION["login_info"]);
 
-            $cm = new ChatterManager($this->getChatters());
-            $cm->setChatter($request->fd, new Chatter($info->uid, $rid)); //设置一个聊天者的信息
-            $this->setChatters($cm->getChatters());
+            $cm->setChatter($request->fd, new Chatter($info->uid, $rid, $isLogin)); //设置一个聊天者的信息
 
             $msgJson = json_encode([
                 "cmd" => "info",
@@ -173,6 +192,8 @@ class OnChat {
             ]);
             $this->getServer()->push($request->fd, $msgJson);
         } else {
+            $cm->setChatter($request->fd, new Chatter(0, $rid, $isLogin)); //设置一个聊天者的信息
+
             $msgJson = json_encode([
                 "cmd" => "error",
                 "data" => [
@@ -182,7 +203,7 @@ class OnChat {
             $this->getServer()->push($request->fd, $msgJson);
         }
         
-        $mm = new MessageManager($rid);
+        $mm = $this->getMessageManager($rid);
         $lenght = $mm->getLenght();
         if ($lenght > 0) { //如果有消息记录
             $data = json_decode($mm->read());
@@ -206,16 +227,13 @@ class OnChat {
      * @return void
      */
     public function onClose(WebSocketServer $server, $fd) {
-        $rm = new RoomManager($this->getRooms());
-		$cm = new ChatterManager($this->getChatters());
+        $rm = $this->getRoomManager();
+		$cm = $this->getChatterManager();
 		$chatter = $cm->getChatter($fd); // 拿到这个客户端的信息
 		
 		$rm->removeChatter($chatter->getRid(), $fd); //将该客户端移除出房间
         $cm->removeChatter($fd); //移除掉这个客户端的信息
 
-        $this->setRooms($rm->getRooms());
-        $this->setChatters($cm->getChatters());
-		
 		echo "{$fd}号客户端与服务器连接中断！\n";
 		echo $chatter->getRid() . "号房间当前在线人数：" . $rm->getChatterNum($chatter->getRid()) . "人\n\n";
 	}
@@ -235,16 +253,17 @@ class OnChat {
 
         switch ($cmd->getCmd()->cmd) {
             case "chat":
-                if (!$cmd->isChatCmd()) return false; //这不是一个正确的CHAT命令
-                if (str_replace(" ", "", $data->msg) == "") return false; //该消息内容全为空格
+                if (!$cmd->isChatCmd() or (str_replace(" ", "", $data->msg) == "")) return false; //这不是一个正确的CHAT命令 / 该消息内容全为空格
 
-                $cm = new ChatterManager($this->getChatters());
+                $cm = $this->getChatterManager();
                 if (!$cm->hasChatter($frame->fd)) return false; //如果不存在该聊天者
 
                 $chatter = $cm->getChatter($frame->fd); // 拿到这个客户端的信息
+
+                if (!$chatter->isLogin()) return false; //如果他未登录
                 
-                $rm = new RoomManager($this->getRooms());
-                $mm = new MessageManager($chatter->getRid());
+                $rm = $this->getRoomManager();
+                $mm = $this->getMessageManager($chatter->getRid());
                 
                 $msg = htmlspecialchars($data->msg); //格式化一下消息
                 $msgData = [
@@ -266,9 +285,6 @@ class OnChat {
                     } else {
                         $rm->removeChatter($chatter->getRid(), $fd);
                         $cm->removeChatter($fd);
-
-                        $this->setRooms($rm->getRooms());
-                        $this->setChatters($cm-getChatters());
                     }
                 }
                 break;
@@ -276,7 +292,7 @@ class OnChat {
             case "history":
                 if (!$cmd->isHistoryCmd()) return false; //这不是一个正确的HISTORY命令
 
-                $mm = new MessageManager($data->rid);
+                $mm = $this->getMessageManager($data->rid);
                 
                 $msgJson = json_encode([
                     "cmd" => "history",

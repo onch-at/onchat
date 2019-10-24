@@ -6,8 +6,8 @@ use hypergo\chatter\Chatter;
 class ChatterManager {
     public $chatters;
 
-    public function __construct(array $chatters) {
-		$this->setChatters($chatters);
+    public function __construct() {
+		$this->setChatters([]);
     }
 
 

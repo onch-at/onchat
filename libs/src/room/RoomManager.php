@@ -23,7 +23,7 @@ class RoomManager {
         $this->rooms = $rooms;
     }
 
-    public function getRoom($rid):array {
+    public function getRoom(int $rid):array {
         $rooms = $this->getRooms();
 
         return (array) $rooms[$rid];
@@ -32,10 +32,10 @@ class RoomManager {
     /**
      * 是否存在该房间
      * 
-     * @param mixed $rid
+     * @param integer $rid
      * @return boolean
      */
-    public function hasRoom($rid):bool {
+    public function hasRoom(int $rid):bool {
         $rooms = $this->getRooms();
 
         return isset($rooms[$rid]);
@@ -44,11 +44,11 @@ class RoomManager {
     /**
      * 添加聊天者
      *
-     * @param [type] $rid
+     * @param integer $rid
      * @param integer $fd
      * @return void
      */
-    public function addChatter($rid, int $fd) {
+    public function addChatter(int $rid, int $fd) {
         $rooms = $this->getRooms();
         $room = $rooms[$rid]; //找到这个房间的数组
         $room[] = $fd; //添加聊天者的fd到房间
@@ -60,11 +60,11 @@ class RoomManager {
     /**
      * 移除聊天者
      *
-     * @param [type] $rid
+     * @param integer $rid
      * @param integer $fd
      * @return void
      */
-    public function removeChatter($rid, int $fd) {
+    public function removeChatter(int $rid, int $fd) {
         $rooms = $this->getRooms();
         $room = $rooms[$rid]; //找到这个房间的数组
         $key = array_search($fd, $room); //通过value取得key
@@ -77,10 +77,10 @@ class RoomManager {
     /**
      * 获取该房间聊天人数
      *
-     * @param [type] $rid
+     * @param integer $rid
      * @return integer
      */
-    public function getChatterNum($rid):int {
+    public function getChatterNum(int $rid):int {
         $rooms = $this->getRooms();
 
         return count($rooms[$rid]);
