@@ -2,7 +2,7 @@ $(function () {
     var register = $(".register-btn");
 
     function showModal(text) {
-        $(".modal-body").text(text);
+        $(".modal-body").html(text);
         $(".modal").modal("show");
     };
     

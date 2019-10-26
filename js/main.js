@@ -1,5 +1,5 @@
 $(function () {
-    var html = $("html");
+    var root = $("html, body");
     var rightBtn = $(".right-btn");
     var msgList = $(".msg-list");
     var historyItem = $(".history-item");
@@ -11,49 +11,61 @@ $(function () {
     var uid = 0;
     var username;
 
-    var lenght; //旧消息段条数
+    var lenght; //记录旧消息段条数（用于查询消息记录）
+
+    var nameList = new Map(); //用于存放uid=>name的键值对关系
 
     function showModal(text) {
-        $(".modal-body").text(text);
+        $(".modal-body").html(text);
         $(".modal").modal("show");
     }
 
     function backToTop(time) {
-        html.animate({scrollTop: 0}, time);
+        root.animate({scrollTop: 0}, time);
     }
 
     function backToBottom(time) {
-        html.animate({scrollTop: $(".msg-list")[0].scrollHeight}, time);
+        root.animate({scrollTop: $(".msg-list")[0].scrollHeight}, time);
     }
 
     function addTime(time) {
-        msgList.append('<li class="time-item text-center">'+time+'</li>');
+        msgList.append('<li class="time-item text-center">' + time + '</li>');
     }
 
     function addMsgItem(msgObj) {
         if (msgObj.timeout !== false) addTime(msgObj.timeout);
 
-        if (msgObj.uid == uid) {
+        if (!nameList.has(msgObj.uid)) { //如果缓存中没有该uid对应的名字
             msgList.append('\
-                <li class="msg-item right-item">\
+                <li class="msg-item ' + ((msgObj.uid == uid) ? 'right-item' : 'left-item') + '">\
                     <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
                     <div class="info">\
-                        <div class="username">' + username + '</div>\
+                        <div class="username ' + msgObj.uid + '">' + msgObj.uid + '</div>\
                         <div class="msg-bubble">' + msgObj.msg + '</div>\
                     </div>\
                 </li>\
             ');
+
+            $.get("../php/username.php", {uid: msgObj.uid}, function (data) {
+                nameList.set(msgObj.uid, data); //缓存UID=>用户名键值对
+
+                $("." + msgObj.uid).each(function () {
+                    $(this).text(data);
+                    $(this).removeClass(msgObj.uid.toString());
+                });
+            });
         } else {
             msgList.append('\
-                <li class="msg-item left-item">\
+                <li class="msg-item ' + ((msgObj.uid == uid) ? 'right-item' : 'left-item') + '">\
                     <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
                     <div class="info">\
-                        <div class="username">' + msgObj.uid + '</div>\
+                        <div class="username">' + nameList.get(msgObj.uid) + '</div>\
                         <div class="msg-bubble">' + msgObj.msg + '</div>\
                     </div>\
                 </li>\
             ');
         }
+
     }
 
     msgInput.click(function () { //点击输入框，回到消息列表最底部
@@ -110,6 +122,8 @@ $(function () {
             case "info":
                 uid = msgObj.data.uid;
                 username = msgObj.data.username;
+
+                nameList.set(uid, username);
                 break;
 
             case "last":
@@ -130,11 +144,10 @@ $(function () {
                     $(this).delay(time).fadeIn(250);
 
                     setTimeout(() => {
-                        html.stop();
+                        root.stop();
                         backToBottom(125);
                     }, time);
                 });
-                
                 break;
 
             case "chat":
@@ -145,30 +158,40 @@ $(function () {
             case "history":
                 $.each(msgObj.data.reverse(), function (k, v) {
                     setTimeout(() => {
-                        if (v.uid == uid) {
+                        if (!nameList.has(v.uid)) { //如果缓存中没有该uid对应的名字
                             historyItem.after('\
-                                <li class="msg-item right-item">\
+                                <li class="msg-item ' + ((v.uid == uid) ? 'right-item' : 'left-item') + '">\
                                     <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
                                     <div class="info">\
-                                        <div class="username">' + username + '</div>\
+                                        <div class="username ' + v.uid + '">' + v.uid + '</div>\
                                         <div class="msg-bubble">' + v.msg + '</div>\
                                     </div>\
                                 </li>\
                             ');
+                
+                            $.get("../php/username.php", {uid: v.uid}, function (data) {
+                                nameList.set(v.uid, data); //缓存UID=>用户名键值对
+                
+                                $("." + v.uid).each(function () {
+                                    $(this).text(data);
+                                    $(this).removeClass(v.uid.toString());
+                                });
+                            });
                         } else {
                             historyItem.after('\
-                                <li class="msg-item left-item">\
+                                <li class="msg-item ' + ((v.uid == uid) ? 'right-item' : 'left-item') + '">\
                                     <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
                                     <div class="info">\
-                                        <div class="username">' + v.uid + '</div>\
+                                        <div class="username">' + nameList.get(v.uid) + '</div>\
                                         <div class="msg-bubble">' + v.msg + '</div>\
                                     </div>\
                                 </li>\
                             ');
                         }
 
-                        if (v.timeout !== false) historyItem.after('<li class="time-item text-center">'+v.timeout+'</li>');
-                    }, k * 50);
+                        if (v.timeout !== false) historyItem.after('<li class="time-item text-center">' + v.timeout + '</li>');
+
+                    }, k * 75);
                 });
 
                 setTimeout(() => {
@@ -187,7 +210,7 @@ $(function () {
                             historyItem.animate({height: "hide"}, "fast");
                         }, 1000);
                     }
-                }, 1000);
+                }, 750);
                 break;
 
             case "error":
@@ -202,6 +225,8 @@ $(function () {
                         break;
 
                     case 1:
+                        showModal('您还未登录，点击<a class="text-warning" href="../user/login?jump=' + location.href + '">这里</a>登陆后即可开始聊天！');
+
                         msgInput.attr("placeholder", "登录后即可开始聊天！");
                         msgInput.attr("readonly", "readonly");
                         break;

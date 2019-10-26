@@ -6,7 +6,7 @@ use hypergo\utils\Code;
 use hypergo\utils\Session;
 use hypergo\redis\MessageManager;
 
-var_dump(User::getUsernameByUid(1));
+var_dump($_GET["t"]);
 //echo phpinfo();
 //use WebSocket\Client; //is_null($obj->data->msg) or is_null($obj->data->style)
 

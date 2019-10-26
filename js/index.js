@@ -12,7 +12,7 @@ $(function () {
     var username;
 
     var showModal = function (text) {
-        $(".modal-body").text(text);
+        $(".modal-body").html(text);
         $(".modal").modal("show");
     };
 

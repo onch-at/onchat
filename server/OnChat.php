@@ -176,9 +176,10 @@ class OnChat {
 
         $rm->addChatter($rid, $request->fd); //将该聊天者添加到房间
 
+        $this->getSession($sessid);
         $isLogin = User::checkLogin();
 
-        if ($this->getSession($sessid) and $isLogin) { //如果不存在session，即未登录！
+        if ($isLogin) { //如果不存在session，即未登录！
             $info = json_decode($_SESSION["login_info"]);
 
             $cm->setChatter($request->fd, new Chatter($info->uid, $rid, $isLogin)); //设置一个聊天者的信息
@@ -260,7 +261,16 @@ class OnChat {
 
                 $chatter = $cm->getChatter($frame->fd); // 拿到这个客户端的信息
 
-                if (!$chatter->isLogin()) return false; //如果他未登录
+                if (!$chatter->isLogin()) { //如果他未登录
+                    $msgJson = json_encode([
+                        "cmd" => "error",
+                        "data" => [
+                            "code" => self::ERROR_NO_LOGIN,
+                        ]
+                    ]);
+                    $this->getServer()->push($frame->fd, $msgJson);
+                    return false;
+                }
                 
                 $rm = $this->getRoomManager();
                 $mm = $this->getMessageManager($chatter->getRid());

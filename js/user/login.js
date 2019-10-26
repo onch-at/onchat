@@ -1,8 +1,20 @@
 $(function () {
+    $.ajax({
+        type: "GET",
+        url: "../../php/is-login.php",
+        dataType: "JSON",
+        beforeSend: function (XHR) { },
+        complete: function (XHR, TS) { },
+        success: function (data) {
+            if (data) location.href = "../../";
+        },
+        error: function (XHR) { }
+    });
+    
     var login = $(".login-btn");
 
     function showModal(text) {
-        $(".modal-body").text(text);
+        $(".modal-body").html(text);
         $(".modal").modal("show");
     };
     
