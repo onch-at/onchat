@@ -3,11 +3,6 @@ require_once "../../vendor/autoload.php";
 
 use hypergo\user\User;
 
-if (User::checkLogin()) { //如果已经登录，则不允许访问验证码
-  http_response_code(403);
-  exit();
-}
-
 use hypergo\utils\Captcha;
 use hypergo\utils\Session;
 

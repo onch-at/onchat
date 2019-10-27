@@ -149,6 +149,7 @@ class OnChat {
         $session = $this->getRedis()->get(self::SESSID_PREFIX . $sessid);
         return ($session == false) ? false : true;
     }
+
     
     /**
      * 建立连接时

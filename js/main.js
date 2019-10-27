@@ -1,5 +1,5 @@
 $(function () {
-    var root = $("html, body");
+    var root = $("html, body"); //必须选上body，适配腾讯的浏览器
     var rightBtn = $(".right-btn");
     var msgList = $(".msg-list");
     var historyItem = $(".history-item");
@@ -7,7 +7,7 @@ $(function () {
     var msgInput = $("#message");
     var sendBtn = $(".send-btn");
 
-    var rid = 0;
+    var rid = (typeof Arg("rid") == "undefined") ? 0 : Arg("rid");
     var uid = 0;
     var username;
 
