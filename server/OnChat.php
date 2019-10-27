@@ -218,7 +218,7 @@ class OnChat {
         }
 		
 		echo "服务器与{$request->fd}号客户端握手成功！{$request->fd}号客户端已加入{$rid}号房间\n";
-		echo "{$rid}号房间当前在线人数：" . $rm->getChatterNum($rid) . "人\n\n";
+        echo "{$rid}号房间当前在线人数：" . $rm->getChatterNum($rid) . "人\n\n";
     }
     
     /**
@@ -229,9 +229,11 @@ class OnChat {
      * @return void
      */
     public function onClose(WebSocketServer $server, $fd) {
+        $cm = $this->getChatterManager();
+        if (!$cm->hasChatter($fd)) return false;
+        
+        $chatter = $cm->getChatter($fd); // 拿到这个客户端的信息
         $rm = $this->getRoomManager();
-		$cm = $this->getChatterManager();
-		$chatter = $cm->getChatter($fd); // 拿到这个客户端的信息
 		
 		$rm->removeChatter($chatter->getRid(), $fd); //将该客户端移除出房间
         $cm->removeChatter($fd); //移除掉这个客户端的信息
