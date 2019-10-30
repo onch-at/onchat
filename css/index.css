@@ -15,9 +15,34 @@
     height: auto;
 }
 
+.sidebar .btn {
+    color: #fff;
+    /* background-color: #ff1744; */
+    font-size: 1.3rem;
+    width: 2.85rem;
+    height: 2.85rem;
+    padding: .5rem;
+    margin: .25rem 0;
+    box-shadow: none !important;
+    outline: none !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* border-radius: 0 0 0 1rem; */
+}
+
+.sidebar .btn:not(.active) {
+    color: #fff59d;
+}
+
+.sidebar .btn:hover {
+    color: #fff;
+}
+
 .main {
     margin-left: 2.85rem;
     height: 999rem;
+    padding-top: 2.85rem;
 }
 
 .title-bar {
@@ -33,7 +58,6 @@
 
 .chat-list {
     padding: 0;
-    padding-top: 2.85rem;
     margin: 0;
 }
 

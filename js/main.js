@@ -1,5 +1,6 @@
 $(function () {
-    var root = $("html, body"); //必须选上body，适配腾讯的浏览器
+    var root = $("html, body"); //必须选上body，适配腾讯爸爸的浏览器
+    var titleBar = $(".title-bar");
     var rightBtn = $(".right-btn");
     var msgList = $(".msg-list");
     var historyItem = $(".history-item");
@@ -128,7 +129,7 @@ $(function () {
 
             case "last":
                 $(".spinner-item").addClass("d-none"); //隐藏loading
-
+                
                 $.each(msgObj.data, function (k, v) {
                     if (k == "lenght") {
                         if (v > 1) historyItem.removeClass("d-none"); //如果消息段长度大于1，即代表还有记录可以加载
@@ -153,6 +154,15 @@ $(function () {
             case "chat":
                 addMsgItem(msgObj.data);
                 backToBottom(500);
+                break;
+
+            case "join":
+                titleBar.attr("data-content", '<p class="text-secondary">' + msgObj.data.username + " 已加入房间！</p>");
+                titleBar.popover('show');
+
+                setTimeout(() => {
+                    titleBar.popover('hide');
+                }, 2000);
                 break;
 
             case "history":

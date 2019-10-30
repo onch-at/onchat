@@ -1,11 +1,3 @@
-.float-shadow {
-    box-shadow: 0 0 1rem .1rem rgba(0, 0, 0, .25);
-}
-
-.float-shadow-sm {
-    box-shadow: 0 0 .5rem .05rem rgba(0, 0, 0, .25);
-}
-
 .ease-reverse-spin {
     -webkit-animation: ease-reverse-spin 1s infinite ease;
             animation: ease-reverse-spin 1s infinite ease; }
@@ -65,7 +57,6 @@
 .title-bar .left-btn, .title-bar .right-btn {
     position: fixed;
     top: .5rem;
-    outline: none;
     font-size: 1.2rem;
     height: 2rem;
     width: 2rem;
@@ -77,25 +68,6 @@
 
 .title-bar .right-btn {
     right: .25rem;
-}
-
-.popover .popover-list {
-    margin: 0;
-    padding: 0;
-}
-
-.popover-body {
-    padding: .35rem 0 !important;
-}
-
-.popover-list .item {
-    margin: 0;
-    padding: 0;
-}
-
-.popover-list .item a {
-    display: block;
-    padding: .25rem 1rem;
 }
 
 .msg-list {

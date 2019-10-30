@@ -1,3 +1,35 @@
 .popover {
     border-radius: .5rem !important;
 }
+
+.popover .popover-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.popover-body {
+    padding: .35rem 0 !important;
+}
+
+.popover-body p {
+    margin: 0;
+    padding: 0 1rem;
+}
+
+.popover-list .item {
+    margin: 0;
+    padding: 0;
+}
+
+.popover-list .item a {
+    display: block;
+    padding:  .25rem 1rem .25rem .75rem;
+}
+
+.popover-list .item .icon {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    text-align: center;
+}

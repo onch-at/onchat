@@ -150,6 +150,39 @@ class OnChat {
         return ($session == false) ? false : true;
     }
 
+    public function broadcast(int $rid, string $msg) {
+        $server = $this->getServer();
+        $cm = $this->getChatterManager();
+        $rm = $this->getRoomManager();
+
+        foreach ($rm->getRoom($rid) as $fd) { // 给该客户端所在的房间内的所有人广播
+            // 需要先判断是否是正确的websocket连接，否则有可能会push失败
+            if ($server->isEstablished($fd)) {
+                $server->push($fd, $msg);
+            } else {
+                $rm->removeChatter($rid, $fd);
+                $cm->removeChatter($fd);
+            }
+        }
+    }
+
+
+    public function selectiveBroadcast(int $rid, string $msg, array $fds) {
+        $server = $this->getServer();
+        $cm = $this->getChatterManager();
+        $rm = $this->getRoomManager();
+
+        foreach ($rm->getRoom($rid) as $fd) { // 给该客户端所在的房间内的所有人广播
+            // 需要先判断是否是正确的websocket连接，否则有可能会push失败
+            if ($server->isEstablished($fd)) {
+                if (!in_array($fd, $fds)) $server->push($fd, $msg); //如果fd不属于fds才发消息过去
+            } else {
+                $rm->removeChatter($rid, $fd);
+                $cm->removeChatter($fd);
+            }
+        }
+    }
+
     
     /**
      * 建立连接时
@@ -193,6 +226,14 @@ class OnChat {
                 ]
             ]);
             $this->getServer()->push($request->fd, $msgJson);
+
+            $msgJson = json_encode([
+                "cmd" => "join",
+                "data" => [
+                    "username" => $info->username
+                ]
+            ]);
+            $this->selectiveBroadcast($rid, $msgJson, [$request->fd]);
         } else {
             $cm->setChatter($request->fd, new Chatter(0, $rid, $isLogin)); //设置一个聊天者的信息
 
@@ -203,6 +244,14 @@ class OnChat {
                 ]
             ]);
             $this->getServer()->push($request->fd, $msgJson);
+
+            $msgJson = json_encode([
+                "cmd" => "join",
+                "data" => [
+                    "username" => "游客{$request->fd}"
+                ]
+            ]);
+            $this->selectiveBroadcast($rid, $msgJson, [$request->fd]);
         }
         
         $mm = $this->getMessageManager($rid);
@@ -237,7 +286,7 @@ class OnChat {
 		
 		$rm->removeChatter($chatter->getRid(), $fd); //将该客户端移除出房间
         $cm->removeChatter($fd); //移除掉这个客户端的信息
-
+        
 		echo "{$fd}号客户端与服务器连接中断！\n";
 		echo $chatter->getRid() . "号房间当前在线人数：" . $rm->getChatterNum($chatter->getRid()) . "人\n\n";
 	}
@@ -291,15 +340,7 @@ class OnChat {
                     "data" => $mm->getMsgData() //刚刚MessageManager封装好的消息数据
                 ]);
                 
-                foreach ($rm->getRoom($chatter->getRid()) as $fd) { // 给该客户端所在的房间内的所有人广播
-                    // 需要先判断是否是正确的websocket连接，否则有可能会push失败
-                    if ($this->getServer()->isEstablished($fd)) {
-                        $this->getServer()->push($fd, $msgJson);
-                    } else {
-                        $rm->removeChatter($chatter->getRid(), $fd);
-                        $cm->removeChatter($fd);
-                    }
-                }
+                $this->broadcast($chatter->getRid(), $msgJson);
                 break;
 
             case "history":

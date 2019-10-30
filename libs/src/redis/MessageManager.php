@@ -79,9 +79,9 @@ class MessageManager extends RedisManager {
 	/**
 	 * 获取这个房间聊天记录的消息段条数
 	 *
-	 * @return boolean
+	 * @return integer
 	 */
-	public function getLenght():bool {
+	public function getLenght():int {
 		$key = $this->getKey();
 		return $this->getRedis()->hLen($key);
 	}

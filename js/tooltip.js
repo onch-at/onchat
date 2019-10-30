@@ -8,6 +8,6 @@ $(function () {
         var the = $(this);
         setTimeout(() => { //显示tooltip的3秒后自动消失
             the.tooltip("hide");
-        }, 3000);
+        }, 2500);
     })
 });

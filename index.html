@@ -8,19 +8,26 @@
 
     <link rel="stylesheet" href="./css/index.css">
     <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/popover.css">    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
 
     <title>OnChat - 世界都在聊</title>
 </head>
 <body>
-    <div class="sidebar float-shadow-sm">
+    <div class="sidebar float-shadow-sm list-group">
         <div class="bg-warning" style="padding: .35rem; border-radius: 0 0 0 1rem;">
             <img src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" class="rounded-circle">
         </div>
         
         <!-- <div class="bg-info float-shadow" style="height: 100%; z-index: 1"></div> -->
+        
+        <button class="btn active" data-toggle="list" href="#list-chat"><i class="fas fa-comment-dots"></i></button>
+        <button class="btn" data-toggle="list" href="#list-friend"><i class="fas fa-user-friends"></i></button>
+        <button class="btn" data-toggle="list" href="#list-user-center"><i class="fas fa-user-alt"></i></button>
+        <button class="btn" data-toggle="list" href="#list-setting" style="position: absolute; bottom: 0;"><i class="fas fa-cog"></i></button>
     </div>
+
     <div class="main">
         <nav class="title-bar bg-light float-shadow">
             <span class="navbar-brand text-warning m-0 p-0">
@@ -32,48 +39,121 @@
             </a>
         </nav>
 
-        <ul class="chat-list">
-            <li class="chat-item">
-                <a class="text-decoration-none" href="./room/chat.html?rid=0">
-                    <img class="float-left img-thumbnail mr-2" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="">
-                    <div class="chat-name text-dark font-weight-bold">Test Room</div>
-                    
-                    <div class="text-secondary" style="height: 2.5rem;">测试房间</div>
-                </a>
-                <button class="btn setting-btn float-right">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </li>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="list-chat">
+                <ul class="chat-list">
+                    <li class="chat-item">
+                        <a class="text-decoration-none" href="./chat/room.html?rid=0">
+                            <img class="float-left img-thumbnail mr-2" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="">
+                            <div class="chat-name text-dark font-weight-bold">Test Room</div>
+                            
+                            <div class="text-secondary" style="height: 2.5rem;">测试房间</div>
+                        </a>
+                        <button class="btn setting-btn float-right">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </li>
 
-            <li class="chat-item">
-                <a class="text-decoration-none" href="./room/chat.html?rid=1">
-                    <img class="float-left img-thumbnail mr-2" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="">
-                    <div class="chat-name text-dark font-weight-bold">NO.1 Room</div>
-                    
-                    <div class="text-secondary" style="height: 2.5rem;">一号房间</div>
-                </a>
-                <button class="btn setting-btn float-right">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </li>
+                    <li class="chat-item">
+                        <a class="text-decoration-none" href="./chat/room.html?rid=1">
+                            <img class="float-left img-thumbnail mr-2" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="">
+                            <div class="chat-name text-dark font-weight-bold">NO.1 Room</div>
+                            
+                            <div class="text-secondary" style="height: 2.5rem;">一号房间</div>
+                        </a>
+                        <button class="btn setting-btn float-right">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </li>
 
-            <li class="chat-item">
-                <a class="text-decoration-none" href="./room/chat.html?rid=999">
-                    <img class="float-left img-thumbnail mr-2" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="">
-                    <div class="chat-name text-dark font-weight-bold">False Room</div>
-                    
-                    <div class="text-secondary" style="height: 2.5rem;">不存在的房间</div>
-                </a>
-                <button class="btn setting-btn float-right">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </li>
-        </ul>
+                    <li class="chat-item">
+                        <a class="text-decoration-none" href="./chat/room.html?rid=2">
+                            <img class="float-left img-thumbnail mr-2" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="">
+                            <div class="chat-name text-dark font-weight-bold">NO.2 Room</div>
+                            
+                            <div class="text-secondary" style="height: 2.5rem;">二号房间</div>
+                        </a>
+                        <button class="btn setting-btn float-right">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </li>
+
+                    <li class="chat-item">
+                        <a class="text-decoration-none" href="./chat/room.html?rid=999">
+                            <img class="float-left img-thumbnail mr-2" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="">
+                            <div class="chat-name text-dark font-weight-bold">False Room</div>
+                            
+                            <div class="text-secondary" style="height: 2.5rem;">不存在的房间</div>
+                        </a>
+                        <button class="btn setting-btn float-right">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-pane fade" id="list-friend">
+                好友功能暂未开发
+            </div>
+
+            <div class="tab-pane fade" id="list-user-center">
+                用户中心
+            </div>
+
+            <div class="tab-pane fade" id="list-setting">
+                设置功能暂未开发
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning">
+                        <span class="text-secondary">On</span>Chat
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body"></div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+        $.get("./php/is-login.php", function (data) {
+            if (!data) {
+                location.href = "./user/login";
+            }
+        }, "json");
+
+        $('[data-toggle="popover"]').popover({
+            html: true,
+            content: '\
+                <ul class="popover-list">\
+                    <li class="item">\
+                        <a class="text-decoration-none text-secondary" href="">\
+                            <span class="icon"><i class="fas fa-history"></i></span>\
+                            更新日志\
+                        </a>\
+                    </li>\
+                    <li class="item">\
+                        <a class="text-decoration-none text-secondary" href="">\
+                            <span class="icon"><i class="fas fa-info"></i></span>\
+                            关于我们\
+                        </a>\
+                    </li>\
+                </ul>\
+            ',
+        });
+    </script>
 </body>
 </html>
