@@ -282,13 +282,24 @@ class OnChat {
         if (!$cm->hasChatter($fd)) return false;
         
         $chatter = $cm->getChatter($fd); // 拿到这个客户端的信息
+        $uid = $chatter->getUid();
+        $rid = $chatter->getRid();
+
         $rm = $this->getRoomManager();
 		
-		$rm->removeChatter($chatter->getRid(), $fd); //将该客户端移除出房间
+		$rm->removeChatter($rid, $fd); //将该客户端移除出房间
         $cm->removeChatter($fd); //移除掉这个客户端的信息
+
+        $msgJson = json_encode([
+            "cmd" => "quit",
+            "data" => [
+                "username" => ($uid == 0) ? "游客{$fd}" : User::getUsernameByUid($uid)
+            ]
+        ]);
+        $this->broadcast($rid, $msgJson);
         
 		echo "{$fd}号客户端与服务器连接中断！\n";
-		echo $chatter->getRid() . "号房间当前在线人数：" . $rm->getChatterNum($chatter->getRid()) . "人\n\n";
+		echo $rid . "号房间当前在线人数：" . $rm->getChatterNum($rid) . "人\n\n";
 	}
     
     /**

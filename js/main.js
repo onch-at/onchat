@@ -165,6 +165,15 @@ $(function () {
                 }, 2000);
                 break;
 
+            case "quit":
+                titleBar.attr("data-content", '<p class="text-secondary">' + msgObj.data.username + " 已离开房间！</p>");
+                titleBar.popover('show');
+
+                setTimeout(() => {
+                    titleBar.popover('hide');
+                }, 2000);
+                break;
+
             case "history":
                 $.each(msgObj.data.reverse(), function (k, v) {
                     setTimeout(() => {
