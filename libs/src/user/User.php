@@ -156,7 +156,7 @@ class User {
         //如果密码长度不符合
         if ($check !== self::STATUS_SUCCESS) return $check;
 
-        $data = $database->select("account", ["uid", "password"], [
+        $data = $database->select("account", ["uid", "username", "password"], [
             "username" => $this->getUsername(),
             "LIMIT" => 1
         ]);
@@ -171,10 +171,10 @@ class User {
         $this->setUid($data[0]["uid"]);
 
         Session::start();
-
+        
         $data = [
             "uid" => (int) $data[0]["uid"],
-            "username" => $this->getUsername(),
+            "username" => $data[0]["username"],
             "password" => $password, //密文
             "expire" => time() + 86400, //1天后清除登录缓存
         ];

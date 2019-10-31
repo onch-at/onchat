@@ -8,27 +8,28 @@
 
     <link rel="stylesheet" href="./css/index.css">
     <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/popover.css">    
+    <link rel="stylesheet" href="./css/popover.css">
+    <link rel="stylesheet" href="./css/iconfont/constellation/iconfont.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
 
     <title>OnChat - 世界都在聊</title>
 </head>
 <body>
-    <div class="sidebar float-shadow-sm list-group">
+    <div class="sidebar float-shadow-ssm list-group bg-yellow">
         <div class="bg-warning" style="padding: .35rem; border-radius: 0 0 0 1rem;">
             <img src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" class="rounded-circle">
         </div>
         
         <!-- <div class="bg-info float-shadow" style="height: 100%; z-index: 1"></div> -->
         
-        <button class="btn active" data-toggle="list" href="#list-chat"><i class="fas fa-comment-dots"></i></button>
-        <button class="btn" data-toggle="list" href="#list-friend"><i class="fas fa-user-friends"></i></button>
-        <button class="btn" data-toggle="list" href="#list-user-center"><i class="fas fa-user-alt"></i></button>
-        <button class="btn" data-toggle="list" href="#list-setting" style="position: absolute; bottom: 0;"><i class="fas fa-cog"></i></button>
+        <button class="btn d-flex justify-content-center align-items-center active" data-toggle="list" href="#list-chat"><i class="fas fa-comment-dots"></i></button>
+        <button class="btn d-flex justify-content-center align-items-center" data-toggle="list" href="#list-friend"><i class="fas fa-user-friends"></i></button>
+        <button class="btn d-flex justify-content-center align-items-center" data-toggle="list" href="#list-user-center"><i class="fas fa-user-alt"></i></button>
+        <button class="btn d-flex justify-content-center align-items-center" data-toggle="list" href="#list-setting" style="position: absolute; bottom: 0;"><i class="fas fa-cog"></i></button>
     </div>
 
-    <div class="main">
+    <div class="main-container">
         <nav class="title-bar bg-light float-shadow">
             <span class="navbar-brand text-warning m-0 p-0">
                 <span class="text-secondary">On</span>Chat
@@ -96,8 +97,69 @@
                 好友功能暂未开发
             </div>
 
-            <div class="tab-pane fade" id="list-user-center">
-                用户中心
+            <div class="tab-pane fade" id="list-user-center" style="padding: .75rem .5rem;">
+                <div class="user-card bg-light mb-3">
+                    <div class="header bg-gray p-2">
+                        <div class="float-left mr-2"><img src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" class="rounded-circle"></div>
+                        <div class="d-inline-block mb-2">
+                            <div class="username font-weight-bold">Username</div>
+                            <div class="info text-secondary small">
+                                <span class="uid pr-2 border-right border-white">UID</span>
+                                <span class="nickname pl-1">Nickname</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="footer text-secondary">Signature</div>
+                </div>
+
+                <div class="info-list list-group mb-3">
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        我的心情
+                        <span class="d-flex justify-content-center align-items-center">
+                            <i class="fas fa-grin-alt text-warning" style="font-size: 1.25rem;"></i>
+                            <!-- <small class="text-secondary font-weight-bold ml-1">微笑</small> -->
+                        </span>
+                    </a>
+
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        生日
+                        <span>
+                            <small class="text-secondary font-weight-bold">2000-11-19</small>
+                        </span>
+                    </a>
+
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        性别
+                        <span>
+                            <small class="text-secondary font-weight-bold ml-1">男</small>
+                        </span>
+                    </a>
+
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        年龄
+                        <span>
+                            <small class="text-secondary font-weight-bold">18岁</small>
+                        </span>
+                    </a>
+
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        十二星座
+                        <span class="d-flex justify-content-center align-items-center">
+                            <i class="iconfont icon-tianhezuo" style="font-size: 1.25rem; color: #aa00ff;"></i>
+                            <small class="text-secondary font-weight-bold ml-1">天蝎座</small>
+                        </span>
+                    </a>
+
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        电子邮箱
+                        <span>
+                            <small class="text-secondary font-weight-bold">1838491745@qq.com</small>
+                        </span>
+                    </a>
+                </div>
+
+                <a class="btn btn-warning bg-light-yellow btn-block logout-btn text-secondary" href="./user/action/logout.php">退出登录</a>
             </div>
 
             <div class="tab-pane fade" id="list-setting">
@@ -132,6 +194,15 @@
         $.get("./php/is-login.php", function (data) {
             if (!data) {
                 location.href = "./user/login";
+            }
+        }, "json");
+
+        $.get("./php/get-user-info.php", function (data) {
+            if (data != false) {
+                $(".user-card > .header .username").text(data.username);
+                $(".user-card > .header .info > .uid").text("UID: " + data.uid);
+                $(".user-card > .header .info > .nickname").text("Nickname: " + data.nickname);
+                $(".user-card > .footer").text(data.signature);
             }
         }, "json");
 

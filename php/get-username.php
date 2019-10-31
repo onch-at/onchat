@@ -1,15 +1,13 @@
 <?php
 require_once '../vendor/autoload.php';
 
-use hypergo\utils\Session;
+use hypergo\user\User;
 
-Session::start();
-
-if(empty($_SESSION["login_info"])) {
-    exit(json_encode(""));
-} else {
+if(User::checkLogin()) {
     $info = json_decode($_SESSION["login_info"]);
 
     exit(json_encode($info->username));
+} else {
+    exit(json_encode(""));
 }
 ?>

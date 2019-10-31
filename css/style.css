@@ -103,10 +103,6 @@ li {
     opacity: 1 !important;
 }
 
-.spinner-item > button, .history-item > button {
-    align-items: center;
-}
-
 .user-portrait {
     width: 2.5rem;
     height: 2.5rem;
