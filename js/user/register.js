@@ -132,8 +132,8 @@ $(function () {
                         break;
                 
                     case 0: //成功
-                        showModal("注册成功，准备跳转至登录页面...");
-                        setTimeout(function () { location.href="../login"; }, 1500);
+                        showModal("注册成功，已自动为您登录，准备跳转...");
+                        setTimeout(function () { location.href="../../"; }, 1500);
                         break;
                     
                     case 1: //未知错误

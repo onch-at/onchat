@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="./css/iconfont/constellation/iconfont.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
 
     <title>OnChat - 世界都在聊</title>
 </head>
@@ -50,7 +51,7 @@
                             
                             <div class="text-secondary" style="height: 2.5rem;">测试房间</div>
                         </a>
-                        <button class="btn setting-btn float-right">
+                        <button class="btn setting-btn float-right d-flex justify-content-center align-items-center">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                     </li>
@@ -62,7 +63,7 @@
                             
                             <div class="text-secondary" style="height: 2.5rem;">一号房间</div>
                         </a>
-                        <button class="btn setting-btn float-right">
+                        <button class="btn setting-btn float-right d-flex justify-content-center align-items-center">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                     </li>
@@ -74,7 +75,7 @@
                             
                             <div class="text-secondary" style="height: 2.5rem;">二号房间</div>
                         </a>
-                        <button class="btn setting-btn float-right">
+                        <button class="btn setting-btn float-right d-flex justify-content-center align-items-center">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                     </li>
@@ -86,7 +87,7 @@
                             
                             <div class="text-secondary" style="height: 2.5rem;">不存在的房间</div>
                         </a>
-                        <button class="btn setting-btn float-right">
+                        <button class="btn setting-btn float-right d-flex justify-content-center align-items-center">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                     </li>
@@ -116,7 +117,7 @@
                 <div class="info-list list-group mb-3">
                     <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         我的心情
-                        <span class="d-flex justify-content-center align-items-center">
+                        <span class="mood d-flex justify-content-center align-items-center">
                             <i class="fas fa-grin-alt text-warning" style="font-size: 1.25rem;"></i>
                             <!-- <small class="text-secondary font-weight-bold ml-1">微笑</small> -->
                         </span>
@@ -124,28 +125,28 @@
 
                     <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         生日
-                        <span>
+                        <span class="birthday">
                             <small class="text-secondary font-weight-bold">2000-11-19</small>
                         </span>
                     </a>
 
                     <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         性别
-                        <span>
+                        <span class="sex">
                             <small class="text-secondary font-weight-bold ml-1">男</small>
                         </span>
                     </a>
 
                     <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         年龄
-                        <span>
+                        <span class="age">
                             <small class="text-secondary font-weight-bold">18岁</small>
                         </span>
                     </a>
 
                     <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         十二星座
-                        <span class="d-flex justify-content-center align-items-center">
+                        <span class="constellation d-flex justify-content-center align-items-center">
                             <i class="iconfont icon-tianhezuo" style="font-size: 1.25rem; color: #aa00ff;"></i>
                             <small class="text-secondary font-weight-bold ml-1">天蝎座</small>
                         </span>
@@ -153,13 +154,23 @@
 
                     <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         电子邮箱
-                        <span>
+                        <span class="email">
                             <small class="text-secondary font-weight-bold">1838491745@qq.com</small>
                         </span>
                     </a>
                 </div>
 
                 <a class="btn btn-warning bg-light-yellow btn-block logout-btn text-secondary" href="./user/action/logout.php">退出登录</a>
+            
+                <div class="input-group date" data-provide="datepicker">
+                    <input type="text" class="form-control" style="background-color: #fff;" id="birthday" name="birthday" label="生日" readonly="readonly" value="" data-date-end-date="0d" aria-describedby="fa-calendar-alt" placeholder="Please Pick Your Birthday">
+                    <div class="input-group-append">
+                        <span class="input-group-text" id="fa-calendar-alt">
+                            <i class="far fa-calendar-alt" style="font-weight: 400;"></i>
+                        </span>
+                    </div>
+                </div>
+
             </div>
 
             <div class="tab-pane fade" id="list-setting">
@@ -189,20 +200,58 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.zh-CN.min.js"></script>
 
     <script>
         $.get("./php/is-login.php", function (data) {
-            if (!data) {
-                location.href = "./user/login";
-            }
+            if (!data) location.href = "./user/login";
         }, "json");
 
         $.get("./php/get-user-info.php", function (data) {
             if (data != false) {
                 $(".user-card > .header .username").text(data.username);
                 $(".user-card > .header .info > .uid").text("UID: " + data.uid);
-                $(".user-card > .header .info > .nickname").text("Nickname: " + data.nickname);
+                $(".user-card > .header .info > .nickname").text("昵称: " + data.nickname);
                 $(".user-card > .footer").text(data.signature);
+
+                //$(".info-list .mool").html(sex);
+                $(".info-list .birthday > small").text(data.birthday);
+                var sex = function () {
+                    if (data.sex == null) return "保密";
+                    if (data.sex == 0) {
+                        return "男";
+                    } else {
+                        return "女";
+                    }
+                }
+                $(".info-list .sex > small").text(sex);
+                $(".info-list .age > small").text(((data.age == 0) ? "不到1" : data.age) + "岁");
+                var Constellation = function (className, name, color) {
+                    this.className = className;
+                    this.name = name;
+                    this.color = color;
+                }
+                var constellations = [
+                    new Constellation("icon-shuipingzuo", "水瓶座", "#b3e5fc"),
+                    new Constellation("icon-shuangyuzuo", "双鱼座", "#2196f3"),
+                    new Constellation("icon-muyangzuo", "白羊座", "#f44336"),
+                    new Constellation("icon-jinniuzuo", "金牛座", "#00bcd4"),
+                    new Constellation("icon-shuangzizuo", "双子座", "#795548"),
+                    new Constellation("icon-juxiezuo", "巨蟹座", "#9e9e9e"), 
+                    new Constellation("icon-shizizuo", "狮子座", "#ffc107"),
+                    new Constellation("icon-chunvzuo", "处女座", "#e91e63"),
+                    new Constellation("icon-tianchengzuo", "天秤座", "#4caf50"),
+                    new Constellation("icon-tianhezuo", "天蝎座", "#616161"),
+                    new Constellation("icon-sheshouzuo", "射手座", "#ff9800"),
+                    new Constellation("icon-mojiezuo", "摩羯座", "#9c27b0")
+                ];
+                var constellation = constellations[data.constellation - 1];
+                $(".info-list .constellation").html('\
+                    <i class="iconfont ' + constellation.className + '" style="font-size: 1.25rem; color: ' + constellation.color + ';"></i>\
+                    <small class="text-secondary font-weight-bold ml-1">' + constellation.name + '</small>\
+                ');
+                $(".info-list .email > small").text((data.email == null) ? "暂未绑定" : data.email);
             }
         }, "json");
 
@@ -224,6 +273,15 @@
                     </li>\
                 </ul>\
             ',
+        });
+
+        $(".input-group.date").datepicker({ //设置日期选择器
+            format: "yyyy-mm-dd",
+            language: "zh-CN",
+            disableTouchKeyboard: "true",
+            autoclose: "true",
+            endDate: "0d",
+            todayHighlight: "true"
         });
     </script>
 </body>

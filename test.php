@@ -6,7 +6,7 @@ use hypergo\utils\Code;
 use hypergo\utils\Session;
 use hypergo\redis\MessageManager;
 
-var_dump($_GET["t"]);
+var_dump(User::getAge(2000,11,19));
 //echo phpinfo();
 //use WebSocket\Client; //is_null($obj->data->msg) or is_null($obj->data->style)
 

@@ -219,10 +219,23 @@ class User {
         //如果不为空，则代表当前用户已被注册
         if (!empty($data)) return self::STATUS_USER_REPEAT;
         
+        $password = User::encode($this->getPassword());
+
         //插入用户数据到数据库
         $database->insert("account", [ 
             "username" => $this->getUsername(),
-            "password" => User::encode($this->getPassword())
+            "password" => $password
+        ]);
+
+        $timestamp = time();
+        $birthday = getdate($timestamp);
+
+        $database->insert("user_info", [ 
+            "uid" => User::getUidByUsername($this->getUsername()),
+            "nickname" => $this->getUsername(),
+            "birthday" => date("Y-m-d", $timestamp),
+            "age" => 0,
+            "constellation" => User::getConstellation($birthday["mon"], $birthday["mday"])
         ]);
         
         //0 => SQL STATE
@@ -233,6 +246,27 @@ class User {
             $this->setErrorMessage($info[2]);
             return self::STATUS_UNKNOWN_ERROR;
         }
+
+        Session::start();
+        
+        $data = [
+            "uid" => (int) User::getUidByUsername($this->getUsername()),
+            "username" => $this->getUsername(),
+            "password" => $password, //密文
+            "expire" => time() + 86400, //1天后清除登录缓存
+        ];
+        $_SESSION["login_info"] = json_encode($data);
+
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            session_id(),
+            $data["expire"],
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
         
         return self::STATUS_SUCCESS;
     }
@@ -352,6 +386,77 @@ class User {
         ]);
 
         return (empty($data)) ? false : $data[0];
+    }
+
+    /**
+     * 通过用户名获取用户UID
+     *
+     * @param string $username
+     * @return mixed
+     */
+    public static function getUidByUsername(string $username) {
+        $database = Database::getInstance();
+        $data = $database->select("account", "uid", [
+            "username" => $username,
+            "LIMIT" => 1
+        ]);
+
+        return (empty($data)) ? false : $data[0];
+    }
+
+    public static function setUserInfo(int $uid, array $data) {
+        $database = Database::getInstance();
+        $database->update("user_info", $data, [
+            "uid" => $uid,
+            "LIMIT" => 1
+        ]);
+    }
+
+    public static function getUserInfo(int $uid, array $data) {
+        $database = Database::getInstance();
+        $data = $database->select("user_info", $data, [
+            "uid" => $uid,
+            "LIMIT" => 1
+        ]);
+
+        return $data[0];
+    }
+
+    public static function getAge(int $bYear, int $bMonth, int $bDay):int {
+        // $birthday = getdate($timestamp);
+        // $bYear = $birthday["year"];
+        // $bMonth = $birthday["mon"];
+        // $bDay = $birthday["mday"];
+        $today = getdate();
+        $tYear = $today["year"];
+        $tMonth = $today["mon"];
+        $tDay = $today["mday"];
+
+        $age = $tYear -$bYear; //获得岁数(未考虑月，日)
+
+        //如果当月还没到生日月 or 如果当月就是生日月，且当天仍未到生日
+        if (($tMonth < $bMonth) or ($tMonth == $bMonth && $tDay < $bDay)) return --$age;
+
+        return $age;
+    }
+
+    public static function getConstellation(int $month, int $date):int {
+        // $constellations = [
+        //     "水瓶座", "双鱼座", "白羊座", "金牛座", "双子座", "巨蟹座", 
+        //     "狮子座", "处女座", "天秤座", "天蝎座", "射手座", "摩羯座"
+        // ];
+        $constellations = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    
+        if ($date <= 22) {
+            if ($month !== 1) {
+                return $constellations[$month - 2];
+            } else {
+                return $constellations[11];
+            }
+    
+        } else {
+            return $constellations[$month - 1];
+        }
     }
 }
 ?>
