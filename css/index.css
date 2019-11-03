@@ -151,3 +151,16 @@
 .logout-btn:hover {
     background-color: #ffd740 !important;
 }
+
+.custom-control-label::before, .custom-control-label::after {
+    display: none !important;
+}
+
+.custom-radio > label {
+    color: #bdbdbd;
+    transition: color .15s ease-in-out, transform .15s ease-in-out;
+}
+
+.custom-radio > label > i {
+    font-size: 1.9rem;
+}

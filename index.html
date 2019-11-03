@@ -215,22 +215,22 @@
 
                         <div class="form-group">
                             <label for="mood" class="col-form-label">我的心情：</label>
-                            <div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="1" name="mood" class="custom-control-input">
-                                    <label class="custom-control-label" for="1"><i class="fas fa-grin-alt" style="font-size: 1.25rem; color: #ffc107"></i></label>
+                            <div class="d-flex justify-content-around">
+                                <div class="m-0 p-0 custom-control custom-radio">
+                                    <input type="radio" id="1" name="mood" class="custom-control-input" value="1">
+                                    <label class="custom-control-label" for="1"><i class="fas fa-grin-alt"></i></label>
                                 </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="2" name="mood" class="custom-control-input">
-                                    <label class="custom-control-label" for="2"><i class="fas fa-angry" style="font-size: 1.25rem; color: #9c27b0"></i></label>
+                                <div class="m-0 p-0 custom-control custom-radio">
+                                    <input type="radio" id="2" name="mood" class="custom-control-input" value="2">
+                                    <label class="custom-control-label" for="2"><i class="fas fa-angry"></i></label>
                                 </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="3" name="mood" class="custom-control-input">
-                                    <label class="custom-control-label" for="3"><i class="fas fa-frown" style="font-size: 1.25rem; color: #2196f3"></i></label>
+                                <div class="m-0 p-0 custom-control custom-radio">
+                                    <input type="radio" id="3" name="mood" class="custom-control-input" value="3">
+                                    <label class="custom-control-label" for="3"><i class="fas fa-frown"></i></label>
                                 </div>
-                                <div class="custom-control custom-radio custom-control-inline">
-                                    <input type="radio" id="4" name="mood" class="custom-control-input">
-                                    <label class="custom-control-label" for="4"><i class="fas fa-grin-squint" style="font-size: 1.25rem; color: #f44336"></i></label>
+                                <div class="m-0 p-0 custom-control custom-radio">
+                                    <input type="radio" id="4" name="mood" class="custom-control-input" value="4">
+                                    <label class="custom-control-label" for="4"><i class="fas fa-grin-squint"></i></label>
                                 </div>
                             </div>
                         </div>
@@ -295,48 +295,12 @@
                     this.color = color;
                 }
                 var moods = [
-                    new Mood("fa-meh-blank"),
-                    new Mood("fa-angry", "#f44336"),
-                    new Mood("fa-dizzy"),
-                    new Mood("fa-flushed"),
-                    new Mood("fa-frown"),
-                    new Mood("fa-frown-open"),
-                    new Mood("fa-grimace"),
-                    new Mood("fa-grin"),
-                    new Mood("fa-grin-alt"),
-                    new Mood("fa-grin-beam"),
-                    new Mood("fa-grin-beam-sweat"),
-                    new Mood("fa-grin-hearts"),
-                    new Mood("fa-grin-squint"),
-                    new Mood("fa-grin-squint-tears"),
-                    new Mood("fa-grin-tears"),
-                    new Mood("fa-grin-stars"),
-                    new Mood("fa-grin-tongue"),
-                    new Mood("fa-grin-tongue-squint"),
-                    new Mood("fa-grin-tongue-wink"),
-                    new Mood("fa-grin-wink"),
-                    new Mood("fa-kiss"),
-                    new Mood("fa-kiss-beam"),
-                    new Mood("fa-kiss-wink-heart"),
-                    new Mood("fa-laugh"),
-                    new Mood("fa-laugh-beam"),
-                    new Mood("fa-laugh-squint"),
-                    new Mood("fa-laugh-wink"),
-                    new Mood("fa-meh"),
-                    new Mood("fa-meh-rolling-eyes"),
-                    new Mood("fa-poo", "#795548"),
-                    new Mood("fa-sad-cry"),
-                    new Mood("fa-sad-tear"),
-                    new Mood("fa-skull", "#757575"),
-                    new Mood("fa-smile"),
-                    new Mood("fa-smile-beam"),
-                    new Mood("fa-smile-wink"),
-                    new Mood("fa-surprise"),
-                    new Mood("fa-tired")
+                    new Mood("fa-grin-alt", "#ffc107"),
+                    new Mood("fa-angry", "#9c27b0"),
+                    new Mood("fa-frown", "#2196f3"),
+                    new Mood("fa-grin-squint", "#f44336"),
                 ];
-                $.each(moods, function (k, mood) {
-                    //$(".input-group").after('<i class="fas ' + mood.className + '" style="font-size: 1.25rem; color: ' + mood.color + '"></i>');
-                });
+                
                 $(".info-list .mood").html((
                     (data.mood == null || data.mood > moods.length) ?
                     '<i class="fas ' + moods[0].className + '" style="font-size: 1.25rem; color: ' + moods[0].color + '"></i>' :
@@ -408,6 +372,29 @@
             autoclose: "true",
             endDate: "0d",
             todayHighlight: "true"
+        });
+
+        var id = undefined;
+        $("input[type=radio]").change(function () {
+            if (typeof id != "undefined") $("label[for=" + id + "]").css({"color": "#bdbdbd", "transform": "scale(1)"});
+            switch ($(this).attr("id")) {
+                case "1":
+                    id = 1;
+                    $("label[for=1]").css({"color": "#ffc107", "transform": "scale(1.15)"});
+                    break;
+                case "2":
+                    id = 2;
+                    $("label[for=2]").css({"color": "#9c27b0", "transform": "scale(1.15)"});
+                    break;
+                case "3":
+                    id = 3;
+                    $("label[for=3]").css({"color": "#2196f3", "transform": "scale(1.15)"});
+                    break;
+                case "4":
+                    id = 4;
+                    $("label[for=4]").css({"color": "#f44336", "transform": "scale(1.15)"});
+                    break;
+            }
         });
     </script>
 </body>
