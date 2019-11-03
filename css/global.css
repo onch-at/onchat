@@ -37,3 +37,7 @@ a {
 .text-light-yellow {
     color: #ffe57f !important;
 }
+
+.circle-border {
+    border-radius: 999rem !important;
+}

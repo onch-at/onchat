@@ -52,6 +52,7 @@
     font-weight: 800;
     font-size: 1.2rem;
     border-bottom-right-radius: 1rem;
+    z-index: 98;
 }
 
 .chat-list {
@@ -75,7 +76,6 @@
     height: 1.75rem;
     margin-top: -3.125rem;
     background-color: #fff;
-    border-radius: 99rem;
     outline: none !important;
     box-shadow: none !important;
 }
@@ -145,7 +145,6 @@
 }
 
 .logout-btn {
-    border-radius: 99rem !important;
     border-color: #ffd740 !important;
 }
 
