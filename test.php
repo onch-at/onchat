@@ -1,3 +1,4 @@
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <?php
 require_once './vendor/autoload.php';
 use hypergo\user\User;
@@ -6,7 +7,13 @@ use hypergo\utils\Code;
 use hypergo\utils\Session;
 use hypergo\redis\MessageManager;
 
-var_dump(User::getAge(2000,11,19));
+$db = Database::getInstance();
+echo User::getUsernameByUid(1);
+echo "<hr>";
+echo "<pre>";
+var_dump($db->info());
+echo "<hr>";
+var_dump($db->error());
 //echo phpinfo();
 //use WebSocket\Client; //is_null($obj->data->msg) or is_null($obj->data->style)
 

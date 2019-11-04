@@ -5,6 +5,7 @@ use hypergo\user\User;
 
 use hypergo\utils\Session;
 use hypergo\utils\Command;
+use hypergo\utile\Database;
 
 use hypergo\room\RoomManager;
 use hypergo\redis\MessageManager;
@@ -211,7 +212,12 @@ class OnChat {
         $rm->addChatter($rid, $request->fd); //将该聊天者添加到房间
 
         $this->getSession($sessid);
+
         $isLogin = User::checkLogin();
+        if ((Database::getInstance()->error())[1] == 2006) { //如果数据库单例与数据库失去连接，则销毁该单例，并重新创建单例
+        	Database::destroyInstance();
+        	$isLogin = User::checkLogin();
+        }
 
         if ($isLogin) { //如果不存在session，即未登录！
             $info = json_decode($_SESSION["login_info"]);
@@ -290,10 +296,16 @@ class OnChat {
 		$rm->removeChatter($rid, $fd); //将该客户端移除出房间
         $cm->removeChatter($fd); //移除掉这个客户端的信息
 
+        $username = User::getUsernameByUid($uid);
+        if ((Database::getInstance()->error())[1] == 2006) { //如果数据库单例与数据库失去连接，则销毁该单例，并重新创建单例
+        	Database::destroyInstance();
+        	$username = User::getUsernameByUid($uid);
+        }
+
         $msgJson = json_encode([
             "cmd" => "quit",
             "data" => [
-                "username" => ($uid == 0) ? "游客{$fd}" : User::getUsernameByUid($uid)
+                "username" => ($uid == 0) ? "游客{$fd}" : $username
             ]
         ]);
         $this->broadcast($rid, $msgJson);

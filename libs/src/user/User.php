@@ -304,9 +304,7 @@ class User {
             "LIMIT" => 1
         ]);
 
-        if (empty($data)) return false; //查询不到该用户
-
-        if ($obj->password !== $data[0]) return false; //密码错误
+        if (empty($data) or $obj->password !== $data[0]) return false; //查询不到该用户//密码错误
     
         return true;
     }
