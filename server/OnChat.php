@@ -5,7 +5,7 @@ use hypergo\user\User;
 
 use hypergo\utils\Session;
 use hypergo\utils\Command;
-use hypergo\utile\Database;
+use hypergo\utils\Database;
 
 use hypergo\room\RoomManager;
 use hypergo\redis\MessageManager;
