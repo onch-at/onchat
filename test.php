@@ -7,13 +7,7 @@ use hypergo\utils\Code;
 use hypergo\utils\Session;
 use hypergo\redis\MessageManager;
 
-$db = Database::getInstance();
-echo User::getUsernameByUid(1);
-echo "<hr>";
-echo "<pre>";
-var_dump($db->info());
-echo "<hr>";
-var_dump($db->error());
+var_dump(empty(null));
 //echo phpinfo();
 //use WebSocket\Client; //is_null($obj->data->msg) or is_null($obj->data->style)
 

@@ -2,7 +2,7 @@ input, textarea {
     caret-color: #6c757d; /* 光标颜色 */
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
     border-color: #ffc107 !important;
     box-shadow: 0 0 0 .2rem rgba(255, 193, 7, .5) !important;
 }

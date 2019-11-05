@@ -58,11 +58,11 @@ $database->create("user_info", [
         "UNSIGNED",
         "NULL"
     ],
-    "age" => [ //年龄（NOT NULL）
-        "TINYINT",
-        "UNSIGNED",
-        "NOT NULL"
-    ],
+    // "age" => [ //年龄（NOT NULL） 年龄需要动态计算
+    //     "TINYINT",
+    //     "UNSIGNED",
+    //     "NOT NULL"
+    // ],
     "constellation" => [ //星座（NOT NULL）
         "TINYINT",
         "UNSIGNED",

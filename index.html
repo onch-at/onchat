@@ -206,31 +206,39 @@
                     <form>
                         <div class="form-group">
                             <label for="nickname" class="col-form-label">昵称：</label>
-                            <input type="text" class="form-control circle-border" id="nickname" placeholder="Please Enter Your Nickname">
+                            <input type="text" class="form-control circle-border" id="nickname" placeholder="Please Enter Your Nickname" maxlength="30">
+                            
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-triangle"></i> 昵称长度必须在5~30位字符之间！
+                            </div>
                         </div>
+
                         <div class="form-group">
                             <label for="signature" class="col-form-label">个性签名：</label>
-                            <textarea class="form-control" id="signature" placeholder="Please Enter Your Signature" style="border-radius: 1.25rem;"></textarea>
+                            <textarea class="form-control" id="signature" placeholder="Please Enter Your Signature" maxlength="50" style="border-radius: 1.25rem;"></textarea>
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-triangle"></i> 个性签名长度不得大于50位字符！
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <label for="mood" class="col-form-label">我的心情：</label>
                             <div class="d-flex justify-content-around">
                                 <div class="m-0 p-0 custom-control custom-radio">
-                                    <input type="radio" id="1" name="mood" class="custom-control-input" value="1">
-                                    <label class="custom-control-label" for="1"><i class="fas fa-grin-alt"></i></label>
+                                    <input type="radio" id="happy" name="mood" class="custom-control-input" value="1">
+                                    <label class="custom-control-label" for="happy"><i class="fas fa-grin-alt"></i></label>
                                 </div>
                                 <div class="m-0 p-0 custom-control custom-radio">
-                                    <input type="radio" id="2" name="mood" class="custom-control-input" value="2">
-                                    <label class="custom-control-label" for="2"><i class="fas fa-angry"></i></label>
+                                    <input type="radio" id="angry" name="mood" class="custom-control-input" value="2">
+                                    <label class="custom-control-label" for="angry"><i class="fas fa-angry"></i></label>
                                 </div>
                                 <div class="m-0 p-0 custom-control custom-radio">
-                                    <input type="radio" id="3" name="mood" class="custom-control-input" value="3">
-                                    <label class="custom-control-label" for="3"><i class="fas fa-frown"></i></label>
+                                    <input type="radio" id="sad" name="mood" class="custom-control-input" value="3">
+                                    <label class="custom-control-label" for="sad"><i class="fas fa-frown"></i></label>
                                 </div>
                                 <div class="m-0 p-0 custom-control custom-radio">
-                                    <input type="radio" id="4" name="mood" class="custom-control-input" value="4">
-                                    <label class="custom-control-label" for="4"><i class="fas fa-grin-squint"></i></label>
+                                    <input type="radio" id="sohappy" name="mood" class="custom-control-input" value="4">
+                                    <label class="custom-control-label" for="sohappy"><i class="fas fa-grin-squint"></i></label>
                                 </div>
                             </div>
                         </div>
@@ -244,6 +252,10 @@
                                         <i class="far fa-calendar-alt" style="font-weight: 400;"></i>
                                     </span>
                                 </div>
+
+                                <div class="invalid-feedback">
+                                    <i class="fas fa-exclamation-triangle"></i> 你必须填写该字段！
+                                </div>
                             </div>
                         </div>
 
@@ -255,11 +267,17 @@
                                 <option value="0">男</option>
                                 <option value="1">女</option>
                             </select>
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-triangle"></i> 你必须选择该字段！
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <label for="email" class="col-form-label">电子邮箱：</label>
                             <input type="email" class="form-control circle-border" id="email" name="email" maxLength="50" value="" onkeyup="this.value=this.value.replace(/\s+/g,'');" placeholder="Please Enter Your E-mail">
+                            <div class="invalid-feedback">
+                                <i class="fas fa-exclamation-triangle"></i> 电子邮箱长度不得大于50位字符！
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -323,25 +341,25 @@
                     this.color = color;
                 }
                 var constellations = [
-                    new Constellation("icon-shuipingzuo", "水瓶座", "#b3e5fc"),
-                    new Constellation("icon-shuangyuzuo", "双鱼座", "#2196f3"),
-                    new Constellation("icon-muyangzuo", "白羊座", "#f44336"),
-                    new Constellation("icon-jinniuzuo", "金牛座", "#00bcd4"),
-                    new Constellation("icon-shuangzizuo", "双子座", "#795548"),
-                    new Constellation("icon-juxiezuo", "巨蟹座", "#9e9e9e"), 
-                    new Constellation("icon-shizizuo", "狮子座", "#ffc107"),
-                    new Constellation("icon-chunvzuo", "处女座", "#e91e63"),
+                    new Constellation("icon-shuipingzuo",  "水瓶座", "#b3e5fc"),
+                    new Constellation("icon-shuangyuzuo",  "双鱼座", "#2196f3"),
+                    new Constellation("icon-muyangzuo",    "白羊座", "#f44336"),
+                    new Constellation("icon-jinniuzuo",    "金牛座", "#00bcd4"),
+                    new Constellation("icon-shuangzizuo",  "双子座", "#795548"),
+                    new Constellation("icon-juxiezuo",     "巨蟹座", "#9e9e9e"), 
+                    new Constellation("icon-shizizuo",     "狮子座", "#ffc107"),
+                    new Constellation("icon-chunvzuo",     "处女座", "#e91e63"),
                     new Constellation("icon-tianchengzuo", "天秤座", "#4caf50"),
-                    new Constellation("icon-tianhezuo", "天蝎座", "#616161"),
-                    new Constellation("icon-sheshouzuo", "射手座", "#ff9800"),
-                    new Constellation("icon-mojiezuo", "摩羯座", "#9c27b0")
+                    new Constellation("icon-tianhezuo",    "天蝎座", "#616161"),
+                    new Constellation("icon-sheshouzuo",   "射手座", "#ff9800"),
+                    new Constellation("icon-mojiezuo",     "摩羯座", "#9c27b0")
                 ];
                 var constellation = constellations[data.constellation - 1];
                 $(".info-list .constellation").html('\
                     <i class="iconfont ' + constellation.className + '" style="font-size: 1.25rem; color: ' + constellation.color + ';"></i>\
                     <small class="text-secondary font-weight-bold ml-1">' + constellation.name + '</small>\
                 ');
-                $(".info-list .email > small").text((data.email == null) ? "暂未绑定" : data.email);
+                $(".info-list .email > small").text((data.email == null) ? "未绑定" : data.email);
             }
         }, "json");
 
@@ -364,38 +382,7 @@
                 </ul>\
             ',
         });
-
-        $(".date").datepicker({ //设置日期选择器
-            format: "yyyy-mm-dd",
-            language: "zh-CN",
-            disableTouchKeyboard: "true",
-            autoclose: "true",
-            endDate: "0d",
-            todayHighlight: "true"
-        });
-
-        var id = undefined;
-        $("input[type=radio]").change(function () {
-            if (typeof id != "undefined") $("label[for=" + id + "]").css({"color": "#bdbdbd", "transform": "scale(1)"});
-            switch ($(this).attr("id")) {
-                case "1":
-                    id = 1;
-                    $("label[for=1]").css({"color": "#ffc107", "transform": "scale(1.15)"});
-                    break;
-                case "2":
-                    id = 2;
-                    $("label[for=2]").css({"color": "#9c27b0", "transform": "scale(1.15)"});
-                    break;
-                case "3":
-                    id = 3;
-                    $("label[for=3]").css({"color": "#2196f3", "transform": "scale(1.15)"});
-                    break;
-                case "4":
-                    id = 4;
-                    $("label[for=4]").css({"color": "#f44336", "transform": "scale(1.15)"});
-                    break;
-            }
-        });
     </script>
+    <script src="./js/user/setting.js"></script>
 </body>
 </html>
