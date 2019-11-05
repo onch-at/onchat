@@ -56,7 +56,7 @@ $database->create("user_info", [
     "sex" => [ //性别
         "TINYINT",
         "UNSIGNED",
-        "NULL"
+        "DEFAULT 0"
     ],
     // "age" => [ //年龄（NOT NULL） 年龄需要动态计算
     //     "TINYINT",
@@ -85,7 +85,6 @@ $database->create("user_info", [
 //         "uid" => $data["uid"],
 //         "nickname" => $data["username"],
 //         "birthday" => date("Y-m-d", $timestamp),
-//         "age" => 0,
 //         "constellation" => User::getConstellation($birthday["mon"], $birthday["mday"])
 //     ]);
 // }

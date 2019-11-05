@@ -11,7 +11,6 @@ if(User::checkLogin()) {
         "mood",
         "birthday",
         "sex",
-        "age",
         "constellation",
         "email"
     ]);
@@ -23,7 +22,6 @@ if(User::checkLogin()) {
         "mood"          => $infoList["mood"],
         "birthday"      => $infoList["birthday"],
         "sex"           => $infoList["sex"],
-        "age"           => $infoList["age"],
         "constellation" => $infoList["constellation"],
         "email"         => $infoList["email"]
     ]));

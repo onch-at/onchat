@@ -208,7 +208,7 @@
                             <label for="nickname" class="col-form-label">昵称：</label>
                             <input type="text" class="form-control circle-border" id="nickname" placeholder="Please Enter Your Nickname" maxlength="30">
                             
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback pl-3">
                                 <i class="fas fa-exclamation-triangle"></i> 昵称长度必须在5~30位字符之间！
                             </div>
                         </div>
@@ -216,7 +216,7 @@
                         <div class="form-group">
                             <label for="signature" class="col-form-label">个性签名：</label>
                             <textarea class="form-control" id="signature" placeholder="Please Enter Your Signature" maxlength="50" style="border-radius: 1.25rem;"></textarea>
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback pl-3">
                                 <i class="fas fa-exclamation-triangle"></i> 个性签名长度不得大于50位字符！
                             </div>
                         </div>
@@ -253,7 +253,7 @@
                                     </span>
                                 </div>
 
-                                <div class="invalid-feedback">
+                                <div class="invalid-feedback pl-3">
                                     <i class="fas fa-exclamation-triangle"></i> 你必须填写该字段！
                                 </div>
                             </div>
@@ -263,11 +263,11 @@
                             <label for="sex" class="col-form-label">性别：</label>
                             <select class="custom-select circle-border" id="sex">
                                 <option disabled>Please Choose Your Sex</option>
-                                <option value="null">保密</option>
-                                <option value="0">男</option>
-                                <option value="1">女</option>
+                                <option value="0">保密</option>
+                                <option value="1">男</option>
+                                <option value="2">女</option>
                             </select>
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback pl-3">
                                 <i class="fas fa-exclamation-triangle"></i> 你必须选择该字段！
                             </div>
                         </div>
@@ -275,7 +275,7 @@
                         <div class="form-group">
                             <label for="email" class="col-form-label">电子邮箱：</label>
                             <input type="email" class="form-control circle-border" id="email" name="email" maxLength="50" value="" onkeyup="this.value=this.value.replace(/\s+/g,'');" placeholder="Please Enter Your E-mail">
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback pl-3">
                                 <i class="fas fa-exclamation-triangle"></i> 电子邮箱长度不得大于50位字符！
                             </div>
                         </div>
@@ -301,14 +301,32 @@
             if (!data) location.href = "./user/login";
         }, "json");
 
+        //通过生日获取年龄
+        function getAge(bYear, bMonth, bDay) {
+            var today = new Date();
+            var tYear = today.getFullYear();
+            var tMonth = today.getMonth();
+            var tDay = today.getDate();
+    
+            var age = tYear -bYear; //获得岁数(未考虑月，日)
+    
+            //如果当月还没到生日月 or 如果当月就是生日月，且当天仍未到生日
+            if ((tMonth < bMonth) || (tMonth == bMonth && tDay < bDay)) return --age;
+    
+            return age;
+        }
+
         $.get("./php/get-user-info.php", function (data) {
             if (data != false) {
-                $(".user-card > .header .username").text(data.username);
-                $(".user-card > .header .info > .uid").text("UID: " + data.uid);
-                $(".user-card > .header .info > .nickname").text("昵称: " + data.nickname);
-                $(".user-card > .footer").text(data.signature);
+                $(".user-card > .header .username").text(data.username); //用户名
+                $(".user-card > .header .info > .uid").text("UID: " + data.uid); //uid
+                $(".user-card > .header .info > .nickname").text("昵称: " + data.nickname); //昵称
+                $("#nickname").val(data.nickname);
+                $(".user-card > .footer").text(data.signature); //个性签名
+                $("#signature").val(data.signature);
 
-                var Mood = function (className, color = "#ffc107") {
+                //心情
+                var Mood = function (className, color) {
                     this.className = className;
                     this.color = color;
                 }
@@ -316,25 +334,42 @@
                     new Mood("fa-grin-alt", "#ffc107"),
                     new Mood("fa-angry", "#9c27b0"),
                     new Mood("fa-frown", "#2196f3"),
-                    new Mood("fa-grin-squint", "#f44336"),
+                    new Mood("fa-grin-squint", "#f44336")
                 ];
-                
-                $(".info-list .mood").html((
-                    (data.mood == null || data.mood > moods.length) ?
-                    '<i class="fas ' + moods[0].className + '" style="font-size: 1.25rem; color: ' + moods[0].color + '"></i>' :
-                    '<i class="fas ' + moods[data.mood - 1].className + '" style="font-size: 1.25rem; color: ' + moods[data.mood - 1].color + '"></i>'
-                ));
+                var moodHTML = '<i class="fas ' + moods[0].className + '" style="font-size: 1.25rem; color: ' + moods[0].color + '"></i>'; //默认心情（喜）
+                if (data.mood != null && data.mood <= moods.length) { //如果已经设置了正确的心情
+                    moodHTML = '<i class="fas ' + moods[data.mood - 1].className + '" style="font-size: 1.25rem; color: ' + moods[data.mood - 1].color + '"></i>'
+                    $("input[type=radio][value=" + data.mood + "]").change();
+                } else {
+                    $("input[type=radio][value=1]").change();
+                }
+
+                $(".info-list .mood").html(moodHTML);
+
+                //生日
                 $(".info-list .birthday > small").text(data.birthday);
+                $("#birthday").val(data.birthday);
+
+                //性别
                 var sex = function () {
-                    if (data.sex == null) return "保密";
-                    if (data.sex == 0) {
-                        return "男";
+                    var sex = $("#sex");
+                    var sexList = ["保密", "男", "女"];
+                    if (data.sex >= 0 && data.sex <= 2) { //如果在0~2之内
+                        sex.val(data.sex);
+                        return sexList[data.sex];
                     } else {
-                        return "女";
+                        sex.val(0);
+                        return sexList[0];
                     }
                 }
                 $(".info-list .sex > small").text(sex);
-                $(".info-list .age > small").text(((data.age == 0) ? "不到1" : data.age) + "岁");
+                
+                //年龄
+                var birthday = new Date(data.birthday);
+                var age = getAge(birthday.getFullYear(), birthday.getMonth(), birthday.getDate());
+                $(".info-list .age > small").text(((age == 0) ? "不到1" : age) + "岁");
+
+                //星座
                 var Constellation = function (className, name, color) {
                     this.className = className;
                     this.name = name;
@@ -359,7 +394,14 @@
                     <i class="iconfont ' + constellation.className + '" style="font-size: 1.25rem; color: ' + constellation.color + ';"></i>\
                     <small class="text-secondary font-weight-bold ml-1">' + constellation.name + '</small>\
                 ');
-                $(".info-list .email > small").text((data.email == null) ? "未绑定" : data.email);
+
+                //邮箱
+                var email = "未绑定";
+                if (data.email != null) {
+                    email = data.email;
+                    $("#email").val(data.email);
+                }
+                $(".info-list .email > small").text(email);
             }
         }, "json");
 

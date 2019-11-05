@@ -433,7 +433,7 @@ class User {
         $age = $tYear -$bYear; //获得岁数(未考虑月，日)
 
         //如果当月还没到生日月 or 如果当月就是生日月，且当天仍未到生日
-        if (($tMonth < $bMonth) or ($tMonth == $bMonth && $tDay < $bDay)) return --$age;
+        if (($tMonth < $bMonth) || ($tMonth == $bMonth && $tDay < $bDay)) return --$age;
 
         return $age;
     }

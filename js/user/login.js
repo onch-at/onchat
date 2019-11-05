@@ -26,7 +26,7 @@ $(function () {
         });
   
         return result;
-      }
+    }
   
     function checkInput(input, minLength, maxLength) {
         var length = input.val().length; //输入框内容长度

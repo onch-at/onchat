@@ -5,7 +5,8 @@ $(function () {
         disableTouchKeyboard: "true",
         autoclose: "true",
         endDate: "0d",
-        todayHighlight: "true"
+        todayHighlight: "true",
+        defaultViewDate: $(".info-list .birthday > small").text() //默认打开生日那天
     });
 
     // 心情选择组件
@@ -32,6 +33,15 @@ $(function () {
         }
     });
 
-    $("#sohappy").change();
-    //$("input[type=radio]:checked").val()
+    function checkInput(input, minLength, maxLength) {
+        var length = input.val().length; //输入框内容长度
+        if (length < minLength || length > maxLength) { //不符合
+            if (!input.hasClass("is-invalid")) input.addClass("is-invalid");
+        } else {
+            if (input.hasClass("is-invalid")) input.removeClass("is-invalid");
+        }
+    }
+
+    $("#nickname").on("input propertychange", function () { checkInput($(this), 5, 30); });
+    $("#signature, #email").on("input propertychange", function () { checkInput($(this), 0, 50); });
 });
