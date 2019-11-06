@@ -22,7 +22,7 @@ $(function () {
     }
   
     function checkInput(input, minLength, maxLength) {
-        var length = input.val().length; //输入框内容长度
+        var length = $.trim(input.val()).length; //输入框内容长度
         if (length < minLength || length > maxLength) { //不符合
             if (!input.hasClass("is-invalid")) input.addClass("is-invalid");
         } else {
@@ -31,6 +31,10 @@ $(function () {
     }
     
     //即时验证
+    $("#username, #password, #confirm-password, #captcha").keyup(function () { //禁止输入空格
+        $(this).val($(this).val().replace(/\s+/g,""));
+    });
+
     $("#username").on("input propertychange", function () { checkInput($(this), 5, 30); });
   
     $("#password").on("input propertychange", function () {

@@ -19,9 +19,9 @@ class Database extends Medoo {
             "password"      => $config["password"],
             "charset"       => $config["charset"],
             "collation"     => $config["collation"],
-            "option"        => [
-                \PDO::ATTR_PERSISTENT => true //持久化连接
-            ]
+            // "option"        => [
+            //     \PDO::ATTR_PERSISTENT => true //持久化连接
+            // ]
         ]);
     }
     

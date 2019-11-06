@@ -99,7 +99,7 @@ class User {
      * @return void
      */
     public function setPassword(string $password) {
-        $this->password = $password;
+        $this->password = str_replace(" ", "", $password);;
     }
     
     /**
@@ -438,14 +438,14 @@ class User {
         return $age;
     }
 
-    public static function getConstellation(int $month, int $date):int {
+    public static function getConstellation(int $month, int $day):int {
         // $constellations = [
         //     "水瓶座", "双鱼座", "白羊座", "金牛座", "双子座", "巨蟹座", 
         //     "狮子座", "处女座", "天秤座", "天蝎座", "射手座", "摩羯座"
         // ];
         $constellations = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     
-        if ($date <= 22) {
+        if ($day <= 22) {
             if ($month !== 1) {
                 return $constellations[$month - 2];
             } else {

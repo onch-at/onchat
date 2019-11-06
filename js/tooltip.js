@@ -1,8 +1,6 @@
 $(function () {
     var tooltip = $('[data-toggle="tooltip"]');
-    tooltip.tooltip({
-        trigger: "hover"
-    });
+    tooltip.tooltip();
 
     tooltip.on("shown.bs.tooltip", function () {
         var the = $(this);
