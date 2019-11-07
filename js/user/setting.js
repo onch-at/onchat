@@ -30,16 +30,6 @@ $(function () {
         }
     }
 
-    $(".date").datepicker({ //设置日期选择器
-        format: "yyyy-mm-dd",
-        language: "zh-CN",
-        disableTouchKeyboard: "true",
-        autoclose: "true",
-        endDate: "0d",
-        todayHighlight: "true",
-        //defaultViewDate: $(".info-list .birthday > small").text() //默认打开生日那天
-    });
-
     // 心情选择组件
     var id = undefined;
     $("input[type=radio]").change(function () {
@@ -78,6 +68,16 @@ $(function () {
         tooltip.attr("data-original-title", title);
         tooltip.tooltip('show');
     }
+
+    var settingModal = $("#user-info-setting");
+    $(".set-item").click(function () {
+        settingModal.data("target", $(this).data("target")); //将需要获取焦点的目标元素传给settingModal
+        settingModal.modal("show");
+    });
+
+    settingModal.on("shown.bs.modal", function () {
+        $($(this).data("target")).focus();
+    });
 
     //即时验证
     $("#nickname, #email").keyup(function () { //禁止输入空格
@@ -181,6 +181,16 @@ $(function () {
         if (data != false) {
             updateUserInfo(data); //填充用户信息先
 
+            $(".date").datepicker({ //设置日期选择器
+                format: "yyyy-mm-dd",
+                language: "zh-CN",
+                disableTouchKeyboard: "true",
+                autoclose: "true",
+                endDate: "0d",
+                todayHighlight: "true",
+                defaultViewDate: data.birthday, //默认打开生日那天
+            });
+
             var oldData = new Map(); //存储旧信息
             oldData.set("nickname",  $("#nickname").val());
             oldData.set("signature", $("#signature").val());
@@ -195,8 +205,10 @@ $(function () {
                     return false;
                 }
 
-                if ($.trim($("#nickname").val()) == "" || $.trim($("#birthday").val()) == "") {
-                    showTooltip("请先将昵称 或 生日填写完整！");
+                var nicknameInput = $("#nickname");
+                if ($.trim(nicknameInput.val()) == "") {
+                    showTooltip("请先将昵称项填写正确！");
+                    nicknameInput.addClass("is-invalid");
                     return false;
                 }
                 
@@ -240,7 +252,16 @@ $(function () {
                     success: function (data) {
                         switch (data) {
                             case true:
-                                showTooltip("用户信息更新成功！");
+                                // showTooltip("用户信息更新成功！");
+                                // setTimeout(() => { settingModal.modal("hide"); }, 1000);
+                                settingModal.modal("hide");
+                                var alert = $("#list-user-center > .alert");
+                                alert.removeClass("d-none fade");
+
+                                setTimeout(() => {
+                                    alert.addClass("fade");
+                                    setTimeout(() => { alert.addClass("d-none"); }, 150);
+                                }, 1000);
                                 break;
 
                             case false:

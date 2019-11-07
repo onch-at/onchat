@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="./css/modal.css">
     <link rel="stylesheet" href="./css/index.css">
     <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/alert.css">
     <link rel="stylesheet" href="./css/popover.css">
     <link rel="stylesheet" href="./css/iconfont/constellation/iconfont.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
@@ -101,6 +102,9 @@
             </div>
 
             <div class="tab-pane fade" id="list-user-center" style="padding: .75rem .5rem;">
+                <div class="alert alert-success text-center d-none fade" role="alert" style="margin-bottom: .75rem; padding: .2rem .5rem .25rem .5rem;">
+                    <small>您的个人信息已更新！</small>
+                </div>
                 <div class="user-card bg-light mb-3">
                     <div class="header bg-gray p-2">
                         <div class="float-left mr-2"><img src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" class="rounded-circle"></div>
@@ -108,16 +112,16 @@
                             <div class="username font-weight-bold">Username</div>
                             <div class="info text-secondary small">
                                 <span class="uid pr-2 border-right border-white">UID</span>
-                                <span class="nickname pl-1">Nickname</span>
+                                <span class="nickname pl-1 cursor-pointer set-item" data-target="#nickname">Nickname</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="footer text-secondary">Signature</div>
+                    <div class="footer text-secondary cursor-pointer set-item" data-target="#signature">Signature</div>
                 </div>
 
                 <div class="info-list list-group mb-3">
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="javascript:" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center set-item" data-target="#mood">
                         我的心情
                         <span class="mood d-flex justify-content-center align-items-center">
                             <i class="fas fa-grin-alt text-warning" style="font-size: 1.25rem;"></i>
@@ -125,35 +129,35 @@
                         </span>
                     </a>
 
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="javascript:" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center set-item" data-target="#birthday">
                         生日
                         <span class="birthday">
                             <small class="text-secondary font-weight-bold">birthday</small>
                         </span>
                     </a>
 
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="javascript:" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center set-item" data-target="#sex">
                         性别
                         <span class="sex">
                             <small class="text-secondary font-weight-bold ml-1">sex</small>
                         </span>
                     </a>
 
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="javascript:" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center set-item" data-target="#birthday">
                         年龄
                         <span class="age">
                             <small class="text-secondary font-weight-bold">18岁</small>
                         </span>
                     </a>
 
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="javascript:" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center set-item" data-target="#birthday">
                         十二星座
                         <span class="constellation d-flex justify-content-center align-items-center">
                             <small class="text-secondary font-weight-bold ml-1">constellation</small>
                         </span>
                     </a>
 
-                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <a href="javascript:" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center set-item" data-target="#email">
                         电子邮箱
                         <span class="email">
                             <small class="text-secondary font-weight-bold">email</small>
@@ -162,8 +166,6 @@
                 </div>
 
                 <a class="btn btn-warning bg-light-yellow btn-block logout-btn text-secondary circle-border" href="./user/action/logout.php">退出登录</a>
-            
-                <button type="button" class="btn btn-sm btn-primary mt-3" data-toggle="modal" data-target="#user-info-setting">TEST</button>
             </div>
 
             <div class="tab-pane fade" id="list-setting">
