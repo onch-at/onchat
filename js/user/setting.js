@@ -104,7 +104,7 @@ $(function () {
         $("#nickname").val(data.nickname);
 
         //个性签名
-        if (data.signature == null) {
+        if (data.signature == null || data.signature == "") {
             $(".user-card > .footer").text("这个人很懒，什么都没留下……");
             $("#signature").val("");
         } else {
