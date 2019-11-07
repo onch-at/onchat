@@ -94,9 +94,9 @@ class MessageManager extends RedisManager {
      */
 	public function write(array $msgData) {
         // $msgData = [
-		//     "uid"	  => uid,
-		// 	   "username" => username,
-		// 	   "rid"      => rid
+		//     "uid"   => uid,
+		// 	   "msg"   => msg,
+		// 	   "style" => []
         // ]
         //
 		// ONCHAT:MSGRECORD:房间号 [

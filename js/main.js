@@ -15,6 +15,7 @@ $(function () {
     var lenght; //记录旧消息段条数（用于查询消息记录）
 
     var nameList = new Map(); //用于存放uid=>name的键值对关系
+    nameList.set("tencent-ai", "TencentAI"); //腾讯AI机器人的名字
 
     function showModal(text) {
         $(".modal-body").html(text);
@@ -56,15 +57,28 @@ $(function () {
                 });
             });
         } else {
-            msgList.append('\
-                <li class="msg-item ' + ((msgObj.uid == uid) ? 'right-item' : 'left-item') + '">\
-                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-                    <div class="info">\
-                        <div class="username">' + nameList.get(msgObj.uid) + '</div>\
-                        <div class="msg-bubble">' + msgObj.msg + '</div>\
-                    </div>\
-                </li>\
-            ');
+            if (msgObj.uid == "tencent-ai") { //如果是腾讯AI的消息
+                msgList.append('\
+                    <li class="msg-item left-item">\
+                        <img class="user-portrait rounded-circle" src="../images/tencent-ai-b.png" alt="" srcset="">\
+                        <div class="info">\
+                            <div class="username">' + nameList.get(msgObj.uid) + '</div>\
+                            <div class="msg-bubble">' + msgObj.msg + '</div>\
+                        </div>\
+                    </li>\
+                ');
+            } else {
+                msgList.append('\
+                    <li class="msg-item ' + ((msgObj.uid == uid) ? 'right-item' : 'left-item') + '">\
+                        <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
+                        <div class="info">\
+                            <div class="username">' + nameList.get(msgObj.uid) + '</div>\
+                            <div class="msg-bubble">' + msgObj.msg + '</div>\
+                        </div>\
+                    </li>\
+                ');
+            }
+
         }
 
     }
@@ -197,15 +211,27 @@ $(function () {
                                 });
                             });
                         } else {
-                            historyItem.after('\
-                                <li class="msg-item ' + ((v.uid == uid) ? 'right-item' : 'left-item') + '">\
-                                    <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
-                                    <div class="info">\
-                                        <div class="username">' + nameList.get(v.uid) + '</div>\
-                                        <div class="msg-bubble">' + v.msg + '</div>\
-                                    </div>\
-                                </li>\
-                            ');
+                            if (v.uid == "tencent-ai") { //如果是腾讯AI的消息
+                                historyItem.after('\
+                                    <li class="msg-item left-item">\
+                                        <img class="user-portrait rounded-circle" src="../images/tencent-ai-b.png" alt="" srcset="">\
+                                        <div class="info">\
+                                            <div class="username">' + nameList.get(v.uid) + '</div>\
+                                            <div class="msg-bubble">' + v.msg + '</div>\
+                                        </div>\
+                                    </li>\
+                                ');
+                            } else {
+                                historyItem.after('\
+                                    <li class="msg-item ' + ((v.uid == uid) ? 'right-item' : 'left-item') + '">\
+                                        <img class="user-portrait rounded-circle" src="https://q.qlogo.cn/headimg_dl?dst_uin=1838491745&spec=5" alt="" srcset="">\
+                                        <div class="info">\
+                                            <div class="username">' + nameList.get(v.uid) + '</div>\
+                                            <div class="msg-bubble">' + v.msg + '</div>\
+                                        </div>\
+                                    </li>\
+                                ');
+                            }
                         }
 
                         if (v.timeout !== false) historyItem.after('<li class="time-item text-center">' + v.timeout + '</li>');
@@ -244,7 +270,7 @@ $(function () {
                         break;
 
                     case 1:
-                        showModal('您还未登录，点击<a class="text-warning" href="../user/login?jump=' + location.href + '">这里</a>登陆后即可开始聊天！');
+                        showModal('您还未登录，点击<a class="text-warning" href="../user/login">这里</a>登陆后即可开始聊天！');
 
                         msgInput.attr("placeholder", "登录后即可开始聊天！");
                         msgInput.attr("readonly", "readonly");

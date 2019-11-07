@@ -3,6 +3,8 @@ require_once '../vendor/autoload.php';
 
 use hypergo\user\User;
 
+use hypergo\ai\TencentAI;
+
 use hypergo\utils\Session;
 use hypergo\utils\Command;
 use hypergo\utils\Database;
@@ -24,6 +26,8 @@ class OnChat {
     public $roomManager;
     public $chatterManager;
     public $messageManager;
+
+    public $ai;
 
 	const WS_HOST = "0.0.0.0"; //WebSocket服务器的IP
     const WS_PORT = 9501; //WebSocket服务器的端口
@@ -48,6 +52,8 @@ class OnChat {
         $this->setRoomManager(new RoomManager($rooms));
         $this->setChatterManager(new ChatterManager());
         $this->setMessageManager(new MessageManager());
+
+        $this->ai = new TencentAI();
 		
         $this->setServer(new WebSocketServer(self::WS_HOST, self::WS_PORT));
         $server = $this->getServer();
@@ -364,6 +370,28 @@ class OnChat {
                 ]);
                 
                 $this->broadcast($chatter->getRid(), $msgJson);
+                
+                if ($chatter->getRid() == 2) { //为2号房间接入TencentAI
+                    $msg = $this->ai->dialog($data->msg);
+                    if ($msg === false) return false;
+                    
+                    $msg = htmlspecialchars($msg); //格式化一下消息
+                    $msgData = [
+                        "uid"	=> "tencent-ai", // 消息发送者User ID
+                        "msg"	=> $msg,		  // 消息内容
+                        "style" => []   // 样式
+                    ];
+                    $mm->write($msgData); //储存消息
+                    
+                    $msgJson = json_encode([
+                        "cmd" => "chat",
+                        "data" => $mm->getMsgData() //刚刚MessageManager封装好的消息数据
+                    ]);
+                    
+                    $this->broadcast($chatter->getRid(), $msgJson);
+                    echo "TencentAI成功解析消息并发起回复\n";
+                }
+
                 break;
 
             case "history":
