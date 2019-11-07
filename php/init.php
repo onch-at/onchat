@@ -42,7 +42,7 @@ $database->create("user_info", [
     ],
     "signature" => [ //个性签名
         "VARCHAR(50)",
-        "DEFAULT '这个人很懒，什么都没留下……'"
+        "NULL"
     ],
     "mood" => [ //心情
         "TINYINT",

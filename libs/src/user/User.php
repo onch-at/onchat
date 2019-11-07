@@ -234,7 +234,6 @@ class User {
             "uid" => User::getUidByUsername($this->getUsername()),
             "nickname" => $this->getUsername(),
             "birthday" => date("Y-m-d", $timestamp),
-            "age" => 0,
             "constellation" => User::getConstellation($birthday["mon"], $birthday["mday"])
         ]);
         
