@@ -6,10 +6,12 @@ use hypergo\utils\Database;
 use hypergo\utils\Code;
 use hypergo\utils\Session;
 use hypergo\redis\MessageManager;
-use hypergo\ai\TencentAI;
+use hypergo\ai\TuringAI;
 
-$ai = new TencentAI();
-echo $ai->dialog("1+2");
+
+$ai = new TuringAI();
+echo "<pre>";
+var_dump($ai->dialog("  ）（*&……%￥#@！@#￥%……&*（"));
 //echo phpinfo();
 //use WebSocket\Client; //is_null($obj->data->msg) or is_null($obj->data->style)
 
