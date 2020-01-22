@@ -2,7 +2,7 @@
 /*!
  * Medoo database framework
  * https://medoo.in
- * Version 1.7.6
+ * Version 1.7.8
  *
  * Copyright 2019, Angel Lai
  * Released under the MIT license
@@ -335,6 +335,8 @@ class Medoo
 
 	public function exec($query, $map = [])
 	{
+		$this->statement = null;
+
 		if ($this->debug_mode)
 		{
 			echo $this->generate($query, $map);
@@ -475,6 +477,11 @@ class Medoo
 
 	protected function tableQuote($table)
 	{
+		if (!preg_match('/^[a-zA-Z0-9_]+$/i', $table))
+		{
+			throw new InvalidArgumentException("Incorrect table name \"$table\"");
+		}
+
 		return '"' . $this->prefix . $table . '"';
 	}
 
@@ -732,7 +739,7 @@ class Medoo
 						{
 							$item = strval($item);
 
-							if (!preg_match('/(\[.+\]|_|%.+|.+%)/', $item))
+							if (!preg_match('/(\[.+\]|[\*\?\!\%#^-_]|%.+|.+%)/', $item))
 							{
 								$item = '%' . $item . '%';
 							}
