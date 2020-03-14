@@ -1,4 +1,4 @@
-# OnChat
+# OnChat (the old version)
 A Simple Instant Messaging Website.
 
 ## Premise
