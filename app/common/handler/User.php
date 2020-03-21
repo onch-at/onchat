@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\common\handle;
+namespace app\common\handler;
 
 use app\common\Result;
 use app\model\User as UserModel;
@@ -83,7 +83,7 @@ class User
         $user = UserModel::create(['username' => $username, 'password' => $hash]);
         self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
 
-        return new Result(Result::CODE_SUCCESS, self::MSG[self::STATUS_SUCCESS]);
+        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…');
     }
 
     /**
@@ -116,7 +116,7 @@ class User
 
         self::saveLoginStatus($info['id'], $info['username'], $info['password']); // 保存登录状态
 
-        return new Result(Result::CODE_SUCCESS, self::MSG[self::STATUS_SUCCESS]);
+        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…');
     }
 
     /**

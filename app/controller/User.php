@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\BaseController;
-use app\common\handle\User as UserHandle;
+use app\common\handler\User as UserHandler;
 use app\common\Result;
 use app\common\util\Str;
 
@@ -19,6 +19,6 @@ class User extends BaseController
 
         $username = Str::trimAll(input('post.username/s'));
         $password = Str::trimAll(input('post.password/s'));
-        return UserHandle::login($username, $password);
+        return UserHandler::login($username, $password);
     }
 }
