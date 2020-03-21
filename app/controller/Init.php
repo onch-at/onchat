@@ -8,6 +8,8 @@ class Init extends BaseController {
     public function index() {
         // 先去MySQL创建数据库
         // CREATE DATABASE IF NOT EXISTS onchat DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci;
+        // 修改ThinkPHP6的Session中间件源码：在handle()里面
+        // $this->app->cookie->set($cookieName, $this->session->getId(), $this->session->getConfig('expire'));
         Db::execute("
             CREATE TABLE IF NOT EXISTS user (
                 id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
