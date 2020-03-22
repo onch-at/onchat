@@ -10,8 +10,12 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 
-Route::get('think', function () {
-    return 'hello,ThinkPHP6!';
-});
+Route::group('index', function () {
+    Route::get('captcha', 'captcha');
+    Route::get('index', 'index');
+})->completeMatch()->prefix('Index/');
 
-// Route::get('hello/:name', 'index/hello');
+Route::group('user', function () {
+    Route::post('login', 'login');
+    Route::post('register', 'register');
+})->completeMatch()->prefix('User/');
