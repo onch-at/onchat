@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\common\handler;
 
-use app\common\Result;
 use app\model\User as UserModel;
+use app\common\Result;
 
 class User
 {

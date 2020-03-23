@@ -13,7 +13,7 @@ class Index extends BaseController
 {
     public function index()
     {
-        dump(empty(''));
+        return 'index';
     }
 
     /**

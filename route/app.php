@@ -10,12 +10,20 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 
+/** 测试路由 */
+Route::get('$', function () {
+    return '<span style="font-size: 150px; font-weight: bolder; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); letter-spacing: -7.5px;">Running Successfully!</span>';
+});
+
+/** 应用主路由/公共路由 */
 Route::group('index', function () {
     Route::get('captcha', 'captcha');
-    Route::get('index', 'index');
 })->completeMatch()->prefix('Index/');
 
+/** 用户模块路由 */
 Route::group('user', function () {
+    Route::get('logout', 'logout');
+    Route::get('checkLogin', 'checkLogin');
     Route::post('login', 'login');
     Route::post('register', 'register');
 })->completeMatch()->prefix('User/');

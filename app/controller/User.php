@@ -11,6 +11,11 @@ use app\common\util\Str;
 
 class User extends BaseController
 {
+    /**
+     * 用户登录
+     *
+     * @return Result
+     */
     public function login(): Result
     {
         if (empty(input('post.username')) || empty(input('post.password'))) { // 如果参数缺失
@@ -22,6 +27,30 @@ class User extends BaseController
         return UserHandler::login($username, $password);
     }
 
+    /**
+     * 退出登录
+     *
+     * @return void
+     */
+    public function logout(): void
+    {
+        UserHandler::logout();
+    }
+
+    /**
+     * 检测用户是否已经登录
+     *
+     * @return Result
+     */
+    public function checkLogin(): Result {
+        return new Result(Result::CODE_SUCCESS, null, UserHandler::checkLogin());
+    }
+
+    /**
+     * 用户注册
+     *
+     * @return Result
+     */
     public function register(): Result
     {
         if (empty(input('post.username')) || empty(input('post.password')) || empty(input('post.captcha'))) { // 如果参数缺失
