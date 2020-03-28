@@ -22,7 +22,7 @@ class Result
 
     /** 响应信息预定义 */
     const MSG = [
-        self::CODE_SUCCESS       => '',
+        self::CODE_SUCCESS       => null,
         self::CODE_ERROR_UNKNOWN => '未知错误',
         self::CODE_ERROR_PARAM   => '参数错误',
     ];

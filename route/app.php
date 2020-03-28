@@ -17,6 +17,7 @@ Route::get('$', function () {
 
 /** 应用主路由/公共路由 */
 Route::group('index', function () {
+    Route::get('', 'index');
     Route::get('captcha', 'captcha');
 })->completeMatch()->prefix('Index/');
 
@@ -24,6 +25,8 @@ Route::group('index', function () {
 Route::group('user', function () {
     Route::get('logout', 'logout');
     Route::get('checkLogin', 'checkLogin');
+    Route::get('chatrooms', 'getChatrooms');
+    Route::get('chatlist', 'getChatList');
     Route::post('login', 'login');
     Route::post('register', 'register');
 })->completeMatch()->prefix('User/');

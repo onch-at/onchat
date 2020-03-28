@@ -65,4 +65,14 @@ class User extends BaseController
         $password = Str::trimAll(input('post.password/s'));
         return UserHandler::register($username, $password);
     }
+
+    public function getChatrooms(): Result
+    {
+        return UserHandler::getChatrooms();
+    }
+
+    public function getChatList(): Result
+    {
+        return UserHandler::getChatList();
+    }
 }

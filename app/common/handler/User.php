@@ -6,6 +6,8 @@ namespace app\common\handler;
 
 use app\model\User as UserModel;
 use app\common\Result;
+use app\common\util\Arr;
+use think\facade\Log;
 
 class User
 {
@@ -39,7 +41,7 @@ class User
 
     /** 响应消息预定义 */
     const MSG = [
-        self::STATUS_SUCCESS        => '',
+        self::STATUS_SUCCESS        => null,
         self::STATUS_UNKNOWN_ERROR  => '未知错误',
         self::STATUS_USER_EXIST     => '用户已存在',
         self::STATUS_USER_NOT_EXIST => '用户不存在',
@@ -52,6 +54,15 @@ class User
 
     /** 用户登录SESSION名 */
     const SESSION_USER_LOGIN = 'user_login';
+
+    /**
+     * 获取储存在SESSION中的用户ID
+     *
+     * @return integer|null
+     */
+    public static function getId(): ?int {
+        return session(self::SESSION_USER_LOGIN . '.id');
+    }
 
     /**
      * 注册账户
@@ -221,7 +232,7 @@ class User
     }
 
     /**
-     * 检查用户密码时候符合规范
+     * 检查用户密码是否符合规范
      *
      * @param string $password
      * @return integer
@@ -237,5 +248,44 @@ class User
         } else {
             return self::STATUS_SUCCESS;
         }
+    }
+
+    /**
+     * 查询该用户下所有的聊天室
+     *
+     * @return Result
+     */
+    public static function getChatrooms(): Result
+    {
+        $data = UserModel::find(self::getId())->chatrooms()->select()->toArray();
+        return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
+    }
+
+    /**
+     * 查询该用户下的聊天列表
+     *
+     * @return Result
+     */
+    public static function getChatList(): Result
+    {
+        $data = UserModel::find(self::getId())
+            ->chatMember()
+            ->field([
+                'chat_member.id',
+                'chat_member.chatroom_id',
+                'chat_member.unread',
+                'chat_member.sticky',
+                'chat_member.create_time',
+                'chat_member.update_time',
+                'chatroom.name',
+                'chatroom.avatar',
+                'chatroom.type'
+            ])
+            ->where('chat_member.is_show', '=', true)
+            ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+            ->select()
+            ->toArray();
+
+        return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
     }
 }
