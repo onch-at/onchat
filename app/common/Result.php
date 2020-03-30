@@ -16,15 +16,18 @@ class Result
     /** 成功 */
     const CODE_SUCCESS = 0;
     /** 未知错误 */
-    const CODE_ERROR_UNKNOWN = 1;
+    const CODE_ERROR_UNKNOWN = -1;
     /** 参数错误 */
-    const CODE_ERROR_PARAM = 2;
+    const CODE_ERROR_PARAM = -2;
+    /** 用户未登录 */
+    const CODE_ERROR_NO_LOGIN = -3;
 
     /** 响应信息预定义 */
     const MSG = [
-        self::CODE_SUCCESS       => null,
-        self::CODE_ERROR_UNKNOWN => '未知错误',
-        self::CODE_ERROR_PARAM   => '参数错误',
+        self::CODE_SUCCESS        => null,
+        self::CODE_ERROR_UNKNOWN  => '未知错误',
+        self::CODE_ERROR_PARAM    => '参数错误',
+        self::CODE_ERROR_NO_LOGIN => '未登录',
     ];
 
     public function __construct(int $code, string $msg = null, $data = null)

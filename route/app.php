@@ -15,6 +15,10 @@ Route::get('$', function () {
     return '<span style="font-size: 150px; font-weight: bolder; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); letter-spacing: -7.5px;">Running Successfully!</span>';
 });
 
+Route::get('phpinfo', function () {
+    return phpinfo();
+});
+
 /** 应用主路由/公共路由 */
 Route::group('index', function () {
     Route::get('', 'index');
@@ -23,10 +27,16 @@ Route::group('index', function () {
 
 /** 用户模块路由 */
 Route::group('user', function () {
+    Route::get('id', 'getUserId');
     Route::get('logout', 'logout');
-    Route::get('checkLogin', 'checkLogin');
+    Route::get('checklogin', 'checkLogin');
     Route::get('chatrooms', 'getChatrooms');
     Route::get('chatlist', 'getChatList');
     Route::post('login', 'login');
     Route::post('register', 'register');
 })->completeMatch()->prefix('User/');
+
+/** 聊天室模块路由 */
+Route::group('chatroom/:id', function () {
+    Route::get('records/:page', 'getRecords');
+})->completeMatch()->prefix('Chatroom/');

@@ -17,7 +17,7 @@ class Chatroom extends Model
         return $this->belongsToMany(User::class, ChatMember::class);
     }
 
-    public function record()
+    public function chatRecord()
     {
         return $this->hasMany(ChatRecord::class);
     }

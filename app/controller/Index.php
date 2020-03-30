@@ -13,6 +13,8 @@ use think\captcha\facade\Captcha;
 use think\facade\Db;
 use think\Response;
 
+use app\common\handler\Chatroom as ChatroomHandler;
+
 class Index extends BaseController
 {
     public function addChatroom($name)
@@ -50,6 +52,7 @@ class Index extends BaseController
         //     $chatMember = ChatMember::create([
         //         'chatroom_id' => $chatroom->id,
         //         'user_id'     => $userId,
+        //         'nickname'    => TODO  昵称
         //     ]);
         // });
         // dump(Chatroom::where('id', 'IN', User::find(1)->chatMember()->column('chatroom_id'))->select()->toArray());
@@ -68,25 +71,109 @@ class Index extends BaseController
 
             // dump($this->searchChatroom());
 
-            dump(
-                User::find(1)
-                ->chatMember()
-                ->field([
-                    'chat_member.id',
-                    'chat_member.chatroom_id',
-                    'chat_member.unread',
-                    'chat_member.sticky',
-                    'chat_member.create_time',
-                    'chat_member.update_time',
-                    'chatroom.name',
-                    'chatroom.avatar',
-                    'chatroom.type'
-                ])
-                ->where('chat_member.is_show', '=', true)
-                ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
-                ->select()
-                ->toArray()
-            );
+            // for ($i=0; $i < 10; $i++) { 
+            //     Chatroom::find(1)->chatRecord()->save([
+            //         'user_id' => 1,
+            //         'type' => 1,
+            //         'content' => $i*1000
+            //     ]);
+            // }
+
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => '哈喽！！！'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => '有人吗？😅'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => '有的，'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => 'emmm'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => '。。。'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => 'Hello, World!'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => '你好，世界！'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => '没错！'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => '2333'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => '嗯嗯'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => '啊咧啊咧啊咧啊咧'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => '啊哈哈哈哈'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => '😁'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => '。。。'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 2,
+            //     'type' => 1,
+            //     'content' => '😊'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => '好的'
+            // ]);
+            // Chatroom::find(1)->chatRecord()->save([
+            //     'user_id' => 1,
+            //     'type' => 1,
+            //     'content' => 'OK'
+            // ]);
+
+            // dump(User::where('id', '=', 1)->value('username'));
+
+        // Chatroom::find(1)->chatRecord()->paginateX([
+        //     'list_rows'=> 10,
+        //     'page' => 2,
+        // ])->each(function($item, $key){
+        //     dump($item->toArray());
+        // });
+        // dump(User::find(2)->chatMember()->find(2));
     }
 
     /**

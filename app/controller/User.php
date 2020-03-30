@@ -66,6 +66,11 @@ class User extends BaseController
         return UserHandler::register($username, $password);
     }
 
+    public function getUserId(): Result
+    {
+        return UserHandler::getUserId();
+    }
+
     public function getChatrooms(): Result
     {
         return UserHandler::getChatrooms();
@@ -75,4 +80,6 @@ class User extends BaseController
     {
         return UserHandler::getChatList();
     }
+
+
 }
