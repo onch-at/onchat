@@ -15,10 +15,6 @@ Route::get('$', function () {
     return '<span style="font-size: 150px; font-weight: bolder; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); letter-spacing: -7.5px;">Running Successfully!</span>';
 });
 
-Route::get('phpinfo', function () {
-    return phpinfo();
-});
-
 /** 应用主路由/公共路由 */
 Route::group('index', function () {
     Route::get('', 'index');

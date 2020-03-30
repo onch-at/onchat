@@ -174,6 +174,7 @@ class Index extends BaseController
         //     dump($item->toArray());
         // });
         // dump(User::find(2)->chatMember()->find(2));
+        dump(User::find(2)->chatMember()->where('chatroom_id', '=',1)->value('nickname'));
     }
 
     /**
