@@ -53,7 +53,8 @@ class User
      *
      * @return integer|null
      */
-    public static function getId(): ?int {
+    public static function getId(): ?int
+    {
         return session(self::SESSION_USER_LOGIN . '.id');
     }
 
@@ -190,7 +191,8 @@ class User
      *
      * @return Result
      */
-    public static function getUserId(): Result {
+    public static function getUserId(): Result
+    {
         $id = self::getId();
         if (!$id) {
             return new Result(Result::CODE_ERROR_NO_LOGIN);
@@ -293,5 +295,33 @@ class User
             ->toArray();
 
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
+    }
+
+    /**
+     * 置顶聊天列表子项
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public static function sticky(int $id, $sticky = true): Result
+    {
+        $num = UserModel::find(User::getId())->chatMember()->update(['sticky' => $sticky, 'id' => $id]);
+
+        if ($num == 0) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        return new Result(Result::CODE_SUCCESS);
+    }
+
+    /**
+     * 取消置顶聊天列表子项
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public static function unsticky(int $id): Result
+    {
+        return self::sticky($id, false);
     }
 }

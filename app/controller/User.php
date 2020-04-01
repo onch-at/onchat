@@ -42,7 +42,8 @@ class User extends BaseController
      *
      * @return Result
      */
-    public function checkLogin(): Result {
+    public function checkLogin(): Result
+    {
         return new Result(Result::CODE_SUCCESS, null, UserHandler::checkLogin());
     }
 
@@ -66,20 +67,55 @@ class User extends BaseController
         return UserHandler::register($username, $password);
     }
 
+    /**
+     * 获取用户ID
+     *
+     * @return Result
+     */
     public function getUserId(): Result
     {
         return UserHandler::getUserId();
     }
 
+    /**
+     * 获取该用户下所有聊天室
+     *
+     * @return Result
+     */
     public function getChatrooms(): Result
     {
         return UserHandler::getChatrooms();
     }
 
+    /**
+     * 获取用户的聊天列表
+     *
+     * @return Result
+     */
     public function getChatList(): Result
     {
         return UserHandler::getChatList();
     }
 
+    /**
+     * 置顶聊天列表子项
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public function sticky(int $id): Result
+    {
+        return UserHandler::sticky($id);
+    }
 
+    /**
+     * 取消置顶聊天列表子项
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public function unsticky(int $id): Result
+    {
+        return UserHandler::unsticky($id);
+    }
 }

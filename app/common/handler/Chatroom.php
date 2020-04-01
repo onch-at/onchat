@@ -24,8 +24,29 @@ class Chatroom
     ];
 
     /** 每次查询的消息行数 */
-    const MSG_ROWS = 5;
+    const MSG_ROWS = 10;
 
+    /**
+     * 获取聊天室名称
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public static function getName(int $id): Result {
+        $name = ChatroomModel::where('id', '=', $id)->value('name');
+        if (!$name) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+        return new Result(Result::CODE_SUCCESS, null, $name);
+    }
+
+    /**
+     * 查询消息记录
+     *
+     * @param integer $id 聊天室ID
+     * @param integer $page 页码
+     * @return Result
+     */
     public static function getRecords(int $id, int $page = 1): Result
     {
         $userId = User::getId();

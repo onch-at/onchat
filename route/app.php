@@ -27,12 +27,20 @@ Route::group('user', function () {
     Route::get('logout', 'logout');
     Route::get('checklogin', 'checkLogin');
     Route::get('chatrooms', 'getChatrooms');
-    Route::get('chatlist', 'getChatList');
+
     Route::post('login', 'login');
     Route::post('register', 'register');
+
+    Route::group('chatlist', function () {
+        Route::get('$', 'getChatList');
+
+        Route::put('sticky/:id', 'sticky');
+        Route::put('unsticky/:id', 'unsticky');
+    });
 })->completeMatch()->prefix('User/');
 
 /** 聊天室模块路由 */
 Route::group('chatroom/:id', function () {
+    Route::get('name', 'getName');
     Route::get('records/:page', 'getRecords');
 })->completeMatch()->prefix('Chatroom/');
