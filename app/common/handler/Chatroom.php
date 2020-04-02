@@ -12,14 +12,11 @@ use app\model\User as UserModel;
 
 class Chatroom
 {
-    /** 权限不足 */
-    const CODE_NO_ACCESS = 1;
     /** 没有消息 */
-    const CODE_NO_RECORD = 2;
+    const CODE_NO_RECORD = 1;
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_NO_ACCESS => '权限不足',
         self::CODE_NO_RECORD => '没有消息'
     ];
 
@@ -51,13 +48,13 @@ class Chatroom
     {
         $userId = User::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_LOGIN);
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
         // 拿到当前用户在这个聊天室的昵称
         $nickname = UserModel::find($userId)->chatMember()->where('chatroom_id', '=', $id)->value('nickname');
         if (!$nickname) {
-            return new Result(self::CODE_NO_ACCESS, self::MSG[self::CODE_NO_ACCESS]);
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
         $chatRecord = ChatroomModel::find($id)->chatRecord();

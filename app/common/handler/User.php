@@ -195,7 +195,7 @@ class User
     {
         $id = self::getId();
         if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_LOGIN);
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
         return new Result(Result::CODE_SUCCESS, null, $id);
     }

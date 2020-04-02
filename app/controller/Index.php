@@ -28,7 +28,8 @@ class Index extends BaseController
 
             // 添加聊天成员
             User::find(1)->chatrooms()->attach($chatroom->id, [
-                'role' => 0
+                'role' => 0,
+                'nickname' => 'HyperLife1119'
             ]);
         });
     }
@@ -67,7 +68,7 @@ class Index extends BaseController
 
     //     dump(User::find(1)->chatrooms()->select()->toArray());
             // $this->addChatroom('OnChat');
-            // $this->addChatroom('世界都在聊');
+            // $this->addChatroom('TEST CHATROOM');
 
             // dump($this->searchChatroom());
 
