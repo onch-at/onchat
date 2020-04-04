@@ -31,6 +31,12 @@ class Index extends BaseController
                 'role' => 0,
                 'nickname' => 'HyperLife1119'
             ]);
+
+            // // 添加聊天成员
+            // User::find(2)->chatrooms()->attach($chatroom->id, [
+            //     'role' => 0,
+            //     'nickname' => '12345'
+            // ]);
         });
     }
 
@@ -67,7 +73,7 @@ class Index extends BaseController
         // return dump($temp);
 
     //     dump(User::find(1)->chatrooms()->select()->toArray());
-            // $this->addChatroom('OnChat');
+            // $this->addChatroom('HyperGo!');
             // $this->addChatroom('TEST CHATROOM');
 
             // dump($this->searchChatroom());
@@ -76,7 +82,7 @@ class Index extends BaseController
             //     Chatroom::find(1)->chatRecord()->save([
             //         'user_id' => 1,
             //         'type' => 1,
-            //         'content' => $i*1000
+            //         'content' => $i*12345
             //     ]);
             // }
 
@@ -175,7 +181,7 @@ class Index extends BaseController
         //     dump($item->toArray());
         // });
         // dump(User::find(2)->chatMember()->find(2));
-        dump(User::find(2)->chatMember()->where('chatroom_id', '=',1)->value('nickname'));
+        // dump(User::find(2)->chatMember()->where('chatroom_id', '=',1)->value('nickname'));
     }
 
     /**

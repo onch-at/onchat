@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS user (
     password    VARCHAR(255) NOT NULL           COMMENT '密码',
     email       VARCHAR(50) NULL UNIQUE KEY     COMMENT '电子邮箱',
     telephone   CHAR(11) NULL UNIQUE KEY        COMMENT '电话号码',
-    create_time DATETIME NOT NULL,
-    update_time DATETIME NOT NULL
+    create_time INT NOT NULL,
+    update_time INT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 聊天室表
@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS chatroom (
     avatar           VARCHAR(255) NULL            COMMENT '聊天室头像URL',
     avatar_thumbnail VARCHAR(255) NULL            COMMENT '聊天室头像缩略图URL',
     type             TINYINT(1) UNSIGNED NOT NULL COMMENT '聊天室的类型',
-    create_time      DATETIME NOT NULL,
-    update_time      DATETIME NOT NULL
+    create_time      INT NOT NULL,
+    update_time      INT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 聊天室成员表
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS chat_member (
     unread      INT UNSIGNED NOT NULL DEFAULT 0        COMMENT '未读消息数',
     is_show     BOOLEAN NOT NULL DEFAULT TRUE          COMMENT '是否显示在首页',
     sticky      BOOLEAN NOT NULL DEFAULT FALSE         COMMENT '是否置顶',
-    create_time DATETIME NOT NULL,
-    update_time DATETIME NOT NULL,
+    create_time INT NOT NULL,
+    update_time INT NOT NULL,
     FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS chat_record (
     type        TINYINT(1) UNSIGNED NOT NULL   COMMENT '消息类型',
     content     VARCHAR(5000) NOT NULL         COMMENT '消息内容',
     reply_id    INT UNSIGNED NULL              COMMENT '回复消息的消息记录ID',
-    create_time DATETIME NOT NULL,
+    create_time INT NOT NULL,
     FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS chat_record (
 --     password    VARCHAR(60) NOT NULL COMMENT '',
 --     email       VARCHAR(50) NULL COMMENT '',
 --     telephone   CHAR(11) NULL COMMENT '',
---     create_time DATETIME NOT NULL,
---     update_time DATETIME NOT NULL,
+--     create_time INT NOT NULL,
+--     update_time INT NOT NULL,
 --     FOREIGN KEY (id) REFERENCES account(uid) ON DELETE CASCADE ON UPDATE CASCADE
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
