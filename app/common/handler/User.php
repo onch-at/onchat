@@ -47,6 +47,8 @@ class User
 
     /** 用户登录SESSION名 */
     const SESSION_USER_LOGIN = 'user_login';
+    /** 是否开放注册 */
+    const CAN_REGISTER = true;
 
     /**
      * 获取储存在SESSION中的用户ID
@@ -67,6 +69,10 @@ class User
      */
     public static function register(string $username, string $password): Result
     {
+        if (!self::CAN_REGISTER) {
+            return new Result(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
+        }
+
         $result = self::checkUsername($username);
         if ($result !== Result::CODE_SUCCESS) { // 如果用户名不符合规范
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
