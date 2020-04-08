@@ -21,7 +21,7 @@ class Chatroom
     ];
 
     /** 每次查询的消息行数 */
-    const MSG_ROWS = 10;
+    const MSG_ROWS = 15;
 
     /**
      * 获取聊天室名称
