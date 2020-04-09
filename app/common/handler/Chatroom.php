@@ -52,7 +52,7 @@ class Chatroom
         }
 
         // 拿到当前用户在这个聊天室的昵称
-        $nickname = UserModel::find($userId)->chatMember()->where('chatroom_id', '=', $id)->value('nickname');
+        $nickname = ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $id)->value('nickname');
         if (!$nickname) {
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
@@ -65,13 +65,13 @@ class Chatroom
         $data = $chatRecord->paginateX([
             'list_rows' => self::MSG_ROWS,
             'page' => $page,
-        ])->each(function ($item) use ($userId, $nickname) {
+        ])->each(function ($item) use ($userId, $nickname, $id) {
             // TODO 查询用户头像
             $item['avatar_thumbnail'] = null;
 
             // 如果这条消息不是该用户发的
             if ($item['user_id'] !== $userId) {
-                $nickname = ChatMemberModel::where('user_id', '=', $item['user_id'])->value('nickname');
+                $nickname = ChatMemberModel::where('user_id', '=', $item['user_id'])->where('chatroom_id', '=', $id)->value('nickname');
             }
 
             if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找

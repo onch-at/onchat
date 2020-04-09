@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace app\common\handler;
 
 use app\model\User as UserModel;
+use app\model\ChatMember as ChatMemberModel;
+use app\model\ChatRecord as ChatRecordModel;
 use app\common\Result;
 use app\common\util\Arr;
 
@@ -282,8 +284,7 @@ class User
      */
     public static function getChatList(): Result
     {
-        $data = UserModel::find(self::getId())
-            ->chatMember()
+        $data = ChatMemberModel::where('user_id', '=', self::getId())
             ->field([
                 'chat_member.id',
                 'chat_member.chatroom_id',
@@ -293,12 +294,21 @@ class User
                 'chat_member.update_time',
                 'chatroom.name',
                 'chatroom.avatar_thumbnail',
-                'chatroom.type'
+                'chatroom.type',
             ])
             ->where('chat_member.is_show', '=', true)
             ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
-            ->select()
-            ->toArray();
+            ->select()->toArray();
+
+        // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
+        $temp = null;
+        foreach ($data as $key => $value) {
+            $temp = ChatRecordModel::where('chatroom_id', '=', $value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
+            if (!empty($temp)) {
+                $temp['nickname'] = ChatMemberModel::where('user_id', '=', $temp['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
+                $data[$key]['latestMsg'] = Arr::keyToCamel($temp);
+            }
+        }
 
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
     }

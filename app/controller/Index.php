@@ -14,6 +14,7 @@ use think\facade\Db;
 use think\Response;
 
 use app\common\handler\Chatroom as ChatroomHandler;
+use app\common\handler\User as UserHandler;
 
 class Index extends BaseController
 {
@@ -139,6 +140,8 @@ class Index extends BaseController
         //     'type' => 1,
         //     'content' => 'OK'
         // ]);
+
+        dump(UserHandler::getChatList());
     }
 
     /**
