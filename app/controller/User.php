@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\BaseController;
-use app\common\handler\User as UserHandler;
-use app\common\Result;
-use app\common\util\Str;
+use app\core\handler\User as UserHandler;
+use app\core\Result;
+use app\core\util\Str;
 
 class User extends BaseController
 {

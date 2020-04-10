@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace app\common\handler;
+namespace app\core\handler;
 
 use app\model\User as UserModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
-use app\common\Result;
-use app\common\util\Arr;
+use app\core\Result;
+use app\core\util\Arr;
 
 class User
 {
@@ -271,9 +271,9 @@ class User
      *
      * @return Result
      */
-    public static function getChatrooms(): Result
+    public static function getChatrooms($userId = null): Result
     {
-        $data = UserModel::find(self::getId())->chatrooms()->select()->toArray();
+        $data = UserModel::find($userId ?? self::getId())->chatrooms()->select()->toArray();
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
     }
 
@@ -302,10 +302,15 @@ class User
 
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
         $temp = null;
+        $nickname = null;
         foreach ($data as $key => $value) {
             $temp = ChatRecordModel::where('chatroom_id', '=', $value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
             if (!empty($temp)) {
-                $temp['nickname'] = ChatMemberModel::where('user_id', '=', $temp['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
+                $nickname = ChatMemberModel::where('user_id', '=', $temp['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
+                if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
+                    $nickname = UserModel::where('id', '=', $temp['user_id'])->value('username');
+                }
+                $temp['nickname'] = $nickname;
                 $data[$key]['latestMsg'] = Arr::keyToCamel($temp);
             }
         }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\common\util;
+namespace app\core\util;
 
 use think\helper\Str;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\common;
+namespace app\core;
 
 class Result
 {

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace app\common\handler;
+namespace app\core\handler;
 
-use app\common\Result;
+use app\core\Result;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
-use app\common\util\Arr;
+use app\core\util\Arr;
 use app\model\User as UserModel;
 
 class Chatroom

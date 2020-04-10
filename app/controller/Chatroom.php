@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\BaseController;
-use app\common\handler\Chatroom as ChatroomHandler;
-use app\common\Result;
+use app\core\handler\Chatroom as ChatroomHandler;
+use app\core\Result;
 
 class Chatroom extends BaseController
 {

@@ -13,8 +13,8 @@ use think\captcha\facade\Captcha;
 use think\facade\Db;
 use think\Response;
 
-use app\common\handler\Chatroom as ChatroomHandler;
-use app\common\handler\User as UserHandler;
+use app\core\handler\Chatroom as ChatroomHandler;
+use app\core\handler\User as UserHandler;
 
 class Index extends BaseController
 {

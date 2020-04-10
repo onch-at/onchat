@@ -2,6 +2,8 @@
 
 use think\swoole\websocket\socketio\Handler;
 use think\swoole\websocket\socketio\Parser;
+use \app\listener\websocket\UserJoin;
+
 
 return [
     'server'     => [
@@ -46,7 +48,7 @@ return [
             ],
         ],
         'listen'        => [
-            'test' => \app\listener\WebsocketTest::class
+            'user_join' => UserJoin::class
         ],
         'subscribe'     => [],
     ],
@@ -61,8 +63,7 @@ return [
         ],
     ],
     'hot_update' => [
-        // 'enable'  => env('APP_DEBUG', false),
-        'enable'  => true,
+        'enable'  => env('APP_DEBUG', false),
         'name'    => ['*.php'],
         'include' => [app_path()],
         'exclude' => [],
