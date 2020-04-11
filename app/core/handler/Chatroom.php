@@ -7,6 +7,7 @@ namespace app\core\handler;
 use app\core\Result;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
+use app\model\ChatRecord as ChatRecordModel;
 use app\core\util\Arr;
 use app\model\User as UserModel;
 
@@ -29,7 +30,8 @@ class Chatroom
      * @param integer $id 聊天室ID
      * @return Result
      */
-    public static function getName(int $id): Result {
+    public static function getName(int $id): Result
+    {
         $name = ChatroomModel::where('id', '=', $id)->value('name');
         if (!$name) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -39,12 +41,13 @@ class Chatroom
 
     /**
      * 查询消息记录
+     * 按照消息ID查询，若消息ID为0，则为初次查询，否则查询传入的消息ID之前的消息
      *
      * @param integer $id 聊天室ID
-     * @param integer $page 页码
+     * @param integer $msgId 消息ID
      * @return Result
      */
-    public static function getRecords(int $id, int $page = 1): Result
+    public static function getRecords(int $id, int $msgId): Result
     {
         $userId = User::getId();
         if (!$userId) {
@@ -53,19 +56,19 @@ class Chatroom
 
         // 拿到当前用户在这个聊天室的昵称
         $nickname = ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $id)->value('nickname');
-        if (!$nickname) {
+        if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        $chatRecord = ChatroomModel::find($id)->chatRecord();
-        if ($chatRecord->count() === 0) {
+        $chatRecord = ChatRecordModel::where('chatroom_id', '=', $id);
+        if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }
 
-        $data = $chatRecord->paginateX([
-            'list_rows' => self::MSG_ROWS,
-            'page' => $page,
-        ])->each(function ($item) use ($userId, $nickname, $id) {
+        // 如果msgId为0，则代表初次查询
+        $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
+
+        $data = $data->order('id', 'desc')->limit(self::MSG_ROWS)->select()->each(function ($item) use ($userId, $nickname, $id) {
             // TODO 查询用户头像
             $item['avatar_thumbnail'] = null;
 
@@ -79,11 +82,7 @@ class Chatroom
             }
 
             $item['nickname'] = $nickname;
-        })->toArray()['data'];
-
-        if (count($data) === 0) {
-            return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
-        }
+        })->toArray();
 
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
     }

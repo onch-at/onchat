@@ -25,11 +25,11 @@ class Chatroom extends BaseController
      * 获取聊天室消息记录
      *
      * @param integer $id 聊天室ID
-     * @param integer $page 页码
+     * @param integer $msgId 消息ID
      * @return Result
      */
-    public function getRecords(int $id, int $page = 1): Result
+    public function getRecords(int $id, int $msgId): Result
     {
-        return ChatroomHandler::getRecords($id, $page);
+        return ChatroomHandler::getRecords($id, $msgId);
     }
 }

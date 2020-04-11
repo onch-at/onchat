@@ -46,5 +46,5 @@ Route::group('user', function () {
 /** 聊天室模块路由 */
 Route::group('chatroom/:id', function () {
     Route::get('name', 'getName');
-    Route::get('records/:page', 'getRecords');
+    Route::get('records/:msgId', 'getRecords');
 })->completeMatch()->prefix('Chatroom/');
