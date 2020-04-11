@@ -9,7 +9,7 @@ use think\swoole\Websocket;
 use think\facade\Session;
 use app\core\handler\User as UserHandler;
 
-class UserJoin
+class UserLeave
 {
     public $websocket = null;
     /**
