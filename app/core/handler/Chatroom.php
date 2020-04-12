@@ -60,6 +60,10 @@ class Chatroom
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
+        // 用于缓存 user id => nickname
+        $nicknameMap = [];
+        $nicknameMap[$userId] = $nickname;
+
         $chatRecord = ChatRecordModel::where('chatroom_id', '=', $id);
         if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
@@ -68,20 +72,21 @@ class Chatroom
         // 如果msgId为0，则代表初次查询
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
 
-        $data = $data->order('id', 'desc')->limit(self::MSG_ROWS)->select()->each(function ($item) use ($userId, $nickname, $id) {
+        $data = $data->order('id', 'desc')->limit(self::MSG_ROWS)->select()->each(function ($item) use ($nickname, $id, &$nicknameMap) {
             // TODO 查询用户头像
             $item['avatar_thumbnail'] = null;
 
-            // 如果这条消息不是该用户发的
-            if ($item['user_id'] !== $userId) {
+            // 如果nicknameMap里面没有找到已经缓存的nickname
+            if (!isset($nicknameMap[$item['user_id']])) {
                 $nickname = ChatMemberModel::where('user_id', '=', $item['user_id'])->where('chatroom_id', '=', $id)->value('nickname');
-            }
 
-            if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
-                $nickname = UserModel::where('id', '=', $item['user_id'])->value('username');
-            }
+                if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
+                    $nickname = UserModel::where('id', '=', $item['user_id'])->value('username');
+                }
 
-            $item['nickname'] = $nickname;
+                $nicknameMap[$item['user_id']] = $nickname;
+            }
+            $item['nickname'] = $nicknameMap[$item['user_id']];
         })->toArray();
 
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
