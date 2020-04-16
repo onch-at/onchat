@@ -13,13 +13,13 @@ use app\core\util\Arr;
 class User
 {
     /** 用户名最小长度 */
-    const USERNAME_LENGTH_MIN = 5;
+    const USERNAME_MIN_LENGTH = 5;
     /** 用户名最大长度 */
-    const USERNAME_LENGTH_MAX = 30;
+    const USERNAME_MAX_LENGTH = 30;
     /** 用户密码最小长度 */
-    const PASSWORD_LENGTH_MIN = 8;
+    const PASSWORD_MIN_LENGTH = 8;
     /** 用户密码最大长度 */
-    const PASSWORD_LENGTH_MAX = 50;
+    const PASSWORD_MAX_LENGTH = 50;
 
     /** 用户已存在 */
     const CODE_USER_EXIST = 1;
@@ -41,10 +41,10 @@ class User
         self::CODE_USER_EXIST     => '用户已存在',
         self::CODE_USER_NOT_EXIST => '用户不存在',
         self::CODE_PASSWORD_ERROR => '密码错误',
-        self::CODE_USERNAME_SHORT => '用户名长度必须在' . self::USERNAME_LENGTH_MIN . '~' . self::USERNAME_LENGTH_MAX . '位字符之间',
-        self::CODE_USERNAME_LONG  => '用户名长度必须在' . self::USERNAME_LENGTH_MIN . '~' . self::USERNAME_LENGTH_MAX . '位字符之间',
-        self::CODE_PASSWORD_SHORT => '密码长度必须在' . self::PASSWORD_LENGTH_MIN . '~' . self::PASSWORD_LENGTH_MAX . '位字符之间',
-        self::CODE_PASSWORD_LONG  => '密码长度必须在' . self::PASSWORD_LENGTH_MIN . '~' . self::PASSWORD_LENGTH_MAX . '位字符之间',
+        self::CODE_USERNAME_SHORT => '用户名长度必须在' . self::USERNAME_MIN_LENGTH . '~' . self::USERNAME_MAX_LENGTH . '位字符之间',
+        self::CODE_USERNAME_LONG  => '用户名长度必须在' . self::USERNAME_MIN_LENGTH . '~' . self::USERNAME_MAX_LENGTH . '位字符之间',
+        self::CODE_PASSWORD_SHORT => '密码长度必须在' . self::PASSWORD_MIN_LENGTH . '~' . self::PASSWORD_MAX_LENGTH . '位字符之间',
+        self::CODE_PASSWORD_LONG  => '密码长度必须在' . self::PASSWORD_MIN_LENGTH . '~' . self::PASSWORD_MAX_LENGTH . '位字符之间',
     ];
 
     /** 用户登录SESSION名 */
@@ -238,9 +238,9 @@ class User
     {
         $length = mb_strlen($username, 'utf-8');
 
-        if ($length < self::USERNAME_LENGTH_MIN) {
+        if ($length < self::USERNAME_MIN_LENGTH) {
             return self::CODE_USERNAME_SHORT;
-        } elseif ($length > self::USERNAME_LENGTH_MAX) {
+        } elseif ($length > self::USERNAME_MAX_LENGTH) {
             return self::CODE_USERNAME_LONG;
         } else {
             return Result::CODE_SUCCESS;
@@ -257,9 +257,9 @@ class User
     {
         $length = mb_strlen($password, 'utf-8');
 
-        if ($length < self::PASSWORD_LENGTH_MIN) {
+        if ($length < self::PASSWORD_MIN_LENGTH) {
             return self::CODE_PASSWORD_SHORT;
-        } elseif ($length > self::PASSWORD_LENGTH_MAX) {
+        } elseif ($length > self::PASSWORD_MAX_LENGTH) {
             return self::CODE_PASSWORD_LONG;
         } else {
             return Result::CODE_SUCCESS;

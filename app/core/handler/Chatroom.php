@@ -15,14 +15,18 @@ class Chatroom
 {
     /** 没有消息 */
     const CODE_NO_RECORD = 1;
+    const CODE_MSG_LONG  = 2;
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_NO_RECORD => '没有消息'
+        self::CODE_NO_RECORD => '没有消息',
+        self::CODE_MSG_LONG  => '文本消息长度过长'
     ];
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
+    /** 文本消息最长长度 */
+    const MSG_MAX_LENGTH = 4096;
 
     /**
      * 获取聊天室名称
@@ -37,6 +41,34 @@ class Chatroom
             return new Result(Result::CODE_ERROR_PARAM);
         }
         return new Result(Result::CODE_SUCCESS, null, $name);
+    }
+
+    public static function setMessage(int $userId, array $msg): Result {
+        // TODO 仅在消息类型为文本的时候才判断
+        if (mb_strlen($msg['content'], 'utf-8') > self::MSG_MAX_LENGTH) {
+            return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
+        }
+
+        // 拿到当前用户在这个聊天室的昵称
+        $nickname = ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $msg['chatroomId'])->value('nickname');
+        if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        ChatroomModel::find($msg['chatroomId'])->chatRecord()->save([
+            'user_id'  => $userId,
+            'type'     => $msg['type'],
+            'content'  => $msg['content'],
+            'reply_id' => $msg['replyId']
+        ]);
+
+        $msg['userId'] = $userId;
+        $msg['nickname'] = $nickname;
+        // TODO 查询用户头像
+        $msg['avatarThumbnail'] = null;
+        $msg['createTime'] = time();
+
+        return new Result(Result::CODE_SUCCESS, null, $msg);
     }
 
     /**
@@ -74,7 +106,7 @@ class Chatroom
 
         $data = $data->order('id', 'desc')->limit(self::MSG_ROWS)->select()->each(function ($item) use ($nickname, $id, &$nicknameMap) {
             // TODO 查询用户头像
-            $item['avatar_thumbnail'] = null;
+            $item['avatarThumbnail'] = null;
 
             // 如果nicknameMap里面没有找到已经缓存的nickname
             if (!isset($nicknameMap[$item['user_id']])) {

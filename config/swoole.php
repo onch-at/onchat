@@ -3,6 +3,7 @@
 use think\swoole\websocket\socketio\Handler;
 use think\swoole\websocket\socketio\Parser;
 use app\listener\websocket\Init;
+use app\listener\websocket\Message;
 use app\listener\websocket\Unload;
 use app\listener\websocket\UserJoin;
 use app\listener\websocket\UserLeave;
@@ -53,12 +54,11 @@ return [
         'listen'        => [
             'init'       => Init::class,
             'unload'     => Unload::class,
+            'message'    => Message::class,
             'user_join'  => UserJoin::class,
             'user_leave' => UserLeave::class,
         ],
-        'subscribe'     => [
-            Test::class
-        ],
+        'subscribe'     => [],
     ],
     'rpc'        => [
         'server' => [
