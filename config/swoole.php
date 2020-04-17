@@ -7,7 +7,6 @@ use app\listener\websocket\Message;
 use app\listener\websocket\Unload;
 use app\listener\websocket\UserJoin;
 use app\listener\websocket\UserLeave;
-use app\subscribe\Test;
 
 return [
     'server'     => [

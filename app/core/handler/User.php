@@ -96,7 +96,7 @@ class User
         $user = UserModel::create(['username' => $username, 'password' => $hash]);
         self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
 
-        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…');
+        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', $user->toArray()['id']);
     }
 
     /**
@@ -129,7 +129,7 @@ class User
 
         self::saveLoginStatus($info['id'], $info['username'], $info['password']); // 保存登录状态
 
-        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…');
+        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…', $info['id']);
     }
 
     /**
@@ -298,6 +298,7 @@ class User
             ])
             ->where('chat_member.is_show', '=', true)
             ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+            ->order('chat_member.update_time', 'desc')
             ->select()->toArray();
 
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
@@ -344,5 +345,22 @@ class User
     public static function unsticky(int $id): Result
     {
         return self::sticky($id, false);
+    }
+
+    /**
+     * 将聊天列表子项设置为已读
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public static function readed(int $id): Result
+    {
+        $num = UserModel::find(User::getId())->chatMember()->update(['unread' => 0, 'id' => $id]);
+
+        if ($num == 0) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        return new Result(Result::CODE_SUCCESS);
     }
 }

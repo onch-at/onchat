@@ -10,6 +10,7 @@ use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
 use app\core\util\Arr;
 use app\model\User as UserModel;
+use think\facade\Db;
 
 class Chatroom
 {
@@ -43,7 +44,8 @@ class Chatroom
         return new Result(Result::CODE_SUCCESS, null, $name);
     }
 
-    public static function setMessage(int $userId, array $msg): Result {
+    public static function setMessage(int $userId, array $msg): Result
+    {
         // TODO 仅在消息类型为文本的时候才判断
         if (mb_strlen($msg['content'], 'utf-8') > self::MSG_MAX_LENGTH) {
             return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
@@ -55,20 +57,38 @@ class Chatroom
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        ChatroomModel::find($msg['chatroomId'])->chatRecord()->save([
-            'user_id'  => $userId,
-            'type'     => $msg['type'],
-            'content'  => $msg['content'],
-            'reply_id' => $msg['replyId']
-        ]);
+        // 启动事务
+        Db::startTrans();
+        try {
+            ChatroomModel::find($msg['chatroomId'])->chatRecord()->save([
+                'user_id'  => $userId,
+                'type'     => $msg['type'],
+                'content'  => $msg['content'],
+                'reply_id' => $msg['replyId']
+            ]);
 
-        $msg['userId'] = $userId;
-        $msg['nickname'] = $nickname;
-        // TODO 查询用户头像
-        $msg['avatarThumbnail'] = null;
-        $msg['createTime'] = time();
+            ChatMemberModel::update([
+                'is_show' => true,
+                // 如果不是该用户的，未读消息就递增
+                'unread' => Db::raw('CASE WHEN user_id = ' . $userId . ' THEN unread ELSE unread+1 END')
+            ], [
+                'chatroom_id' => $msg['chatroomId']
+            ]);
 
-        return new Result(Result::CODE_SUCCESS, null, $msg);
+            $msg['userId'] = $userId;
+            $msg['nickname'] = $nickname;
+            // TODO 查询用户头像
+            $msg['avatarThumbnail'] = null;
+            $msg['createTime'] = time();
+
+            // 提交事务
+            Db::commit();
+            return new Result(Result::CODE_SUCCESS, null, $msg);
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return new Result(Result::CODE_ERROR_UNKNOWN);
+        }
     }
 
     /**
@@ -101,6 +121,13 @@ class Chatroom
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }
 
+        // 初次查询的时候，顺带把未读消息数归零
+        if ($msgId == 0) {
+            ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $id)->update([
+                'unread' => 0
+            ]);
+        }
+
         // 如果msgId为0，则代表初次查询
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
 
@@ -120,6 +147,7 @@ class Chatroom
             }
             $item['nickname'] = $nicknameMap[$item['user_id']];
         })->toArray();
+
 
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
     }

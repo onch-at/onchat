@@ -118,4 +118,15 @@ class User extends BaseController
     {
         return UserHandler::unsticky($id);
     }
+
+    /**
+     * 将聊天列表子项设置为已读
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public function readed(int $id): Result
+    {
+        return UserHandler::readed($id);
+    }
 }

@@ -40,6 +40,7 @@ Route::group('user', function () {
 
         Route::put('sticky/:id', 'sticky');
         Route::put('unsticky/:id', 'unsticky');
+        Route::put('readed/:id', 'readed');
     });
 })->completeMatch()->prefix('User/');
 
