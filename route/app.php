@@ -19,7 +19,7 @@ Route::get('phpinfo', function () {
     return phpinfo();
 });
 
-/** 应用主路由/公共路由 */
+/** 应用主路由/公共路由/杂项路由 */
 Route::group('index', function () {
     Route::get('', 'index');
     Route::get('captcha', 'captcha');
@@ -41,6 +41,7 @@ Route::group('user', function () {
         Route::put('sticky/:id', 'sticky');
         Route::put('unsticky/:id', 'unsticky');
         Route::put('readed/:id', 'readed');
+        Route::put('unread/:id', 'unread');
     });
 })->completeMatch()->prefix('User/');
 

@@ -96,6 +96,8 @@ class User
         $user = UserModel::create(['username' => $username, 'password' => $hash]);
         self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
 
+        Chatroom::addChatMember(1, $user->id); // 添加新用户到默认聊天室
+
         return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', $user->toArray()['id']);
     }
 
@@ -298,7 +300,7 @@ class User
             ])
             ->where('chat_member.is_show', '=', true)
             ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
-            ->order('chat_member.update_time', 'desc')
+            // ->order('chat_member.update_time', 'desc') 交给前端排序吧
             ->select()->toArray();
 
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
@@ -351,16 +353,28 @@ class User
      * 将聊天列表子项设置为已读
      *
      * @param integer $id 聊天室成员表ID
+     * @param integer $unread
      * @return Result
      */
-    public static function readed(int $id): Result
+    public static function readed(int $id, int $unread = 0): Result
     {
-        $num = UserModel::find(User::getId())->chatMember()->update(['unread' => 0, 'id' => $id]);
+        $num = UserModel::find(User::getId())->chatMember()->update(['unread' => $unread, 'id' => $id, 'update_time' => time()]);
 
         if ($num == 0) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
         return new Result(Result::CODE_SUCCESS);
+    }
+
+    /**
+     * 将聊天列表子项设置为未读
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public static function unread(int $id): Result
+    {
+        return self::readed($id, 1);
     }
 }

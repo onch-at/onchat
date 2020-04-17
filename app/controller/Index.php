@@ -141,7 +141,7 @@ class Index extends BaseController
         //     'content' => 'OK'
         // ]);
 
-        dump(UserHandler::getChatList());
+        // dump(ChatroomHandler::addChatMember(1, 4));
     }
 
     /**

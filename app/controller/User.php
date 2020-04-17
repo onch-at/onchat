@@ -129,4 +129,15 @@ class User extends BaseController
     {
         return UserHandler::readed($id);
     }
+
+    /**
+     * 将聊天列表子项设置为未读
+     *
+     * @param integer $id 聊天室成员表ID
+     * @return Result
+     */
+    public function unread(int $id): Result
+    {
+        return UserHandler::unread($id);
+    }
 }

@@ -44,6 +44,38 @@ class Chatroom
         return new Result(Result::CODE_SUCCESS, null, $name);
     }
 
+    /**
+     * 添加聊天成员
+     *
+     * @param integer $id 聊天室ID
+     * @param integer $userId 用户ID
+     * @param integer $role 角色
+     * @return Result
+     */
+    public static function addChatMember(int $id, int $userId, int $role = 0): Result
+    {
+        $username = User::getUsernameById($userId);
+        if (
+            empty(ChatroomModel::find($id)) ||
+            empty($username) ||
+            !empty(ChatMemberModel::where([
+                'chatroom_id' => $id,
+                'user_id'     => $userId
+            ])->find())
+        ) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        ChatMemberModel::create([
+            'chatroom_id' => $id,
+            'user_id'     => $userId,
+            'nickname'    => $username,
+            'role'        => $role
+        ]);
+
+        return new Result(Result::CODE_SUCCESS);
+    }
+
     public static function setMessage(int $userId, array $msg): Result
     {
         // TODO 仅在消息类型为文本的时候才判断
