@@ -349,16 +349,43 @@ class User
         return self::sticky($id, false);
     }
 
+    // /**
+    //  * 将聊天列表子项设置为已读（通过主键）
+    //  *
+    //  * @param integer $id 聊天室成员表ID
+    //  * @param integer $unread
+    //  * @return Result
+    //  */
+    // public static function readed(int $id, int $unread = 0): Result
+    // {
+    //     $num = UserModel::find(User::getId())->chatMember()->update([
+    //         'unread' => $unread,
+    //         'id' => $id,
+    //         'update_time' => time()
+    //     ]);
+
+    //     if ($num == 0) {
+    //         return new Result(Result::CODE_ERROR_PARAM);
+    //     }
+
+    //     return new Result(Result::CODE_SUCCESS);
+    // }
+
     /**
-     * 将聊天列表子项设置为已读
+     * 将聊天列表子项设置为已读（通过用户ID+房间号）
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $chatroomId 聊天室ID
      * @param integer $unread
      * @return Result
      */
-    public static function readed(int $id, int $unread = 0): Result
+    public static function readed(int $chatroomId, int $unread = 0): Result
     {
-        $num = UserModel::find(User::getId())->chatMember()->update(['unread' => $unread, 'id' => $id, 'update_time' => time()]);
+        $num = UserModel::find(User::getId())->chatMember()->where([
+            'chatroom_id' => $chatroomId,
+        ])->update([
+            'unread' => $unread,
+            'update_time' => time()
+        ]);
 
         if ($num == 0) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -370,11 +397,11 @@ class User
     /**
      * 将聊天列表子项设置为未读
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $chatroomId 聊天室ID
      * @return Result
      */
-    public static function unread(int $id): Result
+    public static function unread(int $chatroomId): Result
     {
-        return self::readed($id, 1);
+        return self::readed($chatroomId, 1);
     }
 }
