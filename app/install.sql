@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS chat_member (
     user_id     INT UNSIGNED NOT NULL                  COMMENT '用户ID',
     nickname    VARCHAR(30) NOT NULL                   COMMENT '室友昵称',
     role        TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '室友角色',
-    unread      INT UNSIGNED NOT NULL DEFAULT 0        COMMENT '未读消息数',
+    unread      TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '未读消息数',
     is_show     BOOLEAN NOT NULL DEFAULT TRUE          COMMENT '是否显示在首页',
     sticky      BOOLEAN NOT NULL DEFAULT FALSE         COMMENT '是否置顶',
     create_time INT NOT NULL,
@@ -70,3 +70,6 @@ CREATE TABLE IF NOT EXISTS chat_record (
 --     update_time INT NOT NULL,
 --     FOREIGN KEY (id) REFERENCES account(uid) ON DELETE CASCADE ON UPDATE CASCADE
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 创建一个默认聊天室

@@ -101,8 +101,8 @@ class Chatroom
 
             ChatMemberModel::update([
                 'is_show' => true,
-                // 如果不是该用户的，未读消息就递增
-                'unread' => Db::raw('CASE WHEN user_id = ' . $userId . ' THEN unread ELSE unread+1 END')
+                // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+）
+                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100  THEN unread+1 ELSE unread END')
             ], [
                 'chatroom_id' => $msg['chatroomId']
             ]);
