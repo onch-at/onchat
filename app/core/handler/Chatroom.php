@@ -89,13 +89,16 @@ class Chatroom
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
+        // TODO 仅在消息类型为文本的时候才转化
+        $content = htmlspecialchars($msg['content']);
+
         // 启动事务
         Db::startTrans();
         try {
             ChatroomModel::find($msg['chatroomId'])->chatRecord()->save([
                 'user_id'  => $userId,
                 'type'     => $msg['type'],
-                'content'  => $msg['content'],
+                'content'  => $content,
                 'reply_id' => $msg['replyId']
             ]);
 
@@ -107,6 +110,7 @@ class Chatroom
                 'chatroom_id' => $msg['chatroomId']
             ]);
 
+            $msg['content'] = $content;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
             // TODO 查询用户头像
