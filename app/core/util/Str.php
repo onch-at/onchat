@@ -14,6 +14,6 @@ class Str
      */
     public static function trimAll(string $str): string
     {
-        return str_replace([' ', '　'], ['', '',], $str);
+        return preg_replace('/[\s|　]+/', '', $str);
     }
 }

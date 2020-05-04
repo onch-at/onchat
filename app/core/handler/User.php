@@ -6,9 +6,9 @@ namespace app\core\handler;
 
 use app\model\User as UserModel;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\ChatRecord as ChatRecordModel;
 use app\core\Result;
 use app\core\util\Arr;
+use think\facade\Db;
 
 class User
 {
@@ -307,7 +307,7 @@ class User
         $temp = null;
         $nickname = null;
         foreach ($data as $key => $value) {
-            $temp = ChatRecordModel::where('chatroom_id', '=', $value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
+            $temp = Db::table(Chatroom::TABLE_PREFIX_CHAT_RECORD . $value['chatroom_id'])->order('id', 'desc')->findOrEmpty();
             if (!empty($temp)) {
                 $nickname = ChatMemberModel::where('user_id', '=', $temp['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
                 if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找

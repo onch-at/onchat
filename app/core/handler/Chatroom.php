@@ -7,7 +7,6 @@ namespace app\core\handler;
 use app\core\Result;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\ChatRecord as ChatRecordModel;
 use app\core\util\Arr;
 use app\model\User as UserModel;
 use think\facade\Db;
@@ -28,6 +27,9 @@ class Chatroom
     const MSG_ROWS = 15;
     /** 文本消息最长长度 */
     const MSG_MAX_LENGTH = 4096;
+
+    /** 聊天记录表前缀 + chatroomId */
+    const TABLE_PREFIX_CHAT_RECORD = 'chat_record_';
 
     /**
      * 获取聊天室名称
@@ -95,11 +97,14 @@ class Chatroom
         // 启动事务
         Db::startTrans();
         try {
-            ChatroomModel::find($msg['chatroomId'])->chatRecord()->save([
-                'user_id'  => $userId,
-                'type'     => $msg['type'],
-                'content'  => $content,
-                'reply_id' => $msg['replyId']
+            $time = time();
+            Db::table(self::TABLE_PREFIX_CHAT_RECORD . $msg['chatroomId'])->save([
+                'chatroom_id' => $msg['chatroomId'],
+                'user_id'     => $userId,
+                'type'        => $msg['type'],
+                'content'     => $content,
+                'reply_id'    => $msg['replyId'],
+                'create_time' => $time
             ]);
 
             ChatMemberModel::update([
@@ -115,7 +120,7 @@ class Chatroom
             $msg['nickname'] = $nickname;
             // TODO 查询用户头像
             $msg['avatarThumbnail'] = null;
-            $msg['createTime'] = time();
+            $msg['createTime'] = $time;
 
             // 提交事务
             Db::commit();
@@ -152,7 +157,7 @@ class Chatroom
         $nicknameMap = [];
         $nicknameMap[$userId] = $nickname;
 
-        $chatRecord = ChatRecordModel::where('chatroom_id', '=', $id);
+        $chatRecord = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $id); // ::where('chatroom_id', '=', $id)
         if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }
@@ -167,7 +172,8 @@ class Chatroom
         // 如果msgId为0，则代表初次查询
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
 
-        $data = $data->order('id', 'desc')->limit(self::MSG_ROWS)->select()->each(function ($item) use ($nickname, $id, &$nicknameMap) {
+        $records = [];
+        foreach ($data->order('id', 'desc')->limit(self::MSG_ROWS)->cursor() as $item) {
             // TODO 查询用户头像
             $item['avatarThumbnail'] = null;
 
@@ -182,9 +188,9 @@ class Chatroom
                 $nicknameMap[$item['user_id']] = $nickname;
             }
             $item['nickname'] = $nicknameMap[$item['user_id']];
-        })->toArray();
+            $records[] = $item;
+        }
 
-
-        return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
+        return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($records));
     }
 }

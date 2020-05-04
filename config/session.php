@@ -15,5 +15,5 @@ return [
     // 过期时间
     'expire'         => 259200, // 三天
     // 前缀
-    'prefix'         => 'ONCHAT:',
+    'prefix'         => 'ONCHAT_SESSION:',
 ];
