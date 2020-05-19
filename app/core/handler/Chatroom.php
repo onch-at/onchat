@@ -78,6 +78,13 @@ class Chatroom
         return new Result(Result::CODE_SUCCESS);
     }
 
+    /**
+     * 添加消息
+     *
+     * @param integer $userId 用户ID
+     * @param array $msg 消息体
+     * @return Result
+     */
     public static function setMessage(int $userId, array $msg): Result
     {
         // TODO 仅在消息类型为文本的时候才判断
@@ -98,7 +105,7 @@ class Chatroom
         Db::startTrans();
         try {
             $time = time();
-            Db::table(self::TABLE_PREFIX_CHAT_RECORD . $msg['chatroomId'])->save([
+            $id = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $msg['chatroomId'])->insertGetId([
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
                 'type'        => $msg['type'],
@@ -115,6 +122,7 @@ class Chatroom
                 'chatroom_id' => $msg['chatroomId']
             ]);
 
+            $msg['id'] = $id;
             $msg['content'] = $content;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
@@ -192,5 +200,27 @@ class Chatroom
         }
 
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($records));
+    }
+
+    public static function revokeMsg(int $id, int $userId, int $msgId): Result
+    {
+        $query = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $id)->where('id', '=', $msgId);
+        $msg = $query->find();
+        // 如果没找到这条消息
+        if (!$msg) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        // 如果消息不是它本人发的 或者 已经超时了
+        if ($msg['user_id'] != $userId || time() > $msg['create_time'] + 120) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        // 如果消息删除失败
+        if ($query->delete() == 0) {
+            return new Result(Result::CODE_ERROR_UNKNOWN);
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, ['chatroomId' => $id, 'msgId' => $msgId]);
     }
 }
