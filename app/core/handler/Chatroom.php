@@ -202,6 +202,14 @@ class Chatroom
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($records));
     }
 
+    /**
+     * 撤回消息
+     *
+     * @param integer $id 房间号
+     * @param integer $userId 用户ID
+     * @param integer $msgId 消息ID
+     * @return Result
+     */
     public static function revokeMsg(int $id, int $userId, int $msgId): Result
     {
         $query = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $id)->where('id', '=', $msgId);

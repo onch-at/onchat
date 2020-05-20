@@ -23,7 +23,6 @@ class RevokeMsg extends BaseListener
      */
     public function handle($event)
     {
-        trace($event);
         Session::setId($event['sessId']);
         Session::init();
         $userId = Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
