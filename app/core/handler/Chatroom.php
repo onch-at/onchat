@@ -104,7 +104,7 @@ class Chatroom
         // 启动事务
         Db::startTrans();
         try {
-            $time = time();
+            $time = time() * 1000;
             $id = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $msg['chatroomId'])->insertGetId([
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
@@ -114,12 +114,14 @@ class Chatroom
                 'create_time' => $time
             ]);
 
+            // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+）
             ChatMemberModel::update([
                 'is_show' => true,
-                // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+）
-                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100  THEN unread+1 ELSE unread END')
+                'unread' => Db::raw('unread+1')
             ], [
-                'chatroom_id' => $msg['chatroomId']
+                'chatroom_id' => $msg['chatroomId'],
+                'unread'      => Db::raw('< 100'),
+                'user_id'     => Db::raw('!= ' . $userId)
             ]);
 
             $msg['id'] = $id;
@@ -220,15 +222,34 @@ class Chatroom
         }
 
         // 如果消息不是它本人发的 或者 已经超时了
-        if ($msg['user_id'] != $userId || time() > $msg['create_time'] + 120) {
+        if ($msg['user_id'] != $userId || time() > $msg['create_time'] + 120000) {
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        // 如果消息删除失败
-        if ($query->delete() == 0) {
+        // 启动事务
+        Db::startTrans();
+        try {
+            // 如果消息删除失败
+            if ($query->delete() == 0) {
+                return new Result(Result::CODE_ERROR_UNKNOWN);
+            }
+
+            // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
+            ChatMemberModel::update([
+                'unread' => Db::raw('unread-1')
+            ], [
+                'chatroom_id' => $id,
+                'unread'      => Db::raw('BETWEEN 1 AND 100'),
+                'user_id'     => Db::raw('!= ' . $userId)
+            ]);
+
+            // 提交事务
+            Db::commit();
+            return new Result(Result::CODE_SUCCESS, null, ['chatroomId' => $id, 'msgId' => $msgId]);
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
             return new Result(Result::CODE_ERROR_UNKNOWN);
         }
-
-        return new Result(Result::CODE_SUCCESS, null, ['chatroomId' => $id, 'msgId' => $msgId]);
     }
 }

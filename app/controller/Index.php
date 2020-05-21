@@ -35,7 +35,7 @@ class Index extends BaseController
                     type        TINYINT(1) UNSIGNED NOT NULL   COMMENT '消息类型',
                     content     VARCHAR(5120) NOT NULL         COMMENT '消息内容',
                     reply_id    INT UNSIGNED NULL              COMMENT '回复消息的消息记录ID',
-                    create_time INT UNSIGNED NOT NULL,
+                    create_time BIGINT UNSIGNED NOT NULL,
                     FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
                     FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

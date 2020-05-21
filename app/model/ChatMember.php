@@ -13,8 +13,6 @@ use app\model\Chatroom;
  */
 class ChatMember extends Pivot
 {
-    protected $autoWriteTimestamp = true;
-
     public function chatroom()
     {
         return $this->belongsTo(Chatroom::class);
@@ -24,4 +22,14 @@ class ChatMember extends Pivot
     // {
     //     return $this->belongsTo(User::class);
     // }
+
+    public function setCreateTime($value): int
+    {
+        return (int) $value * 1000;
+    }
+
+    public function setUpdateTime($value): int
+    {
+        return (int) $value * 1000;
+    }
 }
