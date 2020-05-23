@@ -308,14 +308,17 @@ class User
         $nickname = null;
         foreach ($data as $key => $value) {
             $temp = Db::table(Chatroom::TABLE_PREFIX_CHAT_RECORD . $value['chatroom_id'])->order('id', 'desc')->findOrEmpty();
-            if (!empty($temp)) {
-                $nickname = ChatMemberModel::where('user_id', '=', $temp['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
-                if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
-                    $nickname = UserModel::where('id', '=', $temp['user_id'])->value('username');
-                }
-                $temp['nickname'] = $nickname;
-                $data[$key]['latestMsg'] = Arr::keyToCamel($temp);
+            if (empty($temp)) {
+                continue;
             }
+
+            $nickname = ChatMemberModel::where('user_id', '=', $temp['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
+            if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
+                $nickname = UserModel::where('id', '=', $temp['user_id'])->value('username');
+            }
+            $temp['nickname'] = $nickname;
+            $temp['data'] = json_decode($temp['data']);
+            $data[$key]['latestMsg'] = Arr::keyToCamel($temp);
         }
 
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));

@@ -26,7 +26,7 @@ class Chatroom
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
     /** 文本消息最长长度 */
-    const MSG_MAX_LENGTH = 4096;
+    const MSG_MAX_LENGTH = 3000;
 
     /** 聊天记录表前缀 + chatroomId */
     const TABLE_PREFIX_CHAT_RECORD = 'chat_record_';
@@ -88,7 +88,7 @@ class Chatroom
     public static function setMessage(int $userId, array $msg): Result
     {
         // TODO 仅在消息类型为文本的时候才判断
-        if (mb_strlen($msg['content'], 'utf-8') > self::MSG_MAX_LENGTH) {
+        if (mb_strlen($msg['data'], 'utf-8') > self::MSG_MAX_LENGTH) {
             return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
         }
 
@@ -99,17 +99,18 @@ class Chatroom
         }
 
         // TODO 仅在消息类型为文本的时候才转化
-        $content = htmlspecialchars($msg['content']);
+        $content = htmlspecialchars($msg['data']);
+        $data = ['content' => $content];
 
         // 启动事务
         Db::startTrans();
         try {
             $time = time() * 1000;
-            $id = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $msg['chatroomId'])->insertGetId([
+            $id = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $msg['chatroomId'])->json(['data'])->insertGetId([
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
                 'type'        => $msg['type'],
-                'content'     => $content,
+                'data'        => $data,
                 'reply_id'    => $msg['replyId'],
                 'create_time' => $time
             ]);
@@ -125,7 +126,7 @@ class Chatroom
             ]);
 
             $msg['id'] = $id;
-            $msg['content'] = $content;
+            $msg['data'] = $data;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
             // TODO 查询用户头像
@@ -167,7 +168,7 @@ class Chatroom
         $nicknameMap = [];
         $nicknameMap[$userId] = $nickname;
 
-        $chatRecord = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $id); // ::where('chatroom_id', '=', $id)
+        $chatRecord = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $id)->json(['data']); // ::where('chatroom_id', '=', $id)
         if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }
@@ -191,13 +192,14 @@ class Chatroom
             if (!isset($nicknameMap[$item['user_id']])) {
                 $nickname = ChatMemberModel::where('user_id', '=', $item['user_id'])->where('chatroom_id', '=', $id)->value('nickname');
 
-                if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
+                if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
                     $nickname = UserModel::where('id', '=', $item['user_id'])->value('username');
                 }
 
                 $nicknameMap[$item['user_id']] = $nickname;
             }
             $item['nickname'] = $nicknameMap[$item['user_id']];
+            $item['data'] = json_decode($item['data']);
             $records[] = $item;
         }
 
