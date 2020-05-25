@@ -15,14 +15,4 @@ class Chatroom extends Model
     {
         return $this->belongsToMany(User::class, ChatMember::class);
     }
-
-    public function setCreateTime($value): int
-    {
-        return (int) $value * 1000;
-    }
-
-    public function setUpdateTime($value): int
-    {
-        return (int) $value * 1000;
-    }
 }

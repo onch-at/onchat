@@ -93,7 +93,13 @@ class User
         if (!$hash) { // 如果密码散列创建失败
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[Result::CODE_ERROR_UNKNOWN]);
         }
-        $user = UserModel::create(['username' => $username, 'password' => $hash]);
+        $time = time() * 1000;
+        $user = UserModel::create([
+            'username'    => $username,
+            'password'    => $hash,
+            'create_time' => $time,
+            'update_time' => $time,
+        ]);
         self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
 
         Chatroom::addChatMember(1, $user->id); // 添加新用户到默认聊天室
@@ -276,6 +282,8 @@ class User
     public static function getChatrooms($userId = null): Result
     {
         $data = UserModel::find($userId ?? self::getId())->chatrooms()->select()->toArray();
+        trace('----------------- '.$userId);
+        trace('----------------- '.UserModel::find($userId ?? self::getId()));
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
     }
 
@@ -332,7 +340,11 @@ class User
      */
     public static function sticky(int $id, $sticky = true): Result
     {
-        $num = UserModel::find(User::getId())->chatMember()->update(['sticky' => $sticky, 'id' => $id]);
+        $num = UserModel::find(User::getId())->chatMember()->update([
+            'id'          => $id,
+            'sticky'      => $sticky,
+            'update_time' => time() * 1000
+        ]);
 
         if ($num == 0) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -383,11 +395,8 @@ class User
      */
     public static function readed(int $chatroomId, int $unread = 0): Result
     {
-        $num = UserModel::find(User::getId())->chatMember()->where([
-            'chatroom_id' => $chatroomId,
-        ])->update([
-            'unread' => $unread,
-            'update_time' => time()
+        $num = UserModel::find(User::getId())->chatMember()->where('chatroom_id', '=', $chatroomId)->update([
+            'unread' => $unread
         ]);
 
         if ($num == 0) {

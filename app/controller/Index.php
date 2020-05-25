@@ -22,9 +22,12 @@ class Index extends BaseController
     {
         Db::transaction(function () use ($name) {
             // 创建一个聊天室
+            $time = time() * 1000;
             $chatroom = Chatroom::create([
-                'name' => $name,
-                'type' => 0,
+                'name'        => $name,
+                'type'        => 0,
+                'create_time' => $time,
+                'update_time' => $time,
             ]);
 
             Db::execute("

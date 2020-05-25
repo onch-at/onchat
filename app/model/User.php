@@ -31,14 +31,4 @@ class User extends Model
     {
         return (int) $value;
     }
-
-    public function setCreateTime($value): int
-    {
-        return (int) $value * 1000;
-    }
-
-    public function setUpdateTime($value): int
-    {
-        return (int) $value * 1000;
-    }
 }

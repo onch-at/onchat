@@ -68,11 +68,14 @@ class Chatroom
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
+        $time = time() * 1000;
         ChatMemberModel::create([
             'chatroom_id' => $id,
             'user_id'     => $userId,
             'nickname'    => $username,
-            'role'        => $role
+            'role'        => $role,
+            'create_time' => $time,
+            'update_time' => $time,
         ]);
 
         return new Result(Result::CODE_SUCCESS);
@@ -115,14 +118,13 @@ class Chatroom
                 'create_time' => $time
             ]);
 
-            // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+）
             ChatMemberModel::update([
                 'is_show' => true,
-                'unread' => Db::raw('unread+1')
+                'update_time' => $time,
+                // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+）
+                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100 THEN unread+1 ELSE unread END')
             ], [
-                'chatroom_id' => $msg['chatroomId'],
-                'unread'      => Db::raw('< 100'),
-                'user_id'     => Db::raw('!= ' . $userId)
+                'chatroom_id' => $msg['chatroomId']
             ]);
 
             $msg['id'] = $id;
@@ -236,13 +238,13 @@ class Chatroom
                 return new Result(Result::CODE_ERROR_UNKNOWN);
             }
 
-            // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
+            $time = time() * 1000;
             ChatMemberModel::update([
-                'unread' => Db::raw('unread-1')
+                'update_time' => $time,
+                // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
+                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
             ], [
-                'chatroom_id' => $id,
-                'unread'      => Db::raw('BETWEEN 1 AND 100'),
-                'user_id'     => Db::raw('!= ' . $userId)
+                'chatroom_id' => $id
             ]);
 
             // 提交事务

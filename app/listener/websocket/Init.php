@@ -31,7 +31,7 @@ class Init extends BaseListener
 
         foreach ($chatrooms as $chatroom) {
             // 拿到当前用户在这个聊天室的昵称
-            $nickname = ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $chatroom['id'])->value('nickname');
+            // $nickname = ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $chatroom['id'])->value('nickname');
 
             $this->websocket->join('CHATROOM:' . $chatroom['id']);
             // $this->websocket->to('CHATROOM:' . $chatroom['id'])->emit("init", $chatroom['id'] . '[系统消息] 欢迎' . $nickname . '加入聊天室！');
