@@ -314,7 +314,7 @@ class User
         $temp = null;
         $nickname = null;
         foreach ($data as $key => $value) {
-            $temp = ChatRecordModel::suffix('_' . $value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
+            $temp = ChatRecordModel::opt($value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
             if (!$temp) {
                 continue;
             }

@@ -107,7 +107,7 @@ class Chatroom
         Db::startTrans();
         try {
             $time = time() * 1000;
-            $id = ChatRecordModel::suffix('_' . $msg['chatroomId'])->json(['data'])->insertGetId([
+            $id = ChatRecordModel::opt($msg['chatroomId'])->json(['data'])->insertGetId([
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
                 'type'        => $msg['type'],
@@ -168,7 +168,7 @@ class Chatroom
         $nicknameMap = [];
         $nicknameMap[$userId] = $nickname;
 
-        $chatRecord = ChatRecordModel::suffix('_' . $id)->json(['data']); // ::where('chatroom_id', '=', $id)
+        $chatRecord = ChatRecordModel::opt($id)->json(['data']); // ::where('chatroom_id', '=', $id)
         if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }
@@ -217,7 +217,7 @@ class Chatroom
      */
     public static function revokeMsg(int $id, int $userId, int $msgId): Result
     {
-        $query = ChatRecordModel::suffix('_' . $id)->where('id', '=', $msgId);
+        $query = ChatRecordModel::opt($id)->where('id', '=', $msgId);
         $msg = $query->find();
         // 如果没找到这条消息
         if (!$msg) {
