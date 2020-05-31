@@ -15,6 +15,7 @@ use think\Response;
 
 use app\core\handler\Chatroom as ChatroomHandler;
 use app\core\handler\User as UserHandler;
+use think\console\Output;
 
 class Index extends BaseController
 {
@@ -61,6 +62,7 @@ class Index extends BaseController
 
     public function index()
     {
+        // (new Output())->writeln("1233333333333333");
         // $this->addChatroom('TEST CHATROOM');
         // $this->addChatroom('世界都在聊');
 

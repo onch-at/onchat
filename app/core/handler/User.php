@@ -6,6 +6,7 @@ namespace app\core\handler;
 
 use app\model\User as UserModel;
 use app\model\ChatMember as ChatMemberModel;
+use app\model\ChatRecord as ChatRecordModel;
 use app\core\Result;
 use app\core\util\Arr;
 use think\facade\Db;
@@ -282,8 +283,6 @@ class User
     public static function getChatrooms($userId = null): Result
     {
         $data = UserModel::find($userId ?? self::getId())->chatrooms()->select()->toArray();
-        trace('----------------- '.$userId);
-        trace('----------------- '.UserModel::find($userId ?? self::getId()));
         return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
     }
 
@@ -315,8 +314,8 @@ class User
         $temp = null;
         $nickname = null;
         foreach ($data as $key => $value) {
-            $temp = Db::table(Chatroom::TABLE_PREFIX_CHAT_RECORD . $value['chatroom_id'])->order('id', 'desc')->findOrEmpty();
-            if (empty($temp)) {
+            $temp = ChatRecordModel::suffix('_' . $value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
+            if (!$temp) {
                 continue;
             }
 
@@ -342,8 +341,7 @@ class User
     {
         $num = UserModel::find(User::getId())->chatMember()->update([
             'id'          => $id,
-            'sticky'      => $sticky,
-            'update_time' => time() * 1000
+            'sticky'      => $sticky
         ]);
 
         if ($num == 0) {

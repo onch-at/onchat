@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace app\core\handler;
 
 use app\core\Result;
+use app\model\User as UserModel;
 use app\model\Chatroom as ChatroomModel;
+use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\core\util\Arr;
-use app\model\User as UserModel;
 use think\facade\Db;
 
 class Chatroom
@@ -27,9 +28,6 @@ class Chatroom
     const MSG_ROWS = 15;
     /** 文本消息最长长度 */
     const MSG_MAX_LENGTH = 3000;
-
-    /** 聊天记录表前缀 + chatroomId */
-    const TABLE_PREFIX_CHAT_RECORD = 'chat_record_';
 
     /**
      * 获取聊天室名称
@@ -109,7 +107,7 @@ class Chatroom
         Db::startTrans();
         try {
             $time = time() * 1000;
-            $id = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $msg['chatroomId'])->json(['data'])->insertGetId([
+            $id = ChatRecordModel::suffix('_' . $msg['chatroomId'])->json(['data'])->insertGetId([
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
                 'type'        => $msg['type'],
@@ -170,7 +168,7 @@ class Chatroom
         $nicknameMap = [];
         $nicknameMap[$userId] = $nickname;
 
-        $chatRecord = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $id)->json(['data']); // ::where('chatroom_id', '=', $id)
+        $chatRecord = ChatRecordModel::suffix('_' . $id)->json(['data']); // ::where('chatroom_id', '=', $id)
         if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }
@@ -187,6 +185,7 @@ class Chatroom
 
         $records = [];
         foreach ($data->order('id', 'desc')->limit(self::MSG_ROWS)->cursor() as $item) {
+            $item = $item->toArray();
             // TODO 查询用户头像
             $item['avatarThumbnail'] = null;
 
@@ -218,7 +217,7 @@ class Chatroom
      */
     public static function revokeMsg(int $id, int $userId, int $msgId): Result
     {
-        $query = Db::table(self::TABLE_PREFIX_CHAT_RECORD . $id)->where('id', '=', $msgId);
+        $query = ChatRecordModel::suffix('_' . $id)->where('id', '=', $msgId);
         $msg = $query->find();
         // 如果没找到这条消息
         if (!$msg) {

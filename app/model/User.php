@@ -21,6 +21,11 @@ class User extends Model
         return $this->hasMany(ChatMember::class);
     }
 
+    public function chatRecord()
+    {
+        return $this->hasMany(ChatRecord::class);
+    }
+
     /**
      * ID字段获取器
      *

@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS user (
 -- 聊天室表
 CREATE TABLE IF NOT EXISTS chatroom (
     id               INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name             VARCHAR(30) NOT NULL         COMMENT '聊天室名字',
+    name             VARCHAR(30) NULL         COMMENT '聊天室名字',
     description      VARCHAR(500) NULL            COMMENT '聊天室描述',
     avatar           VARCHAR(255) NULL            COMMENT '聊天室头像URL',
     avatar_thumbnail VARCHAR(255) NULL            COMMENT '聊天室头像缩略图URL',
