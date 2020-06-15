@@ -31,7 +31,7 @@ class Init extends BaseListener
 
         $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $userId);
 
-        cache($userId . ':', $this->websocket->getSender() . ':', 60000);
+        // cache($userId . ':', $this->websocket->getSender() . ':', 60000);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
