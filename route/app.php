@@ -11,7 +11,7 @@
 use think\facade\Route;
 
 /** 测试路由 */
-Route::get('$', function () {
+Route::get('/', function () {
     return '<span style="font-size: 150px; font-weight: bolder; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); letter-spacing: -7.5px;">Running Successfully!</span>';
 });
 
@@ -36,7 +36,7 @@ Route::group('user', function () {
     Route::post('register', 'register');
 
     Route::group('chatlist', function () {
-        Route::get('$', 'getChatList');
+        Route::get('/', 'getChatList');
 
         Route::put('sticky/:id', 'sticky');
         Route::put('unsticky/:id', 'unsticky');

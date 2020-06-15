@@ -28,7 +28,7 @@ class Unload extends BaseListener
         $chatrooms = UserHandler::getChatrooms($userId)->data;
 
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->leave('CHATROOM:' . $chatroom['id']);
+            $this->websocket->leave(parent::ROOM_CHATROOM . $chatroom['id']);
         }
     }
 }

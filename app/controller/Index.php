@@ -62,6 +62,7 @@ class Index extends BaseController
 
     public function index()
     {
+        return 11;
         // (new Output())->writeln("1233333333333333");
         // $this->addChatroom('TEST CHATROOM');
         // $this->addChatroom('世界都在聊');

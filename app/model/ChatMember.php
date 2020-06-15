@@ -22,4 +22,15 @@ class ChatMember extends Pivot
     // {
     //     return $this->belongsTo(User::class);
     // }
+
+    /**
+     * ID字段获取器
+     *
+     * @param string|integer $value
+     * @return integer
+     */
+    public function getIdAttr($value): int
+    {
+        return (int) $value;
+    }
 }
