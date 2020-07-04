@@ -10,6 +10,7 @@ use app\model\ChatRecord as ChatRecordModel;
 use app\core\Result;
 use app\core\util\Arr;
 use think\facade\Db;
+use think\facade\Cache;
 
 class User
 {
@@ -50,6 +51,12 @@ class User
 
     /** 用户登录SESSION名 */
     const SESSION_USER_LOGIN = 'user_login';
+
+    /** Redis Hash 名称：储存UserId => fd */
+    const REDIS_HASH_UID_FD_PAIR = 'PAIR:uid-fd';
+    /** Redis Hash 名称：储存fd => UserId */
+    const REDIS_HASH_FD_UID_PAIR = 'PAIR:fd-uid';
+
     /** 是否开放注册 */
     const CAN_REGISTER = true;
 
@@ -61,6 +68,58 @@ class User
     public static function getId(): ?int
     {
         return session(self::SESSION_USER_LOGIN . '.id');
+    }
+
+    /**
+     * 储存用户的WebSocket FileDescriptor
+     *
+     * @param integer $userId
+     * @param integer $fd
+     * @return void
+     */
+    public static function setWebSocketFileDescriptor(int $userId, int $fd)
+    {
+        // 新增之前先删除一次
+        self::removeWebSocketFileDescriptor($fd);
+
+        $userId = (string) $userId;
+        $fd = (string) $fd;
+
+        $redis = Cache::store('redis')->handler();
+
+        $redis->hSet(self::REDIS_HASH_UID_FD_PAIR, $userId, $fd);
+        $redis->hSet(self::REDIS_HASH_FD_UID_PAIR, $fd, $userId);
+    }
+
+    /**
+     * 删除用户的WebSocket FileDescriptor
+     *
+     * @param integer $fd
+     * @return void
+     */
+    public static function removeWebSocketFileDescriptor(int $fd)
+    {
+        $redis = Cache::store('redis')->handler();
+
+        $fd = (string) $fd;
+        $userId = $redis->hGet(self::REDIS_HASH_FD_UID_PAIR, $fd);
+
+        $redis->hDel(self::REDIS_HASH_FD_UID_PAIR, $fd);
+        $redis->hDel(self::REDIS_HASH_UID_FD_PAIR, $userId);
+    }
+
+    /**
+     * 通过UserId获取WebSocket FileDescriptor
+     * 如果获取不到则返回数字零
+     *
+     * @param integer $userId
+     * @return integer
+     */
+    public static function getWebSocketFileDescriptorByUserId(int $userId): int
+    {
+        $redis = Cache::store('redis')->handler();
+
+        return (int) $redis->hGet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
     }
 
     /**

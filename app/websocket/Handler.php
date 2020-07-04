@@ -7,6 +7,7 @@ use Swoole\Websocket\Frame;
 use think\Config;
 use think\Request;
 use think\swoole\websocket\socketio\Handler as BaseHandler;
+use app\core\handler\User as UserHandler;
 
 /**
  * 自定义的WebSocket处理器
@@ -49,6 +50,6 @@ class Handler extends BaseHandler
      */
     public function onClose($fd, $reactorId)
     {
-        return;
+        UserHandler::removeWebSocketFileDescriptor($fd);
     }
 }
