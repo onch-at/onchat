@@ -22,13 +22,13 @@ class Index extends BaseController
     public function addChatroom($name)
     {
         Db::transaction(function () use ($name) {
+            $timestamp = Db::raw('UNIX_TIMESTAMP()*1000');
             // 创建一个聊天室
-            $time = time() * 1000;
             $chatroom = Chatroom::create([
                 'name'        => $name,
                 'type'        => 0,
-                'create_time' => $time,
-                'update_time' => $time,
+                'create_time' => $timestamp,
+                'update_time' => $timestamp,
             ]);
 
             Db::execute("
@@ -48,7 +48,9 @@ class Index extends BaseController
             // 添加聊天成员
             User::find(1)->chatrooms()->attach($chatroom->id, [
                 'role' => 0,
-                'nickname' => 'HyperLife1119'
+                'nickname' => 'HyperLife1119',
+                'create_time' => $timestamp,
+                'update_time' => $timestamp,
             ]);
 
             // // 添加聊天成员
@@ -62,9 +64,9 @@ class Index extends BaseController
 
     public function index()
     {
-        return 11;
+        // return 11;
         // (new Output())->writeln("1233333333333333");
-        // $this->addChatroom('TEST CHATROOM');
+        $this->addChatroom('TEST CHATROOM 3');
         // $this->addChatroom('世界都在聊');
 
         // for ($i=0; $i < 10; $i++) { 

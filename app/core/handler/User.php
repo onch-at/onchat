@@ -94,12 +94,14 @@ class User
         if (!$hash) { // 如果密码散列创建失败
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[Result::CODE_ERROR_UNKNOWN]);
         }
-        $time = time() * 1000;
+
+        $timestamp = Db::raw('UNIX_TIMESTAMP()*1000');
+
         $user = UserModel::create([
             'username'    => $username,
             'password'    => $hash,
-            'create_time' => $time,
-            'update_time' => $time,
+            'create_time' => $timestamp,
+            'update_time' => $timestamp,
         ]);
         self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
 
@@ -162,9 +164,9 @@ class User
     public static function saveLoginStatus(int $id, string $username, string $hashPassword): void
     {
         session(self::SESSION_USER_LOGIN, [
-            "id"       => $id,
-            "username" => $username,
-            "password" => $hashPassword,
+            'id'       => $id,
+            'username' => $username,
+            'password' => $hashPassword,
         ]);
     }
 
@@ -219,22 +221,23 @@ class User
 
     /**
      * 检查用户是否已经登录/处于登录状态
+     * 如果已登录，则返回UserId,否则返回零
      *
-     * @return boolean
+     * @return integer
      */
-    public static function checkLogin(): bool
+    public static function checkLogin(): int
     {
         $session = session(self::SESSION_USER_LOGIN);
         if (empty($session)) { // 如果没有登录的Session
-            return false;
+            return 0;
         }
 
         $password = self::getInfoByKey('id', $session['id'], 'password')['password'];
         if ($session['password'] !== $password) { // 如果密码错误
-            return false;
+            return 0;
         }
 
-        return true;
+        return $session['id'];
     }
 
     /**

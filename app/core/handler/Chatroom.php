@@ -66,14 +66,15 @@ class Chatroom
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $time = time() * 1000;
+        $timestamp = Db::raw('UNIX_TIMESTAMP()*1000');
+
         ChatMemberModel::create([
             'chatroom_id' => $id,
             'user_id'     => $userId,
             'nickname'    => $username,
             'role'        => $role,
-            'create_time' => $time,
-            'update_time' => $time,
+            'create_time' => $timestamp,
+            'update_time' => $timestamp,
         ]);
 
         return new Result(Result::CODE_SUCCESS);
@@ -106,19 +107,20 @@ class Chatroom
         // 启动事务
         Db::startTrans();
         try {
-            $time = time() * 1000;
+            $timestamp = time() * 1000;
+
             $id = ChatRecordModel::opt($msg['chatroomId'])->json(['data'])->insertGetId([
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
                 'type'        => $msg['type'],
                 'data'        => $data,
                 'reply_id'    => $msg['replyId'],
-                'create_time' => $time
+                'create_time' => $timestamp
             ]);
 
             ChatMemberModel::update([
                 'is_show' => true,
-                'update_time' => $time,
+                'update_time' => $timestamp,
                 // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+）
                 'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100 THEN unread+1 ELSE unread END')
             ], [
@@ -131,7 +133,7 @@ class Chatroom
             $msg['nickname'] = $nickname;
             // TODO 查询用户头像
             $msg['avatarThumbnail'] = null;
-            $msg['createTime'] = $time;
+            $msg['createTime'] = $timestamp;
 
             // 提交事务
             Db::commit();
@@ -237,9 +239,8 @@ class Chatroom
                 return new Result(Result::CODE_ERROR_UNKNOWN);
             }
 
-            $time = time() * 1000;
             ChatMemberModel::update([
-                'update_time' => $time,
+                'update_time' => Db::raw('UNIX_TIMESTAMP()*1000'),
                 // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
                 'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
             ], [
