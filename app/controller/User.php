@@ -7,7 +7,7 @@ namespace app\controller;
 use app\BaseController;
 use app\core\handler\User as UserHandler;
 use app\core\Result;
-use app\core\util\Str;
+use app\core\util\Str as StrUtil;
 
 class User extends BaseController
 {
@@ -62,8 +62,8 @@ class User extends BaseController
             return new Result(Result::CODE_ERROR_PARAM, '验证码错误！');
         }
 
-        $username = Str::trimAll(input('post.username/s'));
-        $password = Str::trimAll(input('post.password/s'));
+        $username = StrUtil::trimAll(input('post.username/s'));
+        $password = StrUtil::trimAll(input('post.password/s'));
         return UserHandler::register($username, $password);
     }
 

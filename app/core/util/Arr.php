@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\core\util;
 
-use think\helper\Str;
+use think\helper\Str as StrUtil;
 
 class Arr
 {
@@ -19,7 +19,7 @@ class Arr
     {
         $temp = [];
         foreach ($arr as $k => $v) {
-            $temp[Str::camel($k)] = $v;
+            $temp[StrUtil::camel($k)] = $v;
         }
         return $temp;
     }

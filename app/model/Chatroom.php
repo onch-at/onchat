@@ -11,6 +11,11 @@ use think\Model;
  */
 class Chatroom extends Model
 {
+    /** 聊天室类型：群聊 */
+    const TYPE_GROUP_CHAT = 0;
+    /** 聊天室类型：私聊 */
+    const TYPE_PRIVATE_CHAT = 1;
+
     public function users()
     {
         return $this->belongsToMany(User::class, ChatMember::class);

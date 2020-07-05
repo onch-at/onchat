@@ -8,8 +8,8 @@ use app\model\User as UserModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
 use app\core\Result;
-use app\core\util\Arr;
-use think\facade\Db;
+use app\core\util\Arr as ArrUtil;
+use app\core\util\Sql as SqlUtil;
 use think\facade\Cache;
 
 class User
@@ -193,7 +193,7 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[Result::CODE_ERROR_UNKNOWN]);
         }
 
-        $timestamp = Db::raw('UNIX_TIMESTAMP()*1000');
+        $timestamp = SqlUtil::rawTimestamp();
 
         $user = UserModel::create([
             'username'    => $username,
@@ -205,7 +205,7 @@ class User
 
         Chatroom::addChatMember(1, $user->id); // 添加新用户到默认聊天室
 
-        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', $user->toArray()['id']);
+        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', $user->id);
     }
 
     /**
@@ -384,7 +384,7 @@ class User
     public static function getChatrooms($userId = null): Result
     {
         $data = UserModel::find($userId ?? self::getId())->chatrooms()->select()->toArray();
-        return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($data));
     }
 
     /**
@@ -426,10 +426,10 @@ class User
             }
             $temp['nickname'] = $nickname;
             $temp['data'] = json_decode($temp['data']);
-            $data[$key]['latestMsg'] = Arr::keyToCamel($temp);
+            $data[$key]['latestMsg'] = ArrUtil::keyToCamel($temp);
         }
 
-        return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($data));
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($data));
     }
 
     /**

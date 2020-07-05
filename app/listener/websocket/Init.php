@@ -26,6 +26,7 @@ class Init extends BaseListener
         Session::setId($event['sessId']);
         Session::init();
         $userId = Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
+        // TODO 这里可能session还没生成
         $chatrooms = UserHandler::getChatrooms($userId)->data;
         $nickname = null;
 

@@ -49,12 +49,12 @@ class OnChat extends Command
             case self::ACTION_STOP:
             case self::ACTION_RESTART:
                 $this->clearCache();
-                $output->writeln('OnChat: ' . $action . ' successful!');
+                $output->info('OnChat: ' . $action . ' successful!');
                 Console::call('swoole', [$action]);
                 break;
 
             default:
-                $output->writeln('OnChat: 未知指令动作');
+                $output->error('OnChat: 未知指令动作');
                 break;
         }
     }

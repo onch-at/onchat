@@ -7,7 +7,8 @@ namespace app\listener\websocket;
 use think\Container;
 use think\facade\Session;
 use app\core\handler\User as UserHandler;
-use app\model\ChatMember as ChatMemberModel;
+use app\core\handler\Friend as FriendHandler;
+use app\core\Result;
 
 class FriendRequest extends BaseListener
 {
@@ -26,9 +27,13 @@ class FriendRequest extends BaseListener
         parent::initSession();
         $userId = Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
 
-        try {
-            $this->websocket->setSender(UserHandler::getWebSocketFileDescriptorByUserId(2))->emit('friend_request', '有人向你申请好友啦！');
-        } catch (\Exception $e) {
+        $result = FriendHandler::request($userId, $event['userId']);
+        $this->websocket->emit('friend_request', $result);
+
+        // 如果成功发出申请，则尝试给被申请人推送消息
+        if ($result->code === Result::CODE_SUCCESS) {
+            $this->websocket->setSender(UserHandler::getWebSocketFileDescriptorByUserId($event['userId']))
+                ->emit('friend_request', $result);
         }
     }
 }

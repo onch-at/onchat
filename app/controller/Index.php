@@ -12,9 +12,11 @@ use app\model\Chatroom;
 use think\captcha\facade\Captcha;
 use think\facade\Db;
 use think\Response;
+use app\core\util\Sql as SqlUtil;
 
 use app\core\handler\Chatroom as ChatroomHandler;
 use app\core\handler\User as UserHandler;
+use app\core\handler\Friend as FriendHandler;
 use think\console\Output;
 use think\facade\Cache;
 
@@ -23,7 +25,7 @@ class Index extends BaseController
     public function addChatroom($name)
     {
         Db::transaction(function () use ($name) {
-            $timestamp = Db::raw('UNIX_TIMESTAMP()*1000');
+            $timestamp = SqlUtil::rawTimestamp();
             // 创建一个聊天室
             $chatroom = Chatroom::create([
                 'name'        => $name,
@@ -67,6 +69,8 @@ class Index extends BaseController
     {
         // $this->addChatroom('TEST CHATROOM 3');
         // $this->addChatroom('世界都在聊');
+        // FriendHandler::request(1, 2, '没有理由', '我的小号');
+        dump(FriendHandler::request(1, 3, '没有理由', '我的小号'));
     }
 
     /**

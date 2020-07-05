@@ -1,3 +1,5 @@
+-- 为了便于管理，create_time，update_time 手动维护
+
 -- 创建数据库
 CREATE DATABASE IF NOT EXISTS onchat DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci;
 
@@ -18,7 +20,7 @@ CREATE TABLE IF NOT EXISTS user (
 -- 聊天室表
 CREATE TABLE IF NOT EXISTS chatroom (
     id               INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name             VARCHAR(30) NULL         COMMENT '聊天室名字',
+    name             VARCHAR(30) NULL             COMMENT '聊天室名字',
     description      VARCHAR(500) NULL            COMMENT '聊天室描述',
     avatar           VARCHAR(255) NULL            COMMENT '聊天室头像URL',
     avatar_thumbnail VARCHAR(255) NULL            COMMENT '聊天室头像缩略图URL',
@@ -68,6 +70,8 @@ CREATE TABLE IF NOT EXISTS friend_request (
     reject_reason  VARCHAR(50) NULL                       COMMENT '拒绝理由',
     self_status    TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '申请人状态',
     target_status  TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '被申请人状态',
+    self_alias     VARCHAR(30) NULL                       COMMENT '申请人的别名',
+    target_alias   VARCHAR(30) NULL                       COMMENT '被申请人的别名',
     create_time    BIGINT UNSIGNED NOT NULL,
     update_time    BIGINT UNSIGNED NOT NULL,
     FOREIGN KEY (self_id)   REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE,

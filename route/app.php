@@ -21,7 +21,7 @@ Route::get('phpinfo', function () {
 
 /** 应用主路由/公共路由/杂项路由 */
 Route::group('index', function () {
-    Route::get('', 'index');
+    Route::get('/', 'index');
     Route::get('captcha', 'captcha');
 })->completeMatch()->prefix('Index/');
 

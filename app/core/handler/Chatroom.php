@@ -9,7 +9,8 @@ use app\model\User as UserModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatMember as ChatMemberModel;
-use app\core\util\Arr;
+use app\core\util\Arr as ArrUtil;
+use app\core\util\Sql as SqlUtil;
 use think\facade\Db;
 
 class Chatroom
@@ -55,6 +56,7 @@ class Chatroom
     public static function addChatMember(int $id, int $userId, int $role = 0): Result
     {
         $username = User::getUsernameById($userId);
+        // 如果没有这个房间，或者没有这个用户，或者这个用户已经加入了这个房间
         if (
             empty(ChatroomModel::find($id)) ||
             empty($username) ||
@@ -66,7 +68,7 @@ class Chatroom
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $timestamp = Db::raw('UNIX_TIMESTAMP()*1000');
+        $timestamp = SqlUtil::rawTimestamp();
 
         ChatMemberModel::create([
             'chatroom_id' => $id,
@@ -206,7 +208,7 @@ class Chatroom
             $records[] = $item;
         }
 
-        return new Result(Result::CODE_SUCCESS, null, Arr::keyToCamel2($records));
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($records));
     }
 
     /**
@@ -240,7 +242,7 @@ class Chatroom
             }
 
             ChatMemberModel::update([
-                'update_time' => Db::raw('UNIX_TIMESTAMP()*1000'),
+                'update_time' => $timestamp = SqlUtil::rawTimestamp(),
                 // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
                 'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
             ], [
