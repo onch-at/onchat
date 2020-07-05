@@ -6,6 +6,8 @@ namespace app\listener\websocket;
 
 use think\Container;
 use think\swoole\Websocket;
+use think\facade\Session;
+use app\core\handler\User as UserHandler;
 
 abstract class BaseListener
 {
@@ -22,6 +24,17 @@ abstract class BaseListener
     public function __construct(Container $container)
     {
         $this->websocket = $container->make(Websocket::class);
+    }
+
+    /**
+     * 初始化Session
+     *
+     * @return void
+     */
+    protected function initSession()
+    {
+        Session::setId(UserHandler::getSessIdBytWebSocketFileDescriptor($this->websocket->getSender()));
+        Session::init();
     }
 
     /**

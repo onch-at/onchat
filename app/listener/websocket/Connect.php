@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use think\Container;
+use think\swoole\Websocket;
 use think\facade\Session;
 use app\core\handler\User as UserHandler;
-use app\core\handler\Chatroom as ChatroomHandler;
 
-class Message extends BaseListener
+class Connect extends BaseListener
 {
     public function __construct(Container $container)
     {
@@ -23,9 +23,8 @@ class Message extends BaseListener
      */
     public function handle($event)
     {
-        parent::initSession();
-        $userId = Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
-
-        $this->websocket->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])->emit("message", ChatroomHandler::setMessage($userId, $event['msg']));
+        // Session::setId($event['sessId']);
+        // Session::init();
+        trace($event);
     }
 }

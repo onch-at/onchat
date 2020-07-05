@@ -29,7 +29,10 @@ class Init extends BaseListener
         $chatrooms = UserHandler::getChatrooms($userId)->data;
         $nickname = null;
 
-        UserHandler::setWebSocketFileDescriptor($userId, $this->websocket->getSender());
+        $fd = $this->websocket->getSender();
+
+        UserHandler::setWebSocketFileDescriptorSessIdPair($fd, $event['sessId']);
+        UserHandler::setWebSocketFileDescriptor($userId, $fd);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {

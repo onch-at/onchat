@@ -7,8 +7,7 @@ use app\listener\websocket\Init;
 use app\listener\websocket\Message;
 use app\listener\websocket\RevokeMsg;
 use app\listener\websocket\Unload;
-use app\listener\websocket\UserJoin;
-use app\listener\websocket\UserLeave;
+use app\listener\websocket\Connect;
 
 return [
     'server'     => [
@@ -60,8 +59,7 @@ return [
             'message'        => Message::class,
             'revoke_msg'     => RevokeMsg::class,
             'friend_request' => FriendRequest::class,
-            'user_join'      => UserJoin::class,
-            'user_leave'     => UserLeave::class,
+            // 'connect'        => Connect::class
         ],
         'subscribe'     => [],
     ],

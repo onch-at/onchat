@@ -56,6 +56,8 @@ class User
     const REDIS_HASH_UID_FD_PAIR = 'PAIR:uid-fd';
     /** Redis Hash 名称：储存fd => UserId */
     const REDIS_HASH_FD_UID_PAIR = 'PAIR:fd-uid';
+    /** Redis Hash 名称：储存fd => sessid */
+    const REDIS_HASH_FD_SESSID_PAIR = 'PAIR:fd-sessid';
 
     /** 是否开放注册 */
     const CAN_REGISTER = true;
@@ -120,6 +122,43 @@ class User
         $redis = Cache::store('redis')->handler();
 
         return (int) $redis->hGet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
+    }
+
+    /**
+     * 设置fd-sessid对
+     *
+     * @param integer $fd
+     * @param string $sessid
+     * @return void
+     */
+    public static function setWebSocketFileDescriptorSessIdPair(int $fd, string $sessid)
+    {
+        $redis = Cache::store('redis')->handler();
+        $redis->hSet(self::REDIS_HASH_FD_SESSID_PAIR, (string) $fd, $sessid);
+    }
+
+    /**
+     * 通过fd得到sessid
+     *
+     * @param integer $fd
+     * @return string
+     */
+    public static function getSessIdBytWebSocketFileDescriptor(int $fd): string
+    {
+        $redis = Cache::store('redis')->handler();
+        return $redis->hGet(self::REDIS_HASH_FD_SESSID_PAIR, (string) $fd);
+    }
+
+    /**
+     * 移除fd-sessid对
+     *
+     * @param integer $fd
+     * @return void
+     */
+    public static function removeWebSocketFileDescriptorSessIdPair(int $fd)
+    {
+        $redis = Cache::store('redis')->handler();
+        $redis->hDel(self::REDIS_HASH_FD_SESSID_PAIR, (string) $fd);
     }
 
     /**

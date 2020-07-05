@@ -27,10 +27,6 @@ class UserLeave
      */
     public function handle($event)
     {
-        Session::setId($event['sessId']);
-        Session::init();
-        $this->websocket->join($event['chatroomId']);
-        $this->websocket->to($event['chatroomId'])->emit("abc", UserHandler::getChatrooms(Session::get(UserHandler::SESSION_USER_LOGIN . '.id')));
-        $this->websocket->to($event['chatroomId'])->emit("abc", 12345);
+        trace('66666666666666666666666666666666666666');
     }
 }

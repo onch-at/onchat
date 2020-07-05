@@ -50,6 +50,7 @@ class Handler extends BaseHandler
      */
     public function onClose($fd, $reactorId)
     {
+        UserHandler::removeWebSocketFileDescriptorSessIdPair($fd);
         UserHandler::removeWebSocketFileDescriptor($fd);
     }
 }
