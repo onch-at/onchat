@@ -70,7 +70,13 @@ class Index extends BaseController
         // $this->addChatroom('TEST CHATROOM 3');
         // $this->addChatroom('世界都在聊');
         // FriendHandler::request(1, 2, '没有理由', '我的小号');
-        dump(FriendHandler::request(1, 3, '没有理由', '我的小号'));
+        // dump(FriendHandler::request(1, 2, '没有理由!!!', '我的小号'));
+        // FriendHandler::agreeRequest(1, 2);
+        $u = User::where('id', 'IN', [1, 2, 3])->field('username')->select()->toArray();
+
+        foreach ($u as $i) {
+            dump($i);
+        }
     }
 
     /**

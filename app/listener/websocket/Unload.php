@@ -23,7 +23,7 @@ class Unload extends BaseListener
     public function handle($event)
     {
         parent::initSession();
-        $userId = Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
+        $userId = parent::getUserId();
         $chatrooms = UserHandler::getChatrooms($userId)->data;
 
         foreach ($chatrooms as $chatroom) {

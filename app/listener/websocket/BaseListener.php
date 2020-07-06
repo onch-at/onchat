@@ -37,6 +37,16 @@ abstract class BaseListener
         Session::init();
     }
 
+    protected function getUserId()
+    {
+        return Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
+    }
+
+    protected function getUsername()
+    {
+        return Session::get(UserHandler::SESSION_USER_LOGIN . '.username');
+    }
+
     /**
      * 事件监听处理
      *

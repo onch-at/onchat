@@ -25,9 +25,11 @@ class FriendRequest extends BaseListener
     public function handle($event)
     {
         parent::initSession();
-        $userId = Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
+        $userId = parent::getUserId();
+        $username = parent::getUsername();
 
-        $result = FriendHandler::request($userId, $event['userId']);
+        $result = FriendHandler::request($userId, $event['userId'], $username);
+
         $this->websocket->emit('friend_request', $result);
 
         // 如果成功发出申请，则尝试给被申请人推送消息

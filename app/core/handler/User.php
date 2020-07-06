@@ -10,6 +10,7 @@ use app\model\ChatRecord as ChatRecordModel;
 use app\core\Result;
 use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
+use app\model\Chatroom as ChatroomModel;
 use think\facade\Cache;
 
 class User
@@ -394,7 +395,12 @@ class User
      */
     public static function getChatList(): Result
     {
-        $data = ChatMemberModel::where('user_id', '=', self::getId())
+        $userId = self::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $data = ChatMemberModel::where('user_id', '=', $userId)
             ->field([
                 'chat_member.id',
                 'chat_member.chatroom_id',
@@ -414,7 +420,14 @@ class User
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
         $temp = null;
         $nickname = null;
+        $privateChatroomIdList = []; // 私聊聊天室的ID列表
+
         foreach ($data as $key => $value) {
+            // 如果是私聊聊天室
+            if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
+                $privateChatroomIdList[] = $value['chatroom_id'];
+            }
+
             $temp = ChatRecordModel::opt($value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
             if (!$temp) {
                 continue;
@@ -427,6 +440,26 @@ class User
             $temp['nickname'] = $nickname;
             $temp['data'] = json_decode($temp['data']);
             $data[$key]['latestMsg'] = ArrUtil::keyToCamel($temp);
+        }
+
+        // 如果其中有私聊聊天室
+        if (count($privateChatroomIdList) > 0) {
+            // 找到私聊聊天室，室友（好友）的nickname
+            $list = ChatMemberModel::where('chatroom_id', 'IN', $privateChatroomIdList)
+                ->where('user_id', '<>', $userId)->field('chatroom_id, nickname')->select();
+
+            // chatroomId => nickname
+            $privateChatroomNameList = [];
+
+            foreach ($list as $item) {
+                $privateChatroomNameList[$item->chatroom_id] = $item->nickname;
+            }
+
+            foreach ($data as $key => $value) {
+                if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
+                    $data[$key]['name'] = $privateChatroomNameList[$value['chatroom_id']];
+                }
+            }
         }
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($data));

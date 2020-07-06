@@ -38,11 +38,74 @@ class Chatroom
      */
     public static function getName(int $id): Result
     {
-        $name = ChatroomModel::where('id', '=', $id)->value('name');
-        if (!$name) {
+        $res = ChatroomModel::where('id', '=', $id)->field('name, type')->find();
+        if (!$res) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
-        return new Result(Result::CODE_SUCCESS, null, $name);
+
+        // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
+        if ($res->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
+            $userId = User::getId();
+            if (empty($userId)) {
+                return new Result(Result::CODE_ERROR_NO_ACCESS);
+            }
+
+            // 查找加入了这个房间的另一个好友的nickname
+            $name = ChatMemberModel::where('chatroom_id', '=', $id)->where('user_id', '<>', $userId)->value('nickname');
+
+            if (empty($name)) {
+                return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
+            }
+
+            return new Result(Result::CODE_SUCCESS, null, $name);
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, $res->name);
+    }
+
+    /**
+     * 创建一个聊天室
+     *
+     * @param string $name 聊天室名称
+     * @param integer $type 聊天室类型
+     * @return Result
+     */
+    public static function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT): Result
+    {
+        // 启动事务
+        Db::startTrans();
+        try {
+            $timestamp = SqlUtil::rawTimestamp();
+
+            // 创建一个聊天室
+            $chatroom = ChatroomModel::create([
+                'name'        => $name,
+                'type'        => $type,
+                'create_time' => $timestamp,
+                'update_time' => $timestamp,
+            ]);
+
+            // 创建这个聊天室的聊天记录表
+            Db::execute("
+                CREATE TABLE IF NOT EXISTS chat_record_" . $chatroom->id . " (
+                    id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    chatroom_id INT UNSIGNED NOT NULL          COMMENT '聊天室ID',
+                    user_id     INT UNSIGNED NULL              COMMENT '消息发送者ID',
+                    type        TINYINT(1) UNSIGNED NOT NULL   COMMENT '消息类型',
+                    data        JSON NOT NULL                  COMMENT '消息数据体',
+                    reply_id    INT UNSIGNED NULL              COMMENT '回复消息的消息记录ID',
+                    create_time BIGINT UNSIGNED NOT NULL,
+                    FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                    FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+
+            return new Result(Result::CODE_SUCCESS, null, $chatroom->id);
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return new Result(Result::CODE_ERROR_UNKNOWN);
+        }
     }
 
     /**
@@ -50,10 +113,11 @@ class Chatroom
      *
      * @param integer $id 聊天室ID
      * @param integer $userId 用户ID
+     * @param integer $nickname 室友昵称（好友昵称）
      * @param integer $role 角色
      * @return Result
      */
-    public static function addChatMember(int $id, int $userId, int $role = 0): Result
+    public static function addChatMember(int $id, int $userId, string $nickname = null, int $role = 0): Result
     {
         $username = User::getUsernameById($userId);
         // 如果没有这个房间，或者没有这个用户，或者这个用户已经加入了这个房间
@@ -73,7 +137,7 @@ class Chatroom
         ChatMemberModel::create([
             'chatroom_id' => $id,
             'user_id'     => $userId,
-            'nickname'    => $username,
+            'nickname'    => $nickname ?? $username,
             'role'        => $role,
             'create_time' => $timestamp,
             'update_time' => $timestamp,
@@ -116,7 +180,7 @@ class Chatroom
                 'user_id'     => $userId,
                 'type'        => $msg['type'],
                 'data'        => $data,
-                'reply_id'    => $msg['replyId'],
+                'reply_id'    => $msg['replyId'] ?? null,
                 'create_time' => $timestamp
             ]);
 

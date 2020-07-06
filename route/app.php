@@ -50,3 +50,8 @@ Route::group('chatroom/:id', function () {
     Route::get('name', 'getName');
     Route::get('records/:msgId', 'getRecords');
 })->completeMatch()->prefix('Chatroom/');
+
+/** 好友模块路由 */
+Route::group('friend/:id', function () {
+    Route::get('isfriend', 'isFriend');
+})->completeMatch()->prefix('Friend/');

@@ -1,12 +1,13 @@
 <?php
 
-use app\listener\websocket\FriendRequest;
 use app\websocket\Handler;
 use think\swoole\websocket\socketio\Parser;
 use app\listener\websocket\Init;
 use app\listener\websocket\Message;
 use app\listener\websocket\RevokeMsg;
 use app\listener\websocket\Unload;
+use app\listener\websocket\FriendRequest;
+use app\listener\websocket\FriendRequestAgree;
 use app\listener\websocket\Connect;
 
 return [
@@ -54,11 +55,12 @@ return [
             ],
         ],
         'listen'        => [
-            'init'           => Init::class,
-            'unload'         => Unload::class,
-            'message'        => Message::class,
-            'revoke_msg'     => RevokeMsg::class,
-            'friend_request' => FriendRequest::class,
+            'init'                 => Init::class,
+            'unload'               => Unload::class,
+            'message'              => Message::class,
+            'revoke_msg'           => RevokeMsg::class,
+            'friend_request'       => FriendRequest::class,
+            'friend_request_agree' => FriendRequestAgree::class
             // 'connect'        => Connect::class
         ],
         'subscribe'     => [],

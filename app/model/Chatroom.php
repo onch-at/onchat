@@ -15,6 +15,8 @@ class Chatroom extends Model
     const TYPE_GROUP_CHAT = 0;
     /** 聊天室类型：私聊 */
     const TYPE_PRIVATE_CHAT = 1;
+    /** 聊天室类型：单聊（就是自己跟自己聊） */
+    const TYPE_SINGLE_CHAT = 2;
 
     public function users()
     {
