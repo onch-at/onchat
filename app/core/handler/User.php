@@ -55,8 +55,6 @@ class User
 
     /** Redis Hash 名称：储存UserId => fd */
     const REDIS_HASH_UID_FD_PAIR = 'PAIR:uid-fd';
-    /** Redis Hash 名称：储存fd => UserId */
-    const REDIS_HASH_FD_UID_PAIR = 'PAIR:fd-uid';
     /** Redis Hash 名称：储存fd => sessid */
     const REDIS_HASH_FD_SESSID_PAIR = 'PAIR:fd-sessid';
 
@@ -74,40 +72,28 @@ class User
     }
 
     /**
-     * 储存用户的WebSocket FileDescriptor
+     * 设置uid-fd对
      *
      * @param integer $userId
      * @param integer $fd
      * @return void
      */
-    public static function setWebSocketFileDescriptor(int $userId, int $fd)
+    public static function setUserIdWebSocketFileDescriptorPair(int $userId, int $fd)
     {
-        // 新增之前先删除一次
-        self::removeWebSocketFileDescriptor($fd);
-
-        $userId = (string) $userId;
-        $fd = (string) $fd;
 
         $redis = Cache::store('redis')->handler();
-
-        $redis->hSet(self::REDIS_HASH_UID_FD_PAIR, $userId, $fd);
-        $redis->hSet(self::REDIS_HASH_FD_UID_PAIR, $fd, $userId);
+        $redis->hSet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId, (string) $fd);
     }
 
     /**
-     * 删除用户的WebSocket FileDescriptor
+     * 删除uid-fd对
      *
-     * @param integer $fd
+     * @param integer $userId
      * @return void
      */
-    public static function removeWebSocketFileDescriptor(int $fd)
+    public static function removeUserIdWebSocketFileDescriptorPair(int $userId)
     {
         $redis = Cache::store('redis')->handler();
-
-        $fd = (string) $fd;
-        $userId = $redis->hGet(self::REDIS_HASH_FD_UID_PAIR, $fd);
-
-        $redis->hDel(self::REDIS_HASH_FD_UID_PAIR, $fd);
         $redis->hDel(self::REDIS_HASH_UID_FD_PAIR, $userId);
     }
 
@@ -121,7 +107,6 @@ class User
     public static function getWebSocketFileDescriptorByUserId(int $userId): int
     {
         $redis = Cache::store('redis')->handler();
-
         return (int) $redis->hGet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
     }
 
@@ -140,11 +125,12 @@ class User
 
     /**
      * 通过fd得到sessid
+     * 找不到则返回false
      *
      * @param integer $fd
-     * @return string
+     * @return string|boolean
      */
-    public static function getSessIdBytWebSocketFileDescriptor(int $fd): string
+    public static function getSessIdBytWebSocketFileDescriptor(int $fd)
     {
         $redis = Cache::store('redis')->handler();
         return $redis->hGet(self::REDIS_HASH_FD_SESSID_PAIR, (string) $fd);

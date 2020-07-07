@@ -13,8 +13,10 @@ abstract class BaseListener
 {
     protected $websocket;
 
-    /** 聊天室 */
+    /** 聊天室房间前缀 */
     const ROOM_CHATROOM = 'CHATROOM:';
+    /** 好友申请房间前缀 */
+    const ROOM_FRIEND_REQUEST = 'FRIEND_REQUEST:';
 
     /**
      * 注入容器管理类，从容器中取出Websocket类，或者也可以直接注入Websocket类

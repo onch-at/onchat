@@ -34,11 +34,16 @@ class FriendRequestAgree extends BaseListener
         $this->websocket->emit('friend_request_agree', $result);
 
         // 如果成功同意申请，则尝试给申请人推送消息
-        if ($result->code === Result::CODE_SUCCESS) {
-            $this->websocket->setSender(UserHandler::getWebSocketFileDescriptorByUserId($result->data['selfId']))
-                ->join(parent::ROOM_CHATROOM . $chatroomId);
-            $this->websocket->setSender(UserHandler::getWebSocketFileDescriptorByUserId($result->data['selfId']))
-                ->emit('friend_request_agree', $result);
+        if ($result->code != Result::CODE_SUCCESS) {
+            return;
+        }
+
+        // 拿到申请人的FD
+        $fd = UserHandler::getWebSocketFileDescriptorByUserId($result->data['selfId']);
+        if ($fd) {
+            // 加入新的聊天室
+            $this->websocket->setSender($fd)->join(parent::ROOM_CHATROOM . $chatroomId);
+            $this->websocket->setSender($fd)->emit('friend_request_agree', $result);
         }
     }
 }

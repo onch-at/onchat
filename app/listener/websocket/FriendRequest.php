@@ -34,7 +34,7 @@ class FriendRequest extends BaseListener
 
         // 如果成功发出申请，则尝试给被申请人推送消息
         if ($result->code === Result::CODE_SUCCESS) {
-            $this->websocket->setSender(UserHandler::getWebSocketFileDescriptorByUserId($event['userId']))
+            $this->websocket->to(parent::ROOM_FRIEND_REQUEST . $event['userId'])
                 ->emit('friend_request', $result);
         }
     }

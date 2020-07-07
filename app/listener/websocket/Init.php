@@ -41,10 +41,13 @@ class Init extends BaseListener
             // $this->websocket->to('CHATROOM:' . $chatroom['id'])->emit("init", $chatroom['id'] . '[系统消息] 欢迎' . $nickname . '加入聊天室！');
         }
 
+        // 加入好友请求房间
+        $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $userId);
+
         $fd = $this->websocket->getSender();
 
         UserHandler::setWebSocketFileDescriptorSessIdPair($fd, $event['sessId']);
-        UserHandler::setWebSocketFileDescriptor($userId, $fd);
+        UserHandler::setUserIdWebSocketFileDescriptorPair($userId, $fd);
 
         $result = FriendHandler::getFriendRequests($userId, $username);
 

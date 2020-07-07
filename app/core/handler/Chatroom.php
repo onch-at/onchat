@@ -50,6 +50,17 @@ class Chatroom
                 return new Result(Result::CODE_ERROR_NO_ACCESS);
             }
 
+            // 找到自己
+            $self = ChatMemberModel::where([
+                'chatroom_id' => $id,
+                'user_id'     => $userId
+            ])->find();
+
+            // 如果找不到，则代表自己没有进这个群
+            if (empty($self)) {
+                return new Result(Result::CODE_ERROR_NO_ACCESS);
+            }
+
             // 查找加入了这个房间的另一个好友的nickname
             $name = ChatMemberModel::where('chatroom_id', '=', $id)->where('user_id', '<>', $userId)->value('nickname');
 

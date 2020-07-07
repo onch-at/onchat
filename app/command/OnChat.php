@@ -35,7 +35,6 @@ class OnChat extends Command
     {
         $redis = Cache::store('redis')->handler();
         $redis->del(UserHandler::REDIS_HASH_FD_SESSID_PAIR);
-        $redis->del(UserHandler::REDIS_HASH_FD_UID_PAIR);
         $redis->del(UserHandler::REDIS_HASH_UID_FD_PAIR);
     }
 
