@@ -28,7 +28,13 @@ class FriendRequest extends BaseListener
         $userId = parent::getUserId();
         $username = parent::getUsername();
 
-        $result = FriendHandler::request($userId, $event['userId'], $username);
+        $result = FriendHandler::request(
+            $userId,
+            $event['userId'],
+            $username,
+            $event['requestReason'],
+            $event['targetAlias'],
+        );
 
         $this->websocket->emit('friend_request', $result);
 

@@ -69,6 +69,16 @@ class User extends BaseController
     }
 
     /**
+     * 获取用户
+     *
+     * @return Result
+     */
+    public function getUser($id): Result
+    {
+        return UserHandler::getUser((int) $id);
+    }
+
+    /**
      * 获取用户ID
      *
      * @return Result

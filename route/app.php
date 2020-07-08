@@ -45,6 +45,10 @@ Route::group('user', function () {
     });
 })->completeMatch()->prefix('User/');
 
+Route::group('user/:id', function () {
+    Route::get('/', 'getUser');
+})->completeMatch()->prefix('User/');
+
 /** 聊天室模块路由 */
 Route::group('chatroom/:id', function () {
     Route::get('name', 'getName');

@@ -269,6 +269,24 @@ class User
     }
 
     /**
+     * 通过用户ID获取User
+     *
+     * @param integer $id
+     * @return array
+     */
+    public static function getUser(int $id): Result
+    {
+        // TODO 查询更多信息
+        $user = UserModel::where('id', '=', $id)->withoutField('password')->find();
+
+        if (!$user) {
+            return new Result(Result::CODE_ERROR_PARAM, '用户不存在!!!!!!!!!');
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user->toArray()));
+    }
+
+    /**
      * 通过用户ID获取用户名
      *
      * @param integer $id 用户ID

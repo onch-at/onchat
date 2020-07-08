@@ -28,7 +28,7 @@ class Friend
     public static function request(int $selfId, int $targetId, string $selfUsername, string $requestReason = null, string $targetAlias = null): Result
     {
         // 如果两人已经是好友关系，则不允许申请了
-        if (self::isFriend($selfId, $targetId)) {
+        if ($selfId == $targetId || self::isFriend($selfId, $targetId)) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 

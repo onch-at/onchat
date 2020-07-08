@@ -72,8 +72,9 @@ class Index extends BaseController
         // FriendHandler::request(1, 2, '没有理由', '我的小号');
         // dump(FriendHandler::request(1, 2, '没有理由!!!', '我的小号'));
         // FriendHandler::agreeRequest(1, 2);
-        $redis = Cache::store('redis')->handler();
-        dump($redis->hGet('PAIR:uid-fd', '1'));
+        $arr = mb_str_split('好好学习天天向上', 1, 'utf-8');
+        shuffle($arr);
+        dump(implode($arr));
     }
 
     /**
