@@ -14,6 +14,17 @@ class Friend extends BaseController
 {
 
     /**
+     * 根据对方的UID来获取FriendRequest
+     *
+     * @param integer $targetId
+     * @return Result
+     */
+    public function getFriendRequestByTargetId(int $targetId): Result
+    {
+        return FriendHandler::getFriendRequestByTargetId($targetId);
+    }
+
+    /**
      * 判断对方与自己是否为好友关系
      * 如果是好友关系，则返回私聊房间号；否则返回零
      *

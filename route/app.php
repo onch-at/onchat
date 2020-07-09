@@ -56,6 +56,11 @@ Route::group('chatroom/:id', function () {
 })->completeMatch()->prefix('Chatroom/');
 
 /** 好友模块路由 */
+Route::group('friend', function () {
+    Route::get('request/target/:targetId', 'getFriendRequestByTargetId');
+    // Route::get('request/:id', 'getFriendRequest');
+})->completeMatch()->prefix('Friend/');
+
 Route::group('friend/:id', function () {
     Route::get('isfriend', 'isFriend');
 })->completeMatch()->prefix('Friend/');

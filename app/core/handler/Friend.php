@@ -119,6 +119,31 @@ class Friend
     }
 
     /**
+     * 根据对方的UID来获取FriendRequest
+     *
+     * @param integer $targetId
+     * @return Result
+     */
+    public static function getFriendRequestByTargetId(int $targetId): Result
+    {
+        $userId = User::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $friendRequest = FriendRequestModel::where([
+            'self_id'   => $userId,
+            'target_id' => $targetId
+        ])->find();
+
+        if ($friendRequest) {
+            $friendRequest = ArrUtil::keyToCamel($friendRequest->toArray());
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, $friendRequest);
+    }
+
+    /**
      * 同意好友申请
      *
      * @param integer $friendRequestId 好友申请表的ID

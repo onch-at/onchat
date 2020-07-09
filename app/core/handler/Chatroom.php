@@ -150,6 +150,7 @@ class Chatroom
             'user_id'     => $userId,
             'nickname'    => $nickname ?? $username,
             'role'        => $role,
+            'unread'      => 1,
             'create_time' => $timestamp,
             'update_time' => $timestamp,
         ]);
