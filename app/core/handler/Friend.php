@@ -78,6 +78,33 @@ class Friend
     }
 
     /**
+     * 通过ID获取FriendRequest
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public static function getFriendRequestById(int $id): Result
+    {
+        $userId = User::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $friendRequest = FriendRequestModel::find($id);
+
+        if (!$friendRequest) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        // 如果发请求的这个人不是申请人也不是被申请人，则无权获取
+        if ($friendRequest->self_id != $userId && $friendRequest->target_id != $userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
+    }
+
+    /**
      * 获取所有正在等待验证的好友申请
      *
      * @param integer $userId 被申请人ID
@@ -119,7 +146,7 @@ class Friend
     }
 
     /**
-     * 根据对方的UID来获取FriendRequest
+     * 根据被申请人UID来获取FriendRequest
      *
      * @param integer $targetId
      * @return Result
@@ -136,11 +163,36 @@ class Friend
             'target_id' => $targetId
         ])->find();
 
-        if ($friendRequest) {
-            $friendRequest = ArrUtil::keyToCamel($friendRequest->toArray());
+        if (!$friendRequest) {
+            return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return new Result(Result::CODE_SUCCESS, null, $friendRequest);
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
+    }
+
+    /**
+     * 根据申请人UID来获取FriendRequest
+     *
+     * @param integer $selfId
+     * @return Result
+     */
+    public static function getFriendRequestBySelfId(int $selfId): Result
+    {
+        $userId = User::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $friendRequest = FriendRequestModel::where([
+            'self_id'   => $selfId,
+            'target_id' => $userId
+        ])->find();
+
+        if (!$friendRequest) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
     }
 
     /**

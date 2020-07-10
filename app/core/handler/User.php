@@ -274,7 +274,7 @@ class User
      * @param integer $id
      * @return array
      */
-    public static function getUser(int $id): Result
+    public static function getUserById(int $id): Result
     {
         // TODO 查询更多信息
         $user = UserModel::where('id', '=', $id)->withoutField('password')->find();

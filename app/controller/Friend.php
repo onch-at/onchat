@@ -14,7 +14,7 @@ class Friend extends BaseController
 {
 
     /**
-     * 根据对方的UID来获取FriendRequest
+     * 根据被申请人UID来获取FriendRequest
      *
      * @param integer $targetId
      * @return Result
@@ -22,6 +22,28 @@ class Friend extends BaseController
     public function getFriendRequestByTargetId(int $targetId): Result
     {
         return FriendHandler::getFriendRequestByTargetId($targetId);
+    }
+
+    /**
+     * 根据申请人UID来获取FriendRequest
+     *
+     * @param integer $selfId
+     * @return Result
+     */
+    public function getFriendRequestBySelfId(int $selfId): Result
+    {
+        return FriendHandler::getFriendRequestBySelfId($selfId);
+    }
+
+    /**
+     * 通过ID获取FriendRequest
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public function getFriendRequestById(int $id): Result
+    {
+        return FriendHandler::getFriendRequestById($id);
     }
 
     /**

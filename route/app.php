@@ -46,7 +46,7 @@ Route::group('user', function () {
 })->completeMatch()->prefix('User/');
 
 Route::group('user/:id', function () {
-    Route::get('/', 'getUser');
+    Route::get('/', 'getUserById');
 })->completeMatch()->prefix('User/');
 
 /** 聊天室模块路由 */
@@ -57,8 +57,9 @@ Route::group('chatroom/:id', function () {
 
 /** 好友模块路由 */
 Route::group('friend', function () {
+    Route::get('request/:id', 'getFriendRequestById');
+    Route::get('request/self/:selfId', 'getFriendRequestBySelfId');
     Route::get('request/target/:targetId', 'getFriendRequestByTargetId');
-    // Route::get('request/:id', 'getFriendRequest');
 })->completeMatch()->prefix('Friend/');
 
 Route::group('friend/:id', function () {

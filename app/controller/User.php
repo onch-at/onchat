@@ -73,9 +73,9 @@ class User extends BaseController
      *
      * @return Result
      */
-    public function getUser($id): Result
+    public function getUserById($id): Result
     {
-        return UserHandler::getUser((int) $id);
+        return UserHandler::getUserById((int) $id);
     }
 
     /**
