@@ -14,6 +14,16 @@ class Friend extends BaseController
 {
 
     /**
+     * 获取所有正在等待验证的好友申请
+     *
+     * @return Result
+     */
+    public function getFriendRequests(): Result
+    {
+        return FriendHandler::getFriendRequests();
+    }
+
+    /**
      * 根据被申请人UID来获取FriendRequest
      *
      * @param integer $targetId

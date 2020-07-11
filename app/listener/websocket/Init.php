@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\Container;
 use think\facade\Session;
 use app\core\handler\User as UserHandler;
 use app\model\ChatMember as ChatMemberModel;
@@ -12,10 +11,6 @@ use app\core\handler\Friend as FriendHandler;
 
 class Init extends BaseListener
 {
-    public function __construct(Container $container)
-    {
-        parent::__construct($container);
-    }
 
     /**
      * 事件监听处理
@@ -49,11 +44,11 @@ class Init extends BaseListener
         UserHandler::setWebSocketFileDescriptorSessIdPair($fd, $event['sessId']);
         UserHandler::setUserIdWebSocketFileDescriptorPair($userId, $fd);
 
-        $result = FriendHandler::getFriendRequests($userId, $username);
+        // $result = FriendHandler::getFriendRequests($userId, $username);
 
-        // 如果有正在等待验证的好友申请
-        if (count($result->data) > 0) {
-            $this->websocket->emit('friend_request', $result);
-        }
+        // // 如果有正在等待验证的好友申请
+        // if (count($result->data) > 0) {
+        //     $this->websocket->emit('friend_request', $result);
+        // }
     }
 }

@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\Container;
-use think\facade\Session;
 use app\core\handler\User as UserHandler;
 use app\core\handler\Friend as FriendHandler;
 use app\core\Result;
 
 class FriendRequest extends BaseListener
 {
-    public function __construct(Container $container)
-    {
-        parent::__construct($container);
-    }
 
     /**
      * 事件监听处理

@@ -8,6 +8,7 @@ use app\listener\websocket\RevokeMsg;
 use app\listener\websocket\Unload;
 use app\listener\websocket\FriendRequest;
 use app\listener\websocket\FriendRequestAgree;
+use app\listener\websocket\FriendRequestReject;
 use app\listener\websocket\Connect;
 
 return [
@@ -55,12 +56,13 @@ return [
             ],
         ],
         'listen'        => [
-            'init'                 => Init::class,
-            'unload'               => Unload::class,
-            'message'              => Message::class,
-            'revoke_msg'           => RevokeMsg::class,
-            'friend_request'       => FriendRequest::class,
-            'friend_request_agree' => FriendRequestAgree::class
+            'init'                  => Init::class,
+            'unload'                => Unload::class,
+            'message'               => Message::class,
+            'revoke_msg'            => RevokeMsg::class,
+            'friend_request'        => FriendRequest::class,
+            'friend_request_agree'  => FriendRequestAgree::class,
+            'friend_request_reject' => FriendRequestReject::class
             // 'connect'        => Connect::class
         ],
         'subscribe'     => [],

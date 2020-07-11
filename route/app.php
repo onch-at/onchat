@@ -57,6 +57,7 @@ Route::group('chatroom/:id', function () {
 
 /** 好友模块路由 */
 Route::group('friend', function () {
+    Route::get('request$', 'getFriendRequests');
     Route::get('request/:id', 'getFriendRequestById');
     Route::get('request/self/:selfId', 'getFriendRequestBySelfId');
     Route::get('request/target/:targetId', 'getFriendRequestByTargetId');

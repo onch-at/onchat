@@ -72,6 +72,16 @@ class User
     }
 
     /**
+     * 获取储存在SESSION中的用户名
+     *
+     * @return string|null
+     */
+    public static function getUsername(): ?string
+    {
+        return session(self::SESSION_USER_LOGIN . '.username');
+    }
+
+    /**
      * 设置uid-fd对
      *
      * @param integer $userId
@@ -280,7 +290,7 @@ class User
         $user = UserModel::where('id', '=', $id)->withoutField('password')->find();
 
         if (!$user) {
-            return new Result(Result::CODE_ERROR_PARAM, '用户不存在!!!!!!!!!');
+            return new Result(Result::CODE_ERROR_PARAM, '用户不存在');
         }
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user->toArray()));
@@ -418,7 +428,7 @@ class User
             ])
             ->where('chat_member.is_show', '=', true)
             ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
-            // ->order('chat_member.update_time', 'desc') 交给前端排序吧
+            // ->order('chat_member.update_time', 'desc') 由于前端需要即时排序，则将这一步交给前端
             ->select()->toArray();
 
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称

@@ -111,6 +111,8 @@ class Chatroom
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
             ");
 
+            Db::commit();
+
             return new Result(Result::CODE_SUCCESS, null, $chatroom->id);
         } catch (\Exception $e) {
             // 回滚事务
@@ -148,7 +150,7 @@ class Chatroom
         ChatMemberModel::create([
             'chatroom_id' => $id,
             'user_id'     => $userId,
-            'nickname'    => $nickname ?? $username,
+            'nickname'    => $nickname ?: $username,
             'role'        => $role,
             'unread'      => 1,
             'create_time' => $timestamp,

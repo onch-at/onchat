@@ -72,9 +72,14 @@ class Index extends BaseController
         // FriendHandler::request(1, 2, '没有理由', '我的小号');
         // dump(FriendHandler::request(1, 2, '没有理由!!!', '我的小号'));
         // FriendHandler::agreeRequest(1, 2);
-        $arr = mb_str_split('好好学习天天向上', 1, 'utf-8');
-        shuffle($arr);
-        dump(implode($arr));
+        // $arr = mb_str_split('好好学习天天向上', 1, 'utf-8');
+        // shuffle($arr);
+        // dump(implode($arr));
+        try {
+            User::where('id', 666)->delete();
+        } catch (\Exception $e) {
+            dump($e);
+        }
     }
 
     /**

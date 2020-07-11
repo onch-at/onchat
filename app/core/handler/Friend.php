@@ -37,6 +37,7 @@ class Friend
             'target_id'      => $targetId
         ]);
 
+        $timestamp = time() * 1000;
         $friendRequest = $query->where('target_status', '<>', FriendRequestModel::STATUS_AGREE)->find();
         // 如果之前已经申请过，但对方没有同意，就把对方的状态设置成等待验证
         if (!empty($friendRequest)) {
@@ -46,7 +47,7 @@ class Friend
             $friendRequest->self_status = FriendRequestModel::STATUS_WAIT;
             $friendRequest->target_status = FriendRequestModel::STATUS_WAIT;
 
-            $friendRequest->update_time = time() * 1000;
+            $friendRequest->update_time = $timestamp;
             $friendRequest->save();
 
             $friendRequest = $friendRequest->toArray();
@@ -57,8 +58,6 @@ class Friend
 
             return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest));
         }
-
-        $timestamp = time() * 1000;
 
         $friendRequest = FriendRequestModel::create([
             'self_id'        => $selfId,
@@ -107,16 +106,21 @@ class Friend
     /**
      * 获取所有正在等待验证的好友申请
      *
-     * @param integer $userId 被申请人ID
-     * @param string $username 被申请人用户名
      * @return Result
      */
-    public static function getFriendRequests(int $userId, string $username): Result
+    public static function getFriendRequests(): Result
     {
+        $userId = User::getId();
+        $username = User::getUsername();
+
+        if (!$userId || !$username) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
         $friendRequests = FriendRequestModel::where([
             'target_id' => $userId,
             'target_status' => FriendRequestModel::STATUS_WAIT
-        ])->select()->toArray();
+        ])->order('update_time', 'desc')->select()->toArray();
 
         $selfIdList = []; // 储存申请人的ID，用于一次性查询用户名
 
@@ -207,6 +211,10 @@ class Friend
     {
         $friendRequest = FriendRequestModel::find($friendRequestId);
 
+        if (!$friendRequest) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
         // 确认被申请人的身份
         if ($friendRequest->target_id != $targetId) {
             return new Result(Result::CODE_ERROR_NO_ACCESS);
@@ -214,40 +222,33 @@ class Friend
 
         $timestamp = SqlUtil::rawTimestamp();
 
-        $friendRequest->self_status = FriendRequestModel::STATUS_AGREE;
-        $friendRequest->target_status = FriendRequestModel::STATUS_AGREE;
-        $friendRequest->self_alias = $selfAlias;
-        $friendRequest->update_time = $timestamp;
-        $friendRequest->save();
-
-        // 去找一下有没有自己申请加对方的申请记录
-        // 场景：自己同意了对方的申请，但是自己之前也向对方提出好友申请
-        $otherFriendRequest = FriendRequestModel::where([
-            'self_id' => $targetId,
-            'target_id' => $friendRequest->self_id
-        ])->find();
-
-        // 如果有，就把状态更新下
-        if ($otherFriendRequest) {
-            $otherFriendRequest->self_status = FriendRequestModel::STATUS_AGREE;
-            $otherFriendRequest->target_status = FriendRequestModel::STATUS_AGREE;
-            $otherFriendRequest->update_time = $timestamp;
-            $otherFriendRequest->save();
-        }
-
-        $chatroomName = $friendRequest->self_id . ' & ' . $friendRequest->target_id;
-
-        // 创建一个类型为私聊的聊天室
-        $result = Chatroom::creatChatroom($chatroomName, ChatroomModel::TYPE_PRIVATE_CHAT);
-        if ($result->code != Result::CODE_SUCCESS) {
-            return $result;
-        }
-
-        $chatroomId = $result->data;
-
         // 启动事务
         Db::startTrans();
         try {
+            $friendRequest->self_status = FriendRequestModel::STATUS_AGREE;
+            $friendRequest->target_status = FriendRequestModel::STATUS_AGREE;
+            $friendRequest->self_alias = $selfAlias;
+            $friendRequest->update_time = $timestamp;
+            $friendRequest->save();
+
+            // 去找一下有没有自己申请加对方的申请记录
+            // 场景：自己同意了对方的申请，但是自己之前也向对方提出好友申请
+            // 找到就直接删除吧，省点空间
+            FriendRequestModel::where([
+                'self_id' => $targetId,
+                'target_id' => $friendRequest->self_id
+            ])->delete(true);
+
+            $chatroomName = $friendRequest->self_id . ' & ' . $friendRequest->target_id;
+
+            // 创建一个类型为私聊的聊天室
+            $result = Chatroom::creatChatroom($chatroomName, ChatroomModel::TYPE_PRIVATE_CHAT);
+            if ($result->code != Result::CODE_SUCCESS) {
+                return $result;
+            }
+
+            $chatroomId = $result->data;
+
             $result = Chatroom::addChatMember($chatroomId, $friendRequest->self_id, $friendRequest->self_alias);
             if ($result->code != Result::CODE_SUCCESS) {
                 return $result;
@@ -258,12 +259,62 @@ class Friend
                 return $result;
             }
 
+            Db::commit();
+
             return new Result(Result::CODE_SUCCESS, null, [
                 'friendRequestId' => $friendRequest->id,
                 'chatroomId'      => $chatroomId,
                 'selfId'          => $friendRequest->self_id,
                 'targetId'        => $friendRequest->target_id,
             ]);
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return new Result(Result::CODE_ERROR_UNKNOWN);
+        }
+    }
+
+    /**
+     * 拒绝好友申请
+     *
+     * @param integer $friendRequestId 好友申请表的ID
+     * @param integer $targetId 被申请人的ID
+     * @param string $rejectReason 拒绝原因
+     * @return Result
+     */
+    public static function rejectRequest(int $friendRequestId, int $targetId, string $rejectReason = null): Result
+    {
+        $friendRequest = FriendRequestModel::find($friendRequestId);
+
+        if (!$friendRequest) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        // 确认被申请人的身份
+        if ($friendRequest->target_id != $targetId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        // 启动事务
+        Db::startTrans();
+        try {
+            $friendRequest->self_status = FriendRequestModel::STATUS_REJECT;
+            $friendRequest->target_status = FriendRequestModel::STATUS_REJECT;
+            $friendRequest->reject_reason = $rejectReason;
+            $friendRequest->update_time = time() * 1000;
+            $friendRequest->save();
+
+            // 去找一下有没有自己申请加对方的申请记录
+            // 场景：自己拒绝了对方的申请，但是自己之前也向对方提出好友申请
+            // 找到就直接删除吧，省点空间
+            FriendRequestModel::where([
+                'self_id' => $targetId,
+                'target_id' => $friendRequest->self_id
+            ])->delete(true);
+
+            Db::commit();
+
+            return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();

@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\Container;
 use app\core\handler\User as UserHandler;
 use app\core\handler\Friend as FriendHandler;
 use app\core\Result;
 
 class FriendRequestAgree extends BaseListener
 {
-    public function __construct(Container $container)
-    {
-        parent::__construct($container);
-    }
 
     /**
      * 事件监听处理
