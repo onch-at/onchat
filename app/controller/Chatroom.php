@@ -22,6 +22,17 @@ class Chatroom extends BaseController
     }
 
     /**
+     * 获取聊天室
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public function getChatroom(int $id): Result
+    {
+        return ChatroomHandler::getChatroom($id);
+    }
+
+    /**
      * 获取聊天室消息记录
      *
      * @param integer $id 聊天室ID

@@ -16,4 +16,17 @@ class Str
     {
         return preg_replace('/[\s|　]+/', '', $str);
     }
+
+    /**
+     * 打乱字符串字符顺序，支持中文
+     *
+     * @param string $str
+     * @return string
+     */
+    public static function shuffle(string $str): string
+    {
+        $arr = mb_str_split($str, 1, 'utf-8');
+        shuffle($arr);
+        return implode($arr);
+    }
 }

@@ -428,11 +428,11 @@ class User
             ])
             ->where('chat_member.is_show', '=', true)
             ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
-            // ->order('chat_member.update_time', 'desc') 由于前端需要即时排序，则将这一步交给前端
+            // ->order('chat_member.update_time', 'DESC') 由于前端需要即时排序，则将这一步交给前端
             ->select()->toArray();
 
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
-        $temp = null;
+        $latestMsg = null;
         $nickname = null;
         $privateChatroomIdList = []; // 私聊聊天室的ID列表
 
@@ -442,18 +442,18 @@ class User
                 $privateChatroomIdList[] = $value['chatroom_id'];
             }
 
-            $temp = ChatRecordModel::opt($value['chatroom_id'])->order('id', 'desc')->findOrEmpty()->toArray();
-            if (!$temp) {
+            $latestMsg = ChatRecordModel::opt($value['chatroom_id'])->order('id', 'DESC')->findOrEmpty()->toArray();
+            if (!$latestMsg) {
                 continue;
             }
 
-            $nickname = ChatMemberModel::where('user_id', '=', $temp['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
+            $nickname = ChatMemberModel::where('user_id', '=', $latestMsg['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
             if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
-                $nickname = UserModel::where('id', '=', $temp['user_id'])->value('username');
+                $nickname = UserModel::where('id', '=', $latestMsg['user_id'])->value('username');
             }
-            $temp['nickname'] = $nickname;
-            $temp['data'] = json_decode($temp['data']);
-            $data[$key]['latestMsg'] = ArrUtil::keyToCamel($temp);
+            $latestMsg['nickname'] = $nickname;
+            $latestMsg['data'] = json_decode($latestMsg['data']);
+            $data[$key]['latestMsg'] = ArrUtil::keyToCamel($latestMsg);
         }
 
         // 如果其中有私聊聊天室
@@ -509,28 +509,6 @@ class User
     {
         return self::sticky($id, false);
     }
-
-    // /**
-    //  * 将聊天列表子项设置为已读（通过主键）
-    //  *
-    //  * @param integer $id 聊天室成员表ID
-    //  * @param integer $unread
-    //  * @return Result
-    //  */
-    // public static function readed(int $id, int $unread = 0): Result
-    // {
-    //     $num = UserModel::find(User::getId())->chatMember()->update([
-    //         'unread' => $unread,
-    //         'id' => $id,
-    //         'update_time' => time()
-    //     ]);
-
-    //     if ($num == 0) {
-    //         return new Result(Result::CODE_ERROR_PARAM);
-    //     }
-
-    //     return new Result(Result::CODE_SUCCESS);
-    // }
 
     /**
      * 将聊天列表子项设置为已读（通过用户ID+房间号）

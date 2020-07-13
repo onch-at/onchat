@@ -1,22 +1,17 @@
 {
-    "name": "topthink/think",
-    "description": "the new thinkphp framework",
+    "name": "OnChat",
+    "description": "A simple instant messaging website backend build with ThinkPHP6.",
     "type": "project",
     "keywords": [
-        "framework",
-        "thinkphp",
-        "ORM"
+        "onchat",
+        "thinkphp"
     ],
-    "homepage": "http://thinkphp.cn/",
+    "homepage": "http://chat.hypergo.net/",
     "license": "Apache-2.0",
     "authors": [
         {
-            "name": "liu21st",
-            "email": "liu21st@gmail.com"
-        },
-        {
-            "name": "yunwuxin",
-            "email": "448901948@qq.com"
+            "name": "HyperLife1119",
+            "email": "hyperlife1119@qq.com"
         }
     ],
     "require": {
@@ -28,7 +23,7 @@
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",
-        "topthink/think-trace":"^1.0"
+        "topthink/think-trace": "^1.0"
     },
     "autoload": {
         "psr-4": {

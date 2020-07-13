@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace app\core\handler;
 
-use app\core\Result;
-use app\core\util\Arr as ArrUtil;
 use think\facade\Db;
+use app\core\Result;
+use app\core\util\Str as StrUtil;
+use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
 use app\model\User as UserModel;
 use app\model\Chatroom as ChatroomModel;
@@ -15,6 +16,22 @@ use app\model\FriendRequest as FriendRequestModel;
 
 class Friend
 {
+    /** 别名最大长度 */
+    const ALIAS_MAX_LENGTH = 30;
+    /** 附加消息最大长度 */
+    const REASON_MAX_LENGTH = 50;
+
+    /** 别名过长 */
+    const CODE_ALIAS_LONG = 1;
+    /** 附加消息过长 */
+    const CODE_REASON_LONG = 2;
+
+    /** 响应消息预定义 */
+    const MSG = [
+        self::CODE_ALIAS_LONG => '好友别名长度不能大于' . self::ALIAS_MAX_LENGTH . '位字符',
+        self::CODE_REASON_LONG  => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符'
+    ];
+
     /**
      * 申请添加好友
      *
@@ -27,6 +44,22 @@ class Friend
      */
     public static function request(int $selfId, int $targetId, string $selfUsername, string $requestReason = null, string $targetAlias = null): Result
     {
+        // 如果剔除空格后长度为零，则直接置空
+        $requestReason && mb_strlen(StrUtil::trimAll($requestReason), 'utf-8') == 0 && ($requestReason = null);
+
+        // 如果附加消息长度超出
+        if ($requestReason && mb_strlen($requestReason, 'utf-8') > self::REASON_MAX_LENGTH) {
+            return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
+        }
+
+        // 如果剔除空格后长度为零，则直接置空
+        $targetAlias && mb_strlen(StrUtil::trimAll($targetAlias), 'utf-8') == 0 && ($targetAlias = null);
+
+        // 如果别名长度超出
+        if ($targetAlias && mb_strlen($targetAlias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
+            return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+        }
+
         // 如果两人已经是好友关系，则不允许申请了
         if ($selfId == $targetId || self::isFriend($selfId, $targetId)) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -104,11 +137,11 @@ class Friend
     }
 
     /**
-     * 获取所有正在等待验证的好友申请
+     * 获取我的收到好友申请
      *
      * @return Result
      */
-    public static function getFriendRequests(): Result
+    public static function getReceiveFriendRequests(): Result
     {
         $userId = User::getId();
         $username = User::getUsername();
@@ -117,10 +150,11 @@ class Friend
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
+        // 找到自己被申请的
         $friendRequests = FriendRequestModel::where([
             'target_id' => $userId,
             'target_status' => FriendRequestModel::STATUS_WAIT
-        ])->order('update_time', 'desc')->select()->toArray();
+        ])->order('update_time', 'DESC')->select()->toArray();
 
         $selfIdList = []; // 储存申请人的ID，用于一次性查询用户名
 
@@ -144,6 +178,55 @@ class Friend
         foreach ($friendRequests as $key => $value) {
             // TODO 把头像也返回
             $friendRequests[$key]['selfUsername'] = $selfUsernameList[$value['self_id']];
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($friendRequests));
+    }
+
+    /**
+     * 获取我的发起的好友申请（不包含已经同意的）
+     *
+     * @return Result
+     */
+    public static function getSendFriendRequests(): Result
+    {
+        $userId = User::getId();
+        $username = User::getUsername();
+
+        if (!$userId || !$username) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $friendRequests = FriendRequestModel::where('self_id', '=', $userId)
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['self_status', '=', FriendRequestModel::STATUS_WAIT],
+                    ['self_status', '=', FriendRequestModel::STATUS_REJECT]
+                ]);
+            })->order('update_time', 'DESC')->select()->toArray();
+
+        $targetIdList = []; // 储存被申请人的ID，用于一次性查询用户名
+
+        foreach ($friendRequests as $key => $value) {
+            // TODO 把头像也返回
+            // 这里增加程序复杂度来减少SQL查询
+            // $friendRequests[$key]['selfUsername'] = User::getUsernameById($value['self_id']);
+            $friendRequests[$key]['selfUsername'] = $username;
+            $targetIdList[] = $value['target_id'];
+        }
+
+        // 将用户名一次性查出
+        $list = UserModel::where('id', 'IN', $targetIdList)->field('id, username')->select();
+        // targetId => targetUsername
+        $targetUsernameList = [];
+
+        foreach ($list as $item) {
+            $targetUsernameList[$item->id] = $item->username;
+        }
+
+        foreach ($friendRequests as $key => $value) {
+            // TODO 把头像也返回
+            $friendRequests[$key]['targetUsername'] = $targetUsernameList[$value['target_id']];
         }
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($friendRequests));
@@ -209,6 +292,14 @@ class Friend
      */
     public static function agreeRequest(int $friendRequestId, int $targetId, string $selfAlias = null): Result
     {
+        // 如果剔除空格后长度为零，则直接置空
+        $selfAlias && mb_strlen(StrUtil::trimAll($selfAlias), 'utf-8') == 0 && ($selfAlias = null);
+
+        // 如果别名长度超出
+        if ($selfAlias && mb_strlen($selfAlias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
+            return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+        }
+
         $friendRequest = FriendRequestModel::find($friendRequestId);
 
         if (!$friendRequest) {
@@ -220,16 +311,15 @@ class Friend
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        $timestamp = SqlUtil::rawTimestamp();
-
         // 启动事务
         Db::startTrans();
         try {
-            $friendRequest->self_status = FriendRequestModel::STATUS_AGREE;
-            $friendRequest->target_status = FriendRequestModel::STATUS_AGREE;
-            $friendRequest->self_alias = $selfAlias;
-            $friendRequest->update_time = $timestamp;
-            $friendRequest->save();
+            // $friendRequest->self_status = FriendRequestModel::STATUS_AGREE;
+            // $friendRequest->target_status = FriendRequestModel::STATUS_AGREE;
+            // $friendRequest->self_alias = $selfAlias;
+            // $friendRequest->update_time = $timestamp;
+            // $friendRequest->save();
+            $friendRequest->delete(); // 同意就直接删除吧
 
             // 去找一下有没有自己申请加对方的申请记录
             // 场景：自己同意了对方的申请，但是自己之前也向对方提出好友申请
@@ -237,7 +327,7 @@ class Friend
             FriendRequestModel::where([
                 'self_id' => $targetId,
                 'target_id' => $friendRequest->self_id
-            ])->delete(true);
+            ])->delete();
 
             $chatroomName = $friendRequest->self_id . ' & ' . $friendRequest->target_id;
 
@@ -249,7 +339,7 @@ class Friend
 
             $chatroomId = $result->data;
 
-            $result = Chatroom::addChatMember($chatroomId, $friendRequest->self_id, $friendRequest->self_alias);
+            $result = Chatroom::addChatMember($chatroomId, $friendRequest->self_id, $selfAlias);
             if ($result->code != Result::CODE_SUCCESS) {
                 return $result;
             }
@@ -279,11 +369,20 @@ class Friend
      *
      * @param integer $friendRequestId 好友申请表的ID
      * @param integer $targetId 被申请人的ID
+     * @param string $targetUsername 被申请人的用户名
      * @param string $rejectReason 拒绝原因
      * @return Result
      */
-    public static function rejectRequest(int $friendRequestId, int $targetId, string $rejectReason = null): Result
+    public static function rejectRequest(int $friendRequestId, int $targetId, string $targetUsername, string $rejectReason = null): Result
     {
+        // 如果剔除空格后长度为零，则直接置空
+        $rejectReason && mb_strlen(StrUtil::trimAll($rejectReason), 'utf-8') == 0 && ($rejectReason = null);
+
+        // 如果附加消息长度超出
+        if ($rejectReason && mb_strlen($rejectReason, 'utf-8') > self::REASON_MAX_LENGTH) {
+            return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
+        }
+
         $friendRequest = FriendRequestModel::find($friendRequestId);
 
         if (!$friendRequest) {
@@ -310,11 +409,15 @@ class Friend
             FriendRequestModel::where([
                 'self_id' => $targetId,
                 'target_id' => $friendRequest->self_id
-            ])->delete(true);
+            ])->delete();
+
+            $data = $friendRequest->toArray();
+            $data['selfUsername'] = User::getUsernameById($friendRequest->self_id);
+            $data['targetUsername'] = $targetUsername;
 
             Db::commit();
 
-            return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
+            return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($data));
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -345,5 +448,48 @@ class Friend
         })->find();
 
         return empty($chatroom) ? 0 : $chatroom->id;
+    }
+
+    /**
+     * 设置好友别名
+     *
+     * @param integer $chatroomId 私聊房间号
+     * @param string $alias 好友别名
+     * @return Result
+     */
+    public static function setFriendAlias(int $chatroomId, string $alias): Result
+    {
+        $userId = User::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        if (mb_strlen(StrUtil::trimAll($alias), 'utf-8') == 0) {
+            return new Result(Result::CODE_ERROR_PARAM, '好友别名不能为空');
+        }
+
+        // 如果别名长度超出
+        if (mb_strlen($alias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
+            return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+        }
+
+        $chatroom = ChatroomModel::find($chatroomId); // 找到这个聊天室
+
+        // 如果没有这个聊天室或者这个聊天室不是私聊的
+        if (!$chatroom || $chatroom->type != ChatroomModel::TYPE_PRIVATE_CHAT) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        $chatMember = ChatMemberModel::where('chatroom_id', '=', $chatroomId)
+            ->where('user_id', '<>', $userId)->find();
+
+        if (!$chatMember) {
+            return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有没有其他成员');
+        }
+
+        $chatMember->nickname = $alias;
+        $chatMember->save();
+
+        return new Result(Result::CODE_SUCCESS);
     }
 }

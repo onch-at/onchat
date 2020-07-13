@@ -38,13 +38,13 @@ class Chatroom
      */
     public static function getName(int $id): Result
     {
-        $res = ChatroomModel::where('id', '=', $id)->field('name, type')->find();
-        if (!$res) {
+        $chatroom = ChatroomModel::where('id', '=', $id)->field('name, type')->find();
+        if (!$chatroom) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
-        if ($res->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
+        if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = User::getId();
             if (empty($userId)) {
                 return new Result(Result::CODE_ERROR_NO_ACCESS);
@@ -71,7 +71,44 @@ class Chatroom
             return new Result(Result::CODE_SUCCESS, null, $name);
         }
 
-        return new Result(Result::CODE_SUCCESS, null, $res->name);
+        return new Result(Result::CODE_SUCCESS, null, $chatroom->name);
+    }
+
+    public static function getChatroom(int $id): Result
+    {
+        $chatroom = ChatroomModel::where('id', '=', $id)->find();
+        if (!$chatroom) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
+        if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
+            $userId = User::getId();
+            if (empty($userId)) {
+                return new Result(Result::CODE_ERROR_NO_ACCESS);
+            }
+
+            // 找到自己
+            $self = ChatMemberModel::where([
+                'chatroom_id' => $id,
+                'user_id'     => $userId
+            ])->find();
+
+            // 如果找不到，则代表自己没有进这个群
+            if (empty($self)) {
+                return new Result(Result::CODE_ERROR_NO_ACCESS);
+            }
+
+            // 查找加入了这个房间的另一个好友的nickname
+            $name = ChatMemberModel::where('chatroom_id', '=', $id)->where('user_id', '<>', $userId)->value('nickname');
+
+            if (empty($name)) {
+                return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
+            }
+            $chatroom->name = $name;
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($chatroom->toArray()));
     }
 
     /**
@@ -266,7 +303,7 @@ class Chatroom
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
 
         $records = [];
-        foreach ($data->order('id', 'desc')->limit(self::MSG_ROWS)->cursor() as $item) {
+        foreach ($data->order('id', 'DESC')->limit(self::MSG_ROWS)->cursor() as $item) {
             $item = $item->toArray();
             // TODO 查询用户头像
             $item['avatarThumbnail'] = null;

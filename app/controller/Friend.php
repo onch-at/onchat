@@ -14,13 +14,23 @@ class Friend extends BaseController
 {
 
     /**
-     * 获取所有正在等待验证的好友申请
+     * 获取我的收到好友申请
      *
      * @return Result
      */
-    public function getFriendRequests(): Result
+    public function getReceiveFriendRequests(): Result
     {
-        return FriendHandler::getFriendRequests();
+        return FriendHandler::getReceiveFriendRequests();
+    }
+
+    /**
+     * 获取我的发起的好友申请（不包含已经同意的）
+     *
+     * @return Result
+     */
+    public function getSendFriendRequests(): Result
+    {
+        return FriendHandler::getSendFriendRequests();
     }
 
     /**
@@ -54,6 +64,21 @@ class Friend extends BaseController
     public function getFriendRequestById(int $id): Result
     {
         return FriendHandler::getFriendRequestById($id);
+    }
+
+    /**
+     * 设置好友别名
+     *
+     * @param integer $chatroomId 私聊聊天室ID
+     * @return Result
+     */
+    public function setFriendAlias(int $chatroomId): Result
+    {
+        if (empty(input('put.alias'))) { // 如果参数缺失
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        return FriendHandler::setFriendAlias($chatroomId, input('put.alias/s'));
     }
 
     /**
