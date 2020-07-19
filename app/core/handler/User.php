@@ -187,7 +187,7 @@ class User
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
         if (!$hash) { // 如果密码散列创建失败
-            return new Result(Result::CODE_ERROR_PARAM, self::MSG[Result::CODE_ERROR_UNKNOWN]);
+            return new Result(Result::CODE_ERROR_PARAM);
         }
 
         $timestamp = SqlUtil::rawTimestamp();
@@ -414,7 +414,10 @@ class User
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        $data = ChatMemberModel::where('user_id', '=', $userId)
+        $data = ChatMemberModel::where([
+            'chat_member.user_id' => $userId,
+            'chat_member.is_show' => true
+        ])->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
             ->field([
                 'chat_member.id',
                 'chat_member.chatroom_id',
@@ -426,8 +429,6 @@ class User
                 'chatroom.avatar_thumbnail',
                 'chatroom.type',
             ])
-            ->where('chat_member.is_show', '=', true)
-            ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
             // ->order('chat_member.update_time', 'DESC') 由于前端需要即时排序，则将这一步交给前端
             ->select()->toArray();
 

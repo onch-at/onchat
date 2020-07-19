@@ -152,32 +152,24 @@ class Friend
 
         // 找到自己被申请的
         $friendRequests = FriendRequestModel::where([
-            'target_id' => $userId,
-            'target_status' => FriendRequestModel::STATUS_WAIT
-        ])->order('update_time', 'DESC')->select()->toArray();
-
-        $selfIdList = []; // 储存申请人的ID，用于一次性查询用户名
+            'friend_request.target_id' => $userId,
+            'friend_request.target_status' => FriendRequestModel::STATUS_WAIT
+        ])->join('user', 'friend_request.self_id = user.id')->field([
+            'friend_request.id',
+            'friend_request.self_id',
+            'friend_request.target_id',
+            'friend_request.request_reason',
+            'friend_request.reject_reason',
+            'friend_request.self_status',
+            'friend_request.target_status',
+            'friend_request.create_time',
+            'friend_request.update_time',
+            'user.username as selfUsername',
+        ])->order('friend_request.update_time', 'DESC')->select()->toArray();
 
         foreach ($friendRequests as $key => $value) {
             // TODO 把头像也返回
-            // 这里增加程序复杂度来减少SQL查询
-            // $friendRequests[$key]['selfUsername'] = User::getUsernameById($value['self_id']);
             $friendRequests[$key]['targetUsername'] = $username;
-            $selfIdList[] = $value['self_id'];
-        }
-
-        // 将用户名一次性查出
-        $list = UserModel::where('id', 'IN', $selfIdList)->field('id, username')->select();
-        // selfId => selfUsername
-        $selfUsernameList = [];
-
-        foreach ($list as $item) {
-            $selfUsernameList[$item->id] = $item->username;
-        }
-
-        foreach ($friendRequests as $key => $value) {
-            // TODO 把头像也返回
-            $friendRequests[$key]['selfUsername'] = $selfUsernameList[$value['self_id']];
         }
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($friendRequests));
@@ -197,36 +189,27 @@ class Friend
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        $friendRequests = FriendRequestModel::where('self_id', '=', $userId)
-            ->where(function ($query) {
-                $query->whereOr([
-                    ['self_status', '=', FriendRequestModel::STATUS_WAIT],
-                    ['self_status', '=', FriendRequestModel::STATUS_REJECT]
-                ]);
-            })->order('update_time', 'DESC')->select()->toArray();
-
-        $targetIdList = []; // 储存被申请人的ID，用于一次性查询用户名
+        $friendRequests = FriendRequestModel::where('friend_request.self_id', '=', $userId)->where(function ($query) {
+            $query->whereOr([
+                ['friend_request.self_status', '=', FriendRequestModel::STATUS_WAIT],
+                ['friend_request.self_status', '=', FriendRequestModel::STATUS_REJECT]
+            ]);
+        })->join('user', 'friend_request.target_id = user.id')->field([
+            'friend_request.id',
+            'friend_request.self_id',
+            'friend_request.target_id',
+            'friend_request.request_reason',
+            'friend_request.reject_reason',
+            'friend_request.self_status',
+            'friend_request.target_status',
+            'friend_request.create_time',
+            'friend_request.update_time',
+            'user.username as targetUsername',
+        ])->order('update_time', 'DESC')->select()->toArray();
 
         foreach ($friendRequests as $key => $value) {
             // TODO 把头像也返回
-            // 这里增加程序复杂度来减少SQL查询
-            // $friendRequests[$key]['selfUsername'] = User::getUsernameById($value['self_id']);
             $friendRequests[$key]['selfUsername'] = $username;
-            $targetIdList[] = $value['target_id'];
-        }
-
-        // 将用户名一次性查出
-        $list = UserModel::where('id', 'IN', $targetIdList)->field('id, username')->select();
-        // targetId => targetUsername
-        $targetUsernameList = [];
-
-        foreach ($list as $item) {
-            $targetUsernameList[$item->id] = $item->username;
-        }
-
-        foreach ($friendRequests as $key => $value) {
-            // TODO 把头像也返回
-            $friendRequests[$key]['targetUsername'] = $targetUsernameList[$value['target_id']];
         }
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($friendRequests));
@@ -467,6 +450,8 @@ class Friend
         if (mb_strlen(StrUtil::trimAll($alias), 'utf-8') == 0) {
             return new Result(Result::CODE_ERROR_PARAM, '好友别名不能为空');
         }
+
+        $alias = trim($alias);
 
         // 如果别名长度超出
         if (mb_strlen($alias, 'utf-8') > self::ALIAS_MAX_LENGTH) {

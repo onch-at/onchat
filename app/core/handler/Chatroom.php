@@ -17,18 +17,24 @@ class Chatroom
 {
     /** 没有消息 */
     const CODE_NO_RECORD = 1;
+    /** 消息过长 */
     const CODE_MSG_LONG  = 2;
+    /** 别名过长 */
+    const CODE_NAME_LONG = 3;
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_NO_RECORD => '没有消息',
-        self::CODE_MSG_LONG  => '文本消息长度过长'
+        self::CODE_NO_RECORD  => '没有消息',
+        self::CODE_MSG_LONG   => '文本消息长度过长',
+        self::CODE_NAME_LONG => '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符',
     ];
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
     /** 文本消息最长长度 */
     const MSG_MAX_LENGTH = 3000;
+    /** 群名最大长度 */
+    const NAME_MAX_LENGTH = 30;
 
     /**
      * 获取聊天室名称
@@ -120,6 +126,15 @@ class Chatroom
      */
     public static function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT): Result
     {
+        if ($name) {
+            $name = trim($name);
+
+            // 如果别名长度超出
+            if (mb_strlen($name, 'utf-8') > self::NAME_MAX_LENGTH) {
+                return new Result(self::CODE_NAME_LONG, self::MSG[self::CODE_NAME_LONG]);
+            }
+        }
+
         // 启动事务
         Db::startTrans();
         try {

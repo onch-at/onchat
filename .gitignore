@@ -1,6 +1,7 @@
 /.idea
 /.vscode
 /vendor
+/runtime
 *.log
 .env
 OnChat.zip
