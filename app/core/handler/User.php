@@ -54,9 +54,9 @@ class User
     const SESSION_USER_LOGIN = 'user_login';
 
     /** Redis Hash 名称：储存UserId => fd */
-    const REDIS_HASH_UID_FD_PAIR = 'PAIR:uid-fd';
+    const REDIS_HASH_UID_FD_PAIR = 'ONCHAT_PAIR:uid-fd';
     /** Redis Hash 名称：储存fd => sessid */
-    const REDIS_HASH_FD_SESSID_PAIR = 'PAIR:fd-sessid';
+    const REDIS_HASH_FD_SESSID_PAIR = 'ONCHAT_PAIR:fd-sessid';
 
     /** 是否开放注册 */
     const CAN_REGISTER = true;
@@ -297,6 +297,20 @@ class User
     }
 
     /**
+     * 获得用户在聊天室中的昵称
+     *
+     * @param integer $id 用户ID
+     * @param integer $chatroomId
+     * @return string|null
+     */
+    public static function getNicknameInChatroom(int $id, int $chatroomId): ?string {
+        return ChatMemberModel::where([
+            'user_id' => $id,
+            'chatroom_id' => $chatroomId
+        ])->value('nickname');
+    }
+
+    /**
      * 通过用户ID获取用户名
      *
      * @param integer $id 用户ID
@@ -398,7 +412,7 @@ class User
      */
     public static function getChatrooms($userId = null): Result
     {
-        $data = UserModel::find($userId ?? self::getId())->chatrooms()->select()->toArray();
+        $data = UserModel::find($userId ?: self::getId())->chatrooms()->select()->toArray();
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($data));
     }
 
@@ -448,9 +462,9 @@ class User
                 continue;
             }
 
-            $nickname = ChatMemberModel::where('user_id', '=', $latestMsg['user_id'])->where('chatroom_id', '=', $value['chatroom_id'])->value('nickname');
+            $nickname = User::getNicknameInChatroom($latestMsg['user_id'], $value['chatroom_id']);
             if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
-                $nickname = UserModel::where('id', '=', $latestMsg['user_id'])->value('username');
+                $nickname = self::getUsernameById($latestMsg['user_id']);
             }
             $latestMsg['nickname'] = $nickname;
             $latestMsg['data'] = json_decode($latestMsg['data']);

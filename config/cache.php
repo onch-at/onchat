@@ -27,12 +27,16 @@ return [
 
         'redis' => [
             // 驱动方式
-            'type'     => 'redis',
+            'type'       => 'redis',
             // 服务器地址
-            'host'     => '127.0.0.1',
+            'host'       => '127.0.0.1',
             // 'password' => '',
             // 端口
-            'port'     => 6379
+            'port'       => 6379,
+            // 长连接
+            'persistent' => true,
+            'select'     => 0,
+            'timeout'    => 0,
         ],
         // 更多的缓存连接
     ],

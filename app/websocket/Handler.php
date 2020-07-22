@@ -7,8 +7,6 @@ use Swoole\Websocket\Frame;
 use think\Config;
 use think\Request;
 use think\swoole\websocket\socketio\Handler as BaseHandler;
-use app\core\handler\User as UserHandler;
-use think\facade\Session;
 
 /**
  * 自定义的WebSocket处理器
@@ -51,16 +49,6 @@ class Handler extends BaseHandler
      */
     public function onClose($fd, $reactorId)
     {
-
-        $sessId = UserHandler::getSessIdBytWebSocketFileDescriptor($fd);
-        if ($sessId) {
-            Session::setId(UserHandler::getSessIdBytWebSocketFileDescriptor($fd));
-            Session::init();
-
-            $userId = Session::get(UserHandler::SESSION_USER_LOGIN . '.id');
-            $userId && UserHandler::removeUserIdWebSocketFileDescriptorPair($userId);
-        }
-
-        UserHandler::removeWebSocketFileDescriptorSessIdPair($fd);
+        return parent::onClose($fd, $reactorId);
     }
 }

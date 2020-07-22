@@ -19,8 +19,8 @@ class FriendRequestReject extends BaseListener
     public function handle($event)
     {
         parent::initSession();
-        $userId = parent::getUserId();
-        $username = parent::getUsername();
+        $userId = UserHandler::getId();
+        $username = UserHandler::getUsername();
 
         $result = FriendHandler::rejectRequest($event['friendRequestId'], $userId, $username, $event['rejectReason']);
 

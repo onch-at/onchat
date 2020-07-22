@@ -227,7 +227,7 @@ class Chatroom
         }
 
         // 拿到当前用户在这个聊天室的昵称
-        $nickname = ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $msg['chatroomId'])->value('nickname');
+        $nickname = User::getNicknameInChatroom($userId, $msg['chatroomId']);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
@@ -253,8 +253,8 @@ class Chatroom
             ChatMemberModel::update([
                 'is_show' => true,
                 'update_time' => $timestamp,
-                // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+）
-                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100 THEN unread+1 ELSE unread END')
+                // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+），否则归零
+                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100 THEN unread+1 ELSE 0 END')
             ], [
                 'chatroom_id' => $msg['chatroomId']
             ]);
@@ -293,7 +293,7 @@ class Chatroom
         }
 
         // 拿到当前用户在这个聊天室的昵称
-        $nickname = ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $id)->value('nickname');
+        $nickname = User::getNicknameInChatroom($userId, $id);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
@@ -309,7 +309,10 @@ class Chatroom
 
         // 初次查询的时候，顺带把未读消息数归零
         if ($msgId == 0) {
-            ChatMemberModel::where('user_id', '=', $userId)->where('chatroom_id', '=', $id)->update([
+            ChatMemberModel::where([
+                'user_id' => $userId,
+                'chatroom_id' => $id
+            ])->update([
                 'unread' => 0
             ]);
         }
@@ -325,10 +328,10 @@ class Chatroom
 
             // 如果nicknameMap里面没有找到已经缓存的nickname
             if (!isset($nicknameMap[$item['user_id']])) {
-                $nickname = ChatMemberModel::where('user_id', '=', $item['user_id'])->where('chatroom_id', '=', $id)->value('nickname');
+                $nickname = User::getNicknameInChatroom($item['user_id'], $id);
 
                 if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
-                    $nickname = UserModel::where('id', '=', $item['user_id'])->value('username');
+                    $nickname = User::getUsernameById($item['user_id']);
                 }
 
                 $nicknameMap[$item['user_id']] = $nickname;

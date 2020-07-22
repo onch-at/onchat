@@ -33,9 +33,9 @@ abstract class BaseListener
      *
      * @return void
      */
-    protected function initSession()
+    protected function initSession(string $sessId = null)
     {
-        Session::setId(UserHandler::getSessIdBytWebSocketFileDescriptor($this->websocket->getSender()));
+        Session::setId($sessId ?:UserHandler::getSessIdBytWebSocketFileDescriptor($this->websocket->getSender()));
         Session::init();
     }
 

@@ -2,14 +2,6 @@
 
 use app\websocket\Handler;
 use think\swoole\websocket\socketio\Parser;
-use app\listener\websocket\Init;
-use app\listener\websocket\Message;
-use app\listener\websocket\RevokeMsg;
-use app\listener\websocket\Unload;
-use app\listener\websocket\FriendRequest;
-use app\listener\websocket\FriendRequestAgree;
-use app\listener\websocket\FriendRequestReject;
-use app\listener\websocket\Connect;
 
 return [
     'server'     => [
@@ -51,20 +43,11 @@ return [
             'redis' => [
                 'host'          => '127.0.0.1',
                 'port'          => 6379,
-                'max_active'    => 3,
+                'max_active'    => 10,
                 'max_wait_time' => 5,
             ],
         ],
-        'listen'        => [
-            'init'                  => Init::class,
-            'unload'                => Unload::class,
-            'message'               => Message::class,
-            'revoke_msg'            => RevokeMsg::class,
-            'friend_request'        => FriendRequest::class,
-            'friend_request_agree'  => FriendRequestAgree::class,
-            'friend_request_reject' => FriendRequestReject::class
-            // 'connect'        => Connect::class
-        ],
+        'listen'        => [],
         'subscribe'     => [],
     ],
     'rpc'        => [
@@ -85,12 +68,12 @@ return [
     'pool'       => [
         'db'    => [
             'enable'        => true,
-            'max_active'    => 3,
+            'max_active'    => 100,
             'max_wait_time' => 5,
         ],
         'cache' => [
             'enable'        => true,
-            'max_active'    => 3,
+            'max_active'    => 100,
             'max_wait_time' => 5,
         ],
         //自定义连接池
