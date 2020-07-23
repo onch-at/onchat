@@ -17,10 +17,9 @@ class Message extends BaseListener
      */
     public function handle($event)
     {
-        parent::initSession();
-        $userId = UserHandler::getId();
+        $user = $this->getUser();
 
         $this->websocket->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])
-            ->emit("message", ChatroomHandler::setMessage($userId, $event['msg']));
+            ->emit('message', ChatroomHandler::setMessage($user->id, $event['msg']));
     }
 }

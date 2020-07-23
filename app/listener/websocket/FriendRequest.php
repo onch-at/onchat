@@ -18,14 +18,12 @@ class FriendRequest extends BaseListener
      */
     public function handle($event)
     {
-        parent::initSession();
-        $userId = UserHandler::getId();
-        $username = UserHandler::getUsername();
+        $user = $this->getUser();
 
         $result = FriendHandler::request(
-            $userId,
+            $user->id,
             $event['userId'],
-            $username,
+            $user->username,
             $event['requestReason'],
             $event['targetAlias'],
         );

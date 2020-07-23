@@ -11,7 +11,6 @@ use app\core\Result;
 use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
 use app\model\Chatroom as ChatroomModel;
-use think\facade\Cache;
 
 class User
 {
@@ -53,11 +52,6 @@ class User
     /** 用户登录SESSION名 */
     const SESSION_USER_LOGIN = 'user_login';
 
-    /** Redis Hash 名称：储存UserId => fd */
-    const REDIS_HASH_UID_FD_PAIR = 'ONCHAT_PAIR:uid-fd';
-    /** Redis Hash 名称：储存fd => sessid */
-    const REDIS_HASH_FD_SESSID_PAIR = 'ONCHAT_PAIR:fd-sessid';
-
     /** 是否开放注册 */
     const CAN_REGISTER = true;
 
@@ -79,83 +73,6 @@ class User
     public static function getUsername(): ?string
     {
         return session(self::SESSION_USER_LOGIN . '.username');
-    }
-
-    /**
-     * 设置uid-fd对
-     *
-     * @param integer $userId
-     * @param integer $fd
-     * @return void
-     */
-    public static function setUserIdWebSocketFileDescriptorPair(int $userId, int $fd)
-    {
-
-        $redis = Cache::store('redis')->handler();
-        $redis->hSet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId, (string) $fd);
-    }
-
-    /**
-     * 删除uid-fd对
-     *
-     * @param integer $userId
-     * @return void
-     */
-    public static function removeUserIdWebSocketFileDescriptorPair(int $userId)
-    {
-        $redis = Cache::store('redis')->handler();
-        $redis->hDel(self::REDIS_HASH_UID_FD_PAIR, $userId);
-    }
-
-    /**
-     * 通过UserId获取WebSocket FileDescriptor
-     * 如果获取不到则返回数字零
-     *
-     * @param integer $userId
-     * @return integer
-     */
-    public static function getWebSocketFileDescriptorByUserId(int $userId): int
-    {
-        $redis = Cache::store('redis')->handler();
-        return (int) $redis->hGet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
-    }
-
-    /**
-     * 设置fd-sessid对
-     *
-     * @param integer $fd
-     * @param string $sessid
-     * @return void
-     */
-    public static function setWebSocketFileDescriptorSessIdPair(int $fd, string $sessid)
-    {
-        $redis = Cache::store('redis')->handler();
-        $redis->hSet(self::REDIS_HASH_FD_SESSID_PAIR, (string) $fd, $sessid);
-    }
-
-    /**
-     * 通过fd得到sessid
-     * 找不到则返回false
-     *
-     * @param integer $fd
-     * @return string|boolean
-     */
-    public static function getSessIdBytWebSocketFileDescriptor(int $fd)
-    {
-        $redis = Cache::store('redis')->handler();
-        return $redis->hGet(self::REDIS_HASH_FD_SESSID_PAIR, (string) $fd);
-    }
-
-    /**
-     * 移除fd-sessid对
-     *
-     * @param integer $fd
-     * @return void
-     */
-    public static function removeWebSocketFileDescriptorSessIdPair(int $fd)
-    {
-        $redis = Cache::store('redis')->handler();
-        $redis->hDel(self::REDIS_HASH_FD_SESSID_PAIR, (string) $fd);
     }
 
     /**
@@ -303,7 +220,8 @@ class User
      * @param integer $chatroomId
      * @return string|null
      */
-    public static function getNicknameInChatroom(int $id, int $chatroomId): ?string {
+    public static function getNicknameInChatroom(int $id, int $chatroomId): ?string
+    {
         return ChatMemberModel::where([
             'user_id' => $id,
             'chatroom_id' => $chatroomId

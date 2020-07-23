@@ -17,10 +17,9 @@ class RevokeMsg extends BaseListener
      */
     public function handle($event)
     {
-        parent::initSession();
-        $userId = UserHandler::getId();
+        $user = $this->getUser();
 
         $this->websocket->to(parent::ROOM_CHATROOM . $event['chatroomId'])
-            ->emit("revoke_msg", ChatroomHandler::revokeMsg($event['chatroomId'], $userId, $event['msgId']));
+            ->emit("revoke_msg", ChatroomHandler::revokeMsg($event['chatroomId'], $user->id, $event['msgId']));
     }
 }

@@ -68,6 +68,11 @@ class Index extends BaseController
 
     public function index()
     {
+        $obj = ['id' => 1];
+        // dump(config('session.prefix'));
+
+        // dump($obj->id);
+
         // $this->addChatroom('TEST CHATROOM 3');
         // $this->addChatroom('世界都在聊');
         // FriendHandler::request(1, 2, '没有理由', '我的小号');
@@ -75,30 +80,30 @@ class Index extends BaseController
         // FriendHandler::agreeRequest(1, 2);
         // $arr = mb_str_split('好好学习天天向上', 1, 'utf-8');
         // shuffle($arr);
-        $userId = 2;
-        // $friendRequests = 
-        // FriendRequest::whereRaw(
-        // '(self_id = ' . $userId . ' AND (self_status = ' . FriendRequest::STATUS_WAIT . ' OR self_status = ' . FriendRequest::STATUS_REJECT . ')) OR (target_id = ' . $userId . ' AND target_status = ' . FriendRequest::STATUS_WAIT . ')')->order('update_time', 'DESC')->select()->toArray();
+        // $userId = 2;
+        // // $friendRequests =
+        // // FriendRequest::whereRaw(
+        // // '(self_id = ' . $userId . ' AND (self_status = ' . FriendRequest::STATUS_WAIT . ' OR self_status = ' . FriendRequest::STATUS_REJECT . ')) OR (target_id = ' . $userId . ' AND target_status = ' . FriendRequest::STATUS_WAIT . ')')->order('update_time', 'DESC')->select()->toArray();
 
-        $friendRequests = FriendRequest::where('self_id', '=', $userId)
-            ->where(function ($query) {
-                $query->whereOr([
-                    ['self_status', '=', FriendRequest::STATUS_WAIT],
-                    ['self_status', '=', FriendRequest::STATUS_REJECT]
-                ]);
-            })->whereOr(function ($query) use ($userId) {
-                $query->where([
-                    'target_id' => $userId,
-                    'target_status' => FriendRequest::STATUS_WAIT
-                ]);
-            })->order('update_time', 'DESC')->select()->toArray();
-        // $friendRequests = FriendRequest::whereRaw('self_id = {$userId} AND (self_status = ' . FriendRequest::STATUS_WAIT . ' OR self_status = ' . FriendRequest::STATUS_REJECT . ')')
-        //     ->whereOr([
-        //         'target_id' => 1,
-        //         'target_status' => FriendRequest::STATUS_WAIT
-        //     ])->order('update_time', 'DESC')->select()->toArray();
+        // $friendRequests = FriendRequest::where('self_id', '=', $userId)
+        //     ->where(function ($query) {
+        //         $query->whereOr([
+        //             ['self_status', '=', FriendRequest::STATUS_WAIT],
+        //             ['self_status', '=', FriendRequest::STATUS_REJECT]
+        //         ]);
+        //     })->whereOr(function ($query) use ($userId) {
+        //         $query->where([
+        //             'target_id' => $userId,
+        //             'target_status' => FriendRequest::STATUS_WAIT
+        //         ]);
+        //     })->order('update_time', 'DESC')->select()->toArray();
+        // // $friendRequests = FriendRequest::whereRaw('self_id = {$userId} AND (self_status = ' . FriendRequest::STATUS_WAIT . ' OR self_status = ' . FriendRequest::STATUS_REJECT . ')')
+        // //     ->whereOr([
+        // //         'target_id' => 1,
+        // //         'target_status' => FriendRequest::STATUS_WAIT
+        // //     ])->order('update_time', 'DESC')->select()->toArray();
 
-        dump($friendRequests);
+        // dump($friendRequests);
     }
 
     /**

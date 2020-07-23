@@ -18,10 +18,9 @@ class FriendRequestAgree extends BaseListener
      */
     public function handle($event)
     {
-        parent::initSession();
-        $userId = UserHandler::getId();
+        $user = $this->getUser();
 
-        $result = FriendHandler::agreeRequest($event['friendRequestId'], $userId, $event['selfAlias']);
+        $result = FriendHandler::agreeRequest($event['friendRequestId'], $user->id, $event['selfAlias']);
 
         $chatroomId = $result->data['chatroomId'];
         $this->websocket->join(parent::ROOM_CHATROOM . $chatroomId);
@@ -33,11 +32,11 @@ class FriendRequestAgree extends BaseListener
         }
 
         // 拿到申请人的FD
-        $fd = UserHandler::getWebSocketFileDescriptorByUserId($result->data['selfId']);
-        if ($fd) {
+        $selfFd = $this->getFdByUserId($result->data['selfId']);
+        if ($selfFd) {
             // 加入新的聊天室
-            $this->websocket->setSender($fd)->join(parent::ROOM_CHATROOM . $chatroomId);
-            $this->websocket->setSender($fd)->emit('friend_request_agree', $result);
+            $this->websocket->setSender($selfFd)->join(parent::ROOM_CHATROOM . $chatroomId);
+            $this->websocket->setSender($selfFd)->emit('friend_request_agree', $result);
         }
     }
 }

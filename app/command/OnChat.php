@@ -10,6 +10,7 @@ use think\console\input\Argument;
 use think\console\Output;
 use think\facade\Console;
 use app\core\handler\User as UserHandler;
+use app\listener\websocket\BaseListener;
 use think\facade\Cache;
 
 class OnChat extends Command
@@ -34,8 +35,8 @@ class OnChat extends Command
     public function clearCache()
     {
         $redis = Cache::store('redis')->handler();
-        $redis->del(UserHandler::REDIS_HASH_FD_SESSID_PAIR);
-        $redis->del(UserHandler::REDIS_HASH_UID_FD_PAIR);
+        $redis->del(BaseListener::REDIS_HASH_FD_USER_PAIR);
+        $redis->del(BaseListener::REDIS_HASH_UID_FD_PAIR);
     }
 
     protected function execute(Input $input, Output $output)

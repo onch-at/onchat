@@ -18,11 +18,9 @@ class FriendRequestReject extends BaseListener
      */
     public function handle($event)
     {
-        parent::initSession();
-        $userId = UserHandler::getId();
-        $username = UserHandler::getUsername();
+        $user = $this->getUser();
 
-        $result = FriendHandler::rejectRequest($event['friendRequestId'], $userId, $username, $event['rejectReason']);
+        $result = FriendHandler::rejectRequest($event['friendRequestId'], $user->id, $user->username, $event['rejectReason']);
 
         $this->websocket->emit('friend_request_reject', $result);
 
@@ -32,7 +30,7 @@ class FriendRequestReject extends BaseListener
         }
 
         // 拿到申请人的FD
-        $fd = UserHandler::getWebSocketFileDescriptorByUserId($result->data['selfId']);
-        $fd && $this->websocket->setSender($fd)->emit('friend_request_reject', $result);
+        $selfFd = $this->getFdByUserId($result->data['selfId']);
+        $selfFd && $this->websocket->setSender($selfFd)->emit('friend_request_reject', $result);
     }
 }

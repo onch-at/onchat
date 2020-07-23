@@ -19,10 +19,11 @@ class Init extends BaseListener
      */
     public function handle($event)
     {
-        parent::initSession($event['sessId']);
-        $userId = UserHandler::getId();
+        $this->initSession($event['sessId']);
+
+        $user = $this->getUser();
         // TODO 这里可能session还没生成
-        $chatrooms = UserHandler::getChatrooms($userId)->data;
+        $chatrooms = UserHandler::getChatrooms($user->id)->data;
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
@@ -30,11 +31,9 @@ class Init extends BaseListener
         }
 
         // 加入好友请求房间
-        $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $userId);
+        $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $user->id);
 
-        $fd = $this->websocket->getSender();
-
-        UserHandler::setWebSocketFileDescriptorSessIdPair($fd, $event['sessId']);
-        UserHandler::setUserIdWebSocketFileDescriptorPair($userId, $fd);
+        // 储存uid - fd
+        $this->setUserIdFdPair($user->id);
     }
 }
