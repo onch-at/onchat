@@ -14,8 +14,8 @@ return [
             'log_file'              => runtime_path() . 'swoole.log',
             'daemonize'             => true,
             // Normally this value should be 1~4 times larger according to your cpu cores.
-            'reactor_num'           => swoole_cpu_num(),
-            'worker_num'            => swoole_cpu_num(),
+            'reactor_num'           => swoole_cpu_num() * 2,
+            'worker_num'            => swoole_cpu_num() * 2,
             'task_worker_num'       => swoole_cpu_num(),
             'enable_static_handler' => true,
             'document_root'         => root_path('public'),

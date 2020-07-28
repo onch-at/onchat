@@ -17,6 +17,10 @@ class Message extends BaseListener
      */
     public function handle($event)
     {
+        if (!$this->isEstablished()) {
+            return false;
+        }
+
         $user = $this->getUser();
 
         $this->websocket->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])

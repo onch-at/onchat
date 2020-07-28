@@ -16,7 +16,7 @@ return [
         'swoole.websocket.FriendRequest'       => [app\listener\websocket\FriendRequest::class],
         'swoole.websocket.FriendRequestAgree'  => [app\listener\websocket\FriendRequestAgree::class],
         'swoole.websocket.FriendRequestReject' => [app\listener\websocket\FriendRequestReject::class],
-        'swoole.websocket.Close'               => [app\listener\websocket\Close::class],
+        'swoole.websocket.Close'               => [app\listener\websocket\Unload::class],
     ],
 
     'subscribe' => [],

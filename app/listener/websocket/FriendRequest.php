@@ -18,6 +18,10 @@ class FriendRequest extends BaseListener
      */
     public function handle($event)
     {
+        if (!$this->isEstablished()) {
+            return false;
+        }
+
         $user = $this->getUser();
 
         $result = FriendHandler::request(

@@ -18,12 +18,13 @@ class OnChat extends Command
     const ACTION_START = 'start';
     const ACTION_STOP = 'stop';
     const ACTION_RESTART = 'restart';
+    const ACTION_RELOAD = 'reload';
 
     protected function configure()
     {
         // 指令配置
         $this->setName('onchat')
-            ->addArgument('action', Argument::OPTIONAL, 'start|stop|restart', self::ACTION_START)
+            ->addArgument('action', Argument::OPTIONAL, 'start|stop|restart|reload', self::ACTION_START)
             ->setDescription('the onchat command');
     }
 
@@ -50,6 +51,10 @@ class OnChat extends Command
             case self::ACTION_RESTART:
                 $this->clearCache();
                 $output->info('OnChat: ' . $action . ' successful!');
+                Console::call('swoole', [$action]);
+                break;
+
+            case self::ACTION_RELOAD:
                 Console::call('swoole', [$action]);
                 break;
 

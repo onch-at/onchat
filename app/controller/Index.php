@@ -68,10 +68,11 @@ class Index extends BaseController
 
     public function index()
     {
-        $obj = ['id' => 1];
+
         // dump(config('session.prefix'));
 
-        // dump($obj->id);
+        // dump(request()->header()['authorization']);
+        // dump(unserialize('a:1:{s:10:"user_login";a:3:{s:2:"id";i:1;s:8:"username";s:13:"HyperLife1119";s:8:"password";s:60:"$2y$10$OK4Peq4He4xVgR9xiryJ5OEFs/8j0.c1uCNHO8/csmzPG/pYV4Q06";}}'));
 
         // $this->addChatroom('TEST CHATROOM 3');
         // $this->addChatroom('世界都在聊');

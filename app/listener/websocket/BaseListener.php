@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\Container;
 use think\swoole\Websocket;
-use think\facade\Session;
-use think\facade\Cache;
+use think\cache\driver\Redis;
 use app\core\handler\User as UserHandler;
 
 abstract class BaseListener
 {
     protected $websocket;
+    protected $server;
     protected $redis;
     protected $fd;
+    protected $sessPrefix;
 
     /** 聊天室房间前缀 */
     const ROOM_CHATROOM = 'CHATROOM:';
@@ -26,16 +26,14 @@ abstract class BaseListener
     /** Redis Hash 名称：储存uid => fd */
     const REDIS_HASH_UID_FD_PAIR = 'ONCHAT_PAIR:uid-fd';
 
-    /**
-     * 注入容器管理类，从容器中取出Websocket类，或者也可以直接注入Websocket类
-     *
-     * @param Container $container
-     */
-    public function __construct(Container $container)
+    public function __construct(Websocket $websocket)
     {
-        $this->websocket = $container->make(Websocket::class);
-        $this->redis = Cache::store('redis')->handler();
+        $this->websocket = $websocket;
+        $this->server = app("think\swoole\Manager")->getServer();
+        $this->redis = new Redis;
         $this->fd = $this->websocket->getSender();
+
+        $this->sessPrefix = config('session.prefix');
     }
 
     /**
@@ -46,8 +44,7 @@ abstract class BaseListener
      */
     protected function initSession(string $sessId)
     {
-        // TODO
-        $session = unserialize(unserialize(Cache::store('redis')->handler()->get('ONCHAT_SESSION:' . $sessId)));
+        $session = unserialize($this->redis->get($this->sessPrefix . $sessId));
 
         $this->redis->hSet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd, serialize((object) [
             'id'       => $session[UserHandler::SESSION_USER_LOGIN]['id'],
@@ -111,9 +108,12 @@ abstract class BaseListener
     }
 
     /**
-     * 事件监听处理
+     * 判断是否是正确的websocket连接
      *
-     * @return mixed
+     * @return bool
      */
-    protected abstract function handle($event);
+    protected function isEstablished(): bool
+    {
+        return $this->server->isEstablished($this->fd);
+    }
 }

@@ -18,6 +18,10 @@ class FriendRequestAgree extends BaseListener
      */
     public function handle($event)
     {
+        if (!$this->isEstablished()) {
+            return false;
+        }
+
         $user = $this->getUser();
 
         $result = FriendHandler::agreeRequest($event['friendRequestId'], $user->id, $event['selfAlias']);

@@ -18,6 +18,10 @@ class FriendRequestReject extends BaseListener
      */
     public function handle($event)
     {
+        if (!$this->isEstablished()) {
+            return false;
+        }
+
         $user = $this->getUser();
 
         $result = FriendHandler::rejectRequest($event['friendRequestId'], $user->id, $user->username, $event['rejectReason']);

@@ -19,10 +19,13 @@ class Init extends BaseListener
      */
     public function handle($event)
     {
+        if (!$this->isEstablished()) {
+            return false;
+        }
+
         $this->initSession($event['sessId']);
 
         $user = $this->getUser();
-        // TODO 这里可能session还没生成
         $chatrooms = UserHandler::getChatrooms($user->id)->data;
 
         // 批量加入所有房间
