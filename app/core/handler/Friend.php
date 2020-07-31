@@ -339,6 +339,7 @@ class Friend
                 'chatroomId'      => $chatroomId,
                 'selfId'          => $friendRequest->self_id,
                 'targetId'        => $friendRequest->target_id,
+                'targetUsername'  => User::getUsernameById($friendRequest->target_id)
             ]);
         } catch (\Exception $e) {
             // 回滚事务
