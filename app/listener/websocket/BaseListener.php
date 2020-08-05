@@ -42,11 +42,11 @@ abstract class BaseListener
      *
      * @return void
      */
-    protected function initSession(string $sessId)
+    protected function setFdUserPair(string $sessId)
     {
         $session = unserialize($this->redis->get($this->sessPrefix . $sessId));
 
-        $this->redis->hSet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd, serialize((object) [
+        $this->redis->hSet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd, serialize([
             'id'       => $session[UserHandler::SESSION_USER_LOGIN]['id'],
             'username' => $session[UserHandler::SESSION_USER_LOGIN]['username']
         ]));
@@ -58,7 +58,7 @@ abstract class BaseListener
      *
      * @return mixed
      */
-    protected function getUser()
+    protected function getUserByFd()
     {
         return unserialize($this->redis->hGet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd));
     }
@@ -68,7 +68,7 @@ abstract class BaseListener
      *
      * @return void
      */
-    protected function removeUser()
+    protected function removeFdUserPair()
     {
         $this->redis->hDel(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd);
     }

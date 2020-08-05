@@ -368,19 +368,21 @@ class User
         $latestMsg = null;
         $nickname = null;
         $privateChatroomIdList = []; // 私聊聊天室的ID列表
+        $chatroomId = null;
 
         foreach ($data as $key => $value) {
+            $chatroomId = $value['chatroom_id'];
             // 如果是私聊聊天室
             if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
-                $privateChatroomIdList[] = $value['chatroom_id'];
+                $privateChatroomIdList[] = $chatroomId;
             }
 
-            $latestMsg = ChatRecordModel::opt($value['chatroom_id'])->order('id', 'DESC')->findOrEmpty()->toArray();
+            $latestMsg = ChatRecordModel::opt($chatroomId)->where('chatroom_id', '=', $chatroomId)->order('id', 'DESC')->findOrEmpty()->toArray();
             if (!$latestMsg) {
                 continue;
             }
 
-            $nickname = User::getNicknameInChatroom($latestMsg['user_id'], $value['chatroom_id']);
+            $nickname = User::getNicknameInChatroom($latestMsg['user_id'], $chatroomId);
             if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
                 $nickname = self::getUsernameById($latestMsg['user_id']);
             }
@@ -404,7 +406,7 @@ class User
 
             foreach ($data as $key => $value) {
                 if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
-                    $data[$key]['name'] = $privateChatroomNameList[$value['chatroom_id']];
+                    $data[$key]['name'] = $privateChatroomNameList[$chatroomId];
                 }
             }
         }

@@ -69,42 +69,56 @@ class Index extends BaseController
     public function index()
     {
 
-        // dump(config('session.prefix'));
+        // $chatroomIds = Chatroom::field('id')->select()->toArray();
 
-        // dump(request()->header()['authorization']);
-        // dump(unserialize('a:1:{s:10:"user_login";a:3:{s:2:"id";i:1;s:8:"username";s:13:"HyperLife1119";s:8:"password";s:60:"$2y$10$OK4Peq4He4xVgR9xiryJ5OEFs/8j0.c1uCNHO8/csmzPG/pYV4Q06";}}'));
+        // foreach ($chatroomIds as $chatroom) {
 
-        // $this->addChatroom('TEST CHATROOM 3');
-        // $this->addChatroom('世界都在聊');
-        // FriendHandler::request(1, 2, '没有理由', '我的小号');
-        // dump(FriendHandler::request(1, 2, '没有理由!!!', '我的小号'));
-        // FriendHandler::agreeRequest(1, 2);
-        // $arr = mb_str_split('好好学习天天向上', 1, 'utf-8');
-        // shuffle($arr);
-        // $userId = 2;
-        // // $friendRequests =
-        // // FriendRequest::whereRaw(
-        // // '(self_id = ' . $userId . ' AND (self_status = ' . FriendRequest::STATUS_WAIT . ' OR self_status = ' . FriendRequest::STATUS_REJECT . ')) OR (target_id = ' . $userId . ' AND target_status = ' . FriendRequest::STATUS_WAIT . ')')->order('update_time', 'DESC')->select()->toArray();
 
-        // $friendRequests = FriendRequest::where('self_id', '=', $userId)
-        //     ->where(function ($query) {
-        //         $query->whereOr([
-        //             ['self_status', '=', FriendRequest::STATUS_WAIT],
-        //             ['self_status', '=', FriendRequest::STATUS_REJECT]
+        //     Db::execute('DROP TABLE chat_record_' . $chatroom['id']);
+        // }
+
+
+
+
+        // $base = 100; // 表数量
+        // $id = 99;
+
+        // $chatroomIds = Chatroom::field('id')->select()->toArray();
+
+        // foreach ($chatroomIds as $chatroom) {
+        //     $num = $chatroom['id'] % 100;
+        //     $records = ChatRecord::opt($chatroom['id'])->select()->toArray();
+
+        //     foreach ($records as $record) {
+        //         ChatRecord::suffix('_1_' . $num)->json(['data'])->save([
+        //             'chatroom_id' => $record['chatroom_id'],
+        //             'user_id'     => $record['user_id'],
+        //             'type'        => $record['type'],
+        //             'data'        => $record['data'],
+        //             'reply_id'    => $record['reply_id'],
+        //             'create_time' => $record['create_time']
         //         ]);
-        //     })->whereOr(function ($query) use ($userId) {
-        //         $query->where([
-        //             'target_id' => $userId,
-        //             'target_status' => FriendRequest::STATUS_WAIT
-        //         ]);
-        //     })->order('update_time', 'DESC')->select()->toArray();
-        // // $friendRequests = FriendRequest::whereRaw('self_id = {$userId} AND (self_status = ' . FriendRequest::STATUS_WAIT . ' OR self_status = ' . FriendRequest::STATUS_REJECT . ')')
-        // //     ->whereOr([
-        // //         'target_id' => 1,
-        // //         'target_status' => FriendRequest::STATUS_WAIT
-        // //     ])->order('update_time', 'DESC')->select()->toArray();
+        //     }
+        // }
 
-        // dump($friendRequests);
+
+
+
+        // for ($i = 0; $i < 100; $i++) {
+        //     Db::execute("
+        //         CREATE TABLE IF NOT EXISTS chat_record_1_" . $i . " (
+        //             id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        //             chatroom_id INT UNSIGNED NOT NULL          COMMENT '聊天室ID',
+        //             user_id     INT UNSIGNED NULL              COMMENT '消息发送者ID',
+        //             type        TINYINT(1) UNSIGNED NOT NULL   COMMENT '消息类型',
+        //             data        JSON NOT NULL                  COMMENT '消息数据体',
+        //             reply_id    INT UNSIGNED NULL              COMMENT '回复消息的消息记录ID',
+        //             create_time BIGINT UNSIGNED NOT NULL,
+        //             FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
+        //             FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
+        //         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        //     ");
+        // }
     }
 
     /**

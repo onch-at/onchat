@@ -16,12 +16,8 @@ class Unload extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
-        $user = $this->getUser();
-        $this->removeUser();
-        $this->removeUserIdFdPair($user->id);
+        $user = $this->getUserByFd();
+        $this->removeFdUserPair();
+        $this->removeUserIdFdPair($user['id']);
     }
 }

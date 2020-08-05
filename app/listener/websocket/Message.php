@@ -21,9 +21,9 @@ class Message extends BaseListener
             return false;
         }
 
-        $user = $this->getUser();
+        $user = $this->getUserByFd();
 
         $this->websocket->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])
-            ->emit('message', ChatroomHandler::setMessage($user->id, $event['msg']));
+            ->emit('message', ChatroomHandler::setMessage($user['id'], $event['msg']));
     }
 }

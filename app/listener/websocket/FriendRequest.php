@@ -22,12 +22,12 @@ class FriendRequest extends BaseListener
             return false;
         }
 
-        $user = $this->getUser();
+        $user = $this->getUserByFd();
 
         $result = FriendHandler::request(
-            $user->id,
+            $user['id'],
             $event['userId'],
-            $user->username,
+            $user['username'],
             $event['requestReason'],
             $event['targetAlias'],
         );

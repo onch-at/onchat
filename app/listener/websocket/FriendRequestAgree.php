@@ -22,9 +22,9 @@ class FriendRequestAgree extends BaseListener
             return false;
         }
 
-        $user = $this->getUser();
+        $user = $this->getUserByFd();
 
-        $result = FriendHandler::agreeRequest($event['friendRequestId'], $user->id, $event['selfAlias']);
+        $result = FriendHandler::agreeRequest($event['friendRequestId'], $user['id'], $event['selfAlias']);
 
         $chatroomId = $result->data['chatroomId'];
         $this->websocket->join(parent::ROOM_CHATROOM . $chatroomId);

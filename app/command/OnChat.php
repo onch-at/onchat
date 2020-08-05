@@ -59,7 +59,7 @@ class OnChat extends Command
                 break;
 
             default:
-                $output->error('OnChat: 未知指令动作');
+                $output->error('OnChat: 未知指令');
                 break;
         }
     }

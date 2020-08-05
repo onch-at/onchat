@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\swoole\Websocket;
-use think\facade\Session;
-use app\core\handler\User as UserHandler;
-
-class Connect extends BaseListener
+class Error
 {
 
     /**
@@ -18,6 +14,6 @@ class Connect extends BaseListener
      */
     public function handle($event)
     {
-        trace('Connect');
+        trace('Error');
     }
 }

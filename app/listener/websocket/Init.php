@@ -23,10 +23,10 @@ class Init extends BaseListener
             return false;
         }
 
-        $this->initSession($event['sessId']);
+        $this->setFdUserPair($event['sessId']);
 
-        $user = $this->getUser();
-        $chatrooms = UserHandler::getChatrooms($user->id)->data;
+        $user = $this->getUserByFd();
+        $chatrooms = UserHandler::getChatrooms($user['id'])->data;
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
@@ -34,9 +34,9 @@ class Init extends BaseListener
         }
 
         // 加入好友请求房间
-        $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $user->id);
+        $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $user['id']);
 
         // 储存uid - fd
-        $this->setUserIdFdPair($user->id);
+        $this->setUserIdFdPair($user['id']);
     }
 }

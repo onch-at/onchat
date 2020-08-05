@@ -135,42 +135,17 @@ class Chatroom
             }
         }
 
-        // 启动事务
-        Db::startTrans();
-        try {
-            $timestamp = SqlUtil::rawTimestamp();
+        $timestamp = SqlUtil::rawTimestamp();
 
-            // 创建一个聊天室
-            $chatroom = ChatroomModel::create([
-                'name'        => $name,
-                'type'        => $type,
-                'create_time' => $timestamp,
-                'update_time' => $timestamp,
-            ]);
+        // 创建一个聊天室
+        $chatroom = ChatroomModel::create([
+            'name'        => $name,
+            'type'        => $type,
+            'create_time' => $timestamp,
+            'update_time' => $timestamp,
+        ]);
 
-            // 创建这个聊天室的聊天记录表
-            Db::execute("
-                CREATE TABLE IF NOT EXISTS chat_record_" . $chatroom->id . " (
-                    id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    chatroom_id INT UNSIGNED NOT NULL          COMMENT '聊天室ID',
-                    user_id     INT UNSIGNED NULL              COMMENT '消息发送者ID',
-                    type        TINYINT(1) UNSIGNED NOT NULL   COMMENT '消息类型',
-                    data        JSON NOT NULL                  COMMENT '消息数据体',
-                    reply_id    INT UNSIGNED NULL              COMMENT '回复消息的消息记录ID',
-                    create_time BIGINT UNSIGNED NOT NULL,
-                    FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
-                    FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-            ");
-
-            Db::commit();
-
-            return new Result(Result::CODE_SUCCESS, null, $chatroom->id);
-        } catch (\Exception $e) {
-            // 回滚事务
-            Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN);
-        }
+        return new Result(Result::CODE_SUCCESS, null, $chatroom->id);
     }
 
     /**
@@ -302,7 +277,7 @@ class Chatroom
         $nicknameMap = [];
         $nicknameMap[$userId] = $nickname;
 
-        $chatRecord = ChatRecordModel::opt($id)->json(['data']); // ::where('chatroom_id', '=', $id)
+        $chatRecord = ChatRecordModel::opt($id)->json(['data'])->where('chatroom_id', '=', $id);
         if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }

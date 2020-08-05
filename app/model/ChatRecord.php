@@ -13,9 +13,6 @@ use app\model\Chatroom;
  */
 class ChatRecord extends Model
 {
-    /** 定义默认的表后缀 */
-    protected $suffix = '_1';
-
     /**
      * 选择聊天室
      *
@@ -24,8 +21,9 @@ class ChatRecord extends Model
      */
     public static function opt($chatroomId)
     {
+        // TODO 如果房间ID超过了1000，则需要继续拓展
         $model = new static();
-        $model->setSuffix('_' . $chatroomId);
+        $model->setSuffix('_1_' . $chatroomId % 100);
 
         return $model;
     }
