@@ -406,7 +406,7 @@ class User
 
             foreach ($data as $key => $value) {
                 if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
-                    $data[$key]['name'] = $privateChatroomNameList[$chatroomId];
+                    $data[$key]['name'] = $privateChatroomNameList[$value['chatroom_id']];
                 }
             }
         }
