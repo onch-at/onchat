@@ -68,57 +68,6 @@ class Index extends BaseController
 
     public function index()
     {
-
-        // $chatroomIds = Chatroom::field('id')->select()->toArray();
-
-        // foreach ($chatroomIds as $chatroom) {
-
-
-        //     Db::execute('DROP TABLE chat_record_' . $chatroom['id']);
-        // }
-
-
-
-
-        // $base = 100; // 表数量
-        // $id = 99;
-
-        // $chatroomIds = Chatroom::field('id')->select()->toArray();
-
-        // foreach ($chatroomIds as $chatroom) {
-        //     $num = $chatroom['id'] % 100;
-        //     $records = ChatRecord::opt($chatroom['id'])->select()->toArray();
-
-        //     foreach ($records as $record) {
-        //         ChatRecord::suffix('_1_' . $num)->json(['data'])->save([
-        //             'chatroom_id' => $record['chatroom_id'],
-        //             'user_id'     => $record['user_id'],
-        //             'type'        => $record['type'],
-        //             'data'        => $record['data'],
-        //             'reply_id'    => $record['reply_id'],
-        //             'create_time' => $record['create_time']
-        //         ]);
-        //     }
-        // }
-
-
-
-
-        // for ($i = 0; $i < 100; $i++) {
-        //     Db::execute("
-        //         CREATE TABLE IF NOT EXISTS chat_record_1_" . $i . " (
-        //             id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        //             chatroom_id INT UNSIGNED NOT NULL          COMMENT '聊天室ID',
-        //             user_id     INT UNSIGNED NULL              COMMENT '消息发送者ID',
-        //             type        TINYINT(1) UNSIGNED NOT NULL   COMMENT '消息类型',
-        //             data        JSON NOT NULL                  COMMENT '消息数据体',
-        //             reply_id    INT UNSIGNED NULL              COMMENT '回复消息的消息记录ID',
-        //             create_time BIGINT UNSIGNED NOT NULL,
-        //             FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
-        //             FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
-        //         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        //     ");
-        // }
     }
 
     /**

@@ -107,7 +107,7 @@ class User
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $timestamp = SqlUtil::rawTimestamp();
+        $timestamp = time() * 1000;
 
         $user = UserModel::create([
             'username'    => $username,
@@ -119,7 +119,9 @@ class User
 
         Chatroom::addChatMember(1, $user->id); // 添加新用户到默认聊天室
 
-        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', $user->id);
+        unset($user->password); // 删掉密码
+
+        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', ArrUtil::keyToCamel($user->toArray()));
     }
 
     /**
@@ -141,18 +143,21 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
         }
 
-        $info = self::getInfoByKey('username', $username, ['id', 'username', 'password']);
-        if (empty($info)) { // 如果用户不存在
+        $user = self::getInfoByKey('username', $username, '*');
+
+        if (empty($user)) { // 如果用户不存在
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
-        if (!password_verify($password, $info['password'])) { // 如果密码错误
+        if (!password_verify($password, $user['password'])) { // 如果密码错误
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_PASSWORD_ERROR]);
         }
 
-        self::saveLoginStatus($info['id'], $info['username'], $info['password']); // 保存登录状态
+        self::saveLoginStatus($user['id'], $user['username'], $user['password']); // 保存登录状态
 
-        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…', $info['id']);
+        unset($user['password']);
+
+        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…', $user);
     }
 
     /**
@@ -199,12 +204,30 @@ class User
      * 通过用户ID获取User
      *
      * @param integer $id
-     * @return array
+     * @return Result
      */
     public static function getUserById(int $id): Result
     {
         // TODO 查询更多信息
         $user = UserModel::where('id', '=', $id)->withoutField('password')->find();
+
+        if (!$user) {
+            return new Result(Result::CODE_ERROR_PARAM, '用户不存在');
+        }
+
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user->toArray()));
+    }
+
+    /**
+     * 通过用户名获取User
+     *
+     * @param string $username
+     * @return Result
+     */
+    public static function getUserByUsername(string $username): Result
+    {
+        // TODO 查询更多信息
+        $user = UserModel::where('username', '=', $username)->withoutField('password')->find();
 
         if (!$user) {
             return new Result(Result::CODE_ERROR_PARAM, '用户不存在');
@@ -266,23 +289,23 @@ class User
 
     /**
      * 检查用户是否已经登录/处于登录状态
-     * 如果已登录，则返回UserId,否则返回零
+     * 如果已登录，则返回User, 否则返回false
      *
-     * @return integer
+     * @return Result
      */
-    public static function checkLogin(): int
+    public static function checkLogin(): Result
     {
         $session = session(self::SESSION_USER_LOGIN);
         if (empty($session)) { // 如果没有登录的Session
-            return 0;
+            return new Result(Result::CODE_SUCCESS, null, false);
         }
 
         $password = self::getInfoByKey('id', $session['id'], 'password')['password'];
         if ($session['password'] !== $password) { // 如果密码错误
-            return 0;
+            return new Result(Result::CODE_SUCCESS, null, false);;
         }
 
-        return $session['id'];
+        return self::getUserById($session['id']);
     }
 
     /**

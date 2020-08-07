@@ -39,13 +39,13 @@ class User extends BaseController
 
     /**
      * 检测用户是否已经登录
-     * 如果已登录，则返回UserId；否则返回零
+     * 如果已登录，则返回User；否则返回false
      *
      * @return Result
      */
     public function checkLogin(): Result
     {
-        return new Result(Result::CODE_SUCCESS, null, UserHandler::checkLogin());
+        return UserHandler::checkLogin();
     }
 
     /**
