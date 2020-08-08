@@ -46,7 +46,7 @@ abstract class BaseListener
      */
     protected function setFdUserPair(string $sessId)
     {
-        $session = unserialize($this->getRedis()->get($this->sessPrefix . $sessId));
+        $session = unserialize(unserialize($this->getRedis()->get($this->sessPrefix . $sessId)));
 
         $this->getRedis()->hSet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd, serialize([
             'id'       => $session[UserHandler::SESSION_USER_LOGIN]['id'],
