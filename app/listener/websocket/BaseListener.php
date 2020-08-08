@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use think\swoole\Websocket;
-use think\cache\driver\Redis;
+use think\facade\Cache;
 use app\core\handler\User as UserHandler;
 
 abstract class BaseListener
 {
     protected $websocket;
     protected $server;
-    protected $redis;
+    protected $redisDriver;
+    /** 当前用户的FD */
     protected $fd;
+    /** SESSION的前缀 */
     protected $sessPrefix;
 
     /** 聊天室房间前缀 */
@@ -30,7 +32,7 @@ abstract class BaseListener
     {
         $this->websocket = $websocket;
         $this->server = app("think\swoole\Manager")->getServer();
-        $this->redis = new Redis;
+        $this->redisDriver = Cache::store('redis');
         $this->fd = $this->websocket->getSender();
 
         $this->sessPrefix = config('session.prefix');
@@ -44,9 +46,9 @@ abstract class BaseListener
      */
     protected function setFdUserPair(string $sessId)
     {
-        $session = unserialize($this->redis->get($this->sessPrefix . $sessId));
+        $session = unserialize($this->getRedis()->get($this->sessPrefix . $sessId));
 
-        $this->redis->hSet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd, serialize([
+        $this->getRedis()->hSet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd, serialize([
             'id'       => $session[UserHandler::SESSION_USER_LOGIN]['id'],
             'username' => $session[UserHandler::SESSION_USER_LOGIN]['username']
         ]));
@@ -60,7 +62,7 @@ abstract class BaseListener
      */
     protected function getUserByFd()
     {
-        return unserialize($this->redis->hGet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd));
+        return unserialize($this->getRedis()->hGet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd));
     }
 
     /**
@@ -70,7 +72,7 @@ abstract class BaseListener
      */
     protected function removeFdUserPair()
     {
-        $this->redis->hDel(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd);
+        $this->getRedis()->hDel(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd);
     }
 
     /**
@@ -81,7 +83,7 @@ abstract class BaseListener
      */
     protected function setUserIdFdPair(int $userId)
     {
-        $this->redis->hSet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId, $this->fd);
+        $this->getRedis()->hSet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId, $this->fd);
     }
 
     /**
@@ -92,7 +94,7 @@ abstract class BaseListener
      */
     protected function removeUserIdFdPair(int $userId)
     {
-        $this->redis->hDel(self::REDIS_HASH_UID_FD_PAIR, $userId);
+        $this->getRedis()->hDel(self::REDIS_HASH_UID_FD_PAIR, $userId);
     }
 
     /**
@@ -104,7 +106,7 @@ abstract class BaseListener
      */
     protected function getFdByUserId(int $userId): int
     {
-        return (int) $this->redis->hGet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
+        return (int) $this->getRedis()->hGet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
     }
 
     /**
@@ -115,5 +117,15 @@ abstract class BaseListener
     protected function isEstablished(): bool
     {
         return $this->server->isEstablished($this->fd);
+    }
+
+    /**
+     * 返回Redis句柄对象
+     *
+     * @return mixed
+     */
+    protected function getRedis()
+    {
+        return $this->redisDriver->handler();
     }
 }

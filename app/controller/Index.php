@@ -18,8 +18,9 @@ use app\core\handler\Chatroom as ChatroomHandler;
 use app\core\handler\User as UserHandler;
 use app\core\handler\Friend as FriendHandler;
 use app\model\FriendRequest;
-use think\console\Output;
 use think\facade\Cache;
+use OSS\OssClient;
+use OSS\Core\OssException;
 
 class Index extends BaseController
 {

@@ -4,8 +4,55 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b2c7fa73ce04d001f58bb16d339b8cf1",
+    "content-hash": "78b5f8cf3e7aef46f9156ea91eb3f6c8",
     "packages": [
+        {
+            "name": "aliyuncs/oss-sdk-php",
+            "version": "v2.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aliyun/aliyun-oss-php-sdk.git",
+                "reference": "053d7ba9e798e4c09b9c5c1edab153d25ea9643a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aliyun/aliyun-oss-php-sdk/zipball/053d7ba9e798e4c09b9c5c1edab153d25ea9643a",
+                "reference": "053d7ba9e798e4c09b9c5c1edab153d25ea9643a",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0",
+                "satooshi/php-coveralls": "~1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "OSS\\": "src/OSS"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aliyuncs",
+                    "homepage": "http://www.aliyun.com"
+                }
+            ],
+            "description": "Aliyun OSS SDK for PHP",
+            "homepage": "http://www.aliyun.com/product/oss/",
+            "time": "2019-11-15T11:05:42+00:00"
+        },
         {
             "name": "league/flysystem",
             "version": "1.0.46",
@@ -221,16 +268,16 @@
         },
         {
             "name": "nette/utils",
-            "version": "v3.1.2",
+            "version": "v3.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/utils.git",
-                "reference": "488f58378bba71767e7831c83f9e0fa808bf83b9"
+                "reference": "c09937fbb24987b2a41c6022ebe84f4f1b8eec0f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/utils/zipball/488f58378bba71767e7831c83f9e0fa808bf83b9",
-                "reference": "488f58378bba71767e7831c83f9e0fa808bf83b9",
+                "url": "https://api.github.com/repos/nette/utils/zipball/c09937fbb24987b2a41c6022ebe84f4f1b8eec0f",
+                "reference": "c09937fbb24987b2a41c6022ebe84f4f1b8eec0f",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -301,7 +348,7 @@
                 "utility",
                 "validation"
             ],
-            "time": "2020-05-27T09:58:51+00:00"
+            "time": "2020-08-07T10:34:21+00:00"
         },
         {
             "name": "open-smf/connection-pool",
@@ -970,16 +1017,16 @@
         },
         {
             "name": "topthink/think-swoole",
-            "version": "v3.0.8",
+            "version": "3.0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/think-swoole.git",
-                "reference": "3152c1e705e9eef00b9727a49c2eec54370e4fe3"
+                "reference": "c61e95cdc0669f4fe3382e25def9ae25797c0508"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/3152c1e705e9eef00b9727a49c2eec54370e4fe3",
-                "reference": "3152c1e705e9eef00b9727a49c2eec54370e4fe3",
+                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/c61e95cdc0669f4fe3382e25def9ae25797c0508",
+                "reference": "c61e95cdc0669f4fe3382e25def9ae25797c0508",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -1031,7 +1078,7 @@
                 }
             ],
             "description": "Swoole extend for thinkphp",
-            "time": "2020-06-17T15:45:03+00:00"
+            "time": "2020-08-08T14:39:00+00:00"
         }
     ],
     "packages-dev": [
@@ -1436,7 +1483,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "topthink/think-swoole": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
