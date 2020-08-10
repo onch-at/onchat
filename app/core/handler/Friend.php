@@ -344,7 +344,7 @@ class Friend
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN);
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -405,7 +405,7 @@ class Friend
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN);
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\facade\Session;
 use app\core\handler\User as UserHandler;
-use app\model\ChatMember as ChatMemberModel;
-use app\core\handler\Friend as FriendHandler;
+use app\core\util\Sql as SqlUtil;
+use app\model\UserInfo as UserInfoModel;
 
 class Init extends BaseListener
 {
@@ -38,5 +37,7 @@ class Init extends BaseListener
 
         // 储存uid - fd
         $this->setUserIdFdPair($user['id']);
+
+        UserInfoModel::update(['login_time' => SqlUtil::rawTimestamp()], ['id' => $user['id']]);
     }
 }

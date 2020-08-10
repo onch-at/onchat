@@ -9,12 +9,12 @@ use think\App;
 use think\Request;
 use think\Response;
 use think\Session;
-use think\middleware\SessionInit as BaseSessionInit;
+use think\middleware\SessionInit as OriginSessionInit;
 
 /**
  * 自定义的SessionInit初始化
  */
-class SessionInit extends BaseSessionInit
+class SessionInit extends OriginSessionInit
 {
 
     public function __construct(App $app, Session $session)

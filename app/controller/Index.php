@@ -7,6 +7,7 @@ namespace app\controller;
 use app\BaseController;
 use app\model\ChatMember;
 use app\model\User;
+use app\model\UserInfo;
 use app\model\ChatRecord;
 use app\model\Chatroom;
 use think\captcha\facade\Captcha;
@@ -18,9 +19,13 @@ use app\core\handler\Chatroom as ChatroomHandler;
 use app\core\handler\User as UserHandler;
 use app\core\handler\Friend as FriendHandler;
 use app\model\FriendRequest;
+use app\core\identicon\generator\ImageMagickGenerator;
+use app\core\oss\Client;
+use Identicon\Generator\SvgGenerator;
 use think\facade\Cache;
 use OSS\OssClient;
 use OSS\Core\OssException;
+use app\core\util\Date as DateUtil;
 
 class Index extends BaseController
 {
@@ -69,6 +74,29 @@ class Index extends BaseController
 
     public function index()
     {
+        // $identicon = new \Identicon\Identicon(new ImageMagickGenerator());
+
+        // // 存储空间名称
+        // $bucket = "onchat";
+        // $ossClient = Client::getInstance();
+        // $user = User::select()->toArray();
+        // foreach ($user as $item) {
+        //     $object = 'dev/avatar/' . $item['id'] . '/' . md5((string) DateUtil::now()) . '.png';
+        //     $content = $identicon->getImageData($item['id'], 128, null, '#f5f5f5');
+        //     try {
+        //         $ossClient->putObject($bucket, $object, $content);
+        //         UserInfo::create([
+        //             'user_id' => $item['id'],
+        //             'nickname' => $item['username'],
+        //             'login_time' => $item['update_time'],
+        //             'avatar' => $object,
+        //             'background_image' => 'http://static.hypergo.net/img/rkph.jpg',
+        //         ]);
+        //     } catch (OssException $e) {
+        //         printf(__FUNCTION__ . ": FAILED\n");
+        //         printf($e->getMessage() . "\n");
+        //     }
+        // }
     }
 
     /**

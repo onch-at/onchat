@@ -10,20 +10,36 @@ USE onchat;
 CREATE TABLE IF NOT EXISTS user (
     id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     username    VARCHAR(30) NOT NULL UNIQUE KEY COMMENT '用户名',
-    password    VARCHAR(255) NOT NULL           COMMENT '密码',
+    password    VARCHAR(256) NOT NULL           COMMENT '密码',
     email       VARCHAR(50) NULL UNIQUE KEY     COMMENT '电子邮箱',
     telephone   CHAR(11) NULL UNIQUE KEY        COMMENT '电话号码',
     create_time BIGINT UNSIGNED NOT NULL,
     update_time BIGINT UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 用户信息表
+CREATE TABLE IF NOT EXISTS user_info (
+    id               INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id          INT UNSIGNED NOT NULL    COMMENT '用户ID',
+    nickname         VARCHAR(30) NOT NULL     COMMENT '昵称',
+    signature        VARCHAR(100) NULL        COMMENT '个性签名',
+    mood             TINYINT(1) UNSIGNED NULL COMMENT '心情',
+    login_time       BIGINT UNSIGNED NOT NULL COMMENT '登录时间',
+    birthday         BIGINT UNSIGNED NULL     COMMENT '生日',
+    gender           TINYINT(1) UNSIGNED NULL COMMENT '性别',
+    age              TINYINT(1) UNSIGNED NULL COMMENT '年龄',
+    constellation    TINYINT(1) UNSIGNED NULL COMMENT '星座',
+    avatar           VARCHAR(256) NOT NULL    COMMENT '头像',
+    background_image VARCHAR(256) NOT NULL    COMMENT '背景图',
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 聊天室表
 CREATE TABLE IF NOT EXISTS chatroom (
     id               INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name             VARCHAR(30) NULL             COMMENT '聊天室名字',
-    description      VARCHAR(500) NULL            COMMENT '聊天室描述',
-    avatar           VARCHAR(255) NULL            COMMENT '聊天室头像URL',
-    avatar_thumbnail VARCHAR(255) NULL            COMMENT '聊天室头像缩略图URL',
+    description      VARCHAR(100) NULL            COMMENT '聊天室描述',
+    avatar           VARCHAR(256) NULL            COMMENT '聊天室头像URL',
     type             TINYINT(1) UNSIGNED NOT NULL COMMENT '聊天室的类型',
     create_time      BIGINT UNSIGNED NOT NULL,
     update_time      BIGINT UNSIGNED NOT NULL
@@ -84,8 +100,8 @@ CREATE TABLE IF NOT EXISTS friend_request (
 --     password    VARCHAR(60) NOT NULL COMMENT '',
 --     email       VARCHAR(50) NULL COMMENT '',
 --     telephone   CHAR(11) NULL COMMENT '',
---     create_time INT NOT NULL,
---     update_time INT NOT NULL,
+--     create_time BIGINT UNSIGNED NOT NULL,
+--     update_time BIGINT UNSIGNED NOT NULL,
 --     FOREIGN KEY (id) REFERENCES account(uid) ON DELETE CASCADE ON UPDATE CASCADE
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

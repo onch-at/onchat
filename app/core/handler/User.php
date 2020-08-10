@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace app\core\handler;
 
-use app\model\User as UserModel;
-use app\model\ChatMember as ChatMemberModel;
-use app\model\ChatRecord as ChatRecordModel;
 use app\core\Result;
+use think\facade\Db;
+use Identicon\Identicon;
+use app\model\User as UserModel;
 use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
+use app\core\util\Date as DateUtil;
+use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
+use app\model\UserInfo as UserInfoModel;
+use app\model\ChatMember as ChatMemberModel;
+use app\model\ChatRecord as ChatRecordModel;
+use app\core\identicon\generator\ImageMagickGenerator;
 
 class User
 {
@@ -54,6 +60,26 @@ class User
 
     /** 是否开放注册 */
     const CAN_REGISTER = true;
+
+    /** User 字段 */
+    const USER_FIELDS = [
+        'user.id',
+        'user.username',
+        'user.email',
+        'user.telephone',
+        'user.create_time',
+        'user.update_time',
+        'user_info.nickname',
+        'user_info.signature',
+        'user_info.mood',
+        'user_info.login_time',
+        'user_info.birthday',
+        'user_info.gender',
+        'user_info.age',
+        'user_info.constellation',
+        'user_info.avatar',
+        'user_info.background_image',
+    ];
 
     /**
      * 获取储存在SESSION中的用户ID
@@ -104,24 +130,61 @@ class User
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
         if (!$hash) { // 如果密码散列创建失败
-            return new Result(Result::CODE_ERROR_PARAM);
+            return new Result(Result::CODE_ERROR_UNKNOWN, '密码散列创建失败');
         }
 
         $timestamp = time() * 1000;
+        $identicon = new Identicon(new ImageMagickGenerator());
+        $bucket = 'onchat';
 
-        $user = UserModel::create([
-            'username'    => $username,
-            'password'    => $hash,
-            'create_time' => $timestamp,
-            'update_time' => $timestamp,
-        ]);
-        self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
+        // 启动事务
+        Db::startTrans();
+        try {
+            $user = UserModel::create([
+                'username'    => $username,
+                'password'    => $hash,
+                'create_time' => $timestamp,
+                'update_time' => $timestamp,
+            ]);
 
-        Chatroom::addChatMember(1, $user->id); // 添加新用户到默认聊天室
+            $ossOssClient = OssClient::getInstance();
+            // 如果为调试模式，则将数据存放到dev/目录下
+            $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/' . $user->id . '/' . md5((string) DateUtil::now()) . '.png';
+            // 根据用户ID创建哈希头像
+            $content = $identicon->getImageData($user->id, 128, null, '#f5f5f5');
+            // 上传到OSS
+            $ossOssClient->putObject($bucket, $object, $content);
 
-        unset($user->password); // 删掉密码
+            // 暂存一下用户信息，便于最后直接返回给前端
+            $userInfo = [
+                'user_id' => $user->id,
+                'nickname' => $user->username,
+                'login_time' => $timestamp,
+                'avatar' => $object,
+                'background_image' => 'http://static.hypergo.net/img/rkph.jpg', // TODO
+            ];
 
-        return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', ArrUtil::keyToCamel($user->toArray()));
+            UserInfoModel::create($userInfo);
+
+            self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
+
+            Chatroom::addChatMember(1, $user->id); // 添加新用户到默认聊天室
+
+            unset($user->password); // 删掉密码
+
+            $avatar = OssClient::getDomain() . $object;
+            $userInfo['avatar'] = $avatar . OssClient::getOriginalImgStylename();
+            $userInfo['avatarThumbnail'] = $avatar . OssClient::getThumbnailImgStylename();
+
+            // 提交事务
+            Db::commit();
+
+            return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', ArrUtil::keyToCamel($user->toArray() + $userInfo));
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+        }
     }
 
     /**
@@ -143,7 +206,10 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
         }
 
-        $user = self::getInfoByKey('username', $username, '*');
+        $fields = self::USER_FIELDS;
+        $fields[] = 'user.password';
+
+        $user = self::getInfoByKey('username', $username, $fields);
 
         if (empty($user)) { // 如果用户不存在
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
@@ -157,7 +223,11 @@ class User
 
         unset($user['password']);
 
-        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…', $user);
+        $avatar = OssClient::getDomain() . $user['avatar'];
+        $user['avatar'] = $avatar . OssClient::getOriginalImgStylename();
+        $user['avatarThumbnail'] = $avatar . OssClient::getThumbnailImgStylename();
+
+        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…', ArrUtil::keyToCamel($user));
     }
 
     /**
@@ -197,7 +267,9 @@ class User
      */
     public static function getInfoByKey(string $key, $value, $field): array
     {
-        return UserModel::where($key, '=', $value)->field($field)->findOrEmpty()->toArray();
+
+        return UserModel::where($key == 'id' ? 'user.id' : $key, '=', $value)->join('user_info', 'user_info.user_id = user.id')
+            ->field($field)->findOrEmpty()->toArray();
     }
 
     /**
@@ -208,12 +280,16 @@ class User
      */
     public static function getUserById(int $id): Result
     {
-        // TODO 查询更多信息
-        $user = UserModel::where('id', '=', $id)->withoutField('password')->find();
+        $user = UserModel::where('user.id', '=', $id)->join('user_info', 'user_info.user_id = user.id')
+            ->field(self::USER_FIELDS)->find();
 
         if (!$user) {
-            return new Result(Result::CODE_ERROR_PARAM, '用户不存在');
+            return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
+
+        $avatar = OssClient::getDomain() . $user->avatar;
+        $user->avatar = $avatar . OssClient::getOriginalImgStylename();
+        $user->avatarThumbnail = $avatar . OssClient::getThumbnailImgStylename();
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user->toArray()));
     }
@@ -226,12 +302,16 @@ class User
      */
     public static function getUserByUsername(string $username): Result
     {
-        // TODO 查询更多信息
-        $user = UserModel::where('username', '=', $username)->withoutField('password')->find();
+        $user = UserModel::where('user.username', '=', $username)->join('user_info', 'user_info.user_id = user.id')
+            ->field(self::USER_FIELDS)->find();
 
         if (!$user) {
-            return new Result(Result::CODE_ERROR_PARAM, '用户不存在');
+            return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
+
+        $avatar = OssClient::getDomain() . $user->avatar;
+        $user->avatar = $avatar . OssClient::getOriginalImgStylename();
+        $user->avatarThumbnail = $avatar . OssClient::getThumbnailImgStylename();
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user->toArray()));
     }
@@ -300,12 +380,17 @@ class User
             return new Result(Result::CODE_SUCCESS, null, false);
         }
 
-        $password = self::getInfoByKey('id', $session['id'], 'password')['password'];
-        if ($session['password'] !== $password) { // 如果密码错误
+        $fields = self::USER_FIELDS;
+        $fields[] = 'user.password';
+        $user = self::getInfoByKey('id', $session['id'], $fields);
+
+        if ($session['password'] !== $user['password']) { // 如果密码错误
             return new Result(Result::CODE_SUCCESS, null, false);;
         }
 
-        return self::getUserById($session['id']);
+        unset($user['password']);
+
+        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user));
     }
 
     /**
@@ -381,7 +466,7 @@ class User
                 'chat_member.create_time',
                 'chat_member.update_time',
                 'chatroom.name',
-                'chatroom.avatar_thumbnail',
+                'chatroom.avatar',
                 'chatroom.type',
             ])
             // ->order('chat_member.update_time', 'DESC') 由于前端需要即时排序，则将这一步交给前端
@@ -416,20 +501,34 @@ class User
 
         // 如果其中有私聊聊天室
         if (count($privateChatroomIdList) > 0) {
+            // chatroomId => nickname
+            $privateChatroomNameMap = [];
+            // chatroomId => friend user id
+            $friendIdMap = [];
+            // chatroomId => avatar
+            $privateChatroomAvatarMap = [];
+
             // 找到私聊聊天室，室友（好友）的nickname
             $list = ChatMemberModel::where('chatroom_id', 'IN', $privateChatroomIdList)
-                ->where('user_id', '<>', $userId)->field('chatroom_id, nickname')->select();
-
-            // chatroomId => nickname
-            $privateChatroomNameList = [];
+                ->where('user_id', '<>', $userId)->field('chatroom_id, user_id, nickname')->select();
 
             foreach ($list as $item) {
-                $privateChatroomNameList[$item->chatroom_id] = $item->nickname;
+                $privateChatroomNameMap[$item->chatroom_id] = $item->nickname;
+                $friendIdMap[$item->chatroom_id] = $item->user_id;
+            }
+
+            // 找到私聊聊天室，室友（好友）的头像
+            $list = UserInfoModel::where('user_id', 'IN', array_values($friendIdMap))
+                ->field('user_id, avatar')->select();
+
+            foreach ($list as $item) {
+                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = OssClient::getDomain() . $item->avatar . OssClient::getThumbnailImgStylename();
             }
 
             foreach ($data as $key => $value) {
                 if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
-                    $data[$key]['name'] = $privateChatroomNameList[$value['chatroom_id']];
+                    $data[$key]['name'] = $privateChatroomNameMap[$value['chatroom_id']];
+                    $data[$key]['avatarThumbnail'] = $privateChatroomAvatarMap[$value['chatroom_id']];
                 }
             }
         }

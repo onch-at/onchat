@@ -248,7 +248,7 @@ class Chatroom
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN);
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -276,6 +276,8 @@ class Chatroom
         // 用于缓存 user id => nickname
         $nicknameMap = [];
         $nicknameMap[$userId] = $nickname;
+        // 用于缓存 user id => avatarThumbnail
+        $avatarThumbnailMap = [];
 
         $chatRecord = ChatRecordModel::opt($id)->json(['data'])->where('chatroom_id', '=', $id);
         if ($chatRecord->count() === 0) { // 如果没有消息
@@ -298,8 +300,6 @@ class Chatroom
         $records = [];
         foreach ($data->order('id', 'DESC')->limit(self::MSG_ROWS)->cursor() as $item) {
             $item = $item->toArray();
-            // TODO 查询用户头像
-            $item['avatarThumbnail'] = null;
 
             // 如果nicknameMap里面没有找到已经缓存的nickname
             if (!isset($nicknameMap[$item['user_id']])) {
@@ -311,7 +311,15 @@ class Chatroom
 
                 $nicknameMap[$item['user_id']] = $nickname;
             }
+
+            // 如果avatarThumbnailMap里面没有找到已经缓存的avatarThumbnail
+            if (!isset($avatarThumbnailMap[$item['user_id']])) {
+                $avatar = User::getInfoByKey('id', $item['user_id'], 'avatar')['avatar'];
+                $avatarThumbnailMap[$item['user_id']] = 'https://oss.chat.hypergo.net/' . $avatar . '/thumbnail';
+            }
+
             $item['nickname'] = $nicknameMap[$item['user_id']];
+            $item['avatarThumbnail'] = $avatarThumbnailMap[$item['user_id']];
             $item['data'] = json_decode($item['data']);
             $records[] = $item;
         }
@@ -363,7 +371,7 @@ class Chatroom
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN);
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 }

@@ -20,7 +20,8 @@
         "topthink/think-orm": "^2.0",
         "topthink/think-captcha": "^3.0",
         "topthink/think-swoole": "3.0.x-dev",
-        "aliyuncs/oss-sdk-php": "^2.3"
+        "aliyuncs/oss-sdk-php": "^2.3",
+        "yzalis/identicon": "^2.0"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",
