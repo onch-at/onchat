@@ -25,7 +25,7 @@ class ImageMagickGenerator extends OriginImageMagickGenerator
             $background = new ImagickPixel("rgb($rgbBackgroundColor[0],$rgbBackgroundColor[1],$rgbBackgroundColor[2])");
         }
 
-        $size = $this->pixelRatio * 7;
+        $size = $this->pixelRatio * 6;
         $this->generatedImage->newImage($size, $size, $background, 'png');
 
         // prepare color
@@ -35,15 +35,17 @@ class ImageMagickGenerator extends OriginImageMagickGenerator
         $draw = new ImagickDraw();
         $draw->setFillColor($color);
 
+        $offset = $this->pixelRatio / 2;
+
         // draw the content
         foreach ($this->getArrayOfSquare() as $lineKey => $lineValue) {
             foreach ($lineValue as $colKey => $colValue) {
                 if (true === $colValue && $lineKey < 5) { // 只要 0~4 行
                     $draw->rectangle(
-                        $colKey * $this->pixelRatio + $this->pixelRatio,
-                        $lineKey * $this->pixelRatio + $this->pixelRatio,
-                        ($colKey + 1) * $this->pixelRatio + $this->pixelRatio,
-                        ($lineKey + 1) * $this->pixelRatio + $this->pixelRatio
+                        $colKey * $this->pixelRatio + $offset,
+                        $lineKey * $this->pixelRatio + $offset,
+                        ($colKey + 1) * $this->pixelRatio + $offset,
+                        ($lineKey + 1) * $this->pixelRatio + $offset
                     );
                 }
             }
@@ -96,7 +98,7 @@ class ImageMagickGenerator extends OriginImageMagickGenerator
         }
 
         $this->size = $size;
-        $this->pixelRatio = (int) round($size / 7);
+        $this->pixelRatio = (int) round($size / 6);
 
         return $this;
     }

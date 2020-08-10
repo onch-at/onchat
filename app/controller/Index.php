@@ -81,7 +81,7 @@ class Index extends BaseController
         // $ossClient = Client::getInstance();
         // $user = User::select()->toArray();
         // foreach ($user as $item) {
-        //     $object = 'dev/avatar/' . $item['id'] . '/' . md5((string) DateUtil::now()) . '.png';
+        //     $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/' . $item['id'] . '/' . md5((string) DateUtil::now()) . '.png';
         //     $content = $identicon->getImageData($item['id'], 128, null, '#f5f5f5');
         //     try {
         //         $ossClient->putObject($bucket, $object, $content);

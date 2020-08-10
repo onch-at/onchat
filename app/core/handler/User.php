@@ -385,8 +385,12 @@ class User
         $user = self::getInfoByKey('id', $session['id'], $fields);
 
         if ($session['password'] !== $user['password']) { // 如果密码错误
-            return new Result(Result::CODE_SUCCESS, null, false);;
+            return new Result(Result::CODE_SUCCESS, null, false);
         }
+
+        $avatar = OssClient::getDomain() . $user['avatar'];
+        $user['avatar'] = $avatar . OssClient::getOriginalImgStylename();
+        $user['avatarThumbnail'] = $avatar . OssClient::getThumbnailImgStylename();
 
         unset($user['password']);
 
