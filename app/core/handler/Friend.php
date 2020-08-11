@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace app\core\handler;
 
-use think\facade\Db;
 use app\core\Result;
-use app\core\util\Str as StrUtil;
+use think\facade\Db;
+use app\model\User as UserModel;
 use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
-use app\model\User as UserModel;
+use app\core\util\Str as StrUtil;
+use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\FriendRequest as FriendRequestModel;
@@ -70,6 +71,8 @@ class Friend
             'target_id'      => $targetId
         ]);
 
+        $selfAvatarThumbnail = OssClient::getDomain() . User::getInfoByKey('id', $selfId, 'avatar')['avatar'] . OssClient::getThumbnailImgStylename();
+
         $timestamp = time() * 1000;
         $friendRequest = $query->where('target_status', '<>', FriendRequestModel::STATUS_AGREE)->find();
         // 如果之前已经申请过，但对方没有同意，就把对方的状态设置成等待验证
@@ -85,7 +88,7 @@ class Friend
 
             $friendRequest = $friendRequest->toArray();
 
-            // TODO 把头像也返回
+            $friendRequest['selfAvatarThumbnail'] = $selfAvatarThumbnail;
             $friendRequest['selfUsername'] = $selfUsername;
             $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
@@ -102,7 +105,8 @@ class Friend
         ]);
 
         $friendRequest = $friendRequest->toArray();
-        // TODO 把头像也返回
+
+        $friendRequest['selfAvatarThumbnail'] = $selfAvatarThumbnail;
         $friendRequest['selfUsername'] = $selfUsername;
         $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
@@ -154,21 +158,27 @@ class Friend
         $friendRequests = FriendRequestModel::where([
             'friend_request.target_id' => $userId,
             'friend_request.target_status' => FriendRequestModel::STATUS_WAIT
-        ])->join('user', 'friend_request.self_id = user.id')->field([
-            'friend_request.id',
-            'friend_request.self_id',
-            'friend_request.target_id',
-            'friend_request.request_reason',
-            'friend_request.reject_reason',
-            'friend_request.self_status',
-            'friend_request.target_status',
-            'friend_request.create_time',
-            'friend_request.update_time',
-            'user.username as selfUsername',
-        ])->order('friend_request.update_time', 'DESC')->select()->toArray();
+        ])->join('user', 'friend_request.self_id = user.id')
+            ->join('user_info', 'friend_request.self_id = user_info.user_id')
+            ->field([
+                'friend_request.id',
+                'friend_request.self_id',
+                'friend_request.target_id',
+                'friend_request.request_reason',
+                'friend_request.reject_reason',
+                'friend_request.self_status',
+                'friend_request.target_status',
+                'friend_request.create_time',
+                'friend_request.update_time',
+                'user_info.avatar as selfAvatarThumbnail',
+                'user.username as selfUsername',
+            ])->order('friend_request.update_time', 'DESC')->select()->toArray();
+
+        $domain = OssClient::getDomain();
+        $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($friendRequests as $key => $value) {
-            // TODO 把头像也返回
+            $friendRequests[$key]['selfAvatarThumbnail'] = $domain . $value['selfAvatarThumbnail'] . $stylename;
             $friendRequests[$key]['targetUsername'] = $username;
         }
 
@@ -194,21 +204,27 @@ class Friend
                 ['friend_request.self_status', '=', FriendRequestModel::STATUS_WAIT],
                 ['friend_request.self_status', '=', FriendRequestModel::STATUS_REJECT]
             ]);
-        })->join('user', 'friend_request.target_id = user.id')->field([
-            'friend_request.id',
-            'friend_request.self_id',
-            'friend_request.target_id',
-            'friend_request.request_reason',
-            'friend_request.reject_reason',
-            'friend_request.self_status',
-            'friend_request.target_status',
-            'friend_request.create_time',
-            'friend_request.update_time',
-            'user.username as targetUsername',
-        ])->order('update_time', 'DESC')->select()->toArray();
+        })->join('user', 'friend_request.target_id = user.id')
+            ->join('user_info', 'friend_request.target_id = user_info.user_id')
+            ->field([
+                'friend_request.id',
+                'friend_request.self_id',
+                'friend_request.target_id',
+                'friend_request.request_reason',
+                'friend_request.reject_reason',
+                'friend_request.self_status',
+                'friend_request.target_status',
+                'friend_request.create_time',
+                'friend_request.update_time',
+                'user_info.avatar as targetAvatarThumbnail',
+                'user.username as targetUsername',
+            ])->order('update_time', 'DESC')->select()->toArray();
+
+        $domain = OssClient::getDomain();
+        $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($friendRequests as $key => $value) {
-            // TODO 把头像也返回
+            $friendRequests[$key]['targetAvatarThumbnail'] = $domain . $value['targetAvatarThumbnail'] . $stylename;
             $friendRequests[$key]['selfUsername'] = $username;
         }
 
@@ -334,12 +350,18 @@ class Friend
 
             Db::commit();
 
+            $userInfo = User::getInfoByKey('id', $friendRequest->target_id, [
+                'username',
+                'avatar'
+            ]);
+
             return new Result(Result::CODE_SUCCESS, null, [
-                'friendRequestId' => $friendRequest->id,
-                'chatroomId'      => $chatroomId,
-                'selfId'          => $friendRequest->self_id,
-                'targetId'        => $friendRequest->target_id,
-                'targetUsername'  => User::getUsernameById($friendRequest->target_id)
+                'friendRequestId'       => $friendRequest->id,
+                'chatroomId'            => $chatroomId,
+                'selfId'                => $friendRequest->self_id,
+                'targetId'              => $friendRequest->target_id,
+                'targetUsername'        => $userInfo['username'],
+                'targetAvatarThumbnail' => OssClient::getDomain() . $userInfo['avatar'] . OssClient::getThumbnailImgStylename()
             ]);
         } catch (\Exception $e) {
             // 回滚事务
@@ -398,6 +420,7 @@ class Friend
             $data = $friendRequest->toArray();
             $data['selfUsername'] = User::getUsernameById($friendRequest->self_id);
             $data['targetUsername'] = $targetUsername;
+            $data['targetAvatarThumbnail'] = OssClient::getDomain() . User::getInfoByKey('id', $targetId, 'avatar')['avatar'] . OssClient::getThumbnailImgStylename();
 
             Db::commit();
 

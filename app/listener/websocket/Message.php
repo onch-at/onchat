@@ -22,7 +22,7 @@ class Message extends BaseListener
         }
 
         $user = $this->getUserByFd();
-
+        // TODO 群聊的头像
         $this->websocket->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])
             ->emit('message', ChatroomHandler::setMessage($user['id'], $event['msg']));
     }

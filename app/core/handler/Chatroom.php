@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace app\core\handler;
 
 use app\core\Result;
+use think\facade\Db;
 use app\model\User as UserModel;
-use app\model\Chatroom as ChatroomModel;
-use app\model\ChatRecord as ChatRecordModel;
-use app\model\ChatMember as ChatMemberModel;
 use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
-use think\facade\Db;
+use app\core\oss\Client as OssClient;
+use app\model\Chatroom as ChatroomModel;
+use app\model\ChatMember as ChatMemberModel;
+use app\model\ChatRecord as ChatRecordModel;
 
 class Chatroom
 {
@@ -238,8 +239,7 @@ class Chatroom
             $msg['data'] = $data;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
-            // TODO 查询用户头像
-            $msg['avatarThumbnail'] = null;
+            $msg['avatarThumbnail'] = OssClient::getDomain() . User::getInfoByKey('id', $userId, 'avatar')['avatar'] . OssClient::getThumbnailImgStylename();
             $msg['createTime'] = $timestamp;
 
             // 提交事务
@@ -297,6 +297,9 @@ class Chatroom
         // 如果msgId为0，则代表初次查询
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
 
+        $domain = OssClient::getDomain();
+        $stylename = OssClient::getThumbnailImgStylename();
+
         $records = [];
         foreach ($data->order('id', 'DESC')->limit(self::MSG_ROWS)->cursor() as $item) {
             $item = $item->toArray();
@@ -314,8 +317,7 @@ class Chatroom
 
             // 如果avatarThumbnailMap里面没有找到已经缓存的avatarThumbnail
             if (!isset($avatarThumbnailMap[$item['user_id']])) {
-                $avatar = User::getInfoByKey('id', $item['user_id'], 'avatar')['avatar'];
-                $avatarThumbnailMap[$item['user_id']] = 'https://oss.chat.hypergo.net/' . $avatar . '/thumbnail';
+                $avatarThumbnailMap[$item['user_id']] = $domain . User::getInfoByKey('id', $item['user_id'], 'avatar')['avatar'] . $stylename;
             }
 
             $item['nickname'] = $nicknameMap[$item['user_id']];

@@ -149,7 +149,7 @@ class User
 
             $ossOssClient = OssClient::getInstance();
             // 如果为调试模式，则将数据存放到dev/目录下
-            $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/' . $user->id . '/' . md5((string) DateUtil::now()) . '.png';
+            $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/user/' . $user->id . '/' . md5((string) DateUtil::now()) . '.png';
             // 根据用户ID创建哈希头像
             $content = $identicon->getImageData($user->id, 128, null, '#f5f5f5');
             // 上传到OSS
@@ -525,8 +525,11 @@ class User
             $list = UserInfoModel::where('user_id', 'IN', array_values($friendIdMap))
                 ->field('user_id, avatar')->select();
 
+            $domain = OssClient::getDomain();
+            $stylename = OssClient::getThumbnailImgStylename();
+
             foreach ($list as $item) {
-                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = OssClient::getDomain() . $item->avatar . OssClient::getThumbnailImgStylename();
+                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = $domain . $item->avatar . $stylename;
             }
 
             foreach ($data as $key => $value) {

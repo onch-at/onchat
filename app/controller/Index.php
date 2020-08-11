@@ -81,22 +81,20 @@ class Index extends BaseController
         // $ossClient = Client::getInstance();
         // $user = User::select()->toArray();
         // foreach ($user as $item) {
-        //     $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/' . $item['id'] . '/' . md5((string) DateUtil::now()) . '.png';
-        //     $content = $identicon->getImageData($item['id'], 128, null, '#f5f5f5');
+        //     $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/user/' . $item['id'] . '/' . md5((string) DateUtil::now()) . '.png';
+        //     $content = $identicon->getImageData($item['id'], 128, null, '#f0f0f0');
         //     try {
         //         $ossClient->putObject($bucket, $object, $content);
-        //         UserInfo::create([
-        //             'user_id' => $item['id'],
-        //             'nickname' => $item['username'],
-        //             'login_time' => $item['update_time'],
+        //         UserInfo::update([
         //             'avatar' => $object,
-        //             'background_image' => 'http://static.hypergo.net/img/rkph.jpg',
-        //         ]);
+        //         ], ['id' => $item['id']]);
         //     } catch (OssException $e) {
         //         printf(__FUNCTION__ . ": FAILED\n");
         //         printf($e->getMessage() . "\n");
         //     }
         // }
+
+        // return 'okk';
     }
 
     /**
