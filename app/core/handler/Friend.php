@@ -12,6 +12,7 @@ use app\core\util\Sql as SqlUtil;
 use app\core\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
+use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\FriendRequest as FriendRequestModel;
 
@@ -71,7 +72,28 @@ class Friend
             'target_id'      => $targetId
         ]);
 
-        $selfAvatarThumbnail = OssClient::getDomain() . User::getInfoByKey('id', $selfId, 'avatar')['avatar'] . OssClient::getThumbnailImgStylename();
+        $domain = OssClient::getDomain();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+        $selfAvatarThumbnail = null;
+        $targetAvatarThumbnail = null;
+
+        $userInfos = UserInfoModel::where('user_id', 'IN', [$selfId, $targetId])->field([
+            'user_id',
+            'avatar'
+        ])->select()->toArray();
+
+        foreach ($userInfos as $userInfo) {
+            switch ($userInfo['user_id']) {
+                case $selfId:
+                    $selfAvatarThumbnail = $domain . $userInfo['avatar'] . $stylename;
+                    break;
+
+                case $targetId:
+                    $targetAvatarThumbnail = $domain . $userInfo['avatar'] . $stylename;
+                    break;
+            }
+        }
 
         $timestamp = time() * 1000;
         $friendRequest = $query->where('target_status', '<>', FriendRequestModel::STATUS_AGREE)->find();
@@ -90,6 +112,7 @@ class Friend
 
             $friendRequest['selfAvatarThumbnail'] = $selfAvatarThumbnail;
             $friendRequest['selfUsername'] = $selfUsername;
+            $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
             $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
             return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest));
@@ -108,6 +131,7 @@ class Friend
 
         $friendRequest['selfAvatarThumbnail'] = $selfAvatarThumbnail;
         $friendRequest['selfUsername'] = $selfUsername;
+        $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
         $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
         return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest));
