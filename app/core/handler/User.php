@@ -151,7 +151,7 @@ class User
             // 如果为调试模式，则将数据存放到dev/目录下
             $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/user/' . $user->id . '/' . md5((string) DateUtil::now()) . '.png';
             // 根据用户ID创建哈希头像
-            $content = $identicon->getImageData($user->id, 128, null, '#f5f5f5');
+            $content = $identicon->getImageData($user->id, 256, null, '#f5f5f5');
             // 上传到OSS
             $ossOssClient->putObject($bucket, $object, $content);
 
