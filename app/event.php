@@ -4,11 +4,11 @@ return [
     'bind'      => [],
 
     'listen'    => [
-        'AppInit'  => [],
-        'HttpRun'  => [],
-        'HttpEnd'  => [],
-        'LogLevel' => [],
-        'LogWrite' => [],
+        'AppInit'                              => [],
+        'HttpRun'                              => [],
+        'HttpEnd'                              => [],
+        'LogLevel'                             => [],
+        'LogWrite'                             => [],
         'swoole.websocket.Init'                => [app\listener\websocket\Init::class],
         'swoole.websocket.Unload'              => [app\listener\websocket\Unload::class],
         'swoole.websocket.Message'             => [app\listener\websocket\Message::class],

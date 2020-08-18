@@ -74,6 +74,11 @@ class Index extends BaseController
 
     public function index()
     {
+
+        // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
+
+
+
         // $identicon = new \Identicon\Identicon(new ImageMagickGenerator());
 
         // // 存储空间名称

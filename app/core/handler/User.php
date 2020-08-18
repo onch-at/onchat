@@ -147,20 +147,20 @@ class User
                 'update_time' => $timestamp,
             ]);
 
-            $ossOssClient = OssClient::getInstance();
+            $ossClient = OssClient::getInstance();
             // 如果为调试模式，则将数据存放到dev/目录下
             $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/user/' . $user->id . '/' . md5((string) DateUtil::now()) . '.png';
             // 根据用户ID创建哈希头像
             $content = $identicon->getImageData($user->id, 256, null, '#f5f5f5');
             // 上传到OSS
-            $ossOssClient->putObject($bucket, $object, $content);
+            $ossClient->putObject($bucket, $object, $content);
 
             // 暂存一下用户信息，便于最后直接返回给前端
             $userInfo = [
-                'user_id' => $user->id,
-                'nickname' => $user->username,
-                'login_time' => $timestamp,
-                'avatar' => $object,
+                'user_id'          => $user->id,
+                'nickname'         => $user->username,
+                'login_time'       => $timestamp,
+                'avatar'           => $object,
                 'background_image' => 'http://static.hypergo.net/img/rkph.jpg', // TODO
             ];
 
@@ -326,7 +326,7 @@ class User
     public static function getNicknameInChatroom(int $id, int $chatroomId): ?string
     {
         return ChatMemberModel::where([
-            'user_id' => $id,
+            'user_id'     => $id,
             'chatroom_id' => $chatroomId
         ])->value('nickname');
     }
@@ -432,6 +432,53 @@ class User
             return self::CODE_PASSWORD_LONG;
         } else {
             return Result::CODE_SUCCESS;
+        }
+    }
+
+    public static function avatar(): Result
+    {
+        $id = self::getId();
+        if (!$id) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $bucket = 'onchat';
+
+        try {
+            $image = request()->file('image');
+
+            if ($image->getMime() != 'image/webp') {
+                return new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp的图片文件');
+            }
+
+            if ($image->getSize() > 1048576) { // 1MB
+                return new Result(Result::CODE_ERROR_PARAM, '文件体积过大，仅接受体积为1MB以内的文件');
+            }
+
+            $ossClient = OssClient::getInstance();
+            // 如果为调试模式，则将数据存放到dev/目录下
+            $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/user/' . $id . '/' . md5((string) DateUtil::now()) . '.webp';
+            // 上传到OSS
+            $ossClient->uploadFile($bucket, $object, $image->getRealPath());
+            // 找到旧头像的路径
+            $userInfo = UserInfoModel::where('user_id', '=', $id)->field('avatar')->find();
+            // 删除旧头像
+            $ossClient->deleteObject($bucket, $userInfo->avatar);
+            // 更新新头像
+            $userInfo->avatar = $object;
+            $userInfo->save();
+
+            // TODO 前端暂时不需要返回URL
+            // $domain = OssClient::getDomain();
+
+            // return new Result(Result::CODE_SUCCESS, null, [
+            //     'avatar'          => $domain . $object . OssClient::getOriginalImgStylename(),
+            //     'avatarThumbnail' => $domain . $object . OssClient::getThumbnailImgStylename()
+            // ]);
+
+            return new Result(Result::CODE_SUCCESS);
+        } catch (\Exception $e) {
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 

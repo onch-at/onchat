@@ -68,6 +68,11 @@ class User extends BaseController
         return UserHandler::register($username, $password);
     }
 
+    public function avatar(): Result
+    {
+        return UserHandler::avatar();
+    }
+
     /**
      * 获取用户
      *

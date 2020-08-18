@@ -34,6 +34,7 @@ Route::group('user', function () {
 
     Route::post('login', 'login');
     Route::post('register', 'register');
+    Route::post('avatar', 'avatar');
 
     Route::group('chatlist', function () {
         Route::get('$', 'getChatList');

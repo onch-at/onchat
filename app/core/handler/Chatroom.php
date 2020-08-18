@@ -25,8 +25,8 @@ class Chatroom
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_NO_RECORD  => '没有消息',
-        self::CODE_MSG_LONG   => '文本消息长度过长',
+        self::CODE_NO_RECORD => '没有消息',
+        self::CODE_MSG_LONG  => '文本消息长度过长',
         self::CODE_NAME_LONG => '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符',
     ];
 
@@ -227,10 +227,10 @@ class Chatroom
             ]);
 
             ChatMemberModel::update([
-                'is_show' => true,
+                'is_show'     => true,
                 'update_time' => $timestamp,
                 // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+），否则归零
-                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100 THEN unread+1 ELSE 0 END')
+                'unread'      => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100 THEN unread+1 ELSE 0 END')
             ], [
                 'chatroom_id' => $msg['chatroomId']
             ]);
@@ -287,7 +287,7 @@ class Chatroom
         // 初次查询的时候，顺带把未读消息数归零
         if ($msgId == 0) {
             ChatMemberModel::where([
-                'user_id' => $userId,
+                'user_id'     => $userId,
                 'chatroom_id' => $id
             ])->update([
                 'unread' => 0
@@ -360,9 +360,9 @@ class Chatroom
             }
 
             ChatMemberModel::update([
-                'update_time' => $timestamp = SqlUtil::rawTimestamp(),
+                'update_time' => SqlUtil::rawTimestamp(),
                 // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
-                'unread' => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
+                'unread'      => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
             ], [
                 'chatroom_id' => $id
             ]);
