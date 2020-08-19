@@ -13,6 +13,12 @@ class Client
     /** Object Storage Service */
     public $client;
 
+    public static $imageHeadersOptions = [
+        OssClient::OSS_HEADERS => [
+            'Cache-Control' => 'public, max-age=31536000',
+        ]
+    ];
+
     private function __construct()
     {
         $accessKeyId = config('oss.access_key_id');
@@ -48,6 +54,15 @@ class Client
     public static function destroyInstance(): void
     {
         self::$instance = null;
+    }
+
+    /**
+     * 获取根目录路径
+     * 如果是开发模式，则根目录为dev/，否则为空字符串
+     */
+    public static function getRootPath(): string
+    {
+        return env('app_debug', false) ? 'dev/' : '';
     }
 
     /**

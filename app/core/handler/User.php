@@ -149,11 +149,11 @@ class User
 
             $ossClient = OssClient::getInstance();
             // 如果为调试模式，则将数据存放到dev/目录下
-            $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/user/' . $user->id . '/' . md5((string) DateUtil::now()) . '.png';
+            $object = OssClient::getRootPath() . 'avatar/user/' . $user->id . '/' . md5((string) DateUtil::now()) . '.png';
             // 根据用户ID创建哈希头像
             $content = $identicon->getImageData($user->id, 256, null, '#f5f5f5');
             // 上传到OSS
-            $ossClient->putObject($bucket, $object, $content);
+            $ossClient->putObject($bucket, $object, $content, OssClient::$imageHeadersOptions);
 
             // 暂存一下用户信息，便于最后直接返回给前端
             $userInfo = [
@@ -444,11 +444,27 @@ class User
 
         $bucket = 'onchat';
 
+        // 如果为调试模式，则将数据存放到dev/目录下
+        $root = OssClient::getRootPath();
+
+        // 由于搜索用户所有历史头像
+        $options = [
+            // 文件路径前缀
+            'prefix' => $root . 'avatar/user/' . $id . '/',
+            // 最大数量
+            'max-keys' => 20,
+        ];
+
+        // 用户头像数量最大值
+        $maxCount = 10;
+
         try {
             $image = request()->file('image');
 
-            if ($image->getMime() != 'image/webp') {
-                return new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp的图片文件');
+            $mine = $image->getMime();
+
+            if (!in_array($mine, ['image/webp', 'image/jpeg', 'image/png'])) {
+                return new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp/jpeg/png的图片文件');
             }
 
             if ($image->getSize() > 1048576) { // 1MB
@@ -456,27 +472,46 @@ class User
             }
 
             $ossClient = OssClient::getInstance();
-            // 如果为调试模式，则将数据存放到dev/目录下
-            $object = (env('app_debug', false) ? 'dev/' : '') . 'avatar/user/' . $id . '/' . md5((string) DateUtil::now()) . '.webp';
+
+            $object = $root . 'avatar/user/' . $id . '/' . md5((string) DateUtil::now()) . '.' . substr($mine, 6);
             // 上传到OSS
-            $ossClient->uploadFile($bucket, $object, $image->getRealPath());
-            // 找到旧头像的路径
-            $userInfo = UserInfoModel::where('user_id', '=', $id)->field('avatar')->find();
-            // 删除旧头像
-            $ossClient->deleteObject($bucket, $userInfo->avatar);
+            $ossClient->uploadFile($bucket, $object, $image->getRealPath(), OssClient::$imageHeadersOptions);
+
+            // 列举用户所有头像
+            $objectList = $ossClient->listObjects($bucket, $options)->getObjectList();
+
+            $count = count($objectList);
+
+            // 如果用户的头像大于10张
+            if ($count > $maxCount) {
+                // 按照时间进行升序
+                usort($objectList, function ($a, $b) {
+                    return strtotime($a->getLastModified()) - strtotime($b->getLastModified());
+                });
+
+                // 需要删除的OBJ
+                $objects = [];
+
+                $num = $count - $maxCount;
+                for ($i = 0; $i < $num; $i++) {
+                    $objects[] = $objectList[$i]->getKey();
+                }
+
+                // 把超过的删除
+                $ossClient->deleteObjects($bucket, $objects);
+            }
+
             // 更新新头像
+            $userInfo = UserInfoModel::where('user_id', '=', $id)->field('avatar')->find();
             $userInfo->avatar = $object;
             $userInfo->save();
 
-            // TODO 前端暂时不需要返回URL
-            // $domain = OssClient::getDomain();
+            $domain = OssClient::getDomain();
 
-            // return new Result(Result::CODE_SUCCESS, null, [
-            //     'avatar'          => $domain . $object . OssClient::getOriginalImgStylename(),
-            //     'avatarThumbnail' => $domain . $object . OssClient::getThumbnailImgStylename()
-            // ]);
-
-            return new Result(Result::CODE_SUCCESS);
+            return new Result(Result::CODE_SUCCESS, null, [
+                'avatar'          => $domain . $object . OssClient::getOriginalImgStylename(),
+                'avatarThumbnail' => $domain . $object . OssClient::getThumbnailImgStylename()
+            ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
