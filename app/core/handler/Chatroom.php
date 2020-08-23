@@ -229,8 +229,9 @@ class Chatroom
             ChatMemberModel::update([
                 'is_show'     => true,
                 'update_time' => $timestamp,
-                // 如果消息不是该用户的，且未读消息数小于100，则递增（未读消息数最多储存到100，因为客户端会显示99+），否则归零
-                'unread'      => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread < 100 THEN unread+1 ELSE 0 END')
+                // 如果是该用户的，则归零；
+                // 如果不是该用户的，且小于100，则递增；否则直接100
+                'unread'      => Db::raw('CASE WHEN user_id = ' . $userId . ' THEN 0 ELSE CASE WHEN unread < 100 THEN unread + 1 ELSE 100 END END')
             ], [
                 'chatroom_id' => $msg['chatroomId']
             ]);
