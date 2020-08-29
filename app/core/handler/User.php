@@ -23,7 +23,7 @@ class User
     /** 用户名最小长度 */
     const USERNAME_MIN_LENGTH = 5;
     /** 用户名最大长度 */
-    const USERNAME_MAX_LENGTH = 30;
+    const USERNAME_MAX_LENGTH = 15;
     /** 用户密码最小长度 */
     const PASSWORD_MIN_LENGTH = 8;
     /** 用户密码最大长度 */
@@ -35,24 +35,15 @@ class User
     const CODE_USER_NOT_EXIST = 2;
     /** 用户密码错误 */
     const CODE_PASSWORD_ERROR = 3;
-    /** 用户名过短 */
-    const CODE_USERNAME_SHORT = 5;
-    /** 用户名过长 */
-    const CODE_USERNAME_LONG = 6;
-    /** 用户密码过短 */
-    const CODE_PASSWORD_SHORT = 7;
-    /** 用户密码过长 */
-    const CODE_PASSWORD_LONG = 8;
+    /** 用户密码过短/过长 */
+    const CODE_PASSWORD_IRREGULAR  = 4;
 
     /** 响应消息预定义 */
     const MSG = [
         self::CODE_USER_EXIST     => '用户已存在',
         self::CODE_USER_NOT_EXIST => '用户不存在',
         self::CODE_PASSWORD_ERROR => '密码错误',
-        self::CODE_USERNAME_SHORT => '用户名长度必须在' . self::USERNAME_MIN_LENGTH . '~' . self::USERNAME_MAX_LENGTH . '位字符之间',
-        self::CODE_USERNAME_LONG  => '用户名长度必须在' . self::USERNAME_MIN_LENGTH . '~' . self::USERNAME_MAX_LENGTH . '位字符之间',
-        self::CODE_PASSWORD_SHORT => '密码长度必须在' . self::PASSWORD_MIN_LENGTH . '~' . self::PASSWORD_MAX_LENGTH . '位字符之间',
-        self::CODE_PASSWORD_LONG  => '密码长度必须在' . self::PASSWORD_MIN_LENGTH . '~' . self::PASSWORD_MAX_LENGTH . '位字符之间',
+        self::CODE_PASSWORD_IRREGULAR => '密码长度必须在' . self::PASSWORD_MIN_LENGTH . '~' . self::PASSWORD_MAX_LENGTH . '位字符之间',
     ];
 
     /** 用户登录SESSION名 */
@@ -80,6 +71,12 @@ class User
         'user_info.avatar',
         'user_info.background_image',
     ];
+
+    /**
+     * 用户名的正则表达式
+     * 匹配字母/汉字/数字/下划线/横杠，5-30位字符
+     */
+    const USERNAME_PATTERN = "/^([a-z]|[A-Z]|[0-9]|_|-|[\u3400-\u4DBF\u4E00-\u9FFC\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uFA27-\uFA29\u{20000}-\u{2A6DD}\u{2A700}-\u{2B734}\u{2B740}-\u{2B81D}\u{2B820}-\u{2CEA1}\u{2CEB0}-\u{2EBE0}\u{30000}-\u{3134A}]){" . self::USERNAME_MIN_LENGTH . "," . self::USERNAME_MAX_LENGTH . "}$/u";
 
     /**
      * 获取储存在SESSION中的用户ID
@@ -114,9 +111,8 @@ class User
             return new Result(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
         }
 
-        $result = self::checkUsername($username);
-        if ($result !== Result::CODE_SUCCESS) { // 如果用户名不符合规范
-            return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+        if (!preg_match(self::USERNAME_PATTERN, $username)) {
+            return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
 
         $result = self::checkPassword($password);
@@ -196,9 +192,8 @@ class User
      */
     public static function login(string $username, string $password): Result
     {
-        $result = self::checkUsername($username);
-        if ($result !== Result::CODE_SUCCESS) { // 如果用户名不符合规范
-            return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+        if (!preg_match(self::USERNAME_PATTERN, $username)) {
+            return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
 
         $result = self::checkPassword($password);
@@ -398,25 +393,6 @@ class User
     }
 
     /**
-     * 检查用户名是否符合规范
-     *
-     * @param string $username
-     * @return integer
-     */
-    public static function checkUsername(string $username): int
-    {
-        $length = mb_strlen($username, 'utf-8');
-
-        if ($length < self::USERNAME_MIN_LENGTH) {
-            return self::CODE_USERNAME_SHORT;
-        } elseif ($length > self::USERNAME_MAX_LENGTH) {
-            return self::CODE_USERNAME_LONG;
-        } else {
-            return Result::CODE_SUCCESS;
-        }
-    }
-
-    /**
      * 检查用户密码是否符合规范
      *
      * @param string $password
@@ -426,10 +402,8 @@ class User
     {
         $length = mb_strlen($password, 'utf-8');
 
-        if ($length < self::PASSWORD_MIN_LENGTH) {
-            return self::CODE_PASSWORD_SHORT;
-        } elseif ($length > self::PASSWORD_MAX_LENGTH) {
-            return self::CODE_PASSWORD_LONG;
+        if ($length < self::PASSWORD_MIN_LENGTH || $length > self::PASSWORD_MAX_LENGTH) {
+            return self::CODE_PASSWORD_IRREGULAR;
         } else {
             return Result::CODE_SUCCESS;
         }
