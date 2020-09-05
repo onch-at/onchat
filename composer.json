@@ -21,7 +21,8 @@
         "topthink/think-captcha": "^3.0",
         "topthink/think-swoole": "^3.0",
         "aliyuncs/oss-sdk-php": "^2.3",
-        "yzalis/identicon": "^2.0"
+        "yzalis/identicon": "^2.0",
+        "ezyang/htmlpurifier": "^4.13"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",

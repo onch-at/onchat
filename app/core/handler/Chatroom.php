@@ -18,22 +18,17 @@ class Chatroom
 {
     /** 没有消息 */
     const CODE_NO_RECORD = 1;
-    /** 消息过长 */
-    const CODE_MSG_LONG  = 2;
     /** 别名过长 */
-    const CODE_NAME_LONG = 3;
+    const CODE_NAME_LONG = 2;
 
     /** 响应消息预定义 */
     const MSG = [
         self::CODE_NO_RECORD => '没有消息',
-        self::CODE_MSG_LONG  => '文本消息长度过长',
         self::CODE_NAME_LONG => '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符',
     ];
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
-    /** 文本消息最长长度 */
-    const MSG_MAX_LENGTH = 3000;
     /** 群名最大长度 */
     const NAME_MAX_LENGTH = 30;
 
@@ -197,20 +192,19 @@ class Chatroom
      */
     public static function setMessage(int $userId, array $msg): Result
     {
-        // TODO 仅在消息类型为文本的时候才判断
-        if (mb_strlen($msg['data'], 'utf-8') > self::MSG_MAX_LENGTH) {
-            return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
-        }
-
         // 拿到当前用户在这个聊天室的昵称
         $nickname = User::getNicknameInChatroom($userId, $msg['chatroomId']);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        // TODO 仅在消息类型为文本的时候才转化
-        $content = htmlspecialchars($msg['data']);
-        $data = ['content' => $content];
+        $result = Message::handler($msg);
+
+        if ($result->code != Result::CODE_SUCCESS) {
+            return $result;
+        }
+
+        $msg = $result->data;
 
         // 启动事务
         Db::startTrans();
@@ -221,7 +215,7 @@ class Chatroom
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
                 'type'        => $msg['type'],
-                'data'        => $data,
+                'data'        => $msg['data'],
                 'reply_id'    => $msg['replyId'] ?? null,
                 'create_time' => $timestamp
             ]);
@@ -237,7 +231,6 @@ class Chatroom
             ]);
 
             $msg['id'] = $id;
-            $msg['data'] = $data;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
             $msg['avatarThumbnail'] = OssClient::getDomain() . User::getInfoByKey('id', $userId, 'avatar')['avatar'] . OssClient::getThumbnailImgStylename();

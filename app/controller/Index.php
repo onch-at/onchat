@@ -26,6 +26,8 @@ use think\facade\Cache;
 use OSS\OssClient;
 use OSS\Core\OssException;
 use app\core\util\Date as DateUtil;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 
 class Index extends BaseController
 {
@@ -74,6 +76,37 @@ class Index extends BaseController
 
     public function index()
     {
+        $html = '<p>44444</p>';
+        $config = HTMLPurifier_Config::createDefault();
+        // 允许的元素
+        $config->set('HTML.AllowedElements', [
+            'p', 'strong', 'em', 'u', 's', 'blockquote',
+            'ol', 'ul', 'li', 'pre', 'br', 'sub', 'sub',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span'
+        ]);
+        // 允许的属性
+        $config->set('HTML.AllowedAttributes', ['class']);
+        // 允许的CLASS
+        $config->set('Attr.AllowedClasses', [
+            'ql-indent-1',
+            'ql-indent-2',
+            'ql-indent-3',
+            'ql-indent-4',
+            'ql-indent-5',
+            'ql-indent-6',
+            'ql-indent-7',
+            'ql-indent-8',
+            'ql-align-center',
+            'ql-align-right',
+            'ql-align-justify',
+            'ql-font-serif',
+            'ql-font-monospace',
+            'ql-syntax',
+        ]);
+        $purifier = new HTMLPurifier($config);
+        $clean_html = $purifier->purify($html);
+        dump($html);
+        dump($clean_html);
         // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
 
 
