@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\core\handler;
 
 use app\core\Result;
+use app\core\util\Str as StrUtil;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 
@@ -31,6 +32,11 @@ class Message
         switch ($msg['type']) {
             case self::TYPE_TEXT:
                 $content = $msg['data']['content'];
+
+                if (mb_strlen(StrUtil::trimAll($content), 'utf-8') === 0) {
+                    return new Result(Result::CODE_ERROR_PARAM);
+                }
+
                 if (mb_strlen($content, 'utf-8') > self::TEXT_MSG_MAX_LENGTH) {
                     return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
                 }
@@ -41,6 +47,10 @@ class Message
             case self::TYPE_RICH_TEXT:
                 $html = $msg['data']['html'];
                 $text = $msg['data']['text'];
+
+                if (mb_strlen(StrUtil::trimAll($text), 'utf-8') === 0) {
+                    return new Result(Result::CODE_ERROR_PARAM);
+                }
 
                 if (mb_strlen($text, 'utf-8') > self::TEXT_MSG_MAX_LENGTH) {
                     return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
