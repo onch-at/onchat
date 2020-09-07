@@ -38,6 +38,8 @@ class Init extends BaseListener
         // 储存uid - fd
         $this->setUserIdFdPair($user['id']);
 
+        $this->websocket->emit('init');
+
         UserInfoModel::update(['login_time' => SqlUtil::rawTimestamp()], ['id' => $user['id']]);
     }
 }
