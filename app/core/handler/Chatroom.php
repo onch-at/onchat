@@ -70,10 +70,10 @@ class Chatroom
                 return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
             }
 
-            return new Result(Result::CODE_SUCCESS, null, $name);
+            return Result::success($name);
         }
 
-        return new Result(Result::CODE_SUCCESS, null, $chatroom->name);
+        return Result::success($chatroom->name);
     }
 
     public static function getChatroom(int $id): Result
@@ -110,7 +110,7 @@ class Chatroom
             $chatroom->name = $name;
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($chatroom->toArray()));
+        return Result::success(ArrUtil::keyToCamel($chatroom->toArray()));
     }
 
     /**
@@ -141,7 +141,7 @@ class Chatroom
             'update_time' => $timestamp,
         ]);
 
-        return new Result(Result::CODE_SUCCESS, null, $chatroom->id);
+        return Result::success($chatroom->id);
     }
 
     /**
@@ -180,7 +180,7 @@ class Chatroom
             'update_time' => $timestamp,
         ]);
 
-        return new Result(Result::CODE_SUCCESS);
+        return Result::success();
     }
 
     /**
@@ -238,7 +238,7 @@ class Chatroom
 
             // 提交事务
             Db::commit();
-            return new Result(Result::CODE_SUCCESS, null, $msg);
+            return Result::success($msg);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -320,7 +320,7 @@ class Chatroom
             $records[] = $item;
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($records));
+        return Result::success(ArrUtil::keyToCamel2($records));
     }
 
     /**
@@ -363,7 +363,7 @@ class Chatroom
 
             // 提交事务
             Db::commit();
-            return new Result(Result::CODE_SUCCESS, null, ['chatroomId' => $id, 'msgId' => $msgId]);
+            return Result::success(['chatroomId' => $id, 'msgId' => $msgId]);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();

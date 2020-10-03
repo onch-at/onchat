@@ -92,6 +92,6 @@ class Message
                 return new Result(Result::CODE_ERROR_PARAM, '未知消息类型');
         }
 
-        return new Result(Result::CODE_SUCCESS, null, $msg);
+        return Result::success($msg);
     }
 }

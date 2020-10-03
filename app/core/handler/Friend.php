@@ -115,7 +115,7 @@ class Friend
             $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
             $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
-            return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest));
+            return Result::success(ArrUtil::keyToCamel($friendRequest));
         }
 
         $friendRequest = FriendRequestModel::create([
@@ -134,7 +134,7 @@ class Friend
         $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
         $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest));
+        return Result::success(ArrUtil::keyToCamel($friendRequest));
     }
 
     /**
@@ -161,7 +161,7 @@ class Friend
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
+        return Result::success(ArrUtil::keyToCamel($friendRequest->toArray()));
     }
 
     /**
@@ -206,7 +206,7 @@ class Friend
             $friendRequests[$key]['targetUsername'] = $username;
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($friendRequests));
+        return Result::success(ArrUtil::keyToCamel2($friendRequests));
     }
 
     /**
@@ -252,7 +252,7 @@ class Friend
             $friendRequests[$key]['selfUsername'] = $username;
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($friendRequests));
+        return Result::success(ArrUtil::keyToCamel2($friendRequests));
     }
 
     /**
@@ -277,7 +277,7 @@ class Friend
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
+        return Result::success(ArrUtil::keyToCamel($friendRequest->toArray()));
     }
 
     /**
@@ -302,7 +302,7 @@ class Friend
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($friendRequest->toArray()));
+        return Result::success(ArrUtil::keyToCamel($friendRequest->toArray()));
     }
 
     /**
@@ -379,7 +379,7 @@ class Friend
                 'avatar'
             ]);
 
-            return new Result(Result::CODE_SUCCESS, null, [
+            return Result::success([
                 'friendRequestId'       => $friendRequest->id,
                 'chatroomId'            => $chatroomId,
                 'selfId'                => $friendRequest->self_id,
@@ -448,7 +448,7 @@ class Friend
 
             Db::commit();
 
-            return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($data));
+            return Result::success(ArrUtil::keyToCamel($data));
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -495,15 +495,15 @@ class Friend
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        if (mb_strlen(StrUtil::trimAll($alias), 'utf-8') == 0) {
-            return new Result(Result::CODE_ERROR_PARAM, '好友别名不能为空');
-        }
-
-        $alias = trim($alias);
-
-        // 如果别名长度超出
-        if (mb_strlen($alias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
-            return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+        // 如果有传入别名
+        if (mb_strlen(StrUtil::trimAll($alias), 'utf-8') != 0) {
+            $alias = trim($alias);
+            // 如果别名长度超出
+            if (mb_strlen($alias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
+                return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+            }
+        } else {
+            $alias = null;
         }
 
         $chatroom = ChatroomModel::find($chatroomId); // 找到这个聊天室
@@ -520,9 +520,13 @@ class Friend
             return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有没有其他成员');
         }
 
+        if (!$alias) {
+            $alias = User::getUsernameById($chatMember->user_id);
+        }
+
         $chatMember->nickname = $alias;
         $chatMember->save();
 
-        return new Result(Result::CODE_SUCCESS);
+        return Result::success($alias);
     }
 }

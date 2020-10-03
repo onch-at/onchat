@@ -74,7 +74,7 @@ class User
 
     /**
      * 用户名的正则表达式
-     * 匹配字母/汉字/数字/下划线/横杠，5-30位字符
+     * 匹配字母/汉字/数字/下划线/横杠，5-15位字符
      */
     const USERNAME_PATTERN = "/^([a-z]|[A-Z]|[0-9]|_|-|[\x{4e00}-\x{9fa5}]){" . self::USERNAME_MIN_LENGTH . "," . self::USERNAME_MAX_LENGTH . "}$/u";
 
@@ -175,7 +175,7 @@ class User
             // 提交事务
             Db::commit();
 
-            return new Result(Result::CODE_SUCCESS, '注册成功！即将跳转…', ArrUtil::keyToCamel($user->toArray() + $userInfo));
+            return Result::success(ArrUtil::keyToCamel($user->toArray() + $userInfo), '注册成功！即将跳转…');
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -222,7 +222,7 @@ class User
         $user['avatar'] = $avatar . OssClient::getOriginalImgStylename();
         $user['avatarThumbnail'] = $avatar . OssClient::getThumbnailImgStylename();
 
-        return new Result(Result::CODE_SUCCESS, '登录成功！即将跳转…', ArrUtil::keyToCamel($user));
+        return Result::success(ArrUtil::keyToCamel($user), '登录成功！即将跳转…');
     }
 
     /**
@@ -286,7 +286,7 @@ class User
         $user->avatar = $avatar . OssClient::getOriginalImgStylename();
         $user->avatarThumbnail = $avatar . OssClient::getThumbnailImgStylename();
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user->toArray()));
+        return Result::success(ArrUtil::keyToCamel($user->toArray()));
     }
 
     /**
@@ -308,7 +308,7 @@ class User
         $user->avatar = $avatar . OssClient::getOriginalImgStylename();
         $user->avatarThumbnail = $avatar . OssClient::getThumbnailImgStylename();
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user->toArray()));
+        return Result::success(ArrUtil::keyToCamel($user->toArray()));
     }
 
     /**
@@ -359,7 +359,7 @@ class User
         if (!$id) {
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
-        return new Result(Result::CODE_SUCCESS, null, $id);
+        return Result::success($id);
     }
 
     /**
@@ -372,7 +372,7 @@ class User
     {
         $session = session(self::SESSION_USER_LOGIN);
         if (empty($session)) { // 如果没有登录的Session
-            return new Result(Result::CODE_SUCCESS, null, false);
+            return Result::success(false);
         }
 
         $fields = self::USER_FIELDS;
@@ -380,7 +380,7 @@ class User
         $user = self::getInfoByKey('id', $session['id'], $fields);
 
         if ($session['password'] !== $user['password']) { // 如果密码错误
-            return new Result(Result::CODE_SUCCESS, null, false);
+            return Result::success(false);
         }
 
         $avatar = OssClient::getDomain() . $user['avatar'];
@@ -389,7 +389,7 @@ class User
 
         unset($user['password']);
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel($user));
+        return Result::success(ArrUtil::keyToCamel($user));
     }
 
     /**
@@ -482,7 +482,7 @@ class User
 
             $domain = OssClient::getDomain();
 
-            return new Result(Result::CODE_SUCCESS, null, [
+            return Result::success([
                 'avatar'          => $domain . $object . OssClient::getOriginalImgStylename(),
                 'avatarThumbnail' => $domain . $object . OssClient::getThumbnailImgStylename()
             ]);
@@ -499,7 +499,7 @@ class User
     public static function getChatrooms($userId = null): Result
     {
         $data = UserModel::find($userId ?: self::getId())->chatrooms()->select()->toArray();
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($data));
+        return Result::success(ArrUtil::keyToCamel2($data));
     }
 
     /**
@@ -596,7 +596,7 @@ class User
             }
         }
 
-        return new Result(Result::CODE_SUCCESS, null, ArrUtil::keyToCamel2($data));
+        return Result::success(ArrUtil::keyToCamel2($data));
     }
 
     /**
@@ -616,7 +616,7 @@ class User
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return new Result(Result::CODE_SUCCESS);
+        return Result::success();
     }
 
     /**
@@ -647,7 +647,7 @@ class User
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return new Result(Result::CODE_SUCCESS);
+        return Result::success();
     }
 
     /**

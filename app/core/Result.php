@@ -33,7 +33,12 @@ class Result
     public function __construct(int $code, string $msg = null, $data = null)
     {
         $this->code = $code;
-        $this->msg  = $msg ? $msg : self::MSG[$code];
+        $this->msg  = $msg ?: self::MSG[$code];
         $this->data = $data;
+    }
+
+    public static function success($data = null, string $msg = null): Result
+    {
+        return new Result(self::CODE_SUCCESS, $msg ?: self::MSG[self::CODE_SUCCESS], $data);
     }
 }

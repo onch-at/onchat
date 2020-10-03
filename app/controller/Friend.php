@@ -74,10 +74,6 @@ class Friend extends BaseController
      */
     public function setFriendAlias(int $chatroomId): Result
     {
-        if (empty(input('put.alias'))) { // 如果参数缺失
-            return new Result(Result::CODE_ERROR_PARAM);
-        }
-
         return FriendHandler::setFriendAlias($chatroomId, input('put.alias/s'));
     }
 
@@ -95,6 +91,6 @@ class Friend extends BaseController
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
         $data = FriendHandler::isFriend($userId, $id);
-        return new Result(Result::CODE_SUCCESS, null, $data);
+        return Result::success($data);
     }
 }
