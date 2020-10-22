@@ -141,6 +141,8 @@ class Chatroom
             'update_time' => $timestamp,
         ]);
 
+        self::addChatRecordTable((string) $chatroom->id);
+
         return Result::success($chatroom->id);
     }
 
@@ -230,10 +232,16 @@ class Chatroom
                 'chatroom_id' => $msg['chatroomId']
             ]);
 
+            $ossClient = OssClient::getInstance();
+            $bucket = OssClient::getBucket();
+            $object = User::getInfoByKey('id', $userId, 'avatar')['avatar'];
+
             $msg['id'] = $id;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
-            $msg['avatarThumbnail'] = OssClient::getDomain() . User::getInfoByKey('id', $userId, 'avatar')['avatar'] . OssClient::getThumbnailImgStylename();
+            $msg['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+                OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
+            ]);
             $msg['createTime'] = $timestamp;
 
             // 提交事务
@@ -291,9 +299,11 @@ class Chatroom
         // 如果msgId为0，则代表初次查询
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
 
-        $domain = OssClient::getDomain();
+        $ossClient = OssClient::getInstance();
+        $bucket = OssClient::getBucket();
         $stylename = OssClient::getThumbnailImgStylename();
 
+        $object = null;
         $records = [];
         foreach ($data->order('id', 'DESC')->limit(self::MSG_ROWS)->cursor() as $item) {
             $item = $item->toArray();
@@ -311,7 +321,11 @@ class Chatroom
 
             // 如果avatarThumbnailMap里面没有找到已经缓存的avatarThumbnail
             if (!isset($avatarThumbnailMap[$item['user_id']])) {
-                $avatarThumbnailMap[$item['user_id']] = $domain . User::getInfoByKey('id', $item['user_id'], 'avatar')['avatar'] . $stylename;
+                $object = User::getInfoByKey('id', $item['user_id'], 'avatar')['avatar'];
+
+                $avatarThumbnailMap[$item['user_id']] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+                    OssClient::OSS_PROCESS => 'style/' . $stylename
+                ]);
             }
 
             $item['nickname'] = $nicknameMap[$item['user_id']];
@@ -368,6 +382,43 @@ class Chatroom
             // 回滚事务
             Db::rollback();
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+        }
+    }
+
+    /**
+     * 根据房间号尝试动态添加聊天记录表
+     *
+     * @param string $chatroomId
+     * @return void
+     */
+    public static function addChatRecordTable(string $chatroomId)
+    {
+        if ($chatroomId > 1999 && strlen($chatroomId) == 4) {
+            // 拿到千位数
+            $thousand = substr($chatroomId, 0, 1);
+
+            // 查询是否有这个表
+            if (Db::execute("SHOW TABLES LIKE 'chat_record_{$thousand}_0'") > 0) {
+                return;
+            }
+
+            $sql = function ($index) use ($thousand) {
+                return "CREATE TABLE IF NOT EXISTS chat_record_{$thousand}_{$index} (
+                            id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                            chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
+                            user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
+                            type        TINYINT(1) UNSIGNED NOT NULL COMMENT '消息类型',
+                            data        JSON                NOT NULL COMMENT '消息数据体',
+                            reply_id    INT        UNSIGNED NULL     COMMENT '回复消息的消息记录ID',
+                            create_time BIGINT     UNSIGNED NOT NULL,
+                            FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                            FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+            };
+
+            for ($i = 0; $i < 100; $i++) {
+                Db::execute($sql($i));
+            }
         }
     }
 }

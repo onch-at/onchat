@@ -131,7 +131,7 @@ class User
 
         $timestamp = time() * 1000;
         $identicon = new Identicon(new ImageMagickGenerator());
-        $bucket = 'onchat';
+        $bucket = OssClient::getBucket();
 
         // 启动事务
         Db::startTrans();
@@ -168,9 +168,12 @@ class User
 
             unset($user->password); // 删掉密码
 
-            $avatar = OssClient::getDomain() . $object;
-            $userInfo['avatar'] = $avatar . OssClient::getOriginalImgStylename();
-            $userInfo['avatarThumbnail'] = $avatar . OssClient::getThumbnailImgStylename();
+            $userInfo['avatar'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+                OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
+            ]);
+            $userInfo['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+                OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
+            ]);
 
             // 提交事务
             Db::commit();
@@ -218,9 +221,16 @@ class User
 
         unset($user['password']);
 
-        $avatar = OssClient::getDomain() . $user['avatar'];
-        $user['avatar'] = $avatar . OssClient::getOriginalImgStylename();
-        $user['avatarThumbnail'] = $avatar . OssClient::getThumbnailImgStylename();
+        $ossClient = OssClient::getInstance();
+        $bucket = OssClient::getBucket();
+        $object = $user['avatar'];
+
+        $user['avatar'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
+        ]);
+        $user['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
+        ]);
 
         return Result::success(ArrUtil::keyToCamel($user), '登录成功！即将跳转…');
     }
@@ -282,9 +292,16 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
-        $avatar = OssClient::getDomain() . $user->avatar;
-        $user->avatar = $avatar . OssClient::getOriginalImgStylename();
-        $user->avatarThumbnail = $avatar . OssClient::getThumbnailImgStylename();
+        $ossClient = OssClient::getInstance();
+        $bucket = OssClient::getBucket();
+        $object = $user->avatar;
+
+        $user->avatar = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
+        ]);
+        $user->avatarThumbnail = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
+        ]);
 
         return Result::success(ArrUtil::keyToCamel($user->toArray()));
     }
@@ -304,9 +321,16 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
-        $avatar = OssClient::getDomain() . $user->avatar;
-        $user->avatar = $avatar . OssClient::getOriginalImgStylename();
-        $user->avatarThumbnail = $avatar . OssClient::getThumbnailImgStylename();
+        $ossClient = OssClient::getInstance();
+        $bucket = OssClient::getBucket();
+        $object = $user->avatar;
+
+        $user->avatar = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
+        ]);
+        $user->avatarThumbnail = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
+        ]);
 
         return Result::success(ArrUtil::keyToCamel($user->toArray()));
     }
@@ -383,9 +407,16 @@ class User
             return Result::success(false);
         }
 
-        $avatar = OssClient::getDomain() . $user['avatar'];
-        $user['avatar'] = $avatar . OssClient::getOriginalImgStylename();
-        $user['avatarThumbnail'] = $avatar . OssClient::getThumbnailImgStylename();
+        $ossClient = OssClient::getInstance();
+        $bucket = OssClient::getBucket();
+        $object = $user['avatar'];
+
+        $user['avatar'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
+        ]);
+        $user['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
+        ]);
 
         unset($user['password']);
 
@@ -416,7 +447,7 @@ class User
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        $bucket = 'onchat';
+        $bucket = OssClient::getBucket();
 
         // 如果为调试模式，则将数据存放到dev/目录下
         $root = OssClient::getRootPath();
@@ -480,11 +511,13 @@ class User
             $userInfo->avatar = $object;
             $userInfo->save();
 
-            $domain = OssClient::getDomain();
-
             return Result::success([
-                'avatar'          => $domain . $object . OssClient::getOriginalImgStylename(),
-                'avatarThumbnail' => $domain . $object . OssClient::getThumbnailImgStylename()
+                'avatar'          => $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+                    OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
+                ]),
+                'avatarThumbnail' => $ossClient->signUrl($bucket, $object, 3600, 'GET', [
+                    OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
+                ])
             ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
@@ -581,11 +614,14 @@ class User
             $list = UserInfoModel::where('user_id', 'IN', array_values($friendIdMap))
                 ->field('user_id, avatar')->select();
 
-            $domain = OssClient::getDomain();
+            $ossClient = OssClient::getInstance();
+            $bucket = OssClient::getBucket();
             $stylename = OssClient::getThumbnailImgStylename();
 
             foreach ($list as $item) {
-                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = $domain . $item->avatar . $stylename;
+                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = $ossClient->signUrl($bucket, $item->avatar, 3600, 'GET', [
+                    OssClient::OSS_PROCESS => 'style/' . $stylename
+                ]);
             }
 
             foreach ($data as $key => $value) {

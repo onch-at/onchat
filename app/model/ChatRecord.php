@@ -16,14 +16,19 @@ class ChatRecord extends Model
     /**
      * 选择聊天室
      *
-     * @param integer|string $chatroomId 房间号
+     * @param integer $chatroomId 房间号
      * @return ChatRecord
      */
-    public static function opt($chatroomId)
+    public static function opt(int $chatroomId)
     {
-        // TODO 如果房间ID超过了1000，则需要继续拓展
         $model = new static();
-        $model->setSuffix('_1_' . $chatroomId % 100);
+        $num = 1;
+
+        if ($chatroomId > 1999) {
+            $num = substr((string) $chatroomId, 0, 1);
+        }
+
+        $model->setSuffix('_' . $num . '_' . $chatroomId % 100);
 
         return $model;
     }

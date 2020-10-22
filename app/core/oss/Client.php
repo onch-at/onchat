@@ -13,6 +13,8 @@ class Client
     /** Object Storage Service */
     public $client;
 
+    const OSS_PROCESS = OssClient::OSS_PROCESS;
+
     public static $imageHeadersOptions = [
         OssClient::OSS_HEADERS => [
             'Cache-Control' => 'public, max-age=31536000',
@@ -73,6 +75,16 @@ class Client
     public static function getDomain(): string
     {
         return config('oss.domain');
+    }
+
+    /**
+     * 获取	Bucket 名字
+     *
+     * @return string
+     */
+    public static function getBucket(): string
+    {
+        return config('oss.bucket');
     }
 
     /**
