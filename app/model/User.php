@@ -11,6 +11,8 @@ use think\Model;
  */
 class User extends Model
 {
+    // protected $convertNameToCamel = true;
+
     public function chatrooms()
     {
         return $this->belongsToMany(Chatroom::class, ChatMember::class);

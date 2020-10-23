@@ -11,6 +11,8 @@ use think\Model;
  */
 class FriendRequest extends Model
 {
+    // protected $convertNameToCamel = true;
+
     /** 状态：等待验证 */
     const STATUS_WAIT = 0;
     /** 状态：同意 */

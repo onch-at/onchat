@@ -25,7 +25,7 @@ class OnChat extends Command
     {
         // 指令配置
         $this->setName('onchat')
-            ->addArgument('action', Argument::OPTIONAL, 'start|stop|restart|reload', self::ACTION_START)
+            ->addArgument('action', Argument::OPTIONAL, 'start|stop|restart|reload|install', self::ACTION_START)
             ->setDescription('the onchat command');
     }
 

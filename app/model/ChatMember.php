@@ -13,6 +13,8 @@ use app\model\Chatroom;
  */
 class ChatMember extends Pivot
 {
+    // protected $convertNameToCamel = true;
+
     public function chatroom()
     {
         return $this->belongsTo(Chatroom::class);

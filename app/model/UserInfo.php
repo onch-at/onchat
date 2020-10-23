@@ -11,6 +11,8 @@ use think\Model;
  */
 class UserInfo extends Model
 {
+    // protected $convertNameToCamel = true;
+
     public function user()
     {
         return $this->belongsTo(User::class);

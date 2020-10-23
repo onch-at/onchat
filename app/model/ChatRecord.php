@@ -13,6 +13,8 @@ use app\model\Chatroom;
  */
 class ChatRecord extends Model
 {
+    // protected $convertNameToCamel = true;
+
     /**
      * 选择聊天室
      *

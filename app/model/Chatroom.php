@@ -11,6 +11,8 @@ use think\Model;
  */
 class Chatroom extends Model
 {
+    // protected $convertNameToCamel = true;
+
     /** 聊天室类型：群聊 */
     const TYPE_GROUP_CHAT = 0;
     /** 聊天室类型：私聊 */
