@@ -15,9 +15,9 @@ use think\facade\Db;
 use think\Response;
 use app\core\util\Sql as SqlUtil;
 
-use app\core\handler\Chatroom as ChatroomHandler;
-use app\core\handler\User as UserHandler;
-use app\core\handler\Friend as FriendHandler;
+use app\core\service\Chatroom as ChatroomService;
+use app\core\service\User as UserService;
+use app\core\service\Friend as FriendService;
 use app\model\FriendRequest;
 use app\core\identicon\generator\ImageMagickGenerator;
 use app\core\oss\Client;
@@ -78,7 +78,7 @@ class Index extends BaseController
     {
 
         // dump(Db::execute("SHOW TABLES LIKE 'chat_record_1_0'"));
-        // ChatroomHandler::addChatRecordTable((string)2000);
+        // ChatroomService::addChatRecordTable((string)2000);
         // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
 
 

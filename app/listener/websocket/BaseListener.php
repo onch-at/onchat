@@ -6,7 +6,7 @@ namespace app\listener\websocket;
 
 use think\swoole\Websocket;
 use think\facade\Cache;
-use app\core\handler\User as UserHandler;
+use app\core\service\User as UserService;
 
 abstract class BaseListener
 {
@@ -49,8 +49,8 @@ abstract class BaseListener
         $session = unserialize(unserialize($this->getRedis()->get($this->sessPrefix . $sessId)));
 
         $this->getRedis()->hSet(self::REDIS_HASH_FD_USER_PAIR, (string) $this->fd, serialize([
-            'id'       => $session[UserHandler::SESSION_USER_LOGIN]['id'],
-            'username' => $session[UserHandler::SESSION_USER_LOGIN]['username']
+            'id'       => $session[UserService::SESSION_USER_LOGIN]['id'],
+            'username' => $session[UserService::SESSION_USER_LOGIN]['username']
         ]));
     }
 

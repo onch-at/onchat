@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\BaseController;
-use app\core\handler\User as UserHandler;
+use app\core\service\User as UserService;
 use app\core\Result;
 use app\core\util\Str as StrUtil;
 
@@ -24,7 +24,7 @@ class User extends BaseController
 
         $username = input('post.username/s');
         $password = input('post.password/s');
-        return UserHandler::login($username, $password);
+        return UserService::login($username, $password);
     }
 
     /**
@@ -34,7 +34,7 @@ class User extends BaseController
      */
     public function logout(): void
     {
-        UserHandler::logout();
+        UserService::logout();
     }
 
     /**
@@ -45,7 +45,7 @@ class User extends BaseController
      */
     public function checkLogin(): Result
     {
-        return UserHandler::checkLogin();
+        return UserService::checkLogin();
     }
 
     /**
@@ -65,12 +65,12 @@ class User extends BaseController
 
         $username = StrUtil::trimAll(input('post.username/s'));
         $password = StrUtil::trimAll(input('post.password/s'));
-        return UserHandler::register($username, $password);
+        return UserService::register($username, $password);
     }
 
     public function avatar(): Result
     {
-        return UserHandler::avatar();
+        return UserService::avatar();
     }
 
     /**
@@ -80,7 +80,7 @@ class User extends BaseController
      */
     public function getUserById($id): Result
     {
-        return UserHandler::getUserById((int) $id);
+        return UserService::getUserById((int) $id);
     }
 
     /**
@@ -90,7 +90,7 @@ class User extends BaseController
      */
     public function getUserId(): Result
     {
-        return UserHandler::getUserId();
+        return UserService::getUserId();
     }
 
     /**
@@ -100,7 +100,7 @@ class User extends BaseController
      */
     public function getChatrooms(): Result
     {
-        return UserHandler::getChatrooms();
+        return UserService::getChatrooms();
     }
 
     /**
@@ -110,7 +110,7 @@ class User extends BaseController
      */
     public function getChatList(): Result
     {
-        return UserHandler::getChatList();
+        return UserService::getChatList();
     }
 
     /**
@@ -121,7 +121,7 @@ class User extends BaseController
      */
     public function sticky(int $id): Result
     {
-        return UserHandler::sticky($id);
+        return UserService::sticky($id);
     }
 
     /**
@@ -132,7 +132,7 @@ class User extends BaseController
      */
     public function unsticky(int $id): Result
     {
-        return UserHandler::unsticky($id);
+        return UserService::unsticky($id);
     }
 
     /**
@@ -143,7 +143,7 @@ class User extends BaseController
      */
     public function readed(int $id): Result
     {
-        return UserHandler::readed($id);
+        return UserService::readed($id);
     }
 
     /**
@@ -154,6 +154,6 @@ class User extends BaseController
      */
     public function unread(int $id): Result
     {
-        return UserHandler::unread($id);
+        return UserService::unread($id);
     }
 }

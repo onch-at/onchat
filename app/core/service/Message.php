@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\core\handler;
+namespace app\core\service;
 
 use app\core\Result;
 use app\core\util\Str as StrUtil;

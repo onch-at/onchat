@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\BaseController;
-use app\core\handler\Chatroom as ChatroomHandler;
+use app\core\service\Chatroom as ChatroomService;
 use app\core\Result;
 
 class Chatroom extends BaseController
@@ -18,7 +18,7 @@ class Chatroom extends BaseController
      */
     public function getName(int $id): Result
     {
-        return ChatroomHandler::getName($id);
+        return ChatroomService::getName($id);
     }
 
     /**
@@ -29,7 +29,7 @@ class Chatroom extends BaseController
      */
     public function getChatroom(int $id): Result
     {
-        return ChatroomHandler::getChatroom($id);
+        return ChatroomService::getChatroom($id);
     }
 
     /**
@@ -41,6 +41,6 @@ class Chatroom extends BaseController
      */
     public function getRecords(int $id, int $msgId): Result
     {
-        return ChatroomHandler::getRecords($id, $msgId);
+        return ChatroomService::getRecords($id, $msgId);
     }
 }

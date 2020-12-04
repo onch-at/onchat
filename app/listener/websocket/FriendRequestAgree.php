@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\handler\User as UserHandler;
-use app\core\handler\Friend as FriendHandler;
+use app\core\service\User as UserService;
+use app\core\service\Friend as FriendService;
 use app\core\Result;
 
 class FriendRequestAgree extends BaseListener
@@ -24,7 +24,7 @@ class FriendRequestAgree extends BaseListener
 
         $user = $this->getUserByFd();
 
-        $result = FriendHandler::agreeRequest($event['friendRequestId'], $user['id'], $event['selfAlias']);
+        $result = FriendService::agreeRequest($event['friendRequestId'], $user['id'], $event['selfAlias']);
 
         $chatroomId = $result->data['chatroomId'];
         $this->websocket->join(parent::ROOM_CHATROOM . $chatroomId);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\handler\User as UserHandler;
-use app\core\handler\Friend as FriendHandler;
+use app\core\service\User as UserService;
+use app\core\service\Friend as FriendService;
 use app\core\Result;
 
 class FriendRequest extends BaseListener
@@ -24,7 +24,7 @@ class FriendRequest extends BaseListener
 
         $user = $this->getUserByFd();
 
-        $result = FriendHandler::request(
+        $result = FriendService::request(
             $user['id'],
             $event['userId'],
             $user['username'],

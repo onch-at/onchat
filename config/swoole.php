@@ -21,9 +21,7 @@ return [
             'document_root'         => root_path('public'),
             'package_max_length'    => 20 * 1024 * 1024,
             'buffer_output_size'    => 10 * 1024 * 1024,
-            'socket_buffer_size'    => 128 * 1024 * 1024,
-            // 'ssl_cert_file' => __DIR__ . '/config/ssl.crt / .pem',
-            // 'ssl_key_file' => __DIR__ . '/config/ssl.key',
+            'socket_buffer_size'    => 128 * 1024 * 1024
         ],
     ],
     'websocket'  => [

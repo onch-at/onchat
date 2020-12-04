@@ -6,7 +6,7 @@ namespace app\listener\websocket;
 
 use think\swoole\Websocket;
 use think\facade\Session;
-use app\core\handler\User as UserHandler;
+use app\core\service\User as UserService;
 
 class Connect extends BaseListener
 {

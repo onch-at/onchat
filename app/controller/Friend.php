@@ -6,8 +6,8 @@ namespace app\controller;
 
 use app\BaseController;
 
-use app\core\handler\Friend as FriendHandler;
-use app\core\handler\User as UserHandler;
+use app\core\service\Friend as FriendService;
+use app\core\service\User as UserService;
 use app\core\Result;
 
 class Friend extends BaseController
@@ -20,7 +20,7 @@ class Friend extends BaseController
      */
     public function getReceiveFriendRequests(): Result
     {
-        return FriendHandler::getReceiveFriendRequests();
+        return FriendService::getReceiveFriendRequests();
     }
 
     /**
@@ -30,7 +30,7 @@ class Friend extends BaseController
      */
     public function getSendFriendRequests(): Result
     {
-        return FriendHandler::getSendFriendRequests();
+        return FriendService::getSendFriendRequests();
     }
 
     /**
@@ -41,7 +41,7 @@ class Friend extends BaseController
      */
     public function getFriendRequestByTargetId(int $targetId): Result
     {
-        return FriendHandler::getFriendRequestByTargetId($targetId);
+        return FriendService::getFriendRequestByTargetId($targetId);
     }
 
     /**
@@ -52,7 +52,7 @@ class Friend extends BaseController
      */
     public function getFriendRequestBySelfId(int $selfId): Result
     {
-        return FriendHandler::getFriendRequestBySelfId($selfId);
+        return FriendService::getFriendRequestBySelfId($selfId);
     }
 
     /**
@@ -63,7 +63,7 @@ class Friend extends BaseController
      */
     public function getFriendRequestById(int $id): Result
     {
-        return FriendHandler::getFriendRequestById($id);
+        return FriendService::getFriendRequestById($id);
     }
 
     /**
@@ -74,7 +74,7 @@ class Friend extends BaseController
      */
     public function setFriendAlias(int $chatroomId): Result
     {
-        return FriendHandler::setFriendAlias($chatroomId, input('put.alias/s'));
+        return FriendService::setFriendAlias($chatroomId, input('put.alias/s'));
     }
 
     /**
@@ -86,11 +86,11 @@ class Friend extends BaseController
      */
     public function isFriend(int $id): Result
     {
-        $userId = UserHandler::getId();
+        $userId = UserService::getId();
         if (!$userId) {
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
-        $data = FriendHandler::isFriend($userId, $id);
+        $data = FriendService::isFriend($userId, $id);
         return Result::success($data);
     }
 }

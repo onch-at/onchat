@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\handler\User as UserHandler;
+use app\core\service\User as UserService;
 use app\core\util\Sql as SqlUtil;
 use app\model\UserInfo as UserInfoModel;
 
@@ -25,7 +25,7 @@ class Init extends BaseListener
         $this->setFdUserPair($event['sessId']);
 
         $user = $this->getUserByFd();
-        $chatrooms = UserHandler::getChatrooms($user['id'])->data;
+        $chatrooms = UserService::getChatrooms($user['id'])->data;
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {

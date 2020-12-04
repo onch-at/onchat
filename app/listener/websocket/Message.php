@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\handler\User as UserHandler;
-use app\core\handler\Chatroom as ChatroomHandler;
+use app\core\service\User as UserService;
+use app\core\service\Chatroom as ChatroomService;
 
 class Message extends BaseListener
 {
@@ -24,6 +24,6 @@ class Message extends BaseListener
         $user = $this->getUserByFd();
         // TODO 群聊的头像
         $this->websocket->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])
-            ->emit('message', ChatroomHandler::setMessage($user['id'], $event['msg']));
+            ->emit('message', ChatroomService::setMessage($user['id'], $event['msg']));
     }
 }

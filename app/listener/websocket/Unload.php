@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\handler\User as UserHandler;
+use app\core\service\User as UserService;
 
 class Unload extends BaseListener
 {
