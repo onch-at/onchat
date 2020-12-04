@@ -286,15 +286,13 @@ class Chatroom
             return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
         }
 
-        // 初次查询的时候，顺带把未读消息数归零
-        if ($msgId == 0) {
-            ChatMemberModel::where([
-                'user_id'     => $userId,
-                'chatroom_id' => $id
-            ])->update([
-                'unread' => 0
-            ]);
-        }
+        // 查询的时候，顺带把未读消息数归零
+        ChatMemberModel::where([
+            'user_id'     => $userId,
+            'chatroom_id' => $id
+        ])->update([
+            'unread' => 0
+        ]);
 
         // 如果msgId为0，则代表初次查询
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);

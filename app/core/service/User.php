@@ -52,6 +52,9 @@ class User
     /** 是否开放注册 */
     const CAN_REGISTER = true;
 
+    /** 消息列表行数 */
+    const CHAT_LIST_ROWS = 15;
+
     /** User 字段 */
     const USER_FIELDS = [
         'user.id',
@@ -538,32 +541,55 @@ class User
     /**
      * 查询该用户下的聊天列表
      *
+     * @param integer $page 页码
      * @return Result
      */
-    public static function getChatList(): Result
+    public static function getChatList(int $page): Result
     {
         $userId = self::getId();
         if (!$userId) {
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        $data = ChatMemberModel::where([
-            'chat_member.user_id' => $userId,
-            'chat_member.is_show' => true
-        ])->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
-            ->field([
-                'chat_member.id',
-                'chat_member.chatroom_id',
-                'chat_member.unread',
-                'chat_member.sticky',
-                'chat_member.create_time',
-                'chat_member.update_time',
-                'chatroom.name',
-                'chatroom.avatar',
-                'chatroom.type',
-            ])
-            // ->order('chat_member.update_time', 'DESC') 由于前端需要即时排序，则将这一步交给前端
-            ->select()->toArray();
+        $data = [];
+
+        $field = [
+            'chat_member.id',
+            'chat_member.chatroom_id',
+            'chat_member.unread',
+            'chat_member.sticky',
+            'chat_member.create_time',
+            'chat_member.update_time',
+            'chatroom.name',
+            'chatroom.avatar',
+            'chatroom.type',
+        ];
+
+        // 如果是第一次查询，则查出全部未读消息
+        if ($page === 1) {
+            $data = ChatMemberModel::where([
+                ['chat_member.user_id', '=', $userId],
+                ['chat_member.unread', '>', 0],
+                ['chat_member.is_show', '=', true]
+            ])->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+                ->field($field)
+                ->select()
+                ->toArray();
+        }
+
+        $conut = count($data);
+
+        if ($conut < self::CHAT_LIST_ROWS) {
+            $data = array_merge($data, ChatMemberModel::where([
+                ['chat_member.user_id', '=', $userId],
+                ['chat_member.unread', '=', 0],
+                ['chat_member.is_show', '=', true]
+            ])->page($page, self::CHAT_LIST_ROWS - $conut)
+                ->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+                ->field($field)
+                ->select()
+                ->toArray());
+        }
 
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
         $latestMsg = null;

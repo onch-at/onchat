@@ -106,11 +106,12 @@ class User extends BaseController
     /**
      * 获取用户的聊天列表
      *
+     * @param integer $page 页码
      * @return Result
      */
-    public function getChatList(): Result
+    public function getChatList(int $page): Result
     {
-        return UserService::getChatList();
+        return UserService::getChatList($page);
     }
 
     /**

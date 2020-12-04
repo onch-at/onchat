@@ -37,7 +37,7 @@ Route::group('user', function () {
     Route::post('avatar', 'avatar');
 
     Route::group('chatlist', function () {
-        Route::get('$', 'getChatList');
+        Route::get('/:page', 'getChatList');
 
         Route::put('sticky/:id', 'sticky');
         Route::put('unsticky/:id', 'unsticky');
