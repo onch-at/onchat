@@ -14,6 +14,7 @@ use think\captcha\facade\Captcha;
 use think\facade\Db;
 use think\Response;
 use app\core\util\Sql as SqlUtil;
+use app\core\util\Arr as ArrUtil;
 
 use app\core\service\Chatroom as ChatroomService;
 use app\core\service\User as UserService;
@@ -76,6 +77,7 @@ class Index extends BaseController
 
     public function index()
     {
+        dump(ArrUtil::keyToCamel(['is_A' => ['is_B' => ['is_C' => 1]]]));
 
         // dump(Db::execute("SHOW TABLES LIKE 'chat_record_1_0'"));
         // ChatroomService::addChatRecordTable((string)2000);

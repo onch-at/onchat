@@ -332,7 +332,7 @@ class Chatroom
             $records[] = $item;
         }
 
-        return Result::success(ArrUtil::keyToCamel2($records));
+        return Result::success(ArrUtil::keyToCamel($records));
     }
 
     /**

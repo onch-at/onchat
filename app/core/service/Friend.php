@@ -215,7 +215,7 @@ class Friend
             $friendRequests[$key]['targetUsername'] = $username;
         }
 
-        return Result::success(ArrUtil::keyToCamel2($friendRequests));
+        return Result::success(ArrUtil::keyToCamel($friendRequests));
     }
 
     /**
@@ -264,7 +264,7 @@ class Friend
             $friendRequests[$key]['selfUsername'] = $username;
         }
 
-        return Result::success(ArrUtil::keyToCamel2($friendRequests));
+        return Result::success(ArrUtil::keyToCamel($friendRequests));
     }
 
     /**

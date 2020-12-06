@@ -532,7 +532,7 @@ class User
     public static function getChatrooms($userId = null): Result
     {
         $data = UserModel::find($userId ?: self::getId())->chatrooms()->select()->toArray();
-        return Result::success(ArrUtil::keyToCamel2($data));
+        return Result::success(ArrUtil::keyToCamel($data));
     }
 
     /**
@@ -633,7 +633,7 @@ class User
             }
         }
 
-        return Result::success(ArrUtil::keyToCamel2($data));
+        return Result::success(ArrUtil::keyToCamel($data));
     }
 
     /**
