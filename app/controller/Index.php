@@ -77,7 +77,8 @@ class Index extends BaseController
 
     public function index()
     {
-        dump(ArrUtil::keyToCamel(['is_A' => ['is_B' => ['is_C' => 1]]]));
+        dump(getdate(intval(1607357075914 / 1000)));
+        dump(intval(1607357075914 / 1000));
 
         // dump(Db::execute("SHOW TABLES LIKE 'chat_record_1_0'"));
         // ChatroomService::addChatRecordTable((string)2000);

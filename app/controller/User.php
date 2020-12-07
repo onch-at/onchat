@@ -18,13 +18,7 @@ class User extends BaseController
      */
     public function login(): Result
     {
-        if (empty(input('post.username')) || empty(input('post.password'))) { // 如果参数缺失
-            return new Result(Result::CODE_ERROR_PARAM);
-        }
-
-        $username = input('post.username/s');
-        $password = input('post.password/s');
-        return UserService::login($username, $password);
+        return UserService::login();
     }
 
     /**
@@ -55,22 +49,27 @@ class User extends BaseController
      */
     public function register(): Result
     {
-        if (empty(input('post.username')) || empty(input('post.password')) || empty(input('post.captcha'))) { // 如果参数缺失
-            return new Result(Result::CODE_ERROR_PARAM);
-        }
-
-        if (!captcha_check(input('post.captcha'))) {
-            return new Result(Result::CODE_ERROR_PARAM, '验证码错误！');
-        }
-
-        $username = StrUtil::trimAll(input('post.username/s'));
-        $password = StrUtil::trimAll(input('post.password/s'));
-        return UserService::register($username, $password);
+        return UserService::register();
     }
 
+    /**
+     * 上传用户头像
+     *
+     * @return Result
+     */
     public function avatar(): Result
     {
         return UserService::avatar();
+    }
+
+    /**
+     * 保存用户信息
+     *
+     * @return Result
+     */
+    public function saveUserInfo(): Result
+    {
+        return UserService::saveUserInfo();
     }
 
     /**

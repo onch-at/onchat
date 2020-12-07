@@ -9,7 +9,7 @@ use think\facade\Db;
 use Identicon\Identicon;
 use app\model\User as UserModel;
 use app\core\util\Arr as ArrUtil;
-use app\core\util\Sql as SqlUtil;
+use app\core\util\Str as StrUtil;
 use app\core\util\Date as DateUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
@@ -101,15 +101,27 @@ class User
     /**
      * 注册账户
      *
-     * @param string $username 用户名
-     * @param string $password 密码
      * @return Result
      */
-    public static function register(string $username, string $password): Result
+    public static function register(): Result
     {
+        $username = input('post.username/s');
+        $password = input('post.password/s');
+
+        if (!$username || !$password || !input('post.captcha')) { // 如果参数缺失
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        if (!captcha_check(input('post.captcha'))) {
+            return new Result(Result::CODE_ERROR_PARAM, '验证码错误！');
+        }
+
         if (!self::CAN_REGISTER) {
             return new Result(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
         }
+
+        $username = StrUtil::trimAll($username);
+        $password = StrUtil::trimAll($password);
 
         if (!preg_match(self::USERNAME_PATTERN, $username)) {
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
@@ -189,12 +201,17 @@ class User
     /**
      * 用户登录
      *
-     * @param string $username 用户名
-     * @param string $password 密码
      * @return Result
      */
-    public static function login(string $username, string $password): Result
+    public static function login(): Result
     {
+        $username = input('post.username/s');
+        $password = input('post.password/s');
+
+        if (!$username || !$password) { // 如果参数缺失
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
         if (!preg_match(self::USERNAME_PATTERN, $username)) {
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
@@ -380,10 +397,8 @@ class User
     public static function getUserId(): Result
     {
         $id = self::getId();
-        if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
-        }
-        return Result::success($id);
+
+        return $id ? Result::success($id) : new Result(Result::CODE_ERROR_NO_ACCESS);
     }
 
     /**
@@ -440,6 +455,11 @@ class User
         }
     }
 
+    /**
+     * 上传头像
+     *
+     * @return Result
+     */
     public static function avatar(): Result
     {
         $id = self::getId();
@@ -696,5 +716,48 @@ class User
     public static function unread(int $chatroomId): Result
     {
         return self::readed($chatroomId, 1);
+    }
+
+    /**
+     * 保存用户信息
+     *
+     * @return Result
+     */
+    public static function saveUserInfo(): Result
+    {
+        $id = self::getId();
+        if (!$id) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $nickname      = input('put.nickname/s') ?: self::getUsername();
+        $signature     = input('put.signature/s');
+        $mood          = input('put.mood/d') ?: 0;
+        $birthday      = input('put.birthday/d');
+        $gender        = input('put.gender/d') ?: 2;
+        $age           = $birthday ? DateUtil::getAge((int) $birthday / 1000) : null;
+        $constellation = $birthday ? DateUtil::getConstellation((int) $birthday / 1000) : null;
+
+        $userInfo = UserInfoModel::where('user_id', '=', $id)->field([
+            'nickname',
+            'signature',
+            'mood',
+            'birthday',
+            'gender',
+            'age',
+            'constellation',
+        ])->find();
+
+        $userInfo->nickname      = $nickname;
+        $userInfo->signature     = $signature;
+        $userInfo->mood          = $mood;
+        $userInfo->birthday      = $birthday;
+        $userInfo->gender        = $gender;
+        $userInfo->age           = $age;
+        $userInfo->constellation = $constellation;
+
+        $userInfo->save();
+
+        return Result::success(ArrUtil::keyToCamel($userInfo->toArray()));
     }
 }
