@@ -28,6 +28,8 @@ class User
     const PASSWORD_MIN_LENGTH = 8;
     /** 用户密码最大长度 */
     const PASSWORD_MAX_LENGTH = 50;
+    /** 个性签名 */
+    const SIGNATURE_MAX_LENGTH = 100;
 
     /** 用户已存在 */
     const CODE_USER_EXIST = 1;
@@ -40,9 +42,9 @@ class User
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_USER_EXIST     => '用户已存在',
-        self::CODE_USER_NOT_EXIST => '用户不存在',
-        self::CODE_PASSWORD_ERROR => '密码错误',
+        self::CODE_USER_EXIST         => '用户已存在',
+        self::CODE_USER_NOT_EXIST     => '用户不存在',
+        self::CODE_PASSWORD_ERROR     => '密码错误',
         self::CODE_PASSWORD_IRREGULAR => '密码长度必须在' . self::PASSWORD_MIN_LENGTH . '~' . self::PASSWORD_MAX_LENGTH . '位字符之间',
     ];
 
@@ -732,11 +734,31 @@ class User
 
         $nickname      = input('put.nickname/s') ?: self::getUsername();
         $signature     = input('put.signature/s');
-        $mood          = input('put.mood/d') ?: 0;
+        $mood          = input('put.mood/d');
         $birthday      = input('put.birthday/d');
-        $gender        = input('put.gender/d') ?: 2;
+        $gender        = input('put.gender/d');
         $age           = $birthday ? DateUtil::getAge((int) $birthday / 1000) : null;
         $constellation = $birthday ? DateUtil::getConstellation((int) $birthday / 1000) : null;
+
+        if ($signature) {
+            if (mb_strlen(StrUtil::trimAll($signature), 'utf-8') == 0) {
+                $signature = null;
+            } else {
+                $signature = trim($signature);
+
+                if (mb_strlen($signature, 'utf-8') > self::SIGNATURE_MAX_LENGTH) {
+                    return new Result(Result::CODE_ERROR_PARAM);
+                }
+            }
+        }
+
+        if (!isset($mood)) {
+            $mood = 0;
+        }
+
+        if (!isset($gender)) {
+            $gender = 2;
+        }
 
         $userInfo = UserInfoModel::where('user_id', '=', $id)->field([
             'nickname',

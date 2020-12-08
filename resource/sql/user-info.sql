@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS user_info (
     id               INT          UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id          INT          UNSIGNED NOT NULL COMMENT '用户ID',
     nickname         VARCHAR(30)           NOT NULL COMMENT '昵称',
-    signature        VARCHAR(100)          NULL     COMMENT '个性签名',
+    signature        VARCHAR(200)          NULL     COMMENT '个性签名',
     mood             TINYINT(1)   UNSIGNED NULL     COMMENT '心情',
     login_time       BIGINT       UNSIGNED NOT NULL COMMENT '登录时间',
     birthday         BIGINT       UNSIGNED NULL     COMMENT '生日',
