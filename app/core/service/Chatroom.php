@@ -131,14 +131,26 @@ class Chatroom
             }
         }
 
+        $maxPeopleNum = 1;
         $timestamp = SqlUtil::rawTimestamp();
+
+        switch ($type) {
+            case ChatroomModel::TYPE_PRIVATE_CHAT:
+                $maxPeopleNum = 2;
+                break;
+
+            case ChatroomModel::TYPE_GROUP_CHAT:
+                $maxPeopleNum = 1000;
+                break;
+        }
 
         // 创建一个聊天室
         $chatroom = ChatroomModel::create([
-            'name'        => $name,
-            'type'        => $type,
-            'create_time' => $timestamp,
-            'update_time' => $timestamp,
+            'name'           => $name,
+            'type'           => $type,
+            'max_people_num' => $maxPeopleNum,
+            'create_time'    => $timestamp,
+            'update_time'    => $timestamp,
         ]);
 
         self::addChatRecordTable((string) $chatroom->id);

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f834632afe77e8638bf2bbd66190acc7",
+    "content-hash": "fd7eb347b88ed0adc6cadcff581f50c8",
     "packages": [
         {
             "name": "aliyuncs/oss-sdk-php",
@@ -785,16 +785,16 @@
         },
         {
             "name": "symfony/finder",
-            "version": "v4.4.17",
+            "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "9f1d1d883b79a91ef320c0c6e803494e042ef36e"
+                "reference": "fd8305521692f27eae3263895d1ef1571c71a78d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/9f1d1d883b79a91ef320c0c6e803494e042ef36e",
-                "reference": "9f1d1d883b79a91ef320c0c6e803494e042ef36e",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/fd8305521692f27eae3263895d1ef1571c71a78d",
+                "reference": "fd8305521692f27eae3263895d1ef1571c71a78d",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -804,7 +804,7 @@
                 ]
             },
             "require": {
-                "php": ">=7.1.3"
+                "php": ">=7.2.5"
             },
             "type": "library",
             "autoload": {
@@ -845,20 +845,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-11-17T19:45:34+00:00"
+            "time": "2020-11-18T09:42:36+00:00"
         },
         {
             "name": "topthink/framework",
-            "version": "v6.0.4",
+            "version": "v6.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/framework.git",
-                "reference": "4b252d78562d4a51a501651f837c26cb9d91624f"
+                "reference": "85625d984f5c96699dc27d384869f206c3aec1cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/framework/zipball/4b252d78562d4a51a501651f837c26cb9d91624f",
-                "reference": "4b252d78562d4a51a501651f837c26cb9d91624f",
+                "url": "https://api.github.com/repos/top-think/framework/zipball/85625d984f5c96699dc27d384869f206c3aec1cc",
+                "reference": "85625d984f5c96699dc27d384869f206c3aec1cc",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -912,7 +912,7 @@
                 "orm",
                 "thinkphp"
             ],
-            "time": "2020-09-29T02:19:59+00:00"
+            "time": "2020-10-26T07:18:00+00:00"
         },
         {
             "name": "topthink/think-captcha",
@@ -1067,16 +1067,16 @@
         },
         {
             "name": "topthink/think-swoole",
-            "version": "v3.0.9",
+            "version": "v3.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/think-swoole.git",
-                "reference": "c61e95cdc0669f4fe3382e25def9ae25797c0508"
+                "reference": "044caf6430f153f752199dd643b3e499e382724f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/c61e95cdc0669f4fe3382e25def9ae25797c0508",
-                "reference": "c61e95cdc0669f4fe3382e25def9ae25797c0508",
+                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/044caf6430f153f752199dd643b3e499e382724f",
+                "reference": "044caf6430f153f752199dd643b3e499e382724f",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -1092,11 +1092,11 @@
                 "open-smf/connection-pool": "~1.0",
                 "php": ">7.1",
                 "swoole/ide-helper": "^4.3",
-                "symfony/finder": "^4.3.2",
+                "symfony/finder": "^4.3.2|^5.1",
                 "topthink/framework": "^6.0"
             },
             "require-dev": {
-                "symfony/var-dumper": "^4.3"
+                "symfony/var-dumper": "^4.3|^5.1"
             },
             "type": "library",
             "extra": {
@@ -1128,7 +1128,7 @@
                 }
             ],
             "description": "Swoole extend for thinkphp",
-            "time": "2020-08-08T14:39:00+00:00"
+            "time": "2020-12-09T10:41:21+00:00"
         },
         {
             "name": "yzalis/identicon",
