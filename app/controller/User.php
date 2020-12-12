@@ -113,6 +113,16 @@ class User extends BaseController
     }
 
     /**
+     * 获取私聊聊天室列表
+     *
+     * @return Result
+     */
+    public function getPrivateChatrooms(): Result
+    {
+        return UserService::getPrivateChatrooms();
+    }
+
+    /**
      * 置顶聊天列表子项
      *
      * @param integer $id 聊天室成员表ID

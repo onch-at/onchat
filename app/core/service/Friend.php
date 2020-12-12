@@ -73,7 +73,6 @@ class Friend
         ]);
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $stylename = OssClient::getThumbnailImgStylename();
 
         $selfAvatarThumbnail = null;
@@ -86,9 +85,7 @@ class Friend
 
         $signUrl = null;
         foreach ($userInfos as $userInfo) {
-            $signUrl = $ossClient->signUrl($bucket, $userInfo['avatar'], 3600, 'GET', [
-                OssClient::OSS_PROCESS => 'style/' . $stylename
-            ]);
+            $signUrl = $ossClient->signImageUrl($userInfo['avatar'],  $stylename);
 
             switch ($userInfo['user_id']) {
                 case $selfId:
@@ -205,13 +202,10 @@ class Friend
             ])->order('friend_request.update_time', 'DESC')->select()->toArray();
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['selfAvatarThumbnail'] = $ossClient->signUrl($bucket, $value['selfAvatarThumbnail'], 3600, 'GET', [
-                OssClient::OSS_PROCESS => 'style/' . $stylename
-            ]);
+            $friendRequests[$key]['selfAvatarThumbnail'] = $ossClient->signImageUrl($value['selfAvatarThumbnail'], $stylename);
             $friendRequests[$key]['targetUsername'] = $username;
         }
 
@@ -254,13 +248,10 @@ class Friend
             ])->order('update_time', 'DESC')->select()->toArray();
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['targetAvatarThumbnail'] = $ossClient->signUrl($bucket, $value['targetAvatarThumbnail'], 3600, 'GET', [
-                OssClient::OSS_PROCESS => 'style/' . $stylename
-            ]);
+            $friendRequests[$key]['targetAvatarThumbnail'] = $ossClient->signImageUrl($value['targetAvatarThumbnail'], $stylename);
             $friendRequests[$key]['selfUsername'] = $username;
         }
 
@@ -364,10 +355,8 @@ class Friend
                 'target_id' => $friendRequest->self_id
             ])->delete();
 
-            $chatroomName = $friendRequest->self_id . ' & ' . $friendRequest->target_id;
-
             // 创建一个类型为私聊的聊天室
-            $result = Chatroom::creatChatroom($chatroomName, ChatroomModel::TYPE_PRIVATE_CHAT);
+            $result = Chatroom::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
             if ($result->code != Result::CODE_SUCCESS) {
                 return $result;
             }
@@ -392,7 +381,6 @@ class Friend
             ]);
 
             $ossClient = OssClient::getInstance();
-            $bucket = OssClient::getBucket();
 
             return Result::success([
                 'friendRequestId'       => $friendRequest->id,
@@ -400,9 +388,7 @@ class Friend
                 'selfId'                => $friendRequest->self_id,
                 'targetId'              => $friendRequest->target_id,
                 'targetUsername'        => $userInfo['username'],
-                'targetAvatarThumbnail' => $ossClient->signUrl($bucket, $userInfo['avatar'], 3600, 'GET', [
-                    OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-                ])
+                'targetAvatarThumbnail' => $ossClient->signImageUrl($userInfo['avatar'], OssClient::getThumbnailImgStylename())
             ]);
         } catch (\Exception $e) {
             // 回滚事务
@@ -459,15 +445,12 @@ class Friend
             ])->delete();
 
             $ossClient = OssClient::getInstance();
-            $bucket = OssClient::getBucket();
             $object = User::getInfoByKey('id', $targetId, 'avatar')['avatar'];
 
             $data = $friendRequest->toArray();
             $data['selfUsername'] = User::getUsernameById($friendRequest->self_id);
             $data['targetUsername'] = $targetUsername;
-            $data['targetAvatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-                OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-            ]);
+            $data['targetAvatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
             Db::commit();
 
             return Result::success(ArrUtil::keyToCamel($data));

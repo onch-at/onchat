@@ -15,7 +15,7 @@ use think\facade\Db;
 use think\Response;
 use app\core\util\Sql as SqlUtil;
 use app\core\util\Arr as ArrUtil;
-
+use app\core\oss\Client as OssClient;
 use app\core\service\Chatroom as ChatroomService;
 use app\core\service\User as UserService;
 use app\core\service\Friend as FriendService;
@@ -24,7 +24,6 @@ use app\core\identicon\generator\ImageMagickGenerator;
 use app\core\oss\Client;
 use Identicon\Generator\SvgGenerator;
 use think\facade\Cache;
-use OSS\OssClient;
 use OSS\Core\OssException;
 use app\core\util\Date as DateUtil;
 use HTMLPurifier;
@@ -77,8 +76,44 @@ class Index extends BaseController
 
     public function index()
     {
-        dump(getdate(intval(1607357075914 / 1000)));
-        dump(intval(1607357075914 / 1000));
+        $id = 7;
+
+        $privateChatroomIdList = Chatroom::join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
+            'chatroom.type' =>  Chatroom::TYPE_PRIVATE_CHAT,
+            'chat_member.user_id' => $id
+        ])->column('chatroom.id');
+
+        $data = ChatMember::whereIn('chat_member.chatroom_id', $privateChatroomIdList)
+            ->where('chat_member.user_id', '<>', $id)
+            ->join('user_info', 'user_info.user_id = chat_member.user_id')
+            ->field([
+                'chat_member.id',
+                'chat_member.chatroom_id',
+                'chat_member.nickname as name',
+                'user_info.signature as content',
+                'user_info.avatar as avatarThumbnail',
+
+                'chat_member.create_time',
+                'chat_member.update_time',
+            ])->select()
+            ->toArray();
+
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+
+        foreach ($data as $key => $value) {
+            $data[$key]['type'] = Chatroom::TYPE_PRIVATE_CHAT;
+            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+        }
+
+        dump($data);
+
+        // dump(Chatroom::join('chat_member', 'chatroom.id = chat_member.chatroom_id')
+        //     ->where('chatroom.type', '=', 1)
+        //     ->column('chatroom.id'));
+
+        // dump(Chatroom::getLastSql());
 
         // dump(Db::execute("SHOW TABLES LIKE 'chat_record_1_0'"));
         // ChatroomService::addChatRecordTable((string)2000);

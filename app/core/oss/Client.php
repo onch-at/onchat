@@ -107,6 +107,20 @@ class Client
         return config('oss.img_stylename_thumbnail');
     }
 
+    /**
+     *  签名图像URL
+     *
+     * @param string $object
+     * @param string $stylename
+     * @return string
+     */
+    public function signImageUrl(string $object, string $stylename): string
+    {
+        return $this->signUrl(self::getBucket(), $object, 3600, 'GET', [
+            OssClient::OSS_PROCESS => 'style/' . $stylename
+        ]);
+    }
+
     public function __call($method, $args)
     {
         return call_user_func_array([$this->client, $method], $args);

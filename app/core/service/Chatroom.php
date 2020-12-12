@@ -144,6 +144,8 @@ class Chatroom
                 break;
         }
 
+        trace($maxPeopleNum);
+
         // 创建一个聊天室
         $chatroom = ChatroomModel::create([
             'name'           => $name,
@@ -245,15 +247,12 @@ class Chatroom
             ]);
 
             $ossClient = OssClient::getInstance();
-            $bucket = OssClient::getBucket();
             $object = User::getInfoByKey('id', $userId, 'avatar')['avatar'];
 
             $msg['id'] = $id;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
-            $msg['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-                OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-            ]);
+            $msg['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
             $msg['createTime'] = $timestamp;
 
             // 提交事务
@@ -310,7 +309,6 @@ class Chatroom
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $stylename = OssClient::getThumbnailImgStylename();
 
         $object = null;
@@ -333,9 +331,7 @@ class Chatroom
             if (!isset($avatarThumbnailMap[$item['user_id']])) {
                 $object = User::getInfoByKey('id', $item['user_id'], 'avatar')['avatar'];
 
-                $avatarThumbnailMap[$item['user_id']] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-                    OssClient::OSS_PROCESS => 'style/' . $stylename
-                ]);
+                $avatarThumbnailMap[$item['user_id']] = $ossClient->signImageUrl($object, $stylename);
             }
 
             $item['nickname'] = $nicknameMap[$item['user_id']];

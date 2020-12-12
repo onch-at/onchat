@@ -182,12 +182,8 @@ class User
 
             unset($user->password); // 删掉密码
 
-            $userInfo['avatar'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-                OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
-            ]);
-            $userInfo['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-                OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-            ]);
+            $userInfo['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
+            $userInfo['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
             // 提交事务
             Db::commit();
@@ -241,15 +237,10 @@ class User
         unset($user['password']);
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $object = $user['avatar'];
 
-        $user['avatar'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
-        ]);
-        $user['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-        ]);
+        $user['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
+        $user['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
         return Result::success(ArrUtil::keyToCamel($user), '登录成功！即将跳转…');
     }
@@ -312,15 +303,10 @@ class User
         }
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $object = $user->avatar;
 
-        $user->avatar = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
-        ]);
-        $user->avatarThumbnail = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-        ]);
+        $user->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
+        $user->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
         return Result::success(ArrUtil::keyToCamel($user->toArray()));
     }
@@ -341,15 +327,10 @@ class User
         }
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $object = $user->avatar;
 
-        $user->avatar = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
-        ]);
-        $user->avatarThumbnail = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-        ]);
+        $user->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
+        $user->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
         return Result::success(ArrUtil::keyToCamel($user->toArray()));
     }
@@ -425,15 +406,10 @@ class User
         }
 
         $ossClient = OssClient::getInstance();
-        $bucket = OssClient::getBucket();
         $object = $user['avatar'];
 
-        $user['avatar'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
-        ]);
-        $user['avatarThumbnail'] = $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-        ]);
+        $user['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
+        $user['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
         unset($user['password']);
 
@@ -534,12 +510,8 @@ class User
             $userInfo->save();
 
             return Result::success([
-                'avatar'          => $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-                    OssClient::OSS_PROCESS => 'style/' . OssClient::getOriginalImgStylename()
-                ]),
-                'avatarThumbnail' => $ossClient->signUrl($bucket, $object, 3600, 'GET', [
-                    OssClient::OSS_PROCESS => 'style/' . OssClient::getThumbnailImgStylename()
-                ])
+                'avatar'          => $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename()),
+                'avatarThumbnail' => $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename())
             ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
@@ -612,7 +584,7 @@ class User
             }
             $latestMsg['nickname'] = $nickname;
             $latestMsg['data'] = json_decode($latestMsg['data']);
-            $data[$key]['latestMsg'] = ArrUtil::keyToCamel($latestMsg);
+            $data[$key]['content'] = ArrUtil::keyToCamel($latestMsg);
         }
 
         // 如果其中有私聊聊天室
@@ -642,9 +614,7 @@ class User
             $stylename = OssClient::getThumbnailImgStylename();
 
             foreach ($list as $item) {
-                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = $ossClient->signUrl($bucket, $item->avatar, 3600, 'GET', [
-                    OssClient::OSS_PROCESS => 'style/' . $stylename
-                ]);
+                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = $ossClient->signImageUrl($item->avatar, $stylename);
             }
 
             foreach ($data as $key => $value) {
@@ -659,6 +629,49 @@ class User
     }
 
     /**
+     * 获取私聊聊天室列表
+     *
+     * @return Result
+     */
+    public static function getPrivateChatrooms(): Result
+    {
+        $id = self::getId();
+        if (!$id) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        // 私聊聊天室ID列表
+        $privateChatroomIdList = ChatroomModel::join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
+            'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
+            'chat_member.user_id' => $id
+        ])->column('chatroom.id');
+
+        $data = ChatMemberModel::whereIn('chat_member.chatroom_id', $privateChatroomIdList)
+            ->where('chat_member.user_id', '<>', $id)
+            ->join('user_info', 'user_info.user_id = chat_member.user_id')
+            ->field([
+                'chat_member.id',
+                'chat_member.chatroom_id',
+                'chat_member.nickname as name',
+                'user_info.signature as content',
+                'user_info.avatar as avatarThumbnail',
+                'chat_member.create_time',
+                'chat_member.update_time',
+            ])->select()
+            ->toArray();
+
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+        foreach ($data as $key => $value) {
+            $data[$key]['type'] = ChatroomModel::TYPE_PRIVATE_CHAT;
+            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+        }
+
+        return Result::success(ArrUtil::keyToCamel($data));
+    }
+
+    /**
      * 置顶聊天列表子项
      *
      * @param integer $id 聊天室成员表ID
@@ -666,14 +679,23 @@ class User
      */
     public static function sticky(int $id, $sticky = true): Result
     {
-        $num = UserModel::find(User::getId())->chatMember()->update([
-            'id'          => $id,
-            'sticky'      => $sticky
-        ]);
-
-        if ($num == 0) {
-            return new Result(Result::CODE_ERROR_PARAM);
+        $userId = self::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
+
+        $chatMember = ChatMemberModel::where([
+            'id'      => $id,
+            'user_id' => $userId
+        ])->find();
+
+        // 如果找不到，则代表自己没有进这个群
+        if (!$chatMember) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $chatMember->sticky = $sticky;
+        $chatMember->save();
 
         return Result::success();
     }
@@ -698,13 +720,23 @@ class User
      */
     public static function readed(int $chatroomId, int $unread = 0): Result
     {
-        $num = UserModel::find(User::getId())->chatMember()->where('chatroom_id', '=', $chatroomId)->update([
-            'unread' => $unread
-        ]);
-
-        if ($num == 0) {
-            return new Result(Result::CODE_ERROR_PARAM);
+        $userId = self::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
+
+        $chatMember = ChatMemberModel::where([
+            'chatroom_id' => $chatroomId,
+            'user_id'     => $userId
+        ])->find();
+
+        // 如果找不到，则代表自己没有进这个群
+        if (!$chatMember) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
+
+        $chatMember->unread = $unread;
+        $chatMember->save();
 
         return Result::success();
     }
