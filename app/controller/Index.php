@@ -76,38 +76,86 @@ class Index extends BaseController
 
     public function index()
     {
-        $id = 7;
+        $connections = config('database.connections');
+        $conifg = $connections[config('database.default')];
+        $dsn = "{$conifg['type']}:host={$conifg['hostname']};dbname={$conifg['database']};charset={$conifg['charset']}";
+        $db = new \PDO($dsn, $conifg['username'], $conifg['password'], $conifg['params']);
 
-        $privateChatroomIdList = Chatroom::join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
-            'chatroom.type' =>  Chatroom::TYPE_PRIVATE_CHAT,
-            'chat_member.user_id' => $id
-        ])->column('chatroom.id');
+        $db->exec('DROP FUNCTION IF EXISTS sortByChineseAndEnglish;');
+        $count = $db->exec("CREATE FUNCTION `sortByChineseAndEnglish`(P_NAME VARCHAR(255)) RETURNS VARCHAR(255) CHARSET utf8mb4 DETERMINISTIC BEGIN
+DECLARE
+V_RETURN VARCHAR(255); DECLARE V_BOOL INT DEFAULT 0; DECLARE FIRST_VARCHAR VARCHAR(1);
+SET
+FIRST_VARCHAR = LEFT(CONVERT(P_NAME USING gbk),
+1);
+SELECT
+FIRST_VARCHAR REGEXP '[a-zA-Z]'
+INTO V_BOOL; IF V_BOOL = 1 THEN
+SET
+V_RETURN = FIRST_VARCHAR; ELSE
+SET
+V_RETURN = ELT(
+INTERVAL(
+CONV(
+    HEX(
+        LEFT(CONVERT(P_NAME USING gbk),
+        1)
+    ),
+    16,
+    10
+),
+0xb0a1,
+0xb0c5,
+0xb2c1,
+0xb4ee,
+0xb6ea,
+0xb7a2,
+0xb8c1,
+0xb9fe,
+0xbbf7,
+0xbfa6,
+0xc0ac,
+0xc2e8,
+0xc4c3,
+0xc5b6,
+0xc5be,
+0xc6da,
+0xc8bb,
+0xc8f6,
+0xcbfa,
+0xcdda,
+0xcef4,
+0xd1b9,
+0xd4d1
+),
+'A',
+'B',
+'C',
+'D',
+'E',
+'F',
+'G',
+'H',
+'J',
+'K',
+'L',
+'M',
+'N',
+'O',
+'P',
+'Q',
+'R',
+'S',
+'T',
+'W',
+'X',
+'Y',
+'Z'
+);
+END IF; RETURN V_RETURN;
+END");
 
-        $data = ChatMember::whereIn('chat_member.chatroom_id', $privateChatroomIdList)
-            ->where('chat_member.user_id', '<>', $id)
-            ->join('user_info', 'user_info.user_id = chat_member.user_id')
-            ->field([
-                'chat_member.id',
-                'chat_member.chatroom_id',
-                'chat_member.nickname as name',
-                'user_info.signature as content',
-                'user_info.avatar as avatarThumbnail',
-
-                'chat_member.create_time',
-                'chat_member.update_time',
-            ])->select()
-            ->toArray();
-
-        $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
-
-
-        foreach ($data as $key => $value) {
-            $data[$key]['type'] = Chatroom::TYPE_PRIVATE_CHAT;
-            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
-        }
-
-        dump($data);
+        dump($count);
 
         // dump(Chatroom::join('chat_member', 'chatroom.id = chat_member.chatroom_id')
         //     ->where('chatroom.type', '=', 1)

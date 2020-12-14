@@ -32,7 +32,7 @@ return [
             'hostport'          => env('database.hostport', '3306'),
             // 数据库连接参数
             'params'            => [
-                \PDO::ATTR_PERSISTENT => true,
+                \PDO::ATTR_PERSISTENT => true
             ],
             // 数据库编码默认采用utf8
             'charset'           => env('database.charset', 'utf8mb4'),

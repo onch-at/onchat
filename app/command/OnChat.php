@@ -62,16 +62,16 @@ class OnChat extends Command
             case self::ACTION_INSTALL:
                 $rootPath = root_path();
                 $sqls = [
-                    'user'           => file_get_contents($rootPath . '/resource/sql/user.sql'),
-                    'user_info'      => file_get_contents($rootPath . '/resource/sql/user-info.sql'),
-                    'chatroom'       => file_get_contents($rootPath . '/resource/sql/chatroom.sql'),
-                    'chat_member'    => file_get_contents($rootPath . '/resource/sql/chat-member.sql'),
-                    'friend_request' => file_get_contents($rootPath . '/resource/sql/friend-request.sql'),
+                    file_get_contents($rootPath . '/resource/sql/table/user.sql'),
+                    file_get_contents($rootPath . '/resource/sql/table/user-info.sql'),
+                    file_get_contents($rootPath . '/resource/sql/table/chatroom.sql'),
+                    file_get_contents($rootPath . '/resource/sql/table/chat-member.sql'),
+                    file_get_contents($rootPath . '/resource/sql/table/friend-request.sql'),
                     // 'chat_record' =>  file_get_contents('./resource/sql/chat-record.sql'),
                 ];
 
-                $output->comment('  Creating table…');
-                foreach ($sqls as $table => $sql) {
+                $output->comment('  Execute SQL statement…');
+                foreach ($sqls as $sql) {
                     Db::execute($sql);
                 }
 
