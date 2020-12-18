@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\command;
 
+use app\core\Result;
 use think\facade\Db;
 use think\facade\Cache;
 use think\console\Input;
@@ -12,6 +13,7 @@ use think\facade\Console;
 use think\console\Command;
 use think\console\input\Argument;
 use app\listener\websocket\BaseListener;
+use app\core\service\Chatroom as ChatroomService;
 
 class OnChat extends Command
 {
@@ -60,38 +62,7 @@ class OnChat extends Command
                 break;
 
             case self::ACTION_INSTALL:
-                $rootPath = root_path();
-                $sqls = [
-                    file_get_contents($rootPath . '/resource/sql/table/user.sql'),
-                    file_get_contents($rootPath . '/resource/sql/table/user-info.sql'),
-                    file_get_contents($rootPath . '/resource/sql/table/chatroom.sql'),
-                    file_get_contents($rootPath . '/resource/sql/table/chat-member.sql'),
-                    file_get_contents($rootPath . '/resource/sql/table/friend-request.sql'),
-                    // 'chat_record' =>  file_get_contents('./resource/sql/chat-record.sql'),
-                ];
-
-                $output->comment('  Execute SQL statement…');
-                foreach ($sqls as $sql) {
-                    Db::execute($sql);
-                }
-
-                $sql = function ($index) {
-                    return "CREATE TABLE IF NOT EXISTS chat_record_1_{$index} (
-                                id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                                chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
-                                user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
-                                type        TINYINT(1) UNSIGNED NOT NULL COMMENT '消息类型',
-                                data        JSON                NOT NULL COMMENT '消息数据体',
-                                reply_id    INT        UNSIGNED NULL     COMMENT '回复消息的消息记录ID',
-                                create_time BIGINT     UNSIGNED NOT NULL,
-                                FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
-                                FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-                };
-
-                for ($i = 0; $i < 100; $i++) {
-                    Db::execute($sql($i));
-                }
+                $this->install($output);
                 break;
 
             default:
@@ -100,5 +71,47 @@ class OnChat extends Command
         }
 
         $output->info('OnChat: Execution finished!');
+    }
+
+    private function install($output)
+    {
+        $rootPath = root_path();
+        $sqls = [
+            file_get_contents($rootPath . '/resource/sql/table/user.sql'),
+            file_get_contents($rootPath . '/resource/sql/table/user-info.sql'),
+            file_get_contents($rootPath . '/resource/sql/table/chatroom.sql'),
+            file_get_contents($rootPath . '/resource/sql/table/chat-member.sql'),
+            file_get_contents($rootPath . '/resource/sql/table/friend-request.sql'),
+            // 'chat_record' =>  file_get_contents('./resource/sql/chat-record.sql'),
+        ];
+
+        $output->comment('  Execute SQL statement…');
+        foreach ($sqls as $sql) {
+            Db::execute($sql);
+        }
+
+        $sql = function ($index) {
+            return "CREATE TABLE IF NOT EXISTS chat_record_1_{$index} (
+                        id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                        chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
+                        user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
+                        type        TINYINT(1) UNSIGNED NOT NULL COMMENT '消息类型',
+                        data        JSON                NOT NULL COMMENT '消息数据体',
+                        reply_id    INT        UNSIGNED NULL     COMMENT '回复消息的消息记录ID',
+                        create_time BIGINT     UNSIGNED NOT NULL,
+                        FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                        FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        };
+
+        for ($i = 0; $i < 100; $i++) {
+            Db::execute($sql($i));
+        }
+
+        $result = ChatroomService::getChatroom(1);
+        // 如果没有第一个聊天室，那么就创建一个吧！
+        if ($result->code !== Result::CODE_SUCCESS) {
+            ChatroomService::creatChatroom('OnChat');
+        }
     }
 }

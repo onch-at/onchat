@@ -11,6 +11,16 @@ use app\core\Result;
 class Chatroom extends BaseController
 {
     /**
+     * 创建群聊聊天室
+     *
+     * @return Result
+     */
+    public function create(): Result
+    {
+        return ChatroomService::create();
+    }
+
+    /**
      * 获取聊天室名称
      *
      * @param integer $id 聊天室ID

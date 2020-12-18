@@ -361,7 +361,7 @@ class Friend
                 return $result;
             }
 
-            $chatroomId = $result->data;
+            $chatroomId = $result->data['id'];
 
             $result = Chatroom::addChatMember($chatroomId, $friendRequest->self_id, $selfAlias);
             if ($result->code != Result::CODE_SUCCESS) {

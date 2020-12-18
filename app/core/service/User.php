@@ -553,7 +553,7 @@ class User
                 'chat_member.create_time',
                 'chat_member.update_time',
                 'chatroom.name',
-                'chatroom.avatar',
+                'chatroom.avatar as avatarThumbnail',
                 'chatroom.type',
             ])
             ->select()
@@ -610,7 +610,6 @@ class User
                 ->field('user_id, avatar')->select();
 
             $ossClient = OssClient::getInstance();
-            $bucket = OssClient::getBucket();
             $stylename = OssClient::getThumbnailImgStylename();
 
             foreach ($list as $item) {
@@ -640,14 +639,13 @@ class User
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
-        // 私聊聊天室ID列表
-        $privateChatroomIdList = ChatroomModel::join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
-            'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
-            'chat_member.user_id' => $id
-        ])->column('chatroom.id');
-
-        $data = ChatMemberModel::whereIn('chat_member.chatroom_id', $privateChatroomIdList)
-            ->where('chat_member.user_id', '<>', $id)
+        $data = ChatMemberModel::where('chat_member.chatroom_id', 'IN', function ($query)  use ($id) {
+            // 私聊聊天室ID列表
+            $query->table('chatroom')->join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
+                'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
+                'chat_member.user_id' => $id
+            ])->field('chatroom.id');
+        })->where('chat_member.user_id', '<>', $id)
             ->join('user_info', 'user_info.user_id = chat_member.user_id')
             ->field([
                 'chat_member.id',

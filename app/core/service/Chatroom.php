@@ -6,31 +6,34 @@ namespace app\core\service;
 
 use app\core\Result;
 use think\facade\Db;
+use Identicon\Identicon;
 use app\model\User as UserModel;
 use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
+use app\core\util\Date as DateUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
+use app\core\identicon\generator\ImageMagickGenerator;
 
 class Chatroom
 {
     /** 没有消息 */
     const CODE_NO_RECORD = 1;
-    /** 别名过长 */
+    /** 聊天室名字过长 */
     const CODE_NAME_LONG = 2;
-
-    /** 响应消息预定义 */
-    const MSG = [
-        self::CODE_NO_RECORD => '没有消息',
-        self::CODE_NAME_LONG => '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符',
-    ];
+    /** 群介绍长度不符合规范 */
+    const CODE_DESCRIPTION_IRREGULAR = 3;
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
     /** 群名最大长度 */
     const NAME_MAX_LENGTH = 30;
+    /** 群介绍最小长度 */
+    const DESCRIPTION_MIN_LENGTH = 5;
+    /** 群介绍最大长度 */
+    const DESCRIPTION_MAX_LENGTH = 300;
 
     /**
      * 获取聊天室名称
@@ -86,7 +89,7 @@ class Chatroom
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
         if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = User::getId();
-            if (empty($userId)) {
+            if (!$userId) {
                 return new Result(Result::CODE_ERROR_NO_ACCESS);
             }
 
@@ -118,21 +121,30 @@ class Chatroom
      *
      * @param string $name 聊天室名称
      * @param integer $type 聊天室类型
+     * @param integer $description 聊天室描述、简介
      * @return Result
      */
-    public static function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT): Result
+    public static function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT, string $description = null): Result
     {
         if ($name) {
             $name = trim($name);
-
-            // 如果别名长度超出
+            // 如果长度超出
             if (mb_strlen($name, 'utf-8') > self::NAME_MAX_LENGTH) {
-                return new Result(self::CODE_NAME_LONG, self::MSG[self::CODE_NAME_LONG]);
+                return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符');
+            }
+        }
+
+        if ($description) {
+            $description = trim($description);
+            $length = mb_strlen($description, 'utf-8');
+            // 如果长度超出
+            if ($length < self::DESCRIPTION_MIN_LENGTH || $length > self::DESCRIPTION_MAX_LENGTH) {
+                return new Result(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . self::DESCRIPTION_MIN_LENGTH  . '~' . self::DESCRIPTION_MAX_LENGTH  . '位字符之间');
             }
         }
 
         $maxPeopleNum = 1;
-        $timestamp = SqlUtil::rawTimestamp();
+        $timestamp = time() * 1000;
 
         switch ($type) {
             case ChatroomModel::TYPE_PRIVATE_CHAT:
@@ -144,20 +156,39 @@ class Chatroom
                 break;
         }
 
-        trace($maxPeopleNum);
-
         // 创建一个聊天室
         $chatroom = ChatroomModel::create([
             'name'           => $name,
             'type'           => $type,
+            'description'    => $description,
             'max_people_num' => $maxPeopleNum,
             'create_time'    => $timestamp,
             'update_time'    => $timestamp,
         ]);
 
-        self::addChatRecordTable((string) $chatroom->id);
+        self::addChatRecordTable($chatroom->id);
 
-        return Result::success($chatroom->id);
+        if ($type == ChatroomModel::TYPE_GROUP_CHAT) {
+            $ossClient = OssClient::getInstance();
+            $bucket = OssClient::getBucket();
+            $identicon = new Identicon(new ImageMagickGenerator());
+            // 如果为调试模式，则将数据存放到dev/目录下
+            $object = OssClient::getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/' . md5((string) DateUtil::now()) . '.png';
+            // 根据用户ID创建哈希头像
+            $content = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
+            // 上传到OSS
+            $ossClient->putObject($bucket, $object, $content, OssClient::$imageHeadersOptions);
+
+            ChatroomModel::update([
+                'id' => $chatroom->id,
+                'avatar' => $object
+            ]);
+
+            $chatroom->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
+            $chatroom->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+        }
+
+        return Result::success(ArrUtil::keyToCamel($chatroom->toArray()));
     }
 
     /**
@@ -184,9 +215,9 @@ class Chatroom
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $timestamp = SqlUtil::rawTimestamp();
+        $timestamp = time() * 1000;
 
-        ChatMemberModel::create([
+        $data = ChatMemberModel::create([
             'chatroom_id' => $id,
             'user_id'     => $userId,
             'nickname'    => $nickname ?: $username,
@@ -196,7 +227,7 @@ class Chatroom
             'update_time' => $timestamp,
         ]);
 
-        return Result::success();
+        return Result::success(ArrUtil::keyToCamel($data->toArray()));
     }
 
     /**
@@ -294,7 +325,7 @@ class Chatroom
 
         $chatRecord = ChatRecordModel::opt($id)->json(['data'])->where('chatroom_id', '=', $id);
         if ($chatRecord->count() === 0) { // 如果没有消息
-            return new Result(self::CODE_NO_RECORD, self::MSG[self::CODE_NO_RECORD]);
+            return new Result(self::CODE_NO_RECORD, '没有消息');
         }
 
         // 查询的时候，顺带把未读消息数归零
@@ -392,38 +423,90 @@ class Chatroom
     }
 
     /**
-     * 根据房间号尝试动态添加聊天记录表
+     * 创建群聊聊天室
      *
-     * @param string $chatroomId
-     * @return void
+     * @return Result
      */
-    public static function addChatRecordTable(string $chatroomId)
+    public static function create(): Result
     {
-        if ($chatroomId > 1999 && strlen($chatroomId) == 4) {
-            // 拿到千位数
-            $thousand = substr($chatroomId, 0, 1);
+        $userId = User::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_ACCESS);
+        }
 
-            // 查询是否有这个表
-            if (Db::execute("SHOW TABLES LIKE 'chat_record_{$thousand}_0'") > 0) {
-                return;
+        $name = input('post.name/s');
+        $description = input('post.description/s');
+
+        if (!$name) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        // 启动事务
+        Db::startTrans();
+        try {
+            $result = self::creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
+            if ($result->code != Result::CODE_SUCCESS) {
+                return $result;
             }
 
-            $sql = function ($index) use ($thousand) {
-                return "CREATE TABLE IF NOT EXISTS chat_record_{$thousand}_{$index} (
-                            id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                            chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
-                            user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
-                            type        TINYINT(1) UNSIGNED NOT NULL COMMENT '消息类型',
-                            data        JSON                NOT NULL COMMENT '消息数据体',
-                            reply_id    INT        UNSIGNED NULL     COMMENT '回复消息的消息记录ID',
-                            create_time BIGINT     UNSIGNED NOT NULL,
-                            FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
-                            FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-            };
+            $chatroom = $result->data;
 
-            for ($i = 0; $i < 100; $i++) {
-                Db::execute($sql($i));
+            // 将自己添加到聊天室，角色为主人
+            $result = self::addChatMember($chatroom['id'], $userId, User::getUsername(), ChatroomModel::ROLE_HOST);
+            if ($result->code != Result::CODE_SUCCESS) {
+                return $result;
+            }
+
+            $data = $result->data;
+
+            // 移除掉一些不要的信息
+            unset($data['nickname']);
+            unset($data['role']);
+            unset($data['userId']);
+
+            // 补充一些信息
+            $data['name'] = $name;
+            $data['avatarThumbnail'] = $chatroom['avatarThumbnail'];
+            $data['type'] = ChatroomModel::TYPE_GROUP_CHAT;
+            $data['sticky'] = false;
+
+            Db::commit();
+
+            // 这里就不用转骆驼峰了，因为上面已经转过了
+            return Result::success($data);
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+        }
+    }
+
+    /**
+     * 根据房间号尝试动态添加聊天记录表
+     *
+     * @param integer $chatroomId
+     * @return void
+     */
+    public static function addChatRecordTable(int $chatroomId)
+    {
+        if ($chatroomId > 1999 && strlen((string) $chatroomId) == 4) {
+            // 拿到千位数
+            $thousand = substr((string) $chatroomId, 0, 1);
+            $index = $chatroomId % 100;
+            $tableName = "chat_record_{$thousand}_{$index}";
+            // 如果没有这个表
+            if (Db::execute("SHOW TABLES LIKE '{$tableName}'") == 0) {
+                Db::execute("CREATE TABLE IF NOT EXISTS {$tableName} (
+                    id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
+                    user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
+                    type        TINYINT(1) UNSIGNED NOT NULL COMMENT '消息类型',
+                    data        JSON                NOT NULL COMMENT '消息数据体',
+                    reply_id    INT        UNSIGNED NULL     COMMENT '回复消息的消息记录ID',
+                    create_time BIGINT     UNSIGNED NOT NULL,
+                    FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                    FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
             }
         }
     }
