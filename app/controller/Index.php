@@ -4,30 +4,30 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use app\BaseController;
-use app\model\ChatMember;
+use HTMLPurifier;
 use app\model\User;
-use app\model\UserInfo;
-use app\model\ChatRecord;
-use app\model\Chatroom;
-use think\captcha\facade\Captcha;
-use think\facade\Db;
 use think\Response;
-use app\core\util\Sql as SqlUtil;
+use think\facade\Db;
+use app\BaseController;
+use app\model\Chatroom;
+use app\model\UserInfo;
+use think\facade\Cache;
+use app\core\oss\Client;
+use HTMLPurifier_Config;
+use app\model\ChatMember;
+use app\model\ChatRecord;
+use OSS\Core\OssException;
+use app\model\FriendRequest;
 use app\core\util\Arr as ArrUtil;
+use app\core\util\Sql as SqlUtil;
+use think\captcha\facade\Captcha;
+use app\core\util\Date as DateUtil;
 use app\core\oss\Client as OssClient;
-use app\core\service\Chatroom as ChatroomService;
+use Identicon\Generator\SvgGenerator;
 use app\core\service\User as UserService;
 use app\core\service\Friend as FriendService;
-use app\model\FriendRequest;
+use app\core\service\Chatroom as ChatroomService;
 use app\core\identicon\generator\ImageMagickGenerator;
-use app\core\oss\Client;
-use Identicon\Generator\SvgGenerator;
-use think\facade\Cache;
-use OSS\Core\OssException;
-use app\core\util\Date as DateUtil;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 
 class Index extends BaseController
 {
@@ -76,11 +76,12 @@ class Index extends BaseController
 
     public function index()
     {
-        // dump(Chatroom::join('chat_member', 'chatroom.id = chat_member.chatroom_id')
-        //     ->where('chatroom.type', '=', 1)
-        //     ->column('chatroom.id'));
-
-        // dump(Chatroom::getLastSql());
+        dump(
+            ChatMember::where([
+                'user_id' => 1,
+                'role' => ChatMember::ROLE_HOST
+            ])->count()
+        );
 
         // dump(Db::execute("SHOW TABLES LIKE 'chat_record_1_0'"));
         // ChatroomService::addChatRecordTable((string)2000);

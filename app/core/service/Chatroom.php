@@ -25,6 +25,8 @@ class Chatroom
     const CODE_NAME_LONG = 2;
     /** 群介绍长度不符合规范 */
     const CODE_DESCRIPTION_IRREGULAR = 3;
+    /** 可创建的群聊数量已满 */
+    const CODE_GROUP_CHAT_COUNT_FULL = 4;
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
@@ -34,6 +36,9 @@ class Chatroom
     const DESCRIPTION_MIN_LENGTH = 5;
     /** 群介绍最大长度 */
     const DESCRIPTION_MAX_LENGTH = 300;
+
+    /** 用户创建群聊最大数量 */
+    const MAX_GROUP_CHAT_COUNT = 10;
 
     /**
      * 获取聊天室名称
@@ -437,6 +442,15 @@ class Chatroom
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
+        $count = ChatMemberModel::where([
+            'user_id' => $userId,
+            'role' => ChatMemberModel::ROLE_HOST
+        ])->count();
+
+        if ($count >= self::MAX_GROUP_CHAT_COUNT) {
+            return new Result(self::CODE_GROUP_CHAT_COUNT_FULL, '你可创建的聊天室数量已满！');
+        }
+
         // 启动事务
         Db::startTrans();
         try {
@@ -448,7 +462,7 @@ class Chatroom
             $chatroom = $result->data;
 
             // 将自己添加到聊天室，角色为主人
-            $result = self::addChatMember($chatroom['id'], $userId, $username, ChatroomModel::ROLE_HOST);
+            $result = self::addChatMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
             if ($result->code != Result::CODE_SUCCESS) {
                 return $result;
             }

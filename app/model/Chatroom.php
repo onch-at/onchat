@@ -20,13 +20,6 @@ class Chatroom extends Model
     /** 聊天室类型：单聊（就是自己跟自己聊） */
     const TYPE_SINGLE_CHAT = 2;
 
-    /** 成员角色：普通 */
-    const ROLE_NORMAL = 0;
-    /** 成员角色：管理 */
-    const ROLE_MANAGE = 1;
-    /** 成员角色：主人 */
-    const ROLE_HOST = 2;
-
     public function users()
     {
         return $this->belongsToMany(User::class, ChatMember::class);

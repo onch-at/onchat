@@ -13,6 +13,13 @@ use app\model\Chatroom;
  */
 class ChatMember extends Pivot
 {
+    /** 成员角色：普通 */
+    const ROLE_NORMAL = 0;
+    /** 成员角色：管理 */
+    const ROLE_MANAGE = 1;
+    /** 成员角色：主人 */
+    const ROLE_HOST = 2;
+
     // protected $convertNameToCamel = true;
 
     public function chatroom()
