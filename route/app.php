@@ -68,7 +68,7 @@ Route::group('user/:id', function () {
 
 /** 聊天室模块路由 */
 Route::group('chatroom', function () {
-    Route::post('create', 'create');
+    // Route::post('create', 'create');
 })->completeMatch()->prefix('Chatroom/');
 
 Route::group('chatroom/:id', function () {

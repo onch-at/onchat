@@ -425,18 +425,14 @@ class Chatroom
     /**
      * 创建群聊聊天室
      *
+     * @param string $name
+     * @param string $description
+     * @param integer $userId
+     * @param string $username
      * @return Result
      */
-    public static function create(): Result
+    public static function create(string $name, string $description, int $userId, string $username): Result
     {
-        $userId = User::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
-        }
-
-        $name = input('post.name/s');
-        $description = input('post.description/s');
-
         if (!$name) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
@@ -452,7 +448,7 @@ class Chatroom
             $chatroom = $result->data;
 
             // 将自己添加到聊天室，角色为主人
-            $result = self::addChatMember($chatroom['id'], $userId, User::getUsername(), ChatroomModel::ROLE_HOST);
+            $result = self::addChatMember($chatroom['id'], $userId, $username, ChatroomModel::ROLE_HOST);
             if ($result->code != Result::CODE_SUCCESS) {
                 return $result;
             }

@@ -560,6 +560,9 @@ class User
             ->toArray();
         // ->order('chat_member.update_time', 'DESC') 由于前端需要即时排序，则将这一步交给前端
 
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
         // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
         $latestMsg = null;
         $nickname = null;
@@ -568,9 +571,15 @@ class User
 
         foreach ($data as $key => $value) {
             $chatroomId = $value['chatroom_id'];
-            // 如果是私聊聊天室
-            if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
-                $privateChatroomIdList[] = $chatroomId;
+
+            switch ($value['type']) {
+                case ChatroomModel::TYPE_PRIVATE_CHAT:
+                    $privateChatroomIdList[] = $chatroomId;
+                    break;
+
+                case ChatroomModel::TYPE_GROUP_CHAT:
+                    $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+                    break;
             }
 
             $latestMsg = ChatRecordModel::opt($chatroomId)->where('chatroom_id', '=', $chatroomId)->order('id', 'DESC')->findOrEmpty()->toArray();
@@ -608,9 +617,6 @@ class User
             // 找到私聊聊天室，室友（好友）的头像
             $list = UserInfoModel::where('user_id', 'IN', array_values($friendIdMap))
                 ->field('user_id, avatar')->select();
-
-            $ossClient = OssClient::getInstance();
-            $stylename = OssClient::getThumbnailImgStylename();
 
             foreach ($list as $item) {
                 $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = $ossClient->signImageUrl($item->avatar, $stylename);
