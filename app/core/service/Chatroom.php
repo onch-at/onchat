@@ -129,7 +129,7 @@ class Chatroom
      * @param integer $description 聊天室描述、简介
      * @return Result
      */
-    public static function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT, string $description = null): Result
+    public static function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT, ?string $description = null): Result
     {
         if ($name) {
             $name = trim($name);
@@ -436,7 +436,7 @@ class Chatroom
      * @param string $username
      * @return Result
      */
-    public static function create(string $name, string $description, int $userId, string $username): Result
+    public static function create(string $name, ?string $description, int $userId, string $username): Result
     {
         if (!$name) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -493,20 +493,20 @@ class Chatroom
 
     /**
      * 根据房间号尝试动态添加聊天记录表
+     * 策略：1000个聊天室 使用 100个数据表记录聊天记录
      *
      * @param integer $chatroomId
      * @return void
      */
     public static function addChatRecordTable(int $chatroomId)
     {
-        if ($chatroomId > 1999 && strlen((string) $chatroomId) == 4) {
-            // 拿到千位数
-            $thousand = substr((string) $chatroomId, 0, 1);
-            $index = $chatroomId % 100;
-            $tableName = "chat_record_{$thousand}_{$index}";
-            // 如果没有这个表
-            if (Db::execute("SHOW TABLES LIKE '{$tableName}'") == 0) {
-                Db::execute("CREATE TABLE IF NOT EXISTS {$tableName} (
+        // 拿到千位数（小于1000，千位数为1）
+        $thousand = $chatroomId < 1000 ? 1 : substr((string) $chatroomId, 0, -3);
+        $index = $chatroomId % 100;
+        $tableName = "chat_record_{$thousand}_{$index}";
+        // 如果没有这个表
+        if (Db::execute("SHOW TABLES LIKE '{$tableName}'") == 0) {
+            Db::execute("CREATE TABLE IF NOT EXISTS {$tableName} (
                     id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                     chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
                     user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
@@ -517,7 +517,6 @@ class Chatroom
                     FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
                     FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-            }
         }
     }
 }

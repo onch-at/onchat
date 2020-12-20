@@ -82,30 +82,13 @@ class OnChat extends Command
             file_get_contents($rootPath . '/resource/sql/table/chatroom.sql'),
             file_get_contents($rootPath . '/resource/sql/table/chat-member.sql'),
             file_get_contents($rootPath . '/resource/sql/table/friend-request.sql'),
+            file_get_contents($rootPath . '/resource/sql/table/chat-invitation.sql'),
             // 'chat_record' =>  file_get_contents('./resource/sql/chat-record.sql'),
         ];
 
         $output->comment('  Execute SQL statement…');
         foreach ($sqls as $sql) {
             Db::execute($sql);
-        }
-
-        $sql = function ($index) {
-            return "CREATE TABLE IF NOT EXISTS chat_record_1_{$index} (
-                        id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                        chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
-                        user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
-                        type        TINYINT(1) UNSIGNED NOT NULL COMMENT '消息类型',
-                        data        JSON                NOT NULL COMMENT '消息数据体',
-                        reply_id    INT        UNSIGNED NULL     COMMENT '回复消息的消息记录ID',
-                        create_time BIGINT     UNSIGNED NOT NULL,
-                        FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
-                        FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-        };
-
-        for ($i = 0; $i < 100; $i++) {
-            Db::execute($sql($i));
         }
 
         $result = ChatroomService::getChatroom(1);
