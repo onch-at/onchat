@@ -470,9 +470,7 @@ class Chatroom
             $data = $result->data;
 
             // 移除掉一些不要的信息
-            unset($data['nickname']);
-            unset($data['role']);
-            unset($data['userId']);
+            unset($data['nickname'], $data['role'], $data['userId']);
 
             // 补充一些信息
             $data['name'] = $name;
@@ -493,7 +491,7 @@ class Chatroom
 
     /**
      * 根据房间号尝试动态添加聊天记录表
-     * 策略：1000个聊天室 使用 100个数据表记录聊天记录
+     * 策略：1000个聊天室 使用100个数据表记录聊天记录，等于100个聊天室共用一个数据表
      *
      * @param integer $chatroomId
      * @return void

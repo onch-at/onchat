@@ -22,6 +22,8 @@ abstract class BaseListener
     const ROOM_CHATROOM = 'CHATROOM:';
     /** 好友申请房间前缀 */
     const ROOM_FRIEND_REQUEST = 'FRIEND_REQUEST:';
+    /** 群聊邀请房间前缀 */
+    const ROOM_CHAR_INVITATION = 'CHAR_INVITATION:';
 
     /** Redis Hash 名称：储存fd => user */
     const REDIS_HASH_FD_USER_PAIR = 'ONCHAT_PAIR:fd-user';

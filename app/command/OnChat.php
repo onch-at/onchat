@@ -75,15 +75,14 @@ class OnChat extends Command
 
     private function install($output)
     {
-        $rootPath = root_path();
+        $path = root_path() . '/resource/sql';
         $sqls = [
-            file_get_contents($rootPath . '/resource/sql/table/user.sql'),
-            file_get_contents($rootPath . '/resource/sql/table/user-info.sql'),
-            file_get_contents($rootPath . '/resource/sql/table/chatroom.sql'),
-            file_get_contents($rootPath . '/resource/sql/table/chat-member.sql'),
-            file_get_contents($rootPath . '/resource/sql/table/friend-request.sql'),
-            file_get_contents($rootPath . '/resource/sql/table/chat-invitation.sql'),
-            // 'chat_record' =>  file_get_contents('./resource/sql/chat-record.sql'),
+            file_get_contents($path . '/table/user.sql'),
+            file_get_contents($path . '/table/user-info.sql'),
+            file_get_contents($path . '/table/chatroom.sql'),
+            file_get_contents($path . '/table/chat-member.sql'),
+            file_get_contents($path . '/table/friend-request.sql'),
+            file_get_contents($path . '/table/chat-invitation.sql'),
         ];
 
         $output->comment('  Execute SQL statement…');

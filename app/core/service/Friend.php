@@ -67,11 +67,6 @@ class Friend
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $query = FriendRequestModel::where([
-            'self_id'        => $selfId,
-            'target_id'      => $targetId
-        ]);
-
         $ossClient = OssClient::getInstance();
         $stylename = OssClient::getThumbnailImgStylename();
 
@@ -99,9 +94,15 @@ class Friend
         }
 
         $timestamp = time() * 1000;
-        $friendRequest = $query->where('target_status', '<>', FriendRequestModel::STATUS_AGREE)->find();
+
+        $friendRequest = FriendRequestModel::where([
+            ['self_id', '=', $selfId],
+            ['target_id', '=', $targetId],
+            ['target_status', '<>', FriendRequestModel::STATUS_AGREE]
+        ])->find();
+
         // 如果之前已经申请过，但对方没有同意，就把对方的状态设置成等待验证
-        if (!empty($friendRequest)) {
+        if ($friendRequest) {
             $friendRequest->request_reason = $requestReason;
             $friendRequest->target_alias = $targetAlias;
             // 将双方的状态都设置为等待验证
@@ -177,7 +178,7 @@ class Friend
         $userId = User::getId();
         $username = User::getUsername();
 
-        if (!$userId || !$username) {
+        if (!$userId) {
             return new Result(Result::CODE_ERROR_NO_ACCESS);
         }
 
@@ -409,7 +410,9 @@ class Friend
     public static function rejectRequest(int $friendRequestId, int $targetId, string $targetUsername, string $rejectReason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        $rejectReason && mb_strlen(StrUtil::trimAll($rejectReason), 'utf-8') == 0 && ($rejectReason = null);
+        if ($rejectReason && mb_strlen(StrUtil::trimAll($rejectReason), 'utf-8') == 0) {
+            $rejectReason = null;
+        }
 
         // 如果附加消息长度超出
         if ($rejectReason && mb_strlen($rejectReason, 'utf-8') > self::REASON_MAX_LENGTH) {

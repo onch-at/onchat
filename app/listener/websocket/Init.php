@@ -34,6 +34,8 @@ class Init extends BaseListener
 
         // 加入好友请求房间
         $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $user['id']);
+        // 加入群聊邀请房间
+        $this->websocket->join(parent::ROOM_CHAR_INVITATION . $user['id']);
 
         // 储存uid - fd
         $this->setUserIdFdPair($user['id']);
