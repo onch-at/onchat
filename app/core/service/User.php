@@ -276,15 +276,18 @@ class User
      * 通过用户标识获取用户信息
      *
      * @param string $key 用户标识名
-     * @param [type] $value 用户标识值
+     * @param mixed $value 用户标识值
      * @param string|array $field 需要获取的字段名
      * @return array
      */
     public static function getInfoByKey(string $key, $value, $field): array
     {
 
-        return UserModel::where($key == 'id' ? 'user.id' : $key, '=', $value)->join('user_info', 'user_info.user_id = user.id')
-            ->field($field)->findOrEmpty()->toArray();
+        return UserModel::where($key == 'id' ? 'user.id' : $key, '=', $value)
+            ->join('user_info', 'user_info.user_id = user.id')
+            ->field($field)
+            ->findOrEmpty()
+            ->toArray();
     }
 
     /**
