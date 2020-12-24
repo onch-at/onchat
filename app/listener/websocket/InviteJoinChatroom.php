@@ -8,6 +8,7 @@ use app\core\Result;
 use app\core\service\ChatInvitation;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
+use app\core\service\Message as MessageService;
 
 class InviteJoinChatroom extends BaseListener
 {
@@ -27,18 +28,24 @@ class InviteJoinChatroom extends BaseListener
 
         $result = ChatInvitation::invite($user['id'], $event['chatroomId'], $event['chatroomIdList']);
 
-        // 注意这边，邀请人收到的result.data是array类型
         $this->websocket->emit('invite_join_chatroom', $result);
 
         if ($result->code !== Result::CODE_SUCCESS) {
             return;
         }
 
+        $msg = [
+            'type' => MessageService::TYPE_CHAT_INVITATION,
+            'data' => [
+                'chatroomId' => $event['chatroomId']
+            ]
+        ];
+
         // 给每个受邀者发消息
-        foreach ($result->data as $item) {
-            $this->websocket
-                ->to(self::ROOM_CHAR_INVITATION . $item['inviteeId'])
-                ->emit('invite_join_chatroom', Result::success($item));
+        foreach ($result->data as $chatroomId) {
+            $msg['chatroomId'] = $chatroomId;
+            $this->websocket->to(parent::ROOM_CHATROOM . $chatroomId)
+                ->emit('message', ChatroomService::setMessage($user['id'], $msg));
         }
     }
 }

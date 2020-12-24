@@ -384,7 +384,7 @@ class User
     {
         $id = self::getId();
 
-        return $id ? Result::success($id) : new Result(Result::CODE_ERROR_NO_ACCESS);
+        return $id ? Result::success($id) : new Result(Result::CODE_ERROR_NO_PERMISSION);
     }
 
     /**
@@ -445,7 +445,7 @@ class User
     {
         $id = self::getId();
         if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $bucket = OssClient::getBucket();
@@ -541,7 +541,7 @@ class User
     {
         $userId = self::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $data = ChatMemberModel::where([
@@ -645,7 +645,7 @@ class User
     {
         $id = self::getId();
         if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $data = ChatMemberModel::where('chat_member.chatroom_id', 'IN', function ($query)  use ($id) {
@@ -688,7 +688,7 @@ class User
     {
         $userId = self::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $chatMember = ChatMemberModel::where([
@@ -698,7 +698,7 @@ class User
 
         // 如果找不到，则代表自己没有进这个群
         if (!$chatMember) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $chatMember->sticky = $sticky;
@@ -729,7 +729,7 @@ class User
     {
         $userId = self::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $chatMember = ChatMemberModel::where([
@@ -739,7 +739,7 @@ class User
 
         // 如果找不到，则代表自己没有进这个群
         if (!$chatMember) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $chatMember->unread = $unread;
@@ -768,7 +768,7 @@ class User
     {
         $id = self::getId();
         if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $nickname      = input('put.nickname/s') ?: self::getUsername();

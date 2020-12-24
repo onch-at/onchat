@@ -151,7 +151,7 @@ class Friend
     {
         $userId = User::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $friendRequest = FriendRequestModel::find($id);
@@ -162,7 +162,7 @@ class Friend
 
         // 如果发请求的这个人不是申请人也不是被申请人，则无权获取
         if ($friendRequest->self_id != $userId && $friendRequest->target_id != $userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         return Result::success(ArrUtil::keyToCamel($friendRequest->toArray()));
@@ -179,7 +179,7 @@ class Friend
         $username = User::getUsername();
 
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 找到自己被申请的
@@ -224,7 +224,7 @@ class Friend
         $username = User::getUsername();
 
         if (!$userId || !$username) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $friendRequests = FriendRequestModel::where('friend_request.self_id', '=', $userId)->where(function ($query) {
@@ -269,7 +269,7 @@ class Friend
     {
         $userId = User::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $friendRequest = FriendRequestModel::where([
@@ -294,7 +294,7 @@ class Friend
     {
         $userId = User::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $friendRequest = FriendRequestModel::where([
@@ -335,7 +335,7 @@ class Friend
 
         // 确认被申请人的身份
         if ($friendRequest->target_id != $targetId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
@@ -359,6 +359,7 @@ class Friend
             // 创建一个类型为私聊的聊天室
             $result = Chatroom::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
             if ($result->code != Result::CODE_SUCCESS) {
+                Db::rollback();
                 return $result;
             }
 
@@ -366,11 +367,13 @@ class Friend
 
             $result = Chatroom::addChatMember($chatroomId, $friendRequest->self_id, $selfAlias);
             if ($result->code != Result::CODE_SUCCESS) {
+                Db::rollback();
                 return $result;
             }
 
             $result = Chatroom::addChatMember($chatroomId, $friendRequest->target_id, $friendRequest->target_alias);
             if ($result->code != Result::CODE_SUCCESS) {
+                Db::rollback();
                 return $result;
             }
 
@@ -427,7 +430,7 @@ class Friend
 
         // 确认被申请人的身份
         if ($friendRequest->target_id != $targetId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
@@ -500,7 +503,7 @@ class Friend
     {
         $userId = User::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 如果有传入别名

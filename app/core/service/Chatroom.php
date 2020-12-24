@@ -57,7 +57,7 @@ class Chatroom
         if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = User::getId();
             if (empty($userId)) {
-                return new Result(Result::CODE_ERROR_NO_ACCESS);
+                return new Result(Result::CODE_ERROR_NO_PERMISSION);
             }
 
             // 找到自己
@@ -68,7 +68,7 @@ class Chatroom
 
             // 如果找不到，则代表自己没有进这个群
             if (empty($self)) {
-                return new Result(Result::CODE_ERROR_NO_ACCESS);
+                return new Result(Result::CODE_ERROR_NO_PERMISSION);
             }
 
             // 查找加入了这个房间的另一个好友的nickname
@@ -95,7 +95,7 @@ class Chatroom
         if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = User::getId();
             if (!$userId) {
-                return new Result(Result::CODE_ERROR_NO_ACCESS);
+                return new Result(Result::CODE_ERROR_NO_PERMISSION);
             }
 
             // 找到自己
@@ -106,7 +106,7 @@ class Chatroom
 
             // 如果找不到，则代表自己没有进这个群
             if (empty($self)) {
-                return new Result(Result::CODE_ERROR_NO_ACCESS);
+                return new Result(Result::CODE_ERROR_NO_PERMISSION);
             }
 
             // 查找加入了这个房间的另一个好友的nickname
@@ -247,7 +247,7 @@ class Chatroom
         // 拿到当前用户在这个聊天室的昵称
         $nickname = User::getNicknameInChatroom($userId, $msg['chatroomId']);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $result = Message::handler($msg);
@@ -313,13 +313,13 @@ class Chatroom
     {
         $userId = User::getId();
         if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 拿到当前用户在这个聊天室的昵称
         $nickname = User::getNicknameInChatroom($userId, $id);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 用于缓存 user id => nickname
@@ -373,6 +373,15 @@ class Chatroom
             $item['nickname'] = $nicknameMap[$item['user_id']];
             $item['avatarThumbnail'] = $avatarThumbnailMap[$item['user_id']];
             $item['data'] = json_decode($item['data']);
+
+            // 如果是群聊邀请消息
+            if ($item['type'] == Message::TYPE_CHAT_INVITATION) {
+                $chatroom = ChatroomModel::find($item['data']->chatroomId);
+                $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
+                $item['data']->description     = $chatroom ? $chatroom->description : null;
+                $item['data']->avatarThumbnail = $chatroom ? $ossClient->signImageUrl($chatroom->avatar, $stylename) : null;
+            }
+
             $records[] = $item;
         }
 
@@ -398,7 +407,7 @@ class Chatroom
 
         // 如果消息不是它本人发的 或者 已经超时了
         if ($msg['user_id'] != $userId || time() > $msg['create_time'] + 120000) {
-            return new Result(Result::CODE_ERROR_NO_ACCESS);
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
@@ -406,6 +415,7 @@ class Chatroom
         try {
             // 如果消息删除失败
             if ($query->delete() == 0) {
+                Db::rollback();
                 return new Result(Result::CODE_ERROR_UNKNOWN);
             }
 
@@ -456,6 +466,7 @@ class Chatroom
         try {
             $result = self::creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
             if ($result->code != Result::CODE_SUCCESS) {
+                Db::rollback();
                 return $result;
             }
 
@@ -464,6 +475,7 @@ class Chatroom
             // 将自己添加到聊天室，角色为主人
             $result = self::addChatMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
             if ($result->code != Result::CODE_SUCCESS) {
+                Db::rollback();
                 return $result;
             }
 

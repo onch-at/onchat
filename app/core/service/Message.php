@@ -15,6 +15,7 @@ class Message
     const TYPE_TEXT = 1;
     const TYPE_RICH_TEXT = 2;
     const TYPE_TIPS = 3;
+    const TYPE_CHAT_INVITATION = 4;
 
     /** 文本消息最长长度 */
     const TEXT_MSG_MAX_LENGTH = 3000;
@@ -41,7 +42,8 @@ class Message
                     return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
                 }
 
-                $msg['data']['content'] = htmlspecialchars($content);
+                $data['content'] = htmlspecialchars($content);
+                $msg['data'] = $data;
                 break;
 
             case self::TYPE_RICH_TEXT:
@@ -84,8 +86,15 @@ class Message
                 ]);
                 $purifier = new HTMLPurifier($config);
 
-                $msg['data']['html'] = $purifier->purify($html);
-                $msg['data']['text'] = htmlspecialchars($text);
+                $data['html'] = $purifier->purify($html);
+                $data['text'] = htmlspecialchars($text);
+
+                $msg['data'] = $data;
+                break;
+
+            case self::TYPE_CHAT_INVITATION:
+                $data['chatroomId'] = $msg['data']['chatroomId'];
+                $msg['data'] = $data;
                 break;
 
             default:

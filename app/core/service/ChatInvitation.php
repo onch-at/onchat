@@ -11,7 +11,6 @@ use app\core\util\Sql as SqlUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\ChatInvitation as ChatInvitationModel;
 
 class ChatInvitation
 {
@@ -41,93 +40,18 @@ class ChatInvitation
         }
 
         $peopleNum = ChatMemberModel::where('chatroom_id', '=', $chatroomId)->count();
-
+        // 人数超出上限
         if ($peopleNum >= $chatroom->max_people_num) {
-            return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满！', []);
+            return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满！');
         }
 
-        $ossClient = OssClient::getInstance();
+        // 找到正确的私聊聊天室ID（防止客户端乱传ID）
+        $chatroomIdList = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')->where([
+            ['chat_member.user_id', '=', $inviter],
+            ['chatroom.id', 'IN', $chatroomIdList],
+            ['chatroom.type', '=', ChatroomModel::TYPE_PRIVATE_CHAT],
+        ])->column('chatroom.id');
 
-        $inviterInfo = User::getInfoByKey('id', $inviter, ['username', 'avatar']);
-        $inviterAvatarThumbnail = $ossClient->signImageUrl($inviterInfo['avatar'], OssClient::getThumbnailImgStylename());
-
-        // 找到好友ID列表
-        $friendIdList = ChatMemberModel::whereIn('chatroom_id', function ($query) use ($inviter, $chatroomIdList) {
-            // 找到正确的私聊聊天室ID（防止客户端乱传ID）
-            $query->table('chat_member')->join('chatroom', 'chatroom.id = chat_member.chatroom_id')->where([
-                ['chat_member.user_id', '=', $inviter],
-                ['chatroom.id', 'IN', $chatroomIdList],
-                ['chatroom.type', '=', ChatroomModel::TYPE_PRIVATE_CHAT],
-            ])->field('chatroom.id');
-        })->where('user_id', '<>', $inviter)->column('user_id');
-
-        // 找找里面有没有人已经加入了聊天室
-        $chatMemberIdList = ChatMemberModel::where([
-            ['chatroom_id', '=', $chatroomId],
-            ['user_id', 'IN', $friendIdList]
-        ])->column('user_id');
-
-        // 如果邀请的这批人里有人已经加入了聊天室
-        if (count($chatMemberIdList)) {
-            foreach ($friendIdList as $key => $value) {
-                // 找到并删除
-                if (in_array($value, $chatMemberIdList)) {
-                    unset($friendIdList[$key]);
-                }
-            }
-        }
-
-        $whereOr = [];
-        // 拼接whereOr条件
-        foreach ($friendIdList as $invitee) {
-            $whereOr[] = ['invitee_id', '=', $invitee];
-        }
-
-        // 看看邀请的这批人中，有没有之前已经邀请过的
-        // 如果有的话，就更新状态
-        $chatInvitations = ChatInvitationModel::where([
-            ['inviter_id', '=', $inviter],
-            ['chatroom_id', '=', $chatroomId]
-        ])->where(function ($query) use ($whereOr) {
-            $query->whereOr($whereOr);
-        })->select();
-
-        $dataSet = [];
-        $timestamp = time() * 1000;
-
-        // 更新状态
-        foreach ($chatInvitations as $item) {
-            $dataSet[] = [
-                'inviter_status' => ChatInvitationModel::STATUS_WAIT,
-                'invitee_status' => ChatInvitationModel::STATUS_WAIT,
-                'update_time' => $timestamp
-            ] + $item->toArray();
-        }
-
-        // 已邀请过的人的ID列表
-        $invitedList = $chatInvitations->column('invitee_id');
-
-        foreach ($friendIdList as $invitee) {
-            // 如果没有被邀请过，那就生成一条新记录
-            if (!in_array($invitee, $invitedList)) {
-                $dataSet[] = [
-                    'inviter_id' => $inviter,
-                    'invitee_id' => $invitee,
-                    'chatroom_id' => $chatroomId,
-                    'create_time' => $timestamp,
-                    'update_time' => $timestamp,
-                ];
-            }
-        }
-
-        $model = new ChatInvitationModel;
-        $data = $model->saveAll($dataSet)->toArray();
-
-        foreach ($data as $key => $item) {
-            $data[$key]['inviterUsername'] = $inviterInfo['username'];
-            $data[$key]['inviterAvatarThumbnail'] = $inviterAvatarThumbnail;
-        }
-
-        return Result::success(Arr::keyToCamel($data));
+        return Result::success($chatroomIdList);
     }
 }
