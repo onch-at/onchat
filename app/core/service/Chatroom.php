@@ -84,9 +84,16 @@ class Chatroom
         return Result::success($chatroom->name);
     }
 
+    /**
+     * 根据聊天室ID获取聊天室
+     *
+     * @param integer $id
+     * @return Result
+     */
     public static function getChatroom(int $id): Result
     {
-        $chatroom = ChatroomModel::where('id', '=', $id)->find();
+        $chatroom = ChatroomModel::find($id);
+
         if (!$chatroom) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
@@ -109,14 +116,25 @@ class Chatroom
                 return new Result(Result::CODE_ERROR_NO_PERMISSION);
             }
 
-            // 查找加入了这个房间的另一个好友的nickname
-            $name = ChatMemberModel::where('chatroom_id', '=', $id)->where('user_id', '<>', $userId)->value('nickname');
+            // 查找加入了这个房间的另一个好友的信息
+            $friendInfo = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')->where([
+                ['chat_member.chatroom_id', '=', $id],
+                ['chat_member.user_id', '<>', $userId]
+            ])->field(['chat_member.nickname', 'user_info.avatar'])->find();
 
-            if (empty($name)) {
+            if (empty($friendInfo)) {
                 return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
             }
-            $chatroom->name = $name;
+
+            $chatroom->name = $friendInfo->nickname;
+            $chatroom->avatar = $friendInfo->avatar;
         }
+
+        $ossClient = OssClient::getInstance();
+        $avatar = $chatroom->avatar;
+
+        $chatroom->avatar          = $ossClient->signImageUrl($avatar, OssClient::getOriginalImgStylename());
+        $chatroom->avatarThumbnail = $ossClient->signImageUrl($avatar, OssClient::getThumbnailImgStylename());
 
         return Result::success(ArrUtil::keyToCamel($chatroom->toArray()));
     }

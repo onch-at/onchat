@@ -116,7 +116,7 @@ class Client
      */
     public function signImageUrl(string $object, string $stylename): string
     {
-        return $this->signUrl(self::getBucket(), $object, 3600, 'GET', [
+        return $this->signUrl(self::getBucket(), $object, 86400, 'GET', [
             OssClient::OSS_PROCESS => 'style/' . $stylename
         ]);
     }
