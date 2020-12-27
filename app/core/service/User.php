@@ -544,10 +544,21 @@ class User
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $data = ChatMemberModel::where([
-            'chat_member.user_id' => $userId,
-            'chat_member.is_show' => true
-        ])->join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+        // 存放所有聊天室ID，用于一次性查找最新消息
+        $chatroomIdList = [];
+        // 存私聊聊天室ID列表
+        $privateChatroomIdList = [];
+        // 聊天室最新消息
+        $latestMsg = null;
+
+        $data = ChatMemberModel::join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+            ->where([
+                'chat_member.user_id' => $userId,
+                'chat_member.is_show' => true
+            ])
             ->field([
                 'chat_member.id',
                 'chat_member.chatroom_id',
@@ -557,78 +568,63 @@ class User
                 'chat_member.update_time',
                 'chatroom.name',
                 'chatroom.avatar as avatarThumbnail',
-                'chatroom.type',
+                'chatroom.type as chatroomType',
             ])
             ->select()
             ->toArray();
-        // ->order('chat_member.update_time', 'DESC') 由于前端需要即时排序，则将这一步交给前端
-
-        $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
-
-        // 查询每个聊天室的最新那条消息，并且查到消息发送者的昵称
-        $latestMsg = null;
-        $nickname = null;
-        $privateChatroomIdList = []; // 私聊聊天室的ID列表
-        $chatroomId = null;
 
         foreach ($data as $key => $value) {
-            $chatroomId = $value['chatroom_id'];
-
-            switch ($value['type']) {
-                case ChatroomModel::TYPE_PRIVATE_CHAT:
-                    $privateChatroomIdList[] = $chatroomId;
-                    break;
-
+            switch ($value['chatroomType']) {
                 case ChatroomModel::TYPE_GROUP_CHAT:
                     $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
                     break;
+
+                case ChatroomModel::TYPE_PRIVATE_CHAT:
+                    $privateChatroomIdList[] = $value['chatroom_id'];
+                    break;
             }
 
-            $latestMsg = ChatRecordModel::opt($chatroomId)->where('chatroom_id', '=', $chatroomId)->order('id', 'DESC')->findOrEmpty()->toArray();
-            if (!$latestMsg) {
-                continue;
-            }
+            $chatroomIdList[] = $value['chatroom_id'];
 
-            $nickname = User::getNicknameInChatroom($latestMsg['user_id'], $chatroomId);
-            if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了），直接去用户表找
-                $nickname = self::getUsernameById($latestMsg['user_id']);
+            $latestMsg = ChatRecordModel::opt($value['chatroom_id'])
+                ->alias('chat_record')
+                ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id')
+                ->where('chat_record.chatroom_id', '=', $value['chatroom_id'])
+                ->order('chat_record.id', 'DESC')
+                ->field([
+                    'chat_record.*',
+                    'chat_member.nickname',
+                ])
+                ->findOrEmpty()
+                ->toArray();
+
+            if (!empty($latestMsg)) {
+                $data[$key]['content'] = $latestMsg;
             }
-            $latestMsg['nickname'] = $nickname;
-            $latestMsg['data'] = json_decode($latestMsg['data']);
-            $data[$key]['content'] = ArrUtil::keyToCamel($latestMsg);
         }
 
-        // 如果其中有私聊聊天室
-        if (count($privateChatroomIdList) > 0) {
-            // chatroomId => nickname
-            $privateChatroomNameMap = [];
-            // chatroomId => friend user id
-            $friendIdMap = [];
-            // chatroomId => avatar
-            $privateChatroomAvatarMap = [];
+        if (!empty($privateChatroomIdList)) {
+            // 好友信息
+            $friendInfo = ChatMemberModel::join('user_info', 'chat_member.user_id = user_info.user_id')
+                ->where([
+                    ['chat_member.chatroom_id', 'IN', $privateChatroomIdList],
+                    ['chat_member.user_id', '<>', $userId]
+                ])
+                ->field([
+                    'chat_member.chatroom_id',
+                    // 'chat_member.user_id',
+                    'chat_member.nickname',
+                    'user_info.avatar',
+                ])
+                ->select();
 
-            // 找到私聊聊天室，室友（好友）的nickname
-            $list = ChatMemberModel::where('chatroom_id', 'IN', $privateChatroomIdList)
-                ->where('user_id', '<>', $userId)->field('chatroom_id, user_id, nickname')->select();
-
-            foreach ($list as $item) {
-                $privateChatroomNameMap[$item->chatroom_id] = $item->nickname;
-                $friendIdMap[$item->chatroom_id] = $item->user_id;
-            }
-
-            // 找到私聊聊天室，室友（好友）的头像
-            $list = UserInfoModel::where('user_id', 'IN', array_values($friendIdMap))
-                ->field('user_id, avatar')->select();
-
-            foreach ($list as $item) {
-                $privateChatroomAvatarMap[array_search($item->user_id, $friendIdMap)] = $ossClient->signImageUrl($item->avatar, $stylename);
-            }
-
+            $info = null;
             foreach ($data as $key => $value) {
-                if ($value['type'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
-                    $data[$key]['name'] = $privateChatroomNameMap[$value['chatroom_id']];
-                    $data[$key]['avatarThumbnail'] = $privateChatroomAvatarMap[$value['chatroom_id']];
+                // 将私聊聊天室的头像，好友昵称填入
+                if ($value['chatroomType'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
+                    $info = $friendInfo->where('chatroom_id', '=', $value['chatroom_id'])->shift();
+                    $data[$key]['name'] = $info->nickname;
+                    $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
                 }
             }
         }

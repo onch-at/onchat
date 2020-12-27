@@ -34,15 +34,6 @@ class Index extends BaseController
     public function index()
     {
 
-        dump(
-            Chatroom::join('chat_member', 'chat_member.chatroom_id = chatroom.id')
-                ->where([
-                    ['chatroom.id', '=', 81],
-                    ['chat_member.user_id', '=', 1],
-                    ['chat_member.role', '=', ChatMember::ROLE_HOST]
-                ])->field('chatroom.max_people_num')->find()->max_people_num
-        );
-
         // dump(Db::execute("SHOW TABLES LIKE 'chat_record_1_0'"));
         // ChatroomService::addChatRecordTable((string)2000);
         // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');

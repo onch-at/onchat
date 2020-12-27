@@ -281,7 +281,7 @@ class Chatroom
         try {
             $timestamp = time() * 1000;
 
-            $id = ChatRecordModel::opt($msg['chatroomId'])->json(['data'])->insertGetId([
+            $id = ChatRecordModel::opt($msg['chatroomId'])->insertGetId([
                 'chatroom_id' => $msg['chatroomId'],
                 'user_id'     => $userId,
                 'type'        => $msg['type'],

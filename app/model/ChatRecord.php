@@ -13,7 +13,7 @@ use app\model\Chatroom;
  */
 class ChatRecord extends Model
 {
-    // protected $convertNameToCamel = true;
+    protected $json = ['data'];
 
     /**
      * 选择聊天室
