@@ -16,7 +16,7 @@ class ChatRecord extends Model
     protected $json = ['data'];
 
     /**
-     * 选择聊天室
+     * 通过聊天室ID选择相应的聊天记录表
      *
      * @param integer $chatroomId 房间号
      * @return ChatRecord
@@ -24,13 +24,10 @@ class ChatRecord extends Model
     public static function opt(int $chatroomId)
     {
         $model = new static();
-        $num = 1;
+        // 拿到千位数（小于1000，千位数为1）
+        $thousand = $chatroomId < 1000 ? 1 : substr((string) $chatroomId, 0, -3);
 
-        if ($chatroomId > 1999) {
-            $num = substr((string) $chatroomId, 0, 1);
-        }
-
-        $model->setSuffix('_' . $num . '_' . $chatroomId % 100);
+        $model->setSuffix('_' . $thousand . '_' . $chatroomId % 100);
 
         return $model;
     }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fd7eb347b88ed0adc6cadcff581f50c8",
+    "content-hash": "3ecf5304d7214e0dac859cac333c1129",
     "packages": [
         {
             "name": "aliyuncs/oss-sdk-php",
@@ -744,17 +744,65 @@
             "time": "2017-10-23T01:57:42+00:00"
         },
         {
-            "name": "swoole/ide-helper",
-            "version": "4.5.9",
+            "name": "reasno/swoole-aliyunoss-addon",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/swoole/ide-helper.git",
-                "reference": "4ad5772f9db6a6a0fe41068905a0272dcfa5f4d5"
+                "url": "https://github.com/Reasno/swoole-aliyunoss-addon.git",
+                "reference": "518575e697302842105d1774b219ebed17df345f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/4ad5772f9db6a6a0fe41068905a0272dcfa5f4d5",
-                "reference": "4ad5772f9db6a6a0fe41068905a0272dcfa5f4d5",
+                "url": "https://api.github.com/repos/Reasno/swoole-aliyunoss-addon/zipball/518575e697302842105d1774b219ebed17df345f",
+                "reference": "518575e697302842105d1774b219ebed17df345f",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "ext-swoole": ">=4.4.13"
+            },
+            "require-dev": {
+                "swoole/ide-helper": "dev-master"
+            },
+            "suggest": {
+                "aliyuncs/oss-sdk-php": "install the official oss sdk"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Hook.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Reasno",
+                    "email": "guxi99@gmail.com"
+                }
+            ],
+            "description": "Make Aliyun OSS SDK work with swoole CURL_HOOK.",
+            "time": "2020-05-15T02:55:46+00:00"
+        },
+        {
+            "name": "swoole/ide-helper",
+            "version": "4.5.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swoole/ide-helper.git",
+                "reference": "11d77b630ec63e426326439bea0c4b0460fb3a00"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/11d77b630ec63e426326439bea0c4b0460fb3a00",
+                "reference": "11d77b630ec63e426326439bea0c4b0460fb3a00",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -781,20 +829,20 @@
                 }
             ],
             "description": "IDE help files for Swoole.",
-            "time": "2020-12-01T00:31:09+00:00"
+            "time": "2020-12-27T05:03:52+00:00"
         },
         {
             "name": "symfony/finder",
-            "version": "v5.2.0",
+            "version": "v5.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "fd8305521692f27eae3263895d1ef1571c71a78d"
+                "reference": "0b9231a5922fd7287ba5b411893c0ecd2733e5ba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/fd8305521692f27eae3263895d1ef1571c71a78d",
-                "reference": "fd8305521692f27eae3263895d1ef1571c71a78d",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/0b9231a5922fd7287ba5b411893c0ecd2733e5ba",
+                "reference": "0b9231a5922fd7287ba5b411893c0ecd2733e5ba",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -845,7 +893,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-11-18T09:42:36+00:00"
+            "time": "2020-12-08T17:02:38+00:00"
         },
         {
             "name": "topthink/framework",
@@ -1440,16 +1488,16 @@
         },
         {
             "name": "symfony/var-dumper",
-            "version": "v4.4.17",
+            "version": "v4.4.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "65c6f1e848cda840ef7278686c8e30a7cc353c93"
+                "reference": "4f31364bbc8177f2a6dbc125ac3851634ebe2a03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/65c6f1e848cda840ef7278686c8e30a7cc353c93",
-                "reference": "65c6f1e848cda840ef7278686c8e30a7cc353c93",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/4f31364bbc8177f2a6dbc125ac3851634ebe2a03",
+                "reference": "4f31364bbc8177f2a6dbc125ac3851634ebe2a03",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -1528,7 +1576,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-11-24T09:55:37+00:00"
+            "time": "2020-12-08T16:59:59+00:00"
         },
         {
             "name": "topthink/think-trace",

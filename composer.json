@@ -22,7 +22,8 @@
         "topthink/think-swoole": "^3.0",
         "aliyuncs/oss-sdk-php": "^2.3",
         "yzalis/identicon": "^2.0",
-        "ezyang/htmlpurifier": "^4.13"
+        "ezyang/htmlpurifier": "^4.13",
+        "reasno/swoole-aliyunoss-addon": "^1.0"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",

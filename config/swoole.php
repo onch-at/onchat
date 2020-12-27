@@ -78,7 +78,7 @@ return [
     ],
     'coroutine'  => [
         'enable' => true,
-        'flags'  => SWOOLE_HOOK_ALL ^ SWOOLE_HOOK_CURL,
+        'flags'  => SWOOLE_HOOK_ALL,
     ],
     'tables'     => [],
     //每个worker里需要预加载以共用的实例
