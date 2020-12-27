@@ -547,8 +547,6 @@ class User
         $ossClient = OssClient::getInstance();
         $stylename = OssClient::getThumbnailImgStylename();
 
-        // 存放所有聊天室ID，用于一次性查找最新消息
-        $chatroomIdList = [];
         // 存私聊聊天室ID列表
         $privateChatroomIdList = [];
         // 聊天室最新消息
@@ -583,8 +581,6 @@ class User
                     $privateChatroomIdList[] = $value['chatroom_id'];
                     break;
             }
-
-            $chatroomIdList[] = $value['chatroom_id'];
 
             $latestMsg = ChatRecordModel::opt($value['chatroom_id'])
                 ->alias('chat_record')
