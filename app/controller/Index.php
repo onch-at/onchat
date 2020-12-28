@@ -34,7 +34,7 @@ class Index extends BaseController
     public function index()
     {
 
-        // dump(Db::execute("SHOW TABLES LIKE 'chat_record_1_0'"));
+        // dump(ChatroomService::getChatMember(0));
         // ChatroomService::addChatRecordTable((string)2000);
         // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
 

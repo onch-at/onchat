@@ -75,6 +75,7 @@ Route::group('chatroom/:id', function () {
     Route::get('$', 'getChatroom');
     Route::get('name', 'getName');
     Route::get('records/:msgId', 'getRecords');
+    Route::get('members', 'getChatMembers');
 })->completeMatch()->prefix('Chatroom/');
 
 

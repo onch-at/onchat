@@ -43,4 +43,15 @@ class Chatroom extends BaseController
     {
         return ChatroomService::getRecords($id, $msgId);
     }
+
+    /**
+     * 获取群聊所有成员
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public function getChatMembers(int $id): Result
+    {
+        return ChatroomService::getChatMembers($id);
+    }
 }

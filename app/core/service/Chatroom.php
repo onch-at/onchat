@@ -189,7 +189,7 @@ class Chatroom
             'update_time'    => $timestamp,
         ]);
 
-        self::addChatRecordTable($chatroom->id);
+        self::createChatRecordTable($chatroom->id);
 
         if ($type == ChatroomModel::TYPE_GROUP_CHAT) {
             $ossClient = OssClient::getInstance();
@@ -520,13 +520,49 @@ class Chatroom
     }
 
     /**
+     * 获取群聊所有成员
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public static function getChatMembers(int $id)
+    {
+        $data = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
+            ->join('user_info', 'user_info.user_id = chat_member.user_id')
+            ->where([
+                'chatroom.id' => $id,
+                'chatroom.type' => ChatroomModel::TYPE_GROUP_CHAT
+            ])
+            ->field([
+                'chat_member.id',
+                'chat_member.nickname',
+                'chat_member.user_id',
+                'user_info.avatar as avatarThumbnail',
+                'chat_member.role',
+                'chat_member.create_time',
+                'chat_member.update_time',
+            ])
+            ->select()
+            ->toArray();
+
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+        foreach ($data as $key => $value) {
+            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+        }
+
+        return Result::success(ArrUtil::keyToCamel($data));
+    }
+
+    /**
      * 根据房间号尝试动态添加聊天记录表
      * 策略：1000个聊天室 使用100个数据表记录聊天记录，等于100个聊天室共用一个数据表
      *
      * @param integer $chatroomId
      * @return void
      */
-    public static function addChatRecordTable(int $chatroomId)
+    public static function createChatRecordTable(int $chatroomId)
     {
         // 拿到千位数（小于1000，千位数为1）
         $thousand = $chatroomId < 1000 ? 1 : substr((string) $chatroomId, 0, -3);
