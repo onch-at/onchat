@@ -54,4 +54,15 @@ class Chatroom extends BaseController
     {
         return ChatroomService::getChatMembers($id);
     }
+
+    /**
+     * 上传聊天室头像
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public function avatar(int $id): Result
+    {
+        return ChatroomService::avatar($id);
+    }
 }

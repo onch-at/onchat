@@ -556,6 +556,110 @@ class Chatroom
     }
 
     /**
+     * 上传聊天室头像
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public static function avatar(int $id): Result
+    {
+        $userId = User::getId();
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+        }
+
+        $role = self::getMemberRole($id, $userId);
+        // 如果不是群主、管理员
+        if ($role != ChatMemberModel::ROLE_HOST && $role != ChatMemberModel::ROLE_MANAGE) {
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+        }
+
+        $bucket = OssClient::getBucket();
+        // 如果为调试模式，则将数据存放到dev/目录下
+        $root = OssClient::getRootPath();
+        // 由于搜索用户所有历史头像
+        $options = [
+            // 文件路径前缀
+            'prefix' => $root . 'avatar/chatroom/' . $id . '/',
+            // 最大数量
+            'max-keys' => 20,
+        ];
+
+        // 头像数量最大值
+        $maxCount = 10;
+
+        try {
+            $image = request()->file('image');
+            $mine = $image->getMime();
+
+            if (!in_array($mine, ['image/webp', 'image/jpeg', 'image/png'])) {
+                return new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp/jpeg/png的图片文件');
+            }
+
+            if ($image->getSize() > 1048576) { // 1MB
+                return new Result(Result::CODE_ERROR_PARAM, '文件体积过大，仅接受体积为1MB以内的文件');
+            }
+
+            $ossClient = OssClient::getInstance();
+
+            $object = $root . 'avatar/chatroom/' . $id . '/' . md5((string) DateUtil::now()) . '.' . substr($mine, 6);
+            // 上传到OSS
+            $ossClient->uploadFile($bucket, $object, $image->getRealPath(), OssClient::$imageHeadersOptions);
+
+            // 列举用户所有头像
+            $objectList = $ossClient->listObjects($bucket, $options)->getObjectList();
+
+            $count = count($objectList);
+
+            // 如果用户的头像大于10张
+            if ($count > $maxCount) {
+                // 按照时间进行升序
+                usort($objectList, function ($a, $b) {
+                    return strtotime($a->getLastModified()) - strtotime($b->getLastModified());
+                });
+
+                // 需要删除的OBJ
+                $objects = [];
+
+                $num = $count - $maxCount;
+                for ($i = 0; $i < $num; $i++) {
+                    $objects[] = $objectList[$i]->getKey();
+                }
+
+                // 把超过的删除
+                $ossClient->deleteObjects($bucket, $objects);
+            }
+
+            // 更新新头像
+            $chatroom = ChatroomModel::field('avatar')->find($id);
+            $chatroom->avatar = $object;
+            $chatroom->save();
+
+            return Result::success([
+                'avatar'          => $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename()),
+                'avatarThumbnail' => $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename())
+            ]);
+        } catch (\Exception $e) {
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+        }
+    }
+
+    /**
+     * 获得成员角色
+     *
+     * @param integer $id 聊天室ID
+     * @param integer $userId 成员ID
+     * @return integer
+     */
+    public static function getMemberRole(int $id, int $userId): ?int
+    {
+        return ChatMemberModel::where([
+            'chatroom_id' => $id,
+            'user_id'     => $userId
+        ])->value('role');
+    }
+
+    /**
      * 根据房间号尝试动态添加聊天记录表
      * 策略：1000个聊天室 使用100个数据表记录聊天记录，等于100个聊天室共用一个数据表
      *
