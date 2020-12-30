@@ -668,13 +668,10 @@ class Chatroom
      */
     public static function createChatRecordTable(int $chatroomId)
     {
-        // 拿到千位数（小于1000，千位数为1）
-        $thousand = $chatroomId < 1000 ? 1 : substr((string) $chatroomId, 0, -3);
-        $index = $chatroomId % 100;
-        $tableName = "chat_record_{$thousand}_{$index}";
+        $table = ChatRecordModel::getTableNameById($chatroomId);
         // 如果没有这个表
-        if (Db::execute("SHOW TABLES LIKE '{$tableName}'") == 0) {
-            Db::execute("CREATE TABLE IF NOT EXISTS {$tableName} (
+        if (Db::execute("SHOW TABLES LIKE '{$table}'") == 0) {
+            Db::execute("CREATE TABLE IF NOT EXISTS {$table} (
                     id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                     chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
                     user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',

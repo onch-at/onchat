@@ -549,8 +549,6 @@ class User
 
         // 存私聊聊天室ID列表
         $privateChatroomIdList = [];
-        // 聊天室最新消息
-        $latestMsg = null;
 
         $data = ChatMemberModel::join('chatroom', 'chat_member.chatroom_id = chatroom.id')
             ->where([
@@ -571,6 +569,13 @@ class User
             ->select()
             ->toArray();
 
+        $query = null;
+        $field = [
+            'chat_record.*',
+            'chat_member.nickname',
+        ];
+        $max = 'MAX(chat_record.id)';
+
         foreach ($data as $key => $value) {
             switch ($value['chatroomType']) {
                 case ChatroomModel::TYPE_GROUP_CHAT:
@@ -582,25 +587,45 @@ class User
                     break;
             }
 
-            $latestMsg = ChatRecordModel::opt($value['chatroom_id'])
-                ->alias('chat_record')
-                ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id')
-                ->where('chat_record.chatroom_id', '=', $value['chatroom_id'])
-                ->order('chat_record.id', 'DESC')
-                ->field([
-                    'chat_record.*',
-                    'chat_member.nickname',
-                ])
-                ->findOrEmpty()
-                ->toArray();
+            $table = ChatRecordModel::getTableNameById($value['chatroom_id']);
+            $on = 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id = ' . $value['chatroom_id'];
 
-            if (!empty($latestMsg)) {
-                $data[$key]['content'] = $latestMsg;
+            if (!$query) {
+                $query = ChatRecordModel::opt($value['chatroom_id'])
+                    ->alias('chat_record')
+                    ->leftJoin('chat_member', $on)
+                    ->where('chat_record.id', '=', function ($query) use ($value, $table, $max) {
+                        $query->table($table)
+                            ->alias('chat_record')
+                            ->where('chat_record.chatroom_id', '=', $value['chatroom_id'])
+                            ->fieldRaw($max);
+                    })
+                    // ->limit(1)
+                    ->field($field);
+            } else {
+                $query->unionAll(function ($query) use ($value, $table, $field, $on, $max) {
+                    $query->table($table)
+                        ->alias('chat_record')
+                        ->leftJoin('chat_member', $on)
+                        ->where('chat_record.id', '=', function ($query) use ($value, $table, $max) {
+                            $query->table($table)
+                                ->alias('chat_record')
+                                ->where('chat_record.chatroom_id', '=', $value['chatroom_id'])
+                                ->fieldRaw($max);
+                        })
+                        ->limit(1)
+                        ->field($field);
+                });
             }
         }
 
+        $latestMsgList = $query->select();
+        // 聊天室最新消息
+        $latestMsg = null;
+        // 好友信息
+        $friendInfo = null;
+
         if (!empty($privateChatroomIdList)) {
-            // 好友信息
             $friendInfo = ChatMemberModel::join('user_info', 'chat_member.user_id = user_info.user_id')
                 ->where([
                     ['chat_member.chatroom_id', 'IN', $privateChatroomIdList],
@@ -608,20 +633,24 @@ class User
                 ])
                 ->field([
                     'chat_member.chatroom_id',
-                    // 'chat_member.user_id',
                     'chat_member.nickname',
                     'user_info.avatar',
                 ])
                 ->select();
+        }
 
-            $info = null;
-            foreach ($data as $key => $value) {
-                // 将私聊聊天室的头像，好友昵称填入
-                if ($value['chatroomType'] == ChatroomModel::TYPE_PRIVATE_CHAT) {
-                    $info = $friendInfo->where('chatroom_id', '=', $value['chatroom_id'])->shift();
-                    $data[$key]['name'] = $info->nickname;
-                    $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
-                }
+        foreach ($data as $key => $value) {
+            $latestMsg = $latestMsgList->where('chatroom_id', '=', $value['chatroom_id'])->shift();
+            // 将最新消息填入
+            if ($latestMsg) {
+                $data[$key]['content'] = $latestMsg;
+            }
+
+            // 将私聊聊天室的头像，好友昵称填入
+            if ($value['chatroomType'] == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
+                $info = $friendInfo->where('chatroom_id', '=', $value['chatroom_id'])->shift();
+                $data[$key]['name'] = $info->nickname;
+                $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
             }
         }
 
