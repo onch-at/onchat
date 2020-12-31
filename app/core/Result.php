@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace app\core;
 
+use app\core\util\Arr as ArrUtil;
+
 class Result
 {
     /** 状态码 */
@@ -34,7 +36,7 @@ class Result
     {
         $this->code = $code;
         $this->msg  = $msg ?: self::MSG[$code];
-        $this->data = $data;
+        $this->data = is_array($data) ? ArrUtil::keyToCamel($data) : $data;
     }
 
     public static function success($data = null, string $msg = null): Result

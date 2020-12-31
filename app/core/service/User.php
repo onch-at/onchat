@@ -8,7 +8,6 @@ use app\core\Result;
 use think\facade\Db;
 use Identicon\Identicon;
 use app\model\User as UserModel;
-use app\core\util\Arr as ArrUtil;
 use app\core\util\Str as StrUtil;
 use app\core\util\Date as DateUtil;
 use app\core\oss\Client as OssClient;
@@ -188,7 +187,7 @@ class User
             // 提交事务
             Db::commit();
 
-            return Result::success(ArrUtil::keyToCamel($user->toArray() + $userInfo), '注册成功！即将跳转…');
+            return Result::success($user->toArray() + $userInfo, '注册成功！即将跳转…');
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -242,7 +241,7 @@ class User
         $user['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
         $user['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
-        return Result::success(ArrUtil::keyToCamel($user), '登录成功！即将跳转…');
+        return Result::success($user, '登录成功！即将跳转…');
     }
 
     /**
@@ -311,7 +310,7 @@ class User
         $user->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
         $user->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
-        return Result::success(ArrUtil::keyToCamel($user->toArray()));
+        return Result::success($user->toArray());
     }
 
     /**
@@ -335,7 +334,7 @@ class User
         $user->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
         $user->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
 
-        return Result::success(ArrUtil::keyToCamel($user->toArray()));
+        return Result::success($user->toArray());
     }
 
     /**
@@ -416,7 +415,7 @@ class User
 
         unset($user['password']);
 
-        return Result::success(ArrUtil::keyToCamel($user));
+        return Result::success($user);
     }
 
     /**
@@ -529,7 +528,7 @@ class User
     public static function getChatrooms($userId = null): Result
     {
         $data = UserModel::find($userId ?: self::getId())->chatrooms()->select()->toArray();
-        return Result::success(ArrUtil::keyToCamel($data));
+        return Result::success($data);
     }
 
     /**
@@ -654,7 +653,7 @@ class User
             }
         }
 
-        return Result::success(ArrUtil::keyToCamel($data));
+        return Result::success($data);
     }
 
     /**
@@ -696,7 +695,7 @@ class User
             $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
         }
 
-        return Result::success(ArrUtil::keyToCamel($data));
+        return Result::success($data);
     }
 
     /**
@@ -840,6 +839,6 @@ class User
 
         $userInfo->save();
 
-        return Result::success(ArrUtil::keyToCamel($userInfo->toArray()));
+        return Result::success($userInfo->toArray());
     }
 }

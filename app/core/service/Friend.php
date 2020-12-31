@@ -7,7 +7,6 @@ namespace app\core\service;
 use app\core\Result;
 use think\facade\Db;
 use app\model\User as UserModel;
-use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
 use app\core\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
@@ -119,7 +118,7 @@ class Friend
             $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
             $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
-            return Result::success(ArrUtil::keyToCamel($friendRequest));
+            return Result::success($friendRequest);
         }
 
         $friendRequest = FriendRequestModel::create([
@@ -138,7 +137,7 @@ class Friend
         $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
         $friendRequest['targetUsername'] = User::getUsernameById($targetId);
 
-        return Result::success(ArrUtil::keyToCamel($friendRequest));
+        return Result::success($friendRequest);
     }
 
     /**
@@ -165,7 +164,7 @@ class Friend
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        return Result::success(ArrUtil::keyToCamel($friendRequest->toArray()));
+        return Result::success($friendRequest->toArray());
     }
 
     /**
@@ -210,7 +209,7 @@ class Friend
             $friendRequests[$key]['targetUsername'] = $username;
         }
 
-        return Result::success(ArrUtil::keyToCamel($friendRequests));
+        return Result::success($friendRequests);
     }
 
     /**
@@ -256,7 +255,7 @@ class Friend
             $friendRequests[$key]['selfUsername'] = $username;
         }
 
-        return Result::success(ArrUtil::keyToCamel($friendRequests));
+        return Result::success($friendRequests);
     }
 
     /**
@@ -281,7 +280,7 @@ class Friend
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return Result::success(ArrUtil::keyToCamel($friendRequest->toArray()));
+        return Result::success($friendRequest->toArray());
     }
 
     /**
@@ -306,7 +305,7 @@ class Friend
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return Result::success(ArrUtil::keyToCamel($friendRequest->toArray()));
+        return Result::success($friendRequest->toArray());
     }
 
     /**
@@ -459,7 +458,7 @@ class Friend
             $data['targetAvatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
             Db::commit();
 
-            return Result::success(ArrUtil::keyToCamel($data));
+            return Result::success($data);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();

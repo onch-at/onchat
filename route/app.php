@@ -11,7 +11,7 @@
 use think\facade\Route;
 
 /** 测试路由 */
-Route::get('$', function () {
+Route::get('/', function () {
     return '<span style="font-size: 150px; font-weight: bolder; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); letter-spacing: -7.5px;">Running Successfully!</span>';
 });
 
@@ -25,7 +25,7 @@ Route::get('phpinfo', function () {
 
 /** 应用主路由/公共路由/杂项路由 */
 Route::group('index', function () {
-    Route::get('$', 'index');
+    Route::get('/', 'index');
     Route::get('captcha', 'captcha');
 })->completeMatch()->prefix('Index/');
 
@@ -44,24 +44,24 @@ Route::group('user', function () {
     Route::put('info', 'saveUserInfo');
 
     Route::group('chatlist', function () {
-        Route::get('$', 'getChatList');
+        Route::get('/', 'getChatList');
 
-        Route::put('sticky/:id', 'sticky');
-        Route::put('unsticky/:id', 'unsticky');
-        Route::put('readed/:id', 'readed');
-        Route::put('unread/:id', 'unread');
+        Route::put('sticky/<id>', 'sticky');
+        Route::put('unsticky/<id>', 'unsticky');
+        Route::put('readed/<id>', 'readed');
+        Route::put('unread/<id>', 'unread');
     });
 
     Route::group('chatrooms', function () {
-        Route::get('$', 'getChatrooms');
+        Route::get('/', 'getChatrooms');
         Route::get('private', 'getPrivateChatrooms');
     });
 })->completeMatch()->prefix('User/');
 
 
 
-Route::group('user/:id', function () {
-    Route::get('$', 'getUserById');
+Route::group('user/<id>', function () {
+    Route::get('/', 'getUserById');
 })->completeMatch()->prefix('User/');
 
 
@@ -71,10 +71,10 @@ Route::group('chatroom', function () {
     // Route::post('create', 'create');
 })->completeMatch()->prefix('Chatroom/');
 
-Route::group('chatroom/:id', function () {
-    Route::get('$', 'getChatroom');
+Route::group('chatroom/<id>', function () {
+    Route::get('/', 'getChatroom');
     Route::get('name', 'getName');
-    Route::get('records/:msgId', 'getRecords');
+    Route::get('records/<msgId>', 'getRecords');
     Route::get('members', 'getChatMembers');
 
     Route::post('avatar', 'avatar');
@@ -84,18 +84,18 @@ Route::group('chatroom/:id', function () {
 
 /** 好友模块路由 */
 Route::group('friend', function () {
-    Route::get('request/:id', 'getFriendRequestById');
-    Route::get('request/self/:selfId', 'getFriendRequestBySelfId');
-    Route::get('request/target/:targetId', 'getFriendRequestByTargetId');
+    Route::get('request/<id>', 'getFriendRequestById');
+    Route::get('request/self/<selfId>', 'getFriendRequestBySelfId');
+    Route::get('request/target/<targetId>', 'getFriendRequestByTargetId');
 
     Route::get('requests/receive', 'getReceiveFriendRequests');
     Route::get('requests/send', 'getSendFriendRequests');
 
-    Route::put('alias/:chatroomId', 'setFriendAlias');
+    Route::put('alias/<chatroomId>', 'setFriendAlias');
 })->completeMatch()->prefix('Friend/');
 
 
 
-Route::group('friend/:id', function () {
+Route::group('friend/<id>', function () {
     Route::get('isfriend', 'isFriend');
 })->completeMatch()->prefix('Friend/');

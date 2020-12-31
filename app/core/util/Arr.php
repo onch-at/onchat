@@ -19,7 +19,7 @@ class Arr
     {
         $temp = [];
         foreach ($arr as $k => $v) {
-            $temp[is_int($k) ? $k : Str::camel($k)] = is_array($v) ? self::keyToCamel($v) : $v;
+            $temp[is_string($k) ? Str::camel($k) : $k] = is_array($v) ? self::keyToCamel($v) : $v;
         }
         return $temp;
     }

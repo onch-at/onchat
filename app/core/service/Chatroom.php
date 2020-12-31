@@ -8,7 +8,6 @@ use app\core\Result;
 use think\facade\Db;
 use Identicon\Identicon;
 use app\model\User as UserModel;
-use app\core\util\Arr as ArrUtil;
 use app\core\util\Sql as SqlUtil;
 use app\core\util\Date as DateUtil;
 use app\core\oss\Client as OssClient;
@@ -136,7 +135,7 @@ class Chatroom
         $chatroom->avatar          = $ossClient->signImageUrl($avatar, OssClient::getOriginalImgStylename());
         $chatroom->avatarThumbnail = $ossClient->signImageUrl($avatar, OssClient::getThumbnailImgStylename());
 
-        return Result::success(ArrUtil::keyToCamel($chatroom->toArray()));
+        return Result::success($chatroom->toArray());
     }
 
     /**
@@ -211,7 +210,7 @@ class Chatroom
             $chatroom->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
         }
 
-        return Result::success(ArrUtil::keyToCamel($chatroom->toArray()));
+        return Result::success($chatroom->toArray());
     }
 
     /**
@@ -250,7 +249,7 @@ class Chatroom
             'update_time' => $timestamp,
         ]);
 
-        return Result::success(ArrUtil::keyToCamel($data->toArray()));
+        return Result::success($data->toArray());
     }
 
     /**
@@ -403,7 +402,7 @@ class Chatroom
             $records[] = $item;
         }
 
-        return Result::success(ArrUtil::keyToCamel($records));
+        return Result::success($records);
     }
 
     /**
@@ -552,7 +551,7 @@ class Chatroom
             $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
         }
 
-        return Result::success(ArrUtil::keyToCamel($data));
+        return Result::success($data);
     }
 
     /**
