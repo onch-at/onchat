@@ -75,19 +75,17 @@ class OnChat extends Command
 
     private function install($output)
     {
-        $path = root_path() . '/resource/sql';
-        $sqls = [
-            file_get_contents($path . '/table/user.sql'),
-            file_get_contents($path . '/table/user-info.sql'),
-            file_get_contents($path . '/table/chatroom.sql'),
-            file_get_contents($path . '/table/chat-member.sql'),
-            file_get_contents($path . '/table/friend-request.sql'),
-            file_get_contents($path . '/table/chat-invitation.sql'),
-        ];
+        $path = root_path() . '/resource/sql/';
 
-        $output->comment('  Execute SQL statement…');
-        foreach ($sqls as $sql) {
-            Db::execute($sql);
+        $dir = scandir($path . 'table');
+
+        $output->comment('Execute SQL statement…');
+        foreach ($dir as $file) {
+            $filename = $path . 'table/' . $file;
+            if (preg_match('/(.sql)$/', $file) && is_file($filename)) {
+                Db::execute(file_get_contents($filename));
+                $output->comment(' > ' . $file);
+            }
         }
 
         $result = ChatroomService::getChatroom(1);

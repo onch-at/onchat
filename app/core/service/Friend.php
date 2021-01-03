@@ -45,8 +45,15 @@ class Friend
      */
     public static function request(int $selfId, int $targetId, string $selfUsername, string $requestReason = null, string $targetAlias = null): Result
     {
+        // 如果两人已经是好友关系，则不允许申请了
+        if ($selfId == $targetId || self::isFriend($selfId, $targetId)) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
         // 如果剔除空格后长度为零，则直接置空
-        $requestReason && mb_strlen(StrUtil::trimAll($requestReason), 'utf-8') == 0 && ($requestReason = null);
+        if ($requestReason && mb_strlen(StrUtil::trimAll($requestReason), 'utf-8') == 0) {
+            $requestReason = null;
+        }
 
         // 如果附加消息长度超出
         if ($requestReason && mb_strlen($requestReason, 'utf-8') > self::REASON_MAX_LENGTH) {
@@ -54,16 +61,13 @@ class Friend
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        $targetAlias && mb_strlen(StrUtil::trimAll($targetAlias), 'utf-8') == 0 && ($targetAlias = null);
+        if ($targetAlias && mb_strlen(StrUtil::trimAll($targetAlias), 'utf-8') == 0) {
+            $targetAlias = null;
+        }
 
         // 如果别名长度超出
         if ($targetAlias && mb_strlen($targetAlias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
             return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
-        }
-
-        // 如果两人已经是好友关系，则不允许申请了
-        if ($selfId == $targetId || self::isFriend($selfId, $targetId)) {
-            return new Result(Result::CODE_ERROR_PARAM);
         }
 
         $ossClient = OssClient::getInstance();
@@ -110,25 +114,16 @@ class Friend
 
             $friendRequest->update_time = $timestamp;
             $friendRequest->save();
-
-            $friendRequest = $friendRequest->toArray();
-
-            $friendRequest['selfAvatarThumbnail'] = $selfAvatarThumbnail;
-            $friendRequest['selfUsername'] = $selfUsername;
-            $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
-            $friendRequest['targetUsername'] = User::getUsernameById($targetId);
-
-            return Result::success($friendRequest);
+        } else {
+            $friendRequest = FriendRequestModel::create([
+                'self_id'        => $selfId,
+                'target_id'      => $targetId,
+                'request_reason' => $requestReason,
+                'target_alias'   => $targetAlias,
+                'create_time'    => $timestamp,
+                'update_time'    => $timestamp,
+            ]);
         }
-
-        $friendRequest = FriendRequestModel::create([
-            'self_id'        => $selfId,
-            'target_id'      => $targetId,
-            'request_reason' => $requestReason,
-            'target_alias'   => $targetAlias,
-            'create_time'    => $timestamp,
-            'update_time'    => $timestamp,
-        ]);
 
         $friendRequest = $friendRequest->toArray();
 
@@ -364,13 +359,13 @@ class Friend
 
             $chatroomId = $result->data['id'];
 
-            $result = Chatroom::addChatMember($chatroomId, $friendRequest->self_id, $selfAlias);
+            $result = Chatroom::addMember($chatroomId, $friendRequest->self_id, $selfAlias);
             if ($result->code != Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
 
-            $result = Chatroom::addChatMember($chatroomId, $friendRequest->target_id, $friendRequest->target_alias);
+            $result = Chatroom::addMember($chatroomId, $friendRequest->target_id, $friendRequest->target_alias);
             if ($result->code != Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;

@@ -222,7 +222,7 @@ class Chatroom
      * @param integer $role 角色
      * @return Result
      */
-    public static function addChatMember(int $id, int $userId, string $nickname = null, int $role = 0): Result
+    public static function addMember(int $id, int $userId, string $nickname = null, int $role = 0): Result
     {
         $username = User::getUsernameById($userId);
         // 如果没有这个房间，或者没有这个用户，或者这个用户已经加入了这个房间
@@ -490,7 +490,7 @@ class Chatroom
             $chatroom = $result->data;
 
             // 将自己添加到聊天室，角色为主人
-            $result = self::addChatMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
+            $result = self::addMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
             if ($result->code != Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
@@ -644,6 +644,21 @@ class Chatroom
     }
 
     /**
+     * 是否是聊天室成员
+     *
+     * @param integer $id 聊天室ID
+     * @param integer $userId 用户ID
+     * @return boolean
+     */
+    public static function isMember(int $id, int $userId): bool
+    {
+        return !!ChatMemberModel::where([
+            'chatroom_id' => $id,
+            'user_id'     => $userId
+        ])->find();
+    }
+
+    /**
      * 获得成员角色
      *
      * @param integer $id 聊天室ID
@@ -656,6 +671,28 @@ class Chatroom
             'chatroom_id' => $id,
             'user_id'     => $userId
         ])->value('role');
+    }
+
+    /**
+     * 获取群聊聊天室群主和管理员的用户ID列表
+     *
+     * @param integer $id 聊天室ID
+     * @return array|null
+     */
+    public static function getHostAndManagerIdList(int $id): ?array
+    {
+        return ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
+            ->where([
+                ['chatroom.id', '=', $id],
+                ['chatroom.type', '=', ChatroomModel::TYPE_GROUP_CHAT]
+            ])
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['chat_member.role', '=',  ChatMemberModel::ROLE_HOST],
+                    ['chat_member.role', '=',  ChatMemberModel::ROLE_MANAGE],
+                ]);
+            })
+            ->column('user_id');
     }
 
     /**

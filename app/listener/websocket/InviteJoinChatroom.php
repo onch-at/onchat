@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\core\service\ChatInvitation;
+use app\core\service\Chat as ChatService;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
 use app\core\service\Message as MessageService;
@@ -26,7 +26,7 @@ class InviteJoinChatroom extends BaseListener
 
         $user = $this->getUserByFd();
 
-        $result = ChatInvitation::invite($user['id'], $event['chatroomId'], $event['chatroomIdList']);
+        $result = ChatService::invite($user['id'], $event['chatroomId'], $event['chatroomIdList']);
 
         $this->websocket->emit('invite_join_chatroom', $result);
 

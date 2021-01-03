@@ -177,7 +177,7 @@ class User
 
             self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
 
-            Chatroom::addChatMember(1, $user->id); // 添加新用户到默认聊天室
+            Chatroom::addMember(1, $user->id); // 添加新用户到默认聊天室
 
             unset($user->password); // 删掉密码
 

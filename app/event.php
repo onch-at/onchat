@@ -18,6 +18,7 @@ return [
         'swoole.websocket.FriendRequestReject' => [app\listener\websocket\FriendRequestReject::class],
         'swoole.websocket.CreateChatroom'      => [app\listener\websocket\CreateChatroom::class],
         'swoole.websocket.InviteJoinChatroom'  => [app\listener\websocket\InviteJoinChatroom::class],
+        'swoole.websocket.ChatRequest'         => [app\listener\websocket\ChatRequest::class],
         'swoole.websocket.Close'               => [app\listener\websocket\Unload::class],
     ],
 

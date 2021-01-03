@@ -33,6 +33,7 @@ class Index extends BaseController
 {
     public function index()
     {
+        dump(ChatroomService::getHostAndManagerIdList(1));
         // ChatroomService::addChatRecordTable((string)2000);
         // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
 
