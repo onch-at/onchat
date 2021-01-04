@@ -141,7 +141,7 @@ class Friend
      * @param integer $id
      * @return Result
      */
-    public static function getFriendRequestById(int $id): Result
+    public static function getRequestById(int $id): Result
     {
         $userId = User::getId();
         if (!$userId) {
@@ -167,7 +167,7 @@ class Friend
      *
      * @return Result
      */
-    public static function getReceiveFriendRequests(): Result
+    public static function getReceiveRequests(): Result
     {
         $userId = User::getId();
         $username = User::getUsername();
@@ -212,7 +212,7 @@ class Friend
      *
      * @return Result
      */
-    public static function getSendFriendRequests(): Result
+    public static function getSendRequests(): Result
     {
         $userId = User::getId();
         $username = User::getUsername();
@@ -259,7 +259,7 @@ class Friend
      * @param integer $targetId
      * @return Result
      */
-    public static function getFriendRequestByTargetId(int $targetId): Result
+    public static function getRequestByTargetId(int $targetId): Result
     {
         $userId = User::getId();
         if (!$userId) {
@@ -284,7 +284,7 @@ class Friend
      * @param integer $selfId
      * @return Result
      */
-    public static function getFriendRequestBySelfId(int $selfId): Result
+    public static function getRequestBySelfId(int $selfId): Result
     {
         $userId = User::getId();
         if (!$userId) {
@@ -311,7 +311,7 @@ class Friend
      * @param string $selfAlias 申请人的别名
      * @return Result
      */
-    public static function agreeRequest(int $friendRequestId, int $targetId, string $selfAlias = null): Result
+    public static function agree(int $friendRequestId, int $targetId, string $selfAlias = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
         $selfAlias && mb_strlen(StrUtil::trimAll($selfAlias), 'utf-8') == 0 && ($selfAlias = null);
@@ -404,7 +404,7 @@ class Friend
      * @param string $rejectReason 拒绝原因
      * @return Result
      */
-    public static function rejectRequest(int $friendRequestId, int $targetId, string $targetUsername, string $rejectReason = null): Result
+    public static function reject(int $friendRequestId, int $targetId, string $targetUsername, string $rejectReason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
         if ($rejectReason && mb_strlen(StrUtil::trimAll($rejectReason), 'utf-8') == 0) {

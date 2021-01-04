@@ -8,6 +8,7 @@ use app\core\Result;
 use app\core\util\Arr;
 use app\model\User as UserModel;
 use app\core\util\Str as StrUtil;
+use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
@@ -120,5 +121,47 @@ class Chat
         }
 
         return Result::success($request->toArray());
+    }
+
+    /**
+     * 获取我收到的入群申请
+     *
+     * @return Result
+     */
+    public static function getReceiveRequests(): Result
+    {
+        $userId = User::getId();
+
+        if (!$userId) {
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+        }
+
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+        $data = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
+            ->join('user_info', 'chat_request.applicant_id = user_info.user_id')
+            ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
+            ->where('chat_member.user_id', '=', $userId)
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_HOST],
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_MANAGE],
+                ]);
+            })
+            ->field([
+                'user_info.nickname as applicantNickname',
+                'user_info.avatar as applicantAvatarThumbnail',
+                'chatroom.name as chatroomName',
+                'chat_request.*'
+            ])
+            ->select()
+            ->toArray();
+
+        foreach ($data as $key => $value) {
+            $data[$key]['applicantAvatarThumbnail'] = $ossClient->signImageUrl($value['applicantAvatarThumbnail'], $stylename);
+        }
+
+        return Result::success($data);
     }
 }

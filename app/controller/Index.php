@@ -27,13 +27,14 @@ use Identicon\Generator\SvgGenerator;
 use app\core\service\User as UserService;
 use app\core\service\Friend as FriendService;
 use app\core\service\Chatroom as ChatroomService;
+use app\core\service\Chat as ChatService;
 use app\core\identicon\generator\ImageMagickGenerator;
 
 class Index extends BaseController
 {
     public function index()
     {
-        dump(ChatroomService::getHostAndManagerIdList(1));
+        dump(ChatService::getReceiveRequests());
         // ChatroomService::addChatRecordTable((string)2000);
         // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
 

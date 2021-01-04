@@ -38,8 +38,10 @@ class ChatRequest extends BaseListener
             $userIdList = ChatroomService::getHostAndManagerIdList($event['chatroomId']);
 
             foreach ($userIdList as $userId) {
-                $this->websocket->to(parent::ROOM_CHAT_REQUEST . $userId)->emit('chat_request', $result);
+                $this->websocket->to(parent::ROOM_CHAT_REQUEST . $userId);
             }
+
+            $this->websocket->emit('chat_request', $result);
         }
     }
 }

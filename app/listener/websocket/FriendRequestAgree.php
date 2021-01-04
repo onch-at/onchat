@@ -24,7 +24,7 @@ class FriendRequestAgree extends BaseListener
 
         $user = $this->getUserByFd();
 
-        $result = FriendService::agreeRequest($event['friendRequestId'], $user['id'], $event['selfAlias']);
+        $result = FriendService::agree($event['friendRequestId'], $user['id'], $event['selfAlias']);
 
         $chatroomId = $result->data['chatroomId'];
         $this->websocket->join(parent::ROOM_CHATROOM . $chatroomId);

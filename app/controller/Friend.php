@@ -18,9 +18,9 @@ class Friend extends BaseController
      *
      * @return Result
      */
-    public function getReceiveFriendRequests(): Result
+    public function getReceiveRequests(): Result
     {
-        return FriendService::getReceiveFriendRequests();
+        return FriendService::getReceiveRequests();
     }
 
     /**
@@ -28,9 +28,9 @@ class Friend extends BaseController
      *
      * @return Result
      */
-    public function getSendFriendRequests(): Result
+    public function getSendRequests(): Result
     {
-        return FriendService::getSendFriendRequests();
+        return FriendService::getSendRequests();
     }
 
     /**
@@ -39,9 +39,9 @@ class Friend extends BaseController
      * @param integer $targetId
      * @return Result
      */
-    public function getFriendRequestByTargetId(int $targetId): Result
+    public function getRequestByTargetId(int $targetId): Result
     {
-        return FriendService::getFriendRequestByTargetId($targetId);
+        return FriendService::getRequestByTargetId($targetId);
     }
 
     /**
@@ -50,9 +50,9 @@ class Friend extends BaseController
      * @param integer $selfId
      * @return Result
      */
-    public function getFriendRequestBySelfId(int $selfId): Result
+    public function getRequestBySelfId(int $selfId): Result
     {
-        return FriendService::getFriendRequestBySelfId($selfId);
+        return FriendService::getRequestBySelfId($selfId);
     }
 
     /**
@@ -61,9 +61,9 @@ class Friend extends BaseController
      * @param integer $id
      * @return Result
      */
-    public function getFriendRequestById(int $id): Result
+    public function getRequestById(int $id): Result
     {
-        return FriendService::getFriendRequestById($id);
+        return FriendService::getRequestById($id);
     }
 
     /**

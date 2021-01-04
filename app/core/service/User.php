@@ -648,8 +648,10 @@ class User
             // 将私聊聊天室的头像，好友昵称填入
             if ($value['chatroomType'] == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
                 $info = $friendInfo->where('chatroom_id', '=', $value['chatroom_id'])->shift();
-                $data[$key]['name'] = $info->nickname;
-                $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
+                if ($info) {
+                    $data[$key]['name'] = $info->nickname;
+                    $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
+                }
             }
         }
 

@@ -12,6 +12,7 @@ use think\Model;
 class ChatRequest extends Model
 {
     protected $json = ['readed_list'];
+    protected $jsonAssoc = true;
 
     /** 状态：等待 */
     const STATUS_WAIT = 0;
