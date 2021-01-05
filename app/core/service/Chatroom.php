@@ -14,6 +14,7 @@ use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
+use app\model\ChatSession as ChatSessionModel;
 use app\core\identicon\generator\ImageMagickGenerator;
 
 class Chatroom
@@ -244,9 +245,17 @@ class Chatroom
             'user_id'     => $userId,
             'nickname'    => $nickname ?: $username,
             'role'        => $role,
-            'unread'      => 1,
             'create_time' => $timestamp,
             'update_time' => $timestamp,
+        ]);
+
+        ChatSessionModel::create([
+            'user_id'     => $userId,
+            'type'        => ChatSessionModel::TYPE_CHATROOM,
+            'data'        => ['chatroomId' => $id],
+            'unread'      => 1,
+            'create_time' => $timestamp,
+            'update_time' => $timestamp
         ]);
 
         return Result::success($data->toArray());
@@ -289,15 +298,18 @@ class Chatroom
                 'create_time' => $timestamp
             ]);
 
-            ChatMemberModel::update([
-                'is_show'     => true,
+            ChatSessionModel::update([
+                'visible' => true,
                 'update_time' => $timestamp,
                 // 如果是该用户的，则归零；
                 // 如果不是该用户的，且小于100，则递增；否则直接100
                 'unread'      => Db::raw('CASE WHEN user_id = ' . $userId . ' THEN 0 ELSE CASE WHEN unread < 100 THEN unread + 1 ELSE 100 END END')
             ], [
-                'chatroom_id' => $msg['chatroomId']
+                'type'             => ChatSessionModel::TYPE_CHATROOM,
+                'data->chatroomId' => $msg['chatroomId']
             ]);
+            // TODO 不知道为啥上面的更新没反应
+            Db::execute(ChatSessionModel::getLastSql());
 
             $ossClient = OssClient::getInstance();
             $object = User::getInfoByKey('id', $userId, 'avatar')['avatar'];
@@ -345,18 +357,23 @@ class Chatroom
         // 用于缓存 user id => avatarThumbnail
         $avatarThumbnailMap = [];
 
-        $chatRecord = ChatRecordModel::opt($id)->json(['data'])->where('chatroom_id', '=', $id);
+        // 查询的时候，顺带把未读消息数归零
+        ChatSessionModel::update([
+            'unread' => 0,
+            'visible' => true,
+        ], [
+            'user_id'          => $userId,
+            'type'             => ChatSessionModel::TYPE_CHATROOM,
+            'data->chatroomId' => $id
+        ]);
+
+        // TODO 不知道为啥上面的更新没反应
+        Db::execute(ChatSessionModel::getLastSql());
+
+        $chatRecord = ChatRecordModel::opt($id)->where('chatroom_id', '=', $id);
         if ($chatRecord->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, '没有消息');
         }
-
-        // 查询的时候，顺带把未读消息数归零
-        ChatMemberModel::where([
-            'user_id'     => $userId,
-            'chatroom_id' => $id
-        ])->update([
-            'unread' => 0
-        ]);
 
         // 如果msgId为0，则代表初次查询
         $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
@@ -436,13 +453,16 @@ class Chatroom
                 return new Result(Result::CODE_ERROR_UNKNOWN);
             }
 
-            ChatMemberModel::update([
+            ChatSessionModel::update([
                 'update_time' => SqlUtil::rawTimestamp(),
                 // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
                 'unread'      => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
             ], [
-                'chatroom_id' => $id
+                'type' => ChatSessionModel::TYPE_CHATROOM,
+                'data->chatroomId' => $id
             ]);
+            // TODO 不知道为啥上面的更新没反应
+            Db::execute(ChatSessionModel::getLastSql());
 
             // 提交事务
             Db::commit();
@@ -499,13 +519,18 @@ class Chatroom
             $data = $result->data;
 
             // 移除掉一些不要的信息
-            unset($data['nickname'], $data['role'], $data['userId']);
+            unset($data['nickname'], $data['role'], $data['userId'], $data['chatroomId']);
 
             // 补充一些信息
-            $data['name'] = $name;
+            $data['title'] = $name;
             $data['avatarThumbnail'] = $chatroom['avatarThumbnail'];
-            $data['type'] = ChatroomModel::TYPE_GROUP_CHAT;
+            $data['data'] = [
+                'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT,
+                'chatroomId' => $chatroom['id'],
+            ];
+            $data['type'] = ChatSessionModel::TYPE_CHATROOM;
             $data['sticky'] = false;
+            $data['unread'] = 1;
 
             Db::commit();
 

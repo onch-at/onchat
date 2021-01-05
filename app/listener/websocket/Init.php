@@ -42,6 +42,9 @@ class Init extends BaseListener
 
         $this->websocket->emit('init');
 
-        UserInfoModel::update(['login_time' => SqlUtil::rawTimestamp()], ['id' => $user['id']]);
+        UserInfoModel::update([
+            'login_time' => SqlUtil::rawTimestamp(),
+            'id' => $user['id']
+        ]);
     }
 }

@@ -16,6 +16,7 @@ use app\core\oss\Client;
 use HTMLPurifier_Config;
 use app\model\ChatMember;
 use app\model\ChatRecord;
+use app\model\ChatSession;
 use OSS\Core\OssException;
 use app\model\FriendRequest;
 use app\core\util\Arr as ArrUtil;
@@ -34,36 +35,6 @@ class Index extends BaseController
 {
     public function index()
     {
-        dump(ChatService::getReceiveRequests());
-        // ChatroomService::addChatRecordTable((string)2000);
-        // return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
-
-
-
-        // $identicon = new \Identicon\Identicon(new ImageMagickGenerator());
-
-        // // 存储空间名称
-        // $bucket = "onchat";
-        // $ossClient = Client::getInstance();
-        // echo $ossClient->signUrl($bucket, 'dev/avatar/user/1/9275585a6dd2afdb2034fff04a6d2d7d.webp', 3600, 'GET', [
-        //     'x-oss-process' => 'style/original'
-        // ]);
-        // $user = User::select()->toArray();
-        // foreach ($user as $item) {
-        //     $object = Client::getRootPath() . 'avatar/user/' . $item['id'] . '/' . md5((string) DateUtil::now()) . '.png';
-        //     $content = $identicon->getImageData($item['id'], 256, null, '#f0f0f0');
-        //     try {
-        //         $ossClient->putObject($bucket, $object, $content);
-        //         UserInfo::update([
-        //             'avatar' => $object,
-        //         ], ['id' => $item['id']]);
-        //     } catch (OssException $e) {
-        //         printf(__FUNCTION__ . ": FAILED\n");
-        //         printf($e->getMessage() . "\n");
-        //     }
-        // }
-
-        // return 'okk';
     }
 
     /**

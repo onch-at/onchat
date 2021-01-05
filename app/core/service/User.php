@@ -15,6 +15,7 @@ use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
+use app\model\ChatSession as ChatSessionModel;
 use app\core\identicon\generator\ImageMagickGenerator;
 
 class User
@@ -183,6 +184,16 @@ class User
 
             $userInfo['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
             $userInfo['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+
+            // 创建一个聊天室通知会话
+            ChatSessionModel::create([
+                'user_id' => $user->id,
+                'type'    => ChatSessionModel::TYPE_CHATROOM_NOTICE,
+                'data'    => [],
+                'visible' => false,
+                'create_time' => $timestamp,
+                'update_time' => $timestamp
+            ]);
 
             // 提交事务
             Db::commit();
@@ -532,11 +543,11 @@ class User
     }
 
     /**
-     * 查询该用户下的聊天列表
+     * 获取该用户的聊天会话
      *
      * @return Result
      */
-    public static function getChatList(): Result
+    public static function getChatSessions(): Result
     {
         $userId = self::getId();
         if (!$userId) {
@@ -546,22 +557,23 @@ class User
         $ossClient = OssClient::getInstance();
         $stylename = OssClient::getThumbnailImgStylename();
 
-        // 存私聊聊天室ID列表
+        // 存放私聊聊天室ID列表
         $privateChatroomIdList = [];
 
-        $data = ChatMemberModel::join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+        $data = ChatSessionModel::leftJoin('chatroom', 'chat_session.data->chatroomId = chatroom.id')
             ->where([
-                'chat_member.user_id' => $userId,
-                'chat_member.is_show' => true
+                'chat_session.user_id' => $userId,
+                'chat_session.visible' => true
             ])
             ->field([
-                'chat_member.id',
-                'chat_member.chatroom_id',
-                'chat_member.unread',
-                'chat_member.sticky',
-                'chat_member.create_time',
-                'chat_member.update_time',
-                'chatroom.name',
+                'chat_session.id',
+                'chat_session.type',
+                'chat_session.data',
+                'chat_session.unread',
+                'chat_session.sticky',
+                'chat_session.create_time',
+                'chat_session.update_time',
+                'chatroom.name as title',
                 'chatroom.avatar as avatarThumbnail',
                 'chatroom.type as chatroomType',
             ])
@@ -576,54 +588,66 @@ class User
         $max = 'MAX(chat_record.id)';
 
         foreach ($data as $key => $value) {
-            switch ($value['chatroomType']) {
-                case ChatroomModel::TYPE_GROUP_CHAT:
-                    $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
-                    break;
+            switch ($value['type']) {
+                    // 聊天室类型会话
+                case ChatSessionModel::TYPE_CHATROOM:
+                    $chatroomId = $value['data']->chatroomId;
+                    // 将这些数据丢到data里面
+                    $value['data']->chatroomType = $value['chatroomType'];
+                    unset($data[$key]['chatroomType']);
 
-                case ChatroomModel::TYPE_PRIVATE_CHAT:
-                    $privateChatroomIdList[] = $value['chatroom_id'];
-                    break;
-            }
+                    switch ($value['data']->chatroomType) {
+                        case ChatroomModel::TYPE_GROUP_CHAT:
+                            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+                            break;
 
-            $table = ChatRecordModel::getTableNameById($value['chatroom_id']);
-            $on = 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id = ' . $value['chatroom_id'];
+                        case ChatroomModel::TYPE_PRIVATE_CHAT:
+                            $privateChatroomIdList[] = $chatroomId;
+                            break;
+                    }
 
-            if (!$query) {
-                $query = ChatRecordModel::opt($value['chatroom_id'])
-                    ->alias('chat_record')
-                    ->leftJoin('chat_member', $on)
-                    ->where('chat_record.id', '=', function ($query) use ($value, $table, $max) {
-                        $query->table($table)
+                    $table = ChatRecordModel::getTableNameById($chatroomId);
+                    $on = 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id = ' . $chatroomId;
+
+                    if (!$query) {
+                        $query = ChatRecordModel::opt($chatroomId)
                             ->alias('chat_record')
-                            ->where('chat_record.chatroom_id', '=', $value['chatroom_id'])
-                            ->fieldRaw($max);
-                    })
-                    // ->limit(1)
-                    ->field($field);
-            } else {
-                $query->unionAll(function ($query) use ($value, $table, $field, $on, $max) {
-                    $query->table($table)
-                        ->alias('chat_record')
-                        ->leftJoin('chat_member', $on)
-                        ->where('chat_record.id', '=', function ($query) use ($value, $table, $max) {
+                            ->leftJoin('chat_member', $on)
+                            ->where('chat_record.id', '=', function ($query) use ($chatroomId, $table, $max) {
+                                $query->table($table)
+                                    ->alias('chat_record')
+                                    ->where('chat_record.chatroom_id', '=', $chatroomId)
+                                    ->fieldRaw($max);
+                            })
+                            // ->limit(1)
+                            ->field($field);
+                    } else {
+                        $query->unionAll(function ($query) use ($chatroomId, $table, $field, $on, $max) {
                             $query->table($table)
                                 ->alias('chat_record')
-                                ->where('chat_record.chatroom_id', '=', $value['chatroom_id'])
-                                ->fieldRaw($max);
-                        })
-                        ->limit(1)
-                        ->field($field);
-                });
+                                ->leftJoin('chat_member', $on)
+                                ->where('chat_record.id', '=', function ($query) use ($chatroomId, $table, $max) {
+                                    $query->table($table)
+                                        ->alias('chat_record')
+                                        ->where('chat_record.chatroom_id', '=', $chatroomId)
+                                        ->fieldRaw($max);
+                                })
+                                ->limit(1)
+                                ->field($field);
+                        });
+                    }
+                    break;
             }
         }
 
+        // 最新消息的数据集
         $latestMsgList = $query->select();
         // 聊天室最新消息
         $latestMsg = null;
         // 好友信息
         $friendInfo = null;
 
+        // 如果有私聊聊天室，就去找到好友的昵称和头像
         if (!empty($privateChatroomIdList)) {
             $friendInfo = ChatMemberModel::join('user_info', 'chat_member.user_id = user_info.user_id')
                 ->where([
@@ -639,19 +663,23 @@ class User
         }
 
         foreach ($data as $key => $value) {
-            $latestMsg = $latestMsgList->where('chatroom_id', '=', $value['chatroom_id'])->shift();
-            // 将最新消息填入
-            if ($latestMsg) {
-                $data[$key]['content'] = $latestMsg;
-            }
+            switch ($value['type']) {
+                case ChatSessionModel::TYPE_CHATROOM:
+                    $latestMsg = $latestMsgList->where('chatroom_id', '=', $value['data']->chatroomId)->shift();
+                    // 将最新消息填入
+                    if ($latestMsg) {
+                        $data[$key]['content'] = $latestMsg;
+                    }
 
-            // 将私聊聊天室的头像，好友昵称填入
-            if ($value['chatroomType'] == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
-                $info = $friendInfo->where('chatroom_id', '=', $value['chatroom_id'])->shift();
-                if ($info) {
-                    $data[$key]['name'] = $info->nickname;
-                    $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
-                }
+                    // 将私聊聊天室的头像，好友昵称填入
+                    if ($value['data']->chatroomType == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
+                        $info = $friendInfo->where('chatroom_id', '=', $value['data']->chatroomId)->shift();
+                        if ($info) {
+                            $data[$key]['title'] = $info->nickname;
+                            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
+                        }
+                    }
+                    break;
             }
         }
 
@@ -681,7 +709,7 @@ class User
             ->field([
                 'chat_member.id',
                 'chat_member.chatroom_id',
-                'chat_member.nickname as name',
+                'chat_member.nickname as title',
                 'user_info.signature as content',
                 'user_info.avatar as avatarThumbnail',
                 'chat_member.create_time',
@@ -693,7 +721,11 @@ class User
         $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($data as $key => $value) {
-            $data[$key]['type'] = ChatroomModel::TYPE_PRIVATE_CHAT;
+            $data[$key]['type'] = ChatSessionModel::TYPE_CHATROOM;
+            $data[$key]['data'] = [
+                'chatroomId' => $value['chatroom_id'],
+                'chatroomType' => ChatroomModel::TYPE_PRIVATE_CHAT,
+            ];
             $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
         }
 
@@ -703,7 +735,8 @@ class User
     /**
      * 置顶聊天列表子项
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $id 会话ID
+     * @param boolean $sticky
      * @return Result
      */
     public static function sticky(int $id, $sticky = true): Result
@@ -713,18 +746,17 @@ class User
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $chatMember = ChatMemberModel::where([
+        $chatSession = ChatSessionModel::where([
             'id'      => $id,
             'user_id' => $userId
         ])->find();
 
-        // 如果找不到，则代表自己没有进这个群
-        if (!$chatMember) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+        if (!$chatSession) {
+            return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $chatMember->sticky = $sticky;
-        $chatMember->save();
+        $chatSession->sticky = $sticky;
+        $chatSession->save();
 
         return Result::success();
     }
@@ -743,29 +775,28 @@ class User
     /**
      * 将聊天列表子项设置为已读（通过用户ID+房间号）
      *
-     * @param integer $chatroomId 聊天室ID
+     * @param integer $id
      * @param integer $unread
      * @return Result
      */
-    public static function readed(int $chatroomId, int $unread = 0): Result
+    public static function readed(int $id, int $unread = 0): Result
     {
         $userId = self::getId();
         if (!$userId) {
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $chatMember = ChatMemberModel::where([
-            'chatroom_id' => $chatroomId,
-            'user_id'     => $userId
+        $chatSession = ChatSessionModel::where([
+            'id'      => $id,
+            'user_id' => $userId
         ])->find();
 
-        // 如果找不到，则代表自己没有进这个群
-        if (!$chatMember) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+        if (!$chatSession) {
+            return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $chatMember->unread = $unread;
-        $chatMember->save();
+        $chatSession->unread = $unread;
+        $chatSession->save();
 
         return Result::success();
     }

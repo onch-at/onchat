@@ -518,8 +518,10 @@ class Friend
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $chatMember = ChatMemberModel::where('chatroom_id', '=', $chatroomId)
-            ->where('user_id', '<>', $userId)->find();
+        $chatMember = ChatMemberModel::where([
+            ['chatroom_id', '=', $chatroomId],
+            ['user_id', '<>', $userId]
+        ])->find();
 
         if (!$chatMember) {
             return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有没有其他成员');
