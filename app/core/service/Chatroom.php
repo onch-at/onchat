@@ -308,8 +308,6 @@ class Chatroom
                 'type'             => ChatSessionModel::TYPE_CHATROOM,
                 'data->chatroomId' => $msg['chatroomId']
             ]);
-            // TODO 不知道为啥上面的更新没反应
-            Db::execute(ChatSessionModel::getLastSql());
 
             $ossClient = OssClient::getInstance();
             $object = User::getInfoByKey('id', $userId, 'avatar')['avatar'];
@@ -366,9 +364,6 @@ class Chatroom
             'type'             => ChatSessionModel::TYPE_CHATROOM,
             'data->chatroomId' => $id
         ]);
-
-        // TODO 不知道为啥上面的更新没反应
-        Db::execute(ChatSessionModel::getLastSql());
 
         $chatRecord = ChatRecordModel::opt($id)->where('chatroom_id', '=', $id);
         if ($chatRecord->count() === 0) { // 如果没有消息
@@ -461,8 +456,6 @@ class Chatroom
                 'type' => ChatSessionModel::TYPE_CHATROOM,
                 'data->chatroomId' => $id
             ]);
-            // TODO 不知道为啥上面的更新没反应
-            Db::execute(ChatSessionModel::getLastSql());
 
             // 提交事务
             Db::commit();

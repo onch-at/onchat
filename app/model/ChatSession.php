@@ -13,6 +13,10 @@ class ChatSession extends Model
 {
     protected $json = ['data'];
 
+    protected $jsonType = [
+        'data->chatroomId'    =>    'int'
+    ];
+
     const TYPE_CHATROOM = 0;
     const TYPE_CHATROOM_NOTICE = 1;
 
