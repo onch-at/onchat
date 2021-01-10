@@ -668,7 +668,7 @@ class User
                     $latestMsg = $latestMsgList->where('chatroom_id', '=', $value['data']->chatroomId)->shift();
                     // 将最新消息填入
                     if ($latestMsg) {
-                        $data[$key]['content'] = $latestMsg;
+                        $data[$key]['content'] = $latestMsg->toArray();
                     }
 
                     // 将私聊聊天室的头像，好友昵称填入

@@ -107,7 +107,7 @@ class User extends BaseController
      *
      * @return Result
      */
-    public function getChatList(): Result
+    public function getChatSessions(): Result
     {
         return UserService::getChatSessions();
     }

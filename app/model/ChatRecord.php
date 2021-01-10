@@ -15,9 +15,9 @@ class ChatRecord extends Model
 {
     protected $json = ['data'];
 
-    protected $jsonType = [
-        'data->chatroomId'    =>    'int'
-    ];
+    // protected $jsonType = [
+    //     'data->chatroomId'    =>    'int'
+    // ];
 
     /**
      * 通过聊天室ID选择相应的聊天记录表

@@ -34,7 +34,7 @@ class ChatRequest extends Model
 
     public function chatroom()
     {
-        return $this->belongsTo(Chatroom::class, 'chatroom_id');
+        return $this->belongsTo(Chatroom::class);
     }
 
     /**

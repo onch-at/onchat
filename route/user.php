@@ -14,8 +14,8 @@ Route::group('user', function () {
 
     Route::put('info', 'saveUserInfo');
 
-    Route::group('chatlist', function () {
-        Route::get('/', 'getChatList');
+    Route::group('chatsession', function () {
+        Route::get('/', 'getChatSessions');
 
         Route::put('sticky/<id>', 'sticky');
         Route::put('unsticky/<id>', 'unsticky');
