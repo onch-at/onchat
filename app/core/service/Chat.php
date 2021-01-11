@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace app\core\service;
 
 use app\core\Result;
-use app\core\util\Arr;
 use app\model\User as UserModel;
 use app\core\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
+use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
 
@@ -104,6 +104,7 @@ class Chat
         if ($request) {
             $request->status = ChatRequestModel::STATUS_WAIT;
             $request->request_reason = $reason;
+            $request->reject_reason = null;
             // 清空已读列表
             $request->readed_list = [];
             $request->update_time = $timestamp;
@@ -120,7 +121,23 @@ class Chat
             ]);
         }
 
-        return Result::success($request->toArray());
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+        $info = UserInfoModel::where('user_info.user_id', '=', $applicant)
+            ->field([
+                'user_info.nickname as applicantNickname',
+                'user_info.avatar as applicantAvatarThumbnail'
+            ])
+            ->find()
+            ->toArray();
+        $info['applicantAvatarThumbnail'] = $ossClient->signImageUrl($info['applicantAvatarThumbnail'], $stylename);
+
+        $chatroom = ChatroomModel::field('chatroom.name as chatroomName')
+            ->find($chatroomId)
+            ->toArray();
+
+        return Result::success($request->toArray() + $info + $chatroom);
     }
 
     /**

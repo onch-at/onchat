@@ -78,7 +78,8 @@ class Friend
 
         $userInfos = UserInfoModel::where('user_id', 'IN', [$selfId, $targetId])->field([
             'user_id',
-            'avatar'
+            'avatar',
+            'nickname'
         ])->select()->toArray();
 
         $signUrl = null;
@@ -88,6 +89,7 @@ class Friend
             switch ($userInfo['user_id']) {
                 case $selfId:
                     $selfAvatarThumbnail = $signUrl;
+                    // $selfUsername = $userInfo['nickname'];
                     break;
 
                 case $targetId:
