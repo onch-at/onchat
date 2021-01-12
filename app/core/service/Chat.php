@@ -12,6 +12,8 @@ use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
+use app\model\ChatSession as ChatSessionModel;
+use think\facade\Db;
 
 class Chat
 {
@@ -82,6 +84,11 @@ class Chat
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
+        // 如果人数已满
+        if (Chatroom::isPeopleNumFull($chatroomId)) {
+            return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满！');
+        }
+
         // 如果剔除空格后长度为零，则直接置空
         if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
             $reason = null;
@@ -141,6 +148,27 @@ class Chat
     }
 
     /**
+     * 已读所有入群请求
+     *
+     * @return Result
+     */
+    public static function readed(): Result
+    {
+        $userId = User::getId();
+        ChatRequestModel::whereRaw("!JSON_CONTAINS(readed_list, JSON_ARRAY({$userId}))")
+            ->update([
+                'readed_list' => Db::raw("JSON_ARRAY_APPEND(readed_list, '$', {$userId})")
+            ]);
+
+        ChatSessionModel::update(['unread' => 0], [
+            'user_id' => $userId,
+            'type' => ChatSessionModel::TYPE_CHATROOM_NOTICE
+        ]);
+
+        return Result::success();
+    }
+
+    /**
      * 获取我收到的入群申请
      *
      * @return Result
@@ -148,11 +176,6 @@ class Chat
     public static function getReceiveRequests(): Result
     {
         $userId = User::getId();
-
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
-
         $ossClient = OssClient::getInstance();
         $stylename = OssClient::getThumbnailImgStylename();
 

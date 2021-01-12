@@ -30,6 +30,7 @@ use app\core\service\Friend as FriendService;
 use app\core\service\Chatroom as ChatroomService;
 use app\core\service\Chat as ChatService;
 use app\core\identicon\generator\ImageMagickGenerator;
+use app\model\ChatRequest;
 
 class Index extends BaseController
 {

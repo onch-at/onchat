@@ -2,10 +2,10 @@
 
 namespace app\websocket;
 
-use Swoole\Server;
-use Swoole\Websocket\Frame;
 use think\Config;
+use Swoole\Server;
 use think\Request;
+use Swoole\Websocket\Frame;
 use think\swoole\websocket\socketio\Handler as BaseHandler;
 
 /**

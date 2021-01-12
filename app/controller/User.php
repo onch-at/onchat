@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace app\controller;
 
+use app\core\Result;
 use app\BaseController;
 use app\core\service\User as UserService;
-use app\core\Result;
-use app\core\util\Str as StrUtil;
 
 class User extends BaseController
 {
@@ -128,9 +127,9 @@ class User extends BaseController
      * @param integer $id 聊天室成员表ID
      * @return Result
      */
-    public function sticky(int $id): Result
+    public function stickyChatSession(int $id): Result
     {
-        return UserService::sticky($id);
+        return UserService::stickyChatSession($id);
     }
 
     /**
@@ -139,9 +138,9 @@ class User extends BaseController
      * @param integer $id 聊天室成员表ID
      * @return Result
      */
-    public function unsticky(int $id): Result
+    public function unstickyChatSession(int $id): Result
     {
-        return UserService::unsticky($id);
+        return UserService::unstickyChatSession($id);
     }
 
     /**
@@ -150,9 +149,9 @@ class User extends BaseController
      * @param integer $id 聊天室成员表ID
      * @return Result
      */
-    public function readed(int $id): Result
+    public function readedChatSession(int $id): Result
     {
-        return UserService::readed($id);
+        return UserService::readedChatSession($id);
     }
 
     /**
@@ -161,8 +160,8 @@ class User extends BaseController
      * @param integer $id 聊天室成员表ID
      * @return Result
      */
-    public function unread(int $id): Result
+    public function unreadChatSession(int $id): Result
     {
-        return UserService::unread($id);
+        return UserService::unreadChatSession($id);
     }
 }

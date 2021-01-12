@@ -17,10 +17,10 @@ Route::group('user', function () {
     Route::group('chatsession', function () {
         Route::get('/', 'getChatSessions');
 
-        Route::put('sticky/<id>', 'sticky');
-        Route::put('unsticky/<id>', 'unsticky');
-        Route::put('readed/<id>', 'readed');
-        Route::put('unread/<id>', 'unread');
+        Route::put('sticky/<id>', 'stickyChatSession');
+        Route::put('unsticky/<id>', 'unstickyChatSession');
+        Route::put('readed/<id>', 'readedChatSession');
+        Route::put('unread/<id>', 'unreadChatSession');
     });
 
     Route::group('chatrooms', function () {

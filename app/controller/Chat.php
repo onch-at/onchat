@@ -22,4 +22,14 @@ class Chat extends BaseController
     {
         return ChatService::getReceiveRequests();
     }
+
+    /**
+     * 已读所有入群请求
+     *
+     * @return Result
+     */
+    public function readed(): Result
+    {
+        return ChatService::readed();
+    }
 }

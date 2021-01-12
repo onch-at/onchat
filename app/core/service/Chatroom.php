@@ -25,8 +25,10 @@ class Chatroom
     const CODE_NAME_LONG = 2;
     /** 群介绍长度不符合规范 */
     const CODE_DESCRIPTION_IRREGULAR = 3;
-    /** 可创建的群聊数量已满 */
+    /** 可创建的聊天室数量已满 */
     const CODE_GROUP_CHAT_COUNT_FULL = 4;
+    /** 聊天室人数已满 */
+    const CODE_PEOPLE_NUM_FULL = 5;
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
@@ -230,12 +232,13 @@ class Chatroom
         if (
             empty(ChatroomModel::find($id)) ||
             empty($username) ||
-            !empty(ChatMemberModel::where([
-                'chatroom_id' => $id,
-                'user_id'     => $userId
-            ])->find())
+            self::isMember($id, $userId)
         ) {
             return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        if (self::isPeopleNumFull($id)) {
+            return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满!');
         }
 
         $timestamp = time() * 1000;
@@ -674,6 +677,19 @@ class Chatroom
             'chatroom_id' => $id,
             'user_id'     => $userId
         ])->find();
+    }
+
+    /**
+     * 聊天室人数满了吗
+     *
+     * @param integer $id 聊天室ID
+     * @return boolean
+     */
+    public static function isPeopleNumFull(int $id): bool
+    {
+        $chatroom = ChatroomModel::find($id);
+        $peopleNum = ChatMemberModel::where('chatroom_id', '=', $id)->count();
+        return $peopleNum >= $chatroom->max_people_num;
     }
 
     /**

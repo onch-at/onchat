@@ -739,7 +739,7 @@ class User
      * @param boolean $sticky
      * @return Result
      */
-    public static function sticky(int $id, $sticky = true): Result
+    public static function stickyChatSession(int $id, $sticky = true): Result
     {
         $userId = self::getId();
         if (!$userId) {
@@ -767,19 +767,19 @@ class User
      * @param integer $id 聊天室成员表ID
      * @return Result
      */
-    public static function unsticky(int $id): Result
+    public static function unstickyChatSession(int $id): Result
     {
-        return self::sticky($id, false);
+        return self::stickyChatSession($id, false);
     }
 
     /**
-     * 将聊天列表子项设置为已读（通过用户ID+房间号）
+     * 将聊天列表子项设置为已读
      *
      * @param integer $id
      * @param integer $unread
      * @return Result
      */
-    public static function readed(int $id, int $unread = 0): Result
+    public static function readedChatSession(int $id, int $unread = 0): Result
     {
         $userId = self::getId();
         if (!$userId) {
@@ -804,12 +804,12 @@ class User
     /**
      * 将聊天列表子项设置为未读
      *
-     * @param integer $chatroomId 聊天室ID
+     * @param integer $id
      * @return Result
      */
-    public static function unread(int $chatroomId): Result
+    public static function unreadChatSession(int $id): Result
     {
-        return self::readed($chatroomId, 1);
+        return self::readedChatSession($id, 1);
     }
 
     /**
