@@ -190,7 +190,7 @@ class User
                 'user_id' => $user->id,
                 'type'    => ChatSessionModel::TYPE_CHATROOM_NOTICE,
                 'data'    => [],
-                'visible' => false,
+                'visible' => 0,
                 'create_time' => $timestamp,
                 'update_time' => $timestamp
             ]);

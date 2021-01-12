@@ -128,6 +128,20 @@ class Chat
             ]);
         }
 
+        // 显示群主/管理员的聊天室通知会话
+        ChatSessionModel::where('type', '=', ChatSessionModel::TYPE_CHATROOM_NOTICE)
+            ->where('user_id', 'IN', function ($query) {
+                $query->table('chat_member')
+                    ->where('chatroom_id', '=', 1)
+                    ->where(function ($query) {
+                        $query->whereOr([
+                            ['role', '=', ChatMemberModel::ROLE_HOST],
+                            ['role', '=', ChatMemberModel::ROLE_MANAGE],
+                        ]);
+                    })->field('user_id');
+            })
+            ->update(['chat_session.visible' => true]);
+
         $ossClient = OssClient::getInstance();
         $stylename = OssClient::getThumbnailImgStylename();
 
