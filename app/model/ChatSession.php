@@ -40,4 +40,19 @@ class ChatSession extends Model
     {
         return (bool) $value;
     }
+
+    public function setStickyAttr($value): int
+    {
+        return (int) $value;
+    }
+
+    public function getVisibleAttr($value): bool
+    {
+        return (bool) $value;
+    }
+
+    public function setVisibleAttr($value): int
+    {
+        return (int) $value;
+    }
 }

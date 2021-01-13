@@ -36,7 +36,7 @@ class Index extends BaseController
 {
     public function index()
     {
-        dump(ChatService::getReceiveRequestById(1));
+        dump((int)true);
     }
 
     /**
