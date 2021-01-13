@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace app\core\service;
 
 use app\core\Result;
+use think\facade\Db;
 use app\model\User as UserModel;
+use app\core\util\Sql as SqlUtil;
 use app\core\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
@@ -13,7 +15,6 @@ use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
 use app\model\ChatSession as ChatSessionModel;
-use think\facade\Db;
 
 class Chat
 {
@@ -140,7 +141,10 @@ class Chat
                         ]);
                     })->field('user_id');
             })
-            ->update(['chat_session.visible' => true]);
+            ->update([
+                'chat_session.update_time' => SqlUtil::rawTimestamp(),
+                'chat_session.visible' => true
+            ]);
 
         $ossClient = OssClient::getInstance();
         $stylename = OssClient::getThumbnailImgStylename();
@@ -183,6 +187,50 @@ class Chat
     }
 
     /**
+     * 通过请求ID获取我收到的入群请求
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public static function getReceiveRequestById(int $id): Result
+    {
+        $userId = User::getId();
+
+        $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
+            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
+            ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
+            ->where([
+                'chat_request.id' => $id,
+                'chat_member.user_id' => $userId
+            ])
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_HOST],
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_MANAGE],
+                ]);
+            })
+            ->field([
+                'applicant.nickname as applicantNickname',
+                'applicant.avatar as applicantAvatarThumbnail',
+                'handler.nickname as handlerNickname',
+                'chatroom.name as chatroomName',
+                'chat_request.*'
+            ])
+            ->find();
+
+        if (!$request) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+        $request->applicantAvatarThumbnail = $ossClient->signImageUrl($request->applicantAvatarThumbnail, $stylename);
+
+        return Result::success($request->toArray());
+    }
+
+    /**
      * 获取我收到的入群申请
      *
      * @return Result
@@ -194,7 +242,8 @@ class Chat
         $stylename = OssClient::getThumbnailImgStylename();
 
         $data = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
-            ->join('user_info', 'chat_request.applicant_id = user_info.user_id')
+            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where('chat_member.user_id', '=', $userId)
             ->where(function ($query) {
@@ -204,8 +253,9 @@ class Chat
                 ]);
             })
             ->field([
-                'user_info.nickname as applicantNickname',
-                'user_info.avatar as applicantAvatarThumbnail',
+                'applicant.nickname as applicantNickname',
+                'applicant.avatar as applicantAvatarThumbnail',
+                'handler.nickname as handlerNickname',
                 'chatroom.name as chatroomName',
                 'chat_request.*'
             ])

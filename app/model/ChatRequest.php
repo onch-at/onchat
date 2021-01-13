@@ -32,6 +32,11 @@ class ChatRequest extends Model
         return $this->belongsTo(User::class, 'applicant_id');
     }
 
+    public function handler()
+    {
+        return $this->belongsTo(User::class, 'handler_id');
+    }
+
     public function chatroom()
     {
         return $this->belongsTo(Chatroom::class);

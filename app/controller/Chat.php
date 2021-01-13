@@ -24,6 +24,17 @@ class Chat extends BaseController
     }
 
     /**
+     * 通过请求ID获取我收到的入群请求
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public function getReceiveRequestById(int $id): Result
+    {
+        return ChatService::getReceiveRequestById($id);
+    }
+
+    /**
      * 已读所有入群请求
      *
      * @return Result

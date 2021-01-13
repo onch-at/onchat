@@ -36,10 +36,7 @@ class Index extends BaseController
 {
     public function index()
     {
-        // ChatSession::update(['unread' => 66], [
-        //     ['user_id', '=', 1],
-        //     ['type', '=', ChatSession::TYPE_CHATROOM_NOTICE]
-        // ]);
+        dump(ChatService::getReceiveRequestById(1));
     }
 
     /**
