@@ -194,8 +194,8 @@ class Friend
                 'friend_request.target_status',
                 'friend_request.create_time',
                 'friend_request.update_time',
-                'user_info.avatar as selfAvatarThumbnail',
-                'user.username as selfUsername',
+                'user_info.avatar AS selfAvatarThumbnail',
+                'user.username AS selfUsername',
             ])->order('friend_request.update_time', 'DESC')->select()->toArray();
 
         $ossClient = OssClient::getInstance();
@@ -240,8 +240,8 @@ class Friend
                 'friend_request.target_status',
                 'friend_request.create_time',
                 'friend_request.update_time',
-                'user_info.avatar as targetAvatarThumbnail',
-                'user.username as targetUsername',
+                'user_info.avatar AS targetAvatarThumbnail',
+                'user.username AS targetUsername',
             ])->order('update_time', 'DESC')->select()->toArray();
 
         $ossClient = OssClient::getInstance();
@@ -354,7 +354,7 @@ class Friend
 
             // 创建一个类型为私聊的聊天室
             $result = Chatroom::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
-            if ($result->code != Result::CODE_SUCCESS) {
+            if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
@@ -362,13 +362,13 @@ class Friend
             $chatroomId = $result->data['id'];
 
             $result = Chatroom::addMember($chatroomId, $friendRequest->self_id, $selfAlias);
-            if ($result->code != Result::CODE_SUCCESS) {
+            if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
 
             $result = Chatroom::addMember($chatroomId, $friendRequest->target_id, $friendRequest->target_alias);
-            if ($result->code != Result::CODE_SUCCESS) {
+            if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }

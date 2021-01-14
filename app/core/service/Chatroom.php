@@ -225,7 +225,7 @@ class Chatroom
      * @param integer $role 角色
      * @return Result
      */
-    public static function addMember(int $id, int $userId, string $nickname = null, int $role = 0): Result
+    public static function addMember(int $id, int $userId, string $nickname = null, int $role = ChatMemberModel::ROLE_NORMAL): Result
     {
         $username = User::getUsernameById($userId);
         // 如果没有这个房间，或者没有这个用户，或者这个用户已经加入了这个房间
@@ -243,7 +243,7 @@ class Chatroom
 
         $timestamp = time() * 1000;
 
-        $data = ChatMemberModel::create([
+        ChatMemberModel::create([
             'chatroom_id' => $id,
             'user_id'     => $userId,
             'nickname'    => $nickname ?: $username,
@@ -252,7 +252,7 @@ class Chatroom
             'update_time' => $timestamp,
         ]);
 
-        ChatSessionModel::create([
+        $data = ChatSessionModel::create([
             'user_id'     => $userId,
             'type'        => ChatSessionModel::TYPE_CHATROOM,
             'data'        => ['chatroomId' => $id],
@@ -281,7 +281,7 @@ class Chatroom
 
         $result = Message::handler($msg);
 
-        if ($result->code != Result::CODE_SUCCESS) {
+        if ($result->code !== Result::CODE_SUCCESS) {
             return $result;
         }
 
@@ -498,7 +498,7 @@ class Chatroom
         Db::startTrans();
         try {
             $result = self::creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
-            if ($result->code != Result::CODE_SUCCESS) {
+            if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
@@ -507,26 +507,17 @@ class Chatroom
 
             // 将自己添加到聊天室，角色为主人
             $result = self::addMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
-            if ($result->code != Result::CODE_SUCCESS) {
+            if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
 
             $data = $result->data;
 
-            // 移除掉一些不要的信息
-            unset($data['nickname'], $data['role'], $data['userId'], $data['chatroomId']);
-
             // 补充一些信息
             $data['title'] = $name;
             $data['avatarThumbnail'] = $chatroom['avatarThumbnail'];
-            $data['data'] = [
-                'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT,
-                'chatroomId' => $chatroom['id'],
-            ];
-            $data['type'] = ChatSessionModel::TYPE_CHATROOM;
-            $data['sticky'] = false;
-            $data['unread'] = 1;
+            $data['data']['chatroomType'] = ChatroomModel::TYPE_GROUP_CHAT;
 
             Db::commit();
 
@@ -557,7 +548,7 @@ class Chatroom
                 'chat_member.id',
                 'chat_member.nickname',
                 'chat_member.user_id',
-                'user_info.avatar as avatarThumbnail',
+                'user_info.avatar AS avatarThumbnail',
                 'chat_member.role',
                 'chat_member.create_time',
                 'chat_member.update_time',
@@ -687,9 +678,16 @@ class Chatroom
      */
     public static function isPeopleNumFull(int $id): bool
     {
-        $chatroom = ChatroomModel::find($id);
-        $peopleNum = ChatMemberModel::where('chatroom_id', '=', $id)->count();
-        return $peopleNum >= $chatroom->max_people_num;
+        $data = ChatroomModel::join('chat_member', 'chat_member.chatroom_id = chatroom.id')
+            ->where('chatroom.id', '=', $id)
+            ->field('chatroom.max_people_num AS maxPeopleNum')
+            ->fieldRaw('COUNT(*) AS peopleNum')->find();
+
+        if (!$data) {
+            return false;
+        }
+
+        return $data->peopleNum >= $data->maxPeopleNum;
     }
 
     /**

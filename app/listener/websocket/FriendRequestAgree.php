@@ -31,7 +31,7 @@ class FriendRequestAgree extends BaseListener
         $this->websocket->emit('friend_request_agree', $result);
 
         // 如果成功同意申请，则尝试给申请人推送消息
-        if ($result->code != Result::CODE_SUCCESS) {
+        if ($result->code !== Result::CODE_SUCCESS) {
             return;
         }
 

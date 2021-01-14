@@ -10,7 +10,6 @@ use app\model\UserInfo as UserInfoModel;
 
 class Init extends BaseListener
 {
-
     /**
      * 事件监听处理
      *

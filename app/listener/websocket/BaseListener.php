@@ -7,6 +7,7 @@ namespace app\listener\websocket;
 use think\swoole\Websocket;
 use think\facade\Cache;
 use app\core\service\User as UserService;
+use think\swoole\Manager;
 
 abstract class BaseListener
 {
@@ -33,7 +34,7 @@ abstract class BaseListener
     public function __construct(Websocket $websocket)
     {
         $this->websocket = $websocket;
-        $this->server = app("think\swoole\Manager")->getServer();
+        $this->server = app(Manager::class)->getServer();
         $this->redisDriver = Cache::store('redis');
         $this->fd = $this->websocket->getSender();
 
@@ -104,9 +105,9 @@ abstract class BaseListener
      * 如果获取不到则返回数字零
      *
      * @param integer $userId
-     * @return integer
+     * @return integer|null
      */
-    protected function getFdByUserId(int $userId): int
+    protected function getFdByUserId(int $userId): ?int
     {
         return (int) $this->getRedis()->hGet(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
     }

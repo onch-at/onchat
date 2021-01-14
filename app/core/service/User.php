@@ -567,15 +567,16 @@ class User
             ])
             ->field([
                 'chat_session.id',
+                'chat_session.user_id',
                 'chat_session.type',
                 'chat_session.data',
                 'chat_session.unread',
                 'chat_session.sticky',
                 'chat_session.create_time',
                 'chat_session.update_time',
-                'chatroom.name as title',
-                'chatroom.avatar as avatarThumbnail',
-                'chatroom.type as chatroomType',
+                'chatroom.name AS title',
+                'chatroom.avatar AS avatarThumbnail',
+                'chatroom.type AS chatroomType',
             ])
             ->select()
             ->toArray();
@@ -709,11 +710,11 @@ class User
             ->field([
                 'chat_member.id',
                 'chat_member.chatroom_id',
-                'chat_member.nickname as title',
-                'user_info.signature as content',
-                'user_info.avatar as avatarThumbnail',
+                'chat_member.nickname AS title',
                 'chat_member.create_time',
                 'chat_member.update_time',
+                'user_info.signature AS content',
+                'user_info.avatar AS avatarThumbnail',
             ])->select()
             ->toArray();
 
@@ -721,6 +722,7 @@ class User
         $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($data as $key => $value) {
+            $data[$key]['userId'] = $id;
             $data[$key]['type'] = ChatSessionModel::TYPE_CHATROOM;
             $data[$key]['data'] = [
                 'chatroomId' => $value['chatroom_id'],

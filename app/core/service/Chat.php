@@ -22,13 +22,17 @@ class Chat
     const CODE_PEOPLE_NUM_FULL = 1;
     /** 附加消息过长 */
     const CODE_REASON_LONG = 2;
+    /** 请求已被处理 */
+    const CODE_REQUEST_HANDLED = 3;
 
     /** 附加消息最大长度 */
     const REASON_MAX_LENGTH = 50;
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_REASON_LONG  => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符'
+        self::CODE_REASON_LONG  => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符',
+        self::CODE_REASON_LONG => '聊天室人数已满！',
+        self::CODE_REQUEST_HANDLED => '该请求已被处理！'
     ];
 
     /**
@@ -53,10 +57,9 @@ class Chat
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $peopleNum = ChatMemberModel::where('chatroom_id', '=', $chatroomId)->count();
         // 人数超出上限
-        if ($peopleNum >= $chatroom->max_people_num) {
-            return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满！');
+        if (Chatroom::isPeopleNumFull($chatroomId)) {
+            return new Result(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
         }
 
         // 找到正确的私聊聊天室ID（防止客户端乱传ID）
@@ -151,18 +154,112 @@ class Chat
 
         $info = UserInfoModel::where('user_info.user_id', '=', $applicant)
             ->field([
-                'user_info.nickname as applicantNickname',
-                'user_info.avatar as applicantAvatarThumbnail'
+                'user_info.nickname AS applicantNickname',
+                'user_info.avatar AS applicantAvatarThumbnail'
             ])
             ->find()
             ->toArray();
         $info['applicantAvatarThumbnail'] = $ossClient->signImageUrl($info['applicantAvatarThumbnail'], $stylename);
 
-        $chatroom = ChatroomModel::field('chatroom.name as chatroomName')
+        $chatroom = ChatroomModel::field('chatroom.name AS chatroomName')
             ->find($chatroomId)
             ->toArray();
 
         return Result::success($request->toArray() + $info + $chatroom);
+    }
+
+    /**
+     * 同意入群申请
+     *
+     * @param integer $id 请求ID
+     * @param integer $handler 处理人ID
+     * @param integer $handlerUsername 处理人的名字
+     * @return Result
+     */
+    public static function agree(int $id, int $handler, string $handlerUsername)
+    {
+        $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
+            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
+            ->where([
+                'chat_request.id' => $id,
+                'chat_member.user_id' => $handler
+            ])
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_HOST],
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_MANAGE],
+                ]);
+            })
+            ->field([
+                'applicant.nickname AS applicantNickname',
+                'applicant.avatar AS applicantAvatarThumbnail',
+                'chatroom.name AS chatroomName',
+                'chatroom.avatar AS chatroomAvatarThumbnail',
+                'chat_request.*'
+            ])
+            ->find();
+
+        if (!$request) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        // 已被处理
+        if ($request->handler_id) {
+            return new Result(self::CODE_REQUEST_HANDLED, self::MSG[self::CODE_REQUEST_HANDLED]);
+        }
+
+        $chatroomId = $request->chatroom_id;
+
+        // 人数超出上限
+        if (Chatroom::isPeopleNumFull($chatroomId)) {
+            return new Result(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
+        }
+
+        // 启动事务
+        Db::startTrans();
+        try {
+            // 如果自己还未读
+            if (!in_array($handler, $request->readed_list)) {
+                $request->readed_list[] = $handler;
+            }
+
+            $request->handler_id = $handler;
+            $request->status = ChatRequestModel::STATUS_AGREE;
+            $request->update_time = time() * 1000;
+            $request->save();
+
+            $result = Chatroom::addMember($chatroomId, $request->applicant_id, $request->applicantNickname);
+            if ($result->code !== Result::CODE_SUCCESS) {
+                Db::rollback();
+                return $result;
+            }
+
+            $ossClient = OssClient::getInstance();
+            $stylename = OssClient::getThumbnailImgStylename();
+
+            $chatSession = $result->data;
+
+            // 补充一些信息
+            $chatSession['title'] = $request->chatroomName;
+            $chatSession['avatarThumbnail'] = $ossClient->signImageUrl($request->chatroomAvatarThumbnail, $stylename);
+            $chatSession['data']['chatroomType'] = ChatroomModel::TYPE_GROUP_CHAT;
+
+            $request->applicantAvatarThumbnail = $ossClient->signImageUrl($request->applicantAvatarThumbnail, $stylename);
+
+            $request = $request->toArray();
+
+            $request['handlerNickname'] = $handlerUsername;
+
+            unset($request['chatroomAvatarThumbnail']);
+
+            Db::commit();
+            return Result::success([$request, $chatSession]);
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+        }
     }
 
     /**
@@ -211,10 +308,10 @@ class Chat
                 ]);
             })
             ->field([
-                'applicant.nickname as applicantNickname',
-                'applicant.avatar as applicantAvatarThumbnail',
-                'handler.nickname as handlerNickname',
-                'chatroom.name as chatroomName',
+                'applicant.nickname AS applicantNickname',
+                'applicant.avatar AS applicantAvatarThumbnail',
+                'handler.nickname AS handlerNickname',
+                'chatroom.name AS chatroomName',
                 'chat_request.*'
             ])
             ->find();
@@ -253,10 +350,10 @@ class Chat
                 ]);
             })
             ->field([
-                'applicant.nickname as applicantNickname',
-                'applicant.avatar as applicantAvatarThumbnail',
-                'handler.nickname as handlerNickname',
-                'chatroom.name as chatroomName',
+                'applicant.nickname AS applicantNickname',
+                'applicant.avatar AS applicantAvatarThumbnail',
+                'handler.nickname AS handlerNickname',
+                'chatroom.name AS chatroomName',
                 'chat_request.*'
             ])
             ->select()

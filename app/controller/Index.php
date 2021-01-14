@@ -9,7 +9,7 @@ use app\model\User;
 use think\Response;
 use think\facade\Db;
 use app\BaseController;
-use app\model\Chatroom;
+use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo;
 use think\facade\Cache;
 use app\core\oss\Client;
@@ -34,9 +34,14 @@ use app\model\ChatRequest;
 
 class Index extends BaseController
 {
+
     public function index()
     {
-        dump((int)true);
+        // $data = ChatroomModel::join('user', 'user.id = chatroom.id')->field('chatroom.*')->where('chatroom.id', 1)->find();
+        // $data->name = 'TestChatroom';
+        // $data->save();
+        dump(in_array(1, [1, 2]));
+        // dump(ChatService::agree(1, 1));
     }
 
     /**

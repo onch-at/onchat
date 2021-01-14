@@ -29,7 +29,7 @@ class FriendRequestReject extends BaseListener
         $this->websocket->emit('friend_request_reject', $result);
 
         // 如果成功拒绝申请，则尝试给申请人推送消息
-        if ($result->code != Result::CODE_SUCCESS) {
+        if ($result->code !== Result::CODE_SUCCESS) {
             return;
         }
 
