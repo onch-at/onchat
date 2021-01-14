@@ -10,6 +10,7 @@ use app\model\User as UserModel;
 use app\core\util\Sql as SqlUtil;
 use app\core\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
+use app\core\util\Redis as RedisUtil;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
@@ -38,12 +39,11 @@ class Friend
      *
      * @param integer $selfId 申请人的UserID
      * @param integer $targetId 被申请人的UserID
-     * @param string $selfUsername 申请人的用户名
      * @param string $requestReason 申请原因
      * @param string $targetAlias 被申请人的别名
      * @return Result
      */
-    public static function request(int $selfId, int $targetId, string $selfUsername, string $requestReason = null, string $targetAlias = null): Result
+    public static function request(int $selfId, int $targetId, string $requestReason = null, string $targetAlias = null): Result
     {
         // 如果两人已经是好友关系，则不允许申请了
         if ($selfId == $targetId || self::isFriend($selfId, $targetId)) {
@@ -83,13 +83,14 @@ class Friend
         ])->select()->toArray();
 
         $signUrl = null;
+        $selfUsername = null;
         foreach ($userInfos as $userInfo) {
             $signUrl = $ossClient->signImageUrl($userInfo['avatar'],  $stylename);
 
             switch ($userInfo['user_id']) {
                 case $selfId:
                     $selfAvatarThumbnail = $signUrl;
-                    // $selfUsername = $userInfo['nickname'];
+                    $selfUsername = $userInfo['nickname'];
                     break;
 
                 case $targetId:
@@ -402,11 +403,10 @@ class Friend
      *
      * @param integer $friendRequestId 好友申请表的ID
      * @param integer $targetId 被申请人的ID
-     * @param string $targetUsername 被申请人的用户名
      * @param string $rejectReason 拒绝原因
      * @return Result
      */
-    public static function reject(int $friendRequestId, int $targetId, string $targetUsername, string $rejectReason = null): Result
+    public static function reject(int $friendRequestId, int $targetId, string $rejectReason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
         if ($rejectReason && mb_strlen(StrUtil::trimAll($rejectReason), 'utf-8') == 0) {
@@ -451,7 +451,7 @@ class Friend
 
             $data = $friendRequest->toArray();
             $data['selfUsername'] = User::getUsernameById($friendRequest->self_id);
-            $data['targetUsername'] = $targetUsername;
+            $data['targetUsername'] = RedisUtil::getUserByUserId($targetId)['username'];
             $data['targetAvatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
             Db::commit();
 

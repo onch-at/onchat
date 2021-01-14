@@ -10,6 +10,7 @@ use app\model\User as UserModel;
 use app\core\util\Sql as SqlUtil;
 use app\core\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
+use app\core\util\Redis as RedisUtil;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
@@ -176,7 +177,7 @@ class Chat
      * @param integer $handlerUsername 处理人的名字
      * @return Result
      */
-    public static function agree(int $id, int $handler, string $handlerUsername)
+    public static function agree(int $id, int $handler)
     {
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
             ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
@@ -249,7 +250,7 @@ class Chat
 
             $request = $request->toArray();
 
-            $request['handlerNickname'] = $handlerUsername;
+            $request['handlerNickname'] = RedisUtil::getUserByUserId($handler)['username'];
 
             unset($request['chatroomAvatarThumbnail']);
 

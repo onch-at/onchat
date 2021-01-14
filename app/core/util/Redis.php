@@ -75,7 +75,7 @@ class Redis
     {
         $fd = self::getFdByUserId($userId);
 
-        if (empty($fd)) {
+        if ($fd === 0) {
             return null;
         }
 

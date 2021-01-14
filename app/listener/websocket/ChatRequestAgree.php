@@ -25,7 +25,7 @@ class ChatRequestAgree extends BaseListener
 
         $user = $this->getUser();
 
-        $result = ChatService::agree($event['requestId'], $user['id'], $user['username']);
+        $result = ChatService::agree($event['requestId'], $user['id']);
 
         $this->websocket->emit('chat_request_agree', $result);
 

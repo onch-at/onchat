@@ -28,9 +28,8 @@ class FriendRequest extends BaseListener
         $result = FriendService::request(
             $user['id'],
             $event['userId'],
-            $user['username'],
             $event['requestReason'],
-            $event['targetAlias'],
+            $event['targetAlias']
         );
 
         $this->websocket->emit('friend_request', $result);

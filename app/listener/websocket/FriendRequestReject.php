@@ -25,7 +25,7 @@ class FriendRequestReject extends BaseListener
 
         $user = $this->getUser();
 
-        $result = FriendService::reject($event['friendRequestId'], $user['id'], $user['username'], $event['rejectReason']);
+        $result = FriendService::reject($event['friendRequestId'], $user['id'], $event['rejectReason']);
 
         $this->websocket->emit('friend_request_reject', $result);
 
