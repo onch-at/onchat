@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
+use app\core\util\Redis as RedisUtil;
 use app\core\service\Chat as ChatService;
 use app\core\service\User as UserService;
-use app\core\service\Chatroom as ChatroomService;
 use app\core\service\Message as MessageService;
+use app\core\service\Chatroom as ChatroomService;
 
 class InviteJoinChatroom extends BaseListener
 {
@@ -24,7 +25,7 @@ class InviteJoinChatroom extends BaseListener
             return false;
         }
 
-        $user = $this->getUserByFd();
+        $user = $this->getUser();
 
         $result = ChatService::invite($user['id'], $event['chatroomId'], $event['chatroomIdList']);
 

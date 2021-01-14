@@ -31,6 +31,7 @@ use app\core\service\Chatroom as ChatroomService;
 use app\core\service\Chat as ChatService;
 use app\core\identicon\generator\ImageMagickGenerator;
 use app\model\ChatRequest;
+use think\facade\Config;
 
 class Index extends BaseController
 {
@@ -40,7 +41,7 @@ class Index extends BaseController
         // $data = ChatroomModel::join('user', 'user.id = chatroom.id')->field('chatroom.*')->where('chatroom.id', 1)->find();
         // $data->name = 'TestChatroom';
         // $data->save();
-        dump(in_array(1, [1, 2]));
+        dump(UserService::getChatrooms(1));
         // dump(ChatService::agree(1, 1));
     }
 

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\core\Result;
+use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Friend as FriendService;
-use app\core\Result;
 
 class FriendRequestReject extends BaseListener
 {
@@ -22,7 +23,7 @@ class FriendRequestReject extends BaseListener
             return false;
         }
 
-        $user = $this->getUserByFd();
+        $user = $this->getUser();
 
         $result = FriendService::reject($event['friendRequestId'], $user['id'], $user['username'], $event['rejectReason']);
 
@@ -34,7 +35,7 @@ class FriendRequestReject extends BaseListener
         }
 
         // 拿到申请人的FD
-        $selfFd = $this->getFdByUserId($result->data['selfId']);
+        $selfFd = RedisUtil::getFdByUserId($result->data['selfId']);
         $selfFd && $this->websocket->setSender($selfFd)->emit('friend_request_reject', $result);
     }
 }

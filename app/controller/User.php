@@ -92,16 +92,6 @@ class User extends BaseController
     }
 
     /**
-     * 获取该用户下所有聊天室
-     *
-     * @return Result
-     */
-    public function getChatrooms(): Result
-    {
-        return UserService::getChatrooms();
-    }
-
-    /**
      * 获取用户的聊天列表
      *
      * @return Result

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 
 class Unload extends BaseListener
@@ -16,11 +17,11 @@ class Unload extends BaseListener
      */
     public function handle($event)
     {
-        $user = $this->getUserByFd();
-        $this->removeFdUserPair();
-        $this->removeUserIdFdPair($user['id']);
+        $user = $this->getUser();
+        RedisUtil::removeFdUserPair($this->fd);
+        RedisUtil::removeUserIdFdPair($user['id']);
 
-        $chatrooms = UserService::getChatrooms($user['id'])->data;
+        $chatrooms = UserService::getChatrooms($user['id']);
 
         // 退出房间
         foreach ($chatrooms as $chatroom) {

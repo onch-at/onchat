@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\core\Result;
+use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Friend as FriendService;
-use app\core\Result;
 
 class FriendRequestAgree extends BaseListener
 {
@@ -22,7 +23,7 @@ class FriendRequestAgree extends BaseListener
             return false;
         }
 
-        $user = $this->getUserByFd();
+        $user = $this->getUser();
 
         $result = FriendService::agree($event['friendRequestId'], $user['id'], $event['selfAlias']);
 
@@ -36,11 +37,12 @@ class FriendRequestAgree extends BaseListener
         }
 
         // 拿到申请人的FD
-        $selfFd = $this->getFdByUserId($result->data['selfId']);
+        $selfFd = RedisUtil::getFdByUserId($result->data['selfId']);
         if ($selfFd) {
             // 加入新的聊天室
-            $this->websocket->setSender($selfFd)->join(parent::ROOM_CHATROOM . $chatroomId);
-            $this->websocket->setSender($selfFd)->emit('friend_request_agree', $result);
+            $this->websocket->setSender($selfFd)
+                ->join(parent::ROOM_CHATROOM . $chatroomId)
+                ->emit('friend_request_agree', $result);
         }
     }
 }

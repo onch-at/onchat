@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
+use app\core\util\Redis as RedisUtil;
 use app\core\service\Chat as ChatService;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
@@ -23,7 +24,7 @@ class ChatRequest extends BaseListener
             return false;
         }
 
-        $user = $this->getUserByFd();
+        $user = $this->getUser();
 
         $result = ChatService::request(
             $user['id'],

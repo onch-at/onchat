@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\core\Result;
+use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Friend as FriendService;
-use app\core\Result;
 
 class FriendRequest extends BaseListener
 {
@@ -22,7 +23,7 @@ class FriendRequest extends BaseListener
             return false;
         }
 
-        $user = $this->getUserByFd();
+        $user = $this->getUser();
 
         $result = FriendService::request(
             $user['id'],

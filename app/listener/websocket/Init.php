@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\service\User as UserService;
 use app\core\util\Sql as SqlUtil;
+use app\core\util\Redis as RedisUtil;
 use app\model\UserInfo as UserInfoModel;
+use app\core\service\User as UserService;
 
 class Init extends BaseListener
 {
@@ -21,10 +22,13 @@ class Init extends BaseListener
             return false;
         }
 
-        $this->setFdUserPair($event['sessId']);
+        RedisUtil::setFdUserPair($this->fd, $event['sessId']);
 
-        $user = $this->getUserByFd();
-        $chatrooms = UserService::getChatrooms($user['id'])->data;
+        $user = $this->getUser();
+        $chatrooms = UserService::getChatrooms($user['id']);
+
+        // 储存uid - fd
+        RedisUtil::setUserIdFdPair($user['id'], $this->fd);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
@@ -35,9 +39,6 @@ class Init extends BaseListener
         $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $user['id']);
         // 加入群聊申请房间
         $this->websocket->join(parent::ROOM_CHAT_REQUEST . $user['id']);
-
-        // 储存uid - fd
-        $this->setUserIdFdPair($user['id']);
 
         $this->websocket->emit('init');
 

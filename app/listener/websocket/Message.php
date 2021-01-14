@@ -21,7 +21,7 @@ class Message extends BaseListener
             return false;
         }
 
-        $user = $this->getUserByFd();
+        $user = $this->getUser();
         // TODO 群聊的头像
         $this->websocket
             ->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])

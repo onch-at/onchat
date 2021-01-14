@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\swoole\Websocket;
 use think\facade\Session;
+use think\swoole\Websocket;
 use app\core\service\User as UserService;
 
 class Connect extends BaseListener

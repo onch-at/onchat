@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
 
@@ -21,7 +22,7 @@ class CreateChatroom extends BaseListener
             return false;
         }
 
-        $user = $this->getUserByFd();
+        $user = $this->getUser();
 
         $result = ChatroomService::create($event['name'], $event['description'], $user['id'], $user['username']);
 

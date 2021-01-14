@@ -12,6 +12,7 @@ use think\console\Output;
 use think\facade\Console;
 use think\console\Command;
 use think\console\input\Argument;
+use app\core\util\Redis as RedisUtil;
 use app\listener\websocket\BaseListener;
 use app\core\service\Chatroom as ChatroomService;
 
@@ -39,8 +40,8 @@ class OnChat extends Command
     public function clearCache()
     {
         $redis = Cache::store('redis')->handler();
-        $redis->del(BaseListener::REDIS_HASH_FD_USER_PAIR);
-        $redis->del(BaseListener::REDIS_HASH_UID_FD_PAIR);
+        $redis->del(RedisUtil::REDIS_HASH_FD_USER_PAIR);
+        $redis->del(RedisUtil::REDIS_HASH_UID_FD_PAIR);
     }
 
     protected function execute(Input $input, Output $output)

@@ -24,7 +24,6 @@ Route::group('user', function () {
     });
 
     Route::group('chatrooms', function () {
-        Route::get('/', 'getChatrooms');
         Route::get('private', 'getPrivateChatrooms');
     });
 })->completeMatch()->prefix('User/');

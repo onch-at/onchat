@@ -534,12 +534,15 @@ class User
     /**
      * 查询该用户下所有的聊天室
      *
-     * @return Result
+     * @return array
      */
-    public static function getChatrooms($userId = null): Result
+    public static function getChatrooms($userId = null): array
     {
-        $data = UserModel::find($userId ?: self::getId())->chatrooms()->select()->toArray();
-        return Result::success($data);
+        return ChatMemberModel::join('chatroom', 'chat_member.chatroom_id = chatroom.id')
+            ->where('chat_member.user_id', '=', $userId ?: self::getId())
+            ->field('chatroom.*')
+            ->select()
+            ->toArray();
     }
 
     /**
