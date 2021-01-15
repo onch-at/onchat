@@ -83,7 +83,7 @@ class Redis
     }
 
     /**
-     * 删除fd-user
+     * 删除fd-user对
      *
      * @return void
      */
@@ -91,6 +91,17 @@ class Redis
     {
         $redis = self::getRedis();
         $redis->hDel(self::REDIS_HASH_FD_USER_PAIR, (string) $fd);
+    }
+
+    /**
+     * 清空fd-user对
+     *
+     * @return void
+     */
+    public static function clearFdUserPair()
+    {
+        $redis = self::getRedis();
+        $redis->del(self::REDIS_HASH_FD_USER_PAIR);
     }
 
     /**
@@ -116,6 +127,17 @@ class Redis
     {
         $redis = self::getRedis();
         $redis->hDel(self::REDIS_HASH_UID_FD_PAIR, (string) $userId);
+    }
+
+    /**
+     * 清空uid-fd对
+     *
+     * @return void
+     */
+    public static function clearUserIdFdPair()
+    {
+        $redis = self::getRedis();
+        $redis->del(self::REDIS_HASH_UID_FD_PAIR);
     }
 
     /**

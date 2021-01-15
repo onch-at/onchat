@@ -135,9 +135,9 @@ class Chat
 
         // 显示群主/管理员的聊天室通知会话
         ChatSessionModel::where('type', '=', ChatSessionModel::TYPE_CHATROOM_NOTICE)
-            ->where('user_id', 'IN', function ($query) {
+            ->where('user_id', 'IN', function ($query) use ($chatroomId) {
                 $query->table('chat_member')
-                    ->where('chatroom_id', '=', 1)
+                    ->where('chatroom_id', '=', $chatroomId)
                     ->where(function ($query) {
                         $query->whereOr([
                             ['role', '=', ChatMemberModel::ROLE_HOST],

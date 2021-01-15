@@ -6,23 +6,21 @@ namespace app\command;
 
 use app\core\Result;
 use think\facade\Db;
-use think\facade\Cache;
 use think\console\Input;
 use think\console\Output;
 use think\facade\Console;
 use think\console\Command;
 use think\console\input\Argument;
 use app\core\util\Redis as RedisUtil;
-use app\listener\websocket\BaseListener;
 use app\core\service\Chatroom as ChatroomService;
 
 class OnChat extends Command
 {
-    const ACTION_START    = 'start';
-    const ACTION_STOP     = 'stop';
-    const ACTION_RESTART  = 'restart';
-    const ACTION_RELOAD   = 'reload';
-    const ACTION_INSTALL  = 'install';
+    const ACTION_START   = 'start';
+    const ACTION_STOP    = 'stop';
+    const ACTION_RESTART = 'restart';
+    const ACTION_RELOAD  = 'reload';
+    const ACTION_INSTALL = 'install';
 
     protected function configure()
     {
@@ -37,11 +35,10 @@ class OnChat extends Command
      *
      * @return void
      */
-    public function clearCache()
+    protected function clearCache()
     {
-        $redis = Cache::store('redis')->handler();
-        $redis->del(RedisUtil::REDIS_HASH_FD_USER_PAIR);
-        $redis->del(RedisUtil::REDIS_HASH_UID_FD_PAIR);
+        RedisUtil::clearFdUserPair();
+        RedisUtil::clearUserIdFdPair();
     }
 
     protected function execute(Input $input, Output $output)
@@ -74,7 +71,7 @@ class OnChat extends Command
         $output->info('OnChat: Execution finished!');
     }
 
-    private function install($output)
+    protected function install($output)
     {
         $path = root_path() . '/resource/sql/';
 
