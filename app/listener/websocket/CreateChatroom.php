@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\core\Result;
 use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
@@ -28,7 +29,7 @@ class CreateChatroom extends BaseListener
 
         $this->websocket->emit('create_chatroom', $result);
 
-        if ($result->code === 0) {
+        if ($result->code === Result::CODE_SUCCESS) {
             $this->websocket->join(parent::ROOM_CHATROOM . $result->data['chatroomId']);
         }
     }

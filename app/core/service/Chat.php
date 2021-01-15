@@ -16,6 +16,7 @@ use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
 use app\model\ChatSession as ChatSessionModel;
+use think\model\Collection;
 
 class Chat
 {
@@ -116,10 +117,10 @@ class Chat
         if ($request) {
             $request->status = ChatRequestModel::STATUS_WAIT;
             $request->request_reason = $reason;
-            $request->reject_reason = null;
-            // 清空已读列表
-            $request->readed_list = [];
-            $request->update_time = $timestamp;
+            $request->reject_reason  = null;
+            $request->readed_list    = [];
+            $request->handler_id     = null;
+            $request->update_time    = $timestamp;
             $request->save();
         } else {
             $request = ChatRequestModel::create([
@@ -174,10 +175,9 @@ class Chat
      *
      * @param integer $id 请求ID
      * @param integer $handler 处理人ID
-     * @param integer $handlerUsername 处理人的名字
      * @return Result
      */
-    public static function agree(int $id, int $handler)
+    public static function agree(int $id, int $handler): Result
     {
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
             ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
@@ -222,11 +222,13 @@ class Chat
         try {
             // 如果自己还未读
             if (!in_array($handler, $request->readed_list)) {
-                $request->readed_list[] = $handler;
+                $readedList = $request->readed_list;
+                $readedList[] = $handler;
+                $request->readed_list = $readedList;
             }
 
-            $request->handler_id = $handler;
-            $request->status = ChatRequestModel::STATUS_AGREE;
+            $request->handler_id  = $handler;
+            $request->status      = ChatRequestModel::STATUS_AGREE;
             $request->update_time = time() * 1000;
             $request->save();
 
@@ -261,6 +263,81 @@ class Chat
             Db::rollback();
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
+    }
+
+    /**
+     * 拒绝入群申请
+     *
+     * @param integer $id 请求ID
+     * @param integer $handler 处理人ID
+     * @param string $reason 拒绝原因
+     * @return Result
+     */
+    public static function reject(int $id, int $handler, ?string $reason): Result
+    {
+        // 如果剔除空格后长度为零，则直接置空
+        if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
+            $reason = null;
+        }
+
+        // 如果附加消息长度超出
+        if ($reason && mb_strlen($reason, 'utf-8') > self::REASON_MAX_LENGTH) {
+            return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
+        }
+
+        $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
+            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
+            ->where([
+                'chat_request.id' => $id,
+                'chat_member.user_id' => $handler
+            ])
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_HOST],
+                    ['chat_member.role', '=', ChatMemberModel::ROLE_MANAGE],
+                ]);
+            })
+            ->field([
+                'applicant.nickname AS applicantNickname',
+                'applicant.avatar AS applicantAvatarThumbnail',
+                'chatroom.name AS chatroomName',
+                'chatroom.avatar AS chatroomAvatarThumbnail',
+                'chat_request.*'
+            ])
+            ->find();
+
+        if (!$request) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        // 已被处理
+        if ($request->handler_id) {
+            return new Result(self::CODE_REQUEST_HANDLED, self::MSG[self::CODE_REQUEST_HANDLED]);
+        }
+
+        // 如果自己还未读
+        if (!in_array($handler, $request->readed_list)) {
+            // 这里需要拿个变量存起来先，否则错误
+            $readedList = $request->readed_list;
+            $readedList[] = $handler;
+            $request->readed_list = $readedList;
+        }
+        $request->reject_reason = $reason;
+        $request->status        = ChatRequestModel::STATUS_REJECT;
+        $request->handler_id    = $handler;
+        $request->update_time   = time() * 1000;
+        $request->save();
+
+        $ossClient = OssClient::getInstance();
+        $stylename = OssClient::getThumbnailImgStylename();
+
+        $request = $request->toArray();
+        $request['applicantAvatarThumbnail'] = $ossClient->signImageUrl($request['applicantAvatarThumbnail'], $stylename);
+        $request['chatroomAvatarThumbnail']  = $ossClient->signImageUrl($request['chatroomAvatarThumbnail'], $stylename);
+        $request['handlerNickname'] = RedisUtil::getUserByUserId($handler)['username'];
+
+        return Result::success($request);
     }
 
     /**

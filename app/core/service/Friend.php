@@ -39,11 +39,11 @@ class Friend
      *
      * @param integer $selfId 申请人的UserID
      * @param integer $targetId 被申请人的UserID
-     * @param string $requestReason 申请原因
+     * @param string $reason 申请原因
      * @param string $targetAlias 被申请人的别名
      * @return Result
      */
-    public static function request(int $selfId, int $targetId, string $requestReason = null, string $targetAlias = null): Result
+    public static function request(int $selfId, int $targetId, ?string $reason = null, ?string $targetAlias = null): Result
     {
         // 如果两人已经是好友关系，则不允许申请了
         if ($selfId == $targetId || self::isFriend($selfId, $targetId)) {
@@ -51,12 +51,12 @@ class Friend
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($requestReason && mb_strlen(StrUtil::trimAll($requestReason), 'utf-8') == 0) {
-            $requestReason = null;
+        if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
+            $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($requestReason && mb_strlen($requestReason, 'utf-8') > self::REASON_MAX_LENGTH) {
+        if ($reason && mb_strlen($reason, 'utf-8') > self::REASON_MAX_LENGTH) {
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
@@ -109,7 +109,7 @@ class Friend
 
         // 如果之前已经申请过，但对方没有同意，就把对方的状态设置成等待验证
         if ($friendRequest) {
-            $friendRequest->request_reason = $requestReason;
+            $friendRequest->request_reason = $reason;
             $friendRequest->target_alias = $targetAlias;
             // 将双方的状态都设置为等待验证
             $friendRequest->self_status = FriendRequestModel::STATUS_WAIT;
@@ -121,7 +121,7 @@ class Friend
             $friendRequest = FriendRequestModel::create([
                 'self_id'        => $selfId,
                 'target_id'      => $targetId,
-                'request_reason' => $requestReason,
+                'request_reason' => $reason,
                 'target_alias'   => $targetAlias,
                 'create_time'    => $timestamp,
                 'update_time'    => $timestamp,
@@ -403,18 +403,18 @@ class Friend
      *
      * @param integer $friendRequestId 好友申请表的ID
      * @param integer $targetId 被申请人的ID
-     * @param string $rejectReason 拒绝原因
+     * @param string $reason 拒绝原因
      * @return Result
      */
-    public static function reject(int $friendRequestId, int $targetId, string $rejectReason = null): Result
+    public static function reject(int $friendRequestId, int $targetId, string $reason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($rejectReason && mb_strlen(StrUtil::trimAll($rejectReason), 'utf-8') == 0) {
-            $rejectReason = null;
+        if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
+            $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($rejectReason && mb_strlen($rejectReason, 'utf-8') > self::REASON_MAX_LENGTH) {
+        if ($reason && mb_strlen($reason, 'utf-8') > self::REASON_MAX_LENGTH) {
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
@@ -434,7 +434,7 @@ class Friend
         try {
             $friendRequest->self_status = FriendRequestModel::STATUS_REJECT;
             $friendRequest->target_status = FriendRequestModel::STATUS_REJECT;
-            $friendRequest->reject_reason = $rejectReason;
+            $friendRequest->reject_reason = $reason;
             $friendRequest->update_time = time() * 1000;
             $friendRequest->save();
 

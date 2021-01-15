@@ -27,6 +27,7 @@ class Unload extends BaseListener
         foreach ($chatrooms as $chatroom) {
             $this->websocket->leave(parent::ROOM_CHATROOM . $chatroom['id']);
         }
+
         $this->websocket->leave(parent::ROOM_FRIEND_REQUEST . $user['id']);
         $this->websocket->leave(parent::ROOM_CHAT_REQUEST . $user['id']);
     }

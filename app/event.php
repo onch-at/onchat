@@ -5,9 +5,10 @@ use app\listener\websocket\Unload;
 use app\listener\websocket\Message;
 use app\listener\websocket\RevokeMsg;
 use app\listener\websocket\ChatRequest;
-use app\listener\websocket\ChatRequestAgree;
 use app\listener\websocket\FriendRequest;
 use app\listener\websocket\CreateChatroom;
+use app\listener\websocket\ChatRequestAgree;
+use app\listener\websocket\ChatRequestReject;
 use app\listener\websocket\FriendRequestAgree;
 use app\listener\websocket\InviteJoinChatroom;
 use app\listener\websocket\FriendRequestReject;
@@ -32,6 +33,7 @@ return [
         'swoole.websocket.InviteJoinChatroom'  => [InviteJoinChatroom::class],
         'swoole.websocket.ChatRequest'         => [ChatRequest::class],
         'swoole.websocket.ChatRequestAgree'    => [ChatRequestAgree::class],
+        'swoole.websocket.ChatRequestReject'   => [ChatRequestReject::class],
         'swoole.websocket.Close'               => [Unload::class],
     ],
 

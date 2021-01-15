@@ -31,7 +31,7 @@ class ChatRequestAgree extends BaseListener
 
         // 如果成功同意申请，则尝试给申请人推送消息
         if ($result->code !== Result::CODE_SUCCESS) {
-            return;
+            return false;
         }
 
         $chatSession = $result->data[1];

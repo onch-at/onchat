@@ -26,13 +26,13 @@ class Result
 
     /** 响应信息预定义 */
     const MSG = [
-        self::CODE_SUCCESS         => null,
-        self::CODE_ERROR_UNKNOWN   => '未知错误',
-        self::CODE_ERROR_PARAM     => '参数错误',
+        self::CODE_SUCCESS             => null,
+        self::CODE_ERROR_UNKNOWN       => '未知错误',
+        self::CODE_ERROR_PARAM         => '参数错误',
         self::CODE_ERROR_NO_PERMISSION => '权限不足',
     ];
 
-    public function __construct(int $code, string $msg = null, $data = null)
+    public function __construct(int $code, ?string $msg = null, $data = null)
     {
         $this->code = $code;
         $this->msg  = $msg ?: self::MSG[$code];

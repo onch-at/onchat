@@ -32,7 +32,7 @@ class InviteJoinChatroom extends BaseListener
         $this->websocket->emit('invite_join_chatroom', $result);
 
         if ($result->code !== Result::CODE_SUCCESS) {
-            return;
+            return false;
         }
 
         $msg = [
