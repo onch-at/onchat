@@ -840,8 +840,12 @@ class User
         $mood          = input('put.mood/d');
         $birthday      = input('put.birthday/d');
         $gender        = input('put.gender/d');
-        $age           = $birthday ? DateUtil::getAge((int) $birthday / 1000) : null;
-        $constellation = $birthday ? DateUtil::getConstellation((int) $birthday / 1000) : null;
+        $age           = isset($birthday) ? DateUtil::getAge((int) $birthday / 1000) : null;
+        $constellation = isset($birthday) ? DateUtil::getConstellation((int) $birthday / 1000) : null;
+
+        if ($birthday < 0) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
 
         if ($signature) {
             if (mb_strlen(StrUtil::trimAll($signature), 'utf-8') == 0) {

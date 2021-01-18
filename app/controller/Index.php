@@ -42,7 +42,6 @@ class Index extends BaseController
         // $data->name = 'TestChatroom';
         // $data->save();
         // dump(ChatService::agree(1, 1));
-        dump(gettype(session(UserService::SESSION_USER_LOGIN . '.id')));
     }
 
     /**
