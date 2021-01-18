@@ -661,6 +661,7 @@ class User
                 ->field([
                     'chat_member.chatroom_id',
                     'chat_member.nickname',
+                    'user_info.user_id',
                     'user_info.avatar',
                 ])
                 ->select();
@@ -679,6 +680,7 @@ class User
                     if ($value['data']->chatroomType == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
                         $info = $friendInfo->where('chatroom_id', '=', $value['data']->chatroomId)->shift();
                         if ($info) {
+                            $data[$key]['data']->userId = $info->user_id;
                             $data[$key]['title'] = $info->nickname;
                             $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
                         }
@@ -702,16 +704,17 @@ class User
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $data = ChatMemberModel::where('chat_member.chatroom_id', 'IN', function ($query)  use ($id) {
-            // 私聊聊天室ID列表
-            $query->table('chatroom')->join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
-                'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
-                'chat_member.user_id' => $id
-            ])->field('chatroom.id');
-        })->where('chat_member.user_id', '<>', $id)
-            ->join('user_info', 'user_info.user_id = chat_member.user_id')
+        $data = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')
+            ->where('chat_member.chatroom_id', 'IN', function ($query)  use ($id) {
+                // 私聊聊天室ID列表
+                $query->table('chatroom')->join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
+                    'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
+                    'chat_member.user_id' => $id
+                ])->field('chatroom.id');
+            })->where('chat_member.user_id', '<>', $id)
             ->field([
                 'chat_member.id',
+                'chat_member.user_id as friendId',
                 'chat_member.chatroom_id',
                 'chat_member.nickname AS title',
                 'chat_member.create_time',
@@ -730,8 +733,11 @@ class User
             $data[$key]['data'] = [
                 'chatroomId' => $value['chatroom_id'],
                 'chatroomType' => ChatroomModel::TYPE_PRIVATE_CHAT,
+                'userId' => $value['friendId']
             ];
             $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+
+            unset($data[$key]['friendId'], $data[$key]['chatroom_id']);
         }
 
         return Result::success($data);

@@ -16,7 +16,6 @@ use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
 use app\model\ChatSession as ChatSessionModel;
-use think\model\Collection;
 
 class Chat
 {
@@ -32,8 +31,8 @@ class Chat
 
     /** 响应消息预定义 */
     const MSG = [
+        self::CODE_PEOPLE_NUM_FULL => '聊天室人数已满！',
         self::CODE_REASON_LONG  => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符',
-        self::CODE_REASON_LONG => '聊天室人数已满！',
         self::CODE_REQUEST_HANDLED => '该请求已被处理！'
     ];
 
@@ -87,7 +86,7 @@ class Chat
     {
         // 如果已经是聊天室成员了
         if (Chatroom::isMember($chatroomId, $applicant)) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return new Result(Result::CODE_ERROR_PARAM, '你已加入该聊天室！');
         }
 
         // 如果人数已满
