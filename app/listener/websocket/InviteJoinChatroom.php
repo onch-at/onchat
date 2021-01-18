@@ -45,9 +45,9 @@ class InviteJoinChatroom extends BaseListener
         // 给每个受邀者发消息
         foreach ($result->data as $chatroomId) {
             $msg['chatroomId'] = $chatroomId;
-            $this->websocket->to(parent::ROOM_CHATROOM . $chatroomId);
+            $this->websocket
+                ->to(parent::ROOM_CHATROOM . $chatroomId)
+                ->emit('message', ChatroomService::setMessage($user['id'], $msg));
         }
-
-        $this->websocket->emit('message', ChatroomService::setMessage($user['id'], $msg));
     }
 }
