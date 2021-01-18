@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS user_info (
     signature        VARCHAR(200)              NULL COMMENT '个性签名',
     mood             TINYINT(1)   UNSIGNED     NULL COMMENT '心情',
     login_time       BIGINT       UNSIGNED NOT NULL COMMENT '登录时间',
-    birthday         BIGINT       UNSIGNED     NULL COMMENT '生日',
+    birthday         BIGINT                    NULL COMMENT '生日',
     gender           TINYINT(1)   UNSIGNED     NULL COMMENT '性别',
     age              TINYINT(1)   UNSIGNED     NULL COMMENT '年龄',
     constellation    TINYINT(1)   UNSIGNED     NULL COMMENT '星座',

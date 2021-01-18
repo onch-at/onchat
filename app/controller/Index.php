@@ -42,6 +42,7 @@ class Index extends BaseController
         // $data->name = 'TestChatroom';
         // $data->save();
         // dump(ChatService::agree(1, 1));
+        dump(getdate(-1111110));
     }
 
     /**
