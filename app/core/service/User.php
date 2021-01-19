@@ -518,9 +518,9 @@ class User
             }
 
             // 更新新头像
-            $userInfo = UserInfoModel::where('user_id', '=', $id)->field('avatar')->find();
-            $userInfo->avatar = $object;
-            $userInfo->save();
+            UserInfoModel::update(['avatar' => $object], [
+                'user_id' => $id
+            ]);
 
             return Result::success([
                 'avatar'          => $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename()),
@@ -863,25 +863,17 @@ class User
             $gender = 2;
         }
 
-        $userInfo = UserInfoModel::where('user_id', '=', $id)->field([
-            'nickname',
-            'signature',
-            'mood',
-            'birthday',
-            'gender',
-            'age',
-            'constellation',
-        ])->find();
-
-        $userInfo->nickname      = $nickname;
-        $userInfo->signature     = $signature;
-        $userInfo->mood          = $mood;
-        $userInfo->birthday      = $birthday;
-        $userInfo->gender        = $gender;
-        $userInfo->age           = $age;
-        $userInfo->constellation = $constellation;
-
-        $userInfo->save();
+        $userInfo = UserInfoModel::update([
+            'nickname'      => $nickname,
+            'signature'     => $signature,
+            'mood'          => $mood,
+            'birthday'      => $birthday,
+            'gender'        => $gender,
+            'age'           => $age,
+            'constellation' => $constellation,
+        ], [
+            'user_id' => $id
+        ]);
 
         return Result::success($userInfo->toArray());
     }

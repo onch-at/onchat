@@ -1,6 +1,7 @@
 <?php
 
 use app\listener\websocket\Init;
+use app\listener\websocket\Test;
 use app\listener\websocket\Unload;
 use app\listener\websocket\Message;
 use app\listener\websocket\RevokeMsg;
@@ -22,6 +23,7 @@ return [
         'HttpEnd'                              => [],
         'LogLevel'                             => [],
         'LogWrite'                             => [],
+        'swoole.websocket.Test'                => [Test::class],
         'swoole.websocket.Init'                => [Init::class],
         'swoole.websocket.Unload'              => [Unload::class],
         'swoole.websocket.Message'             => [Message::class],

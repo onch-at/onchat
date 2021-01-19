@@ -261,16 +261,16 @@
         },
         {
             "name": "league/mime-type-detection",
-            "version": "1.5.1",
+            "version": "1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/mime-type-detection.git",
-                "reference": "353f66d7555d8a90781f6f5e7091932f9a4250aa"
+                "reference": "3b9dff8aaf7323590c1d2e443db701eb1f9aa0d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/mime-type-detection/zipball/353f66d7555d8a90781f6f5e7091932f9a4250aa",
-                "reference": "353f66d7555d8a90781f6f5e7091932f9a4250aa",
+                "url": "https://api.github.com/repos/thephpleague/mime-type-detection/zipball/3b9dff8aaf7323590c1d2e443db701eb1f9aa0d3",
+                "reference": "3b9dff8aaf7323590c1d2e443db701eb1f9aa0d3",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -284,8 +284,9 @@
                 "php": "^7.2 || ^8.0"
             },
             "require-dev": {
-                "phpstan/phpstan": "^0.12.36",
-                "phpunit/phpunit": "^8.5.8"
+                "friendsofphp/php-cs-fixer": "^2.18",
+                "phpstan/phpstan": "^0.12.68",
+                "phpunit/phpunit": "^8.5.8 || ^9.3"
             },
             "type": "library",
             "autoload": {
@@ -314,7 +315,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-10-18T11:50:25+00:00"
+            "time": "2021-01-18T20:58:21+00:00"
         },
         {
             "name": "nette/php-generator",
@@ -793,16 +794,16 @@
         },
         {
             "name": "swoole/ide-helper",
-            "version": "4.6.0",
+            "version": "4.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swoole/ide-helper.git",
-                "reference": "9bc93b2c49770dbad44f2876ef5b6ed12e5c5fc3"
+                "reference": "5b36a9722eb8c693ff9831023cfb807474eab07c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/9bc93b2c49770dbad44f2876ef5b6ed12e5c5fc3",
-                "reference": "9bc93b2c49770dbad44f2876ef5b6ed12e5c5fc3",
+                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/5b36a9722eb8c693ff9831023cfb807474eab07c",
+                "reference": "5b36a9722eb8c693ff9831023cfb807474eab07c",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -829,7 +830,7 @@
                 }
             ],
             "description": "IDE help files for Swoole.",
-            "time": "2021-01-06T05:44:37+00:00"
+            "time": "2021-01-11T19:15:13+00:00"
         },
         {
             "name": "symfony/finder",
@@ -1064,16 +1065,16 @@
         },
         {
             "name": "topthink/think-orm",
-            "version": "v2.0.35",
+            "version": "v2.0.36",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/think-orm.git",
-                "reference": "f0bba0b15610d4015655ff6f07ea3d639212076f"
+                "reference": "f48dc09050f25029d41a66bfc9c3c403e4f82024"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/think-orm/zipball/f0bba0b15610d4015655ff6f07ea3d639212076f",
-                "reference": "f0bba0b15610d4015655ff6f07ea3d639212076f",
+                "url": "https://api.github.com/repos/top-think/think-orm/zipball/f48dc09050f25029d41a66bfc9c3c403e4f82024",
+                "reference": "f48dc09050f25029d41a66bfc9c3c403e4f82024",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -1111,7 +1112,7 @@
                 "database",
                 "orm"
             ],
-            "time": "2021-01-06T12:55:12+00:00"
+            "time": "2021-01-12T09:08:52+00:00"
         },
         {
             "name": "topthink/think-swoole",
