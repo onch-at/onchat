@@ -1,6 +1,6 @@
 <?php
 
-use app\websocket\Handler;
+use think\swoole\websocket\socketio\Handler;
 use think\swoole\websocket\socketio\Parser;
 
 return [
@@ -59,7 +59,7 @@ return [
     'hot_update' => [
         'enable'  => env('APP_DEBUG', false),
         'name'    => ['*.php'],
-        'include' => [app_path()],
+        'include' => [root_path()],
         'exclude' => [],
     ],
     //连接池
