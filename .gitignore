@@ -4,5 +4,6 @@
 /runtime
 *.log
 .env
+prod.env
 composer.lock
 OnChat.zip

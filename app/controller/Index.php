@@ -45,11 +45,7 @@ class Index extends BaseController
         // dump(User::find(1));
         $id = 21;
         $userId = 1;
-        dump([
-            ChatroomModel::TYPE_SINGLE_CHAT  => 1,
-            ChatroomModel::TYPE_PRIVATE_CHAT => 2,
-            ChatroomModel::TYPE_GROUP_CHAT   => 100,
-        ][2]);
+        dump('sss' . (null ?: 111));
     }
 
     /**
