@@ -43,7 +43,13 @@ class Index extends BaseController
         // $data->save();
         // dump(ChatService::agree(1, 1));
         // dump(User::find(1));
-        return User::find(1);
+        $id = 21;
+        $userId = 1;
+        dump([
+            ChatroomModel::TYPE_SINGLE_CHAT  => 1,
+            ChatroomModel::TYPE_PRIVATE_CHAT => 2,
+            ChatroomModel::TYPE_GROUP_CHAT   => 100,
+        ][2]);
     }
 
     /**

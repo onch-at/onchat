@@ -50,7 +50,7 @@ class Chatroom
      */
     public static function getName(int $id): Result
     {
-        $chatroom = ChatroomModel::where('id', '=', $id)->field('name, type')->find();
+        $chatroom = ChatroomModel::field(['name', 'type'])->find($id);
         if (!$chatroom) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
@@ -62,25 +62,25 @@ class Chatroom
                 return new Result(Result::CODE_ERROR_NO_PERMISSION);
             }
 
-            // 找到自己
-            $self = ChatMemberModel::where([
+            // 找到自己和好友
+            $data = ChatMemberModel::where([
                 'chatroom_id' => $id,
                 'user_id'     => $userId
-            ])->find();
+            ])->whereOr(function ($query) use ($id, $userId) {
+                $query->where([
+                    ['chatroom_id', '=', $id],
+                    ['user_id', '<>', $userId]
+                ]);
+            })->field(['user_id', 'nickname'])
+                ->limit(2)
+                ->select();
 
-            // 如果找不到，则代表自己没有进这个群
-            if (empty($self)) {
-                return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            // 如果找不到自己和好友（两条数据）
+            if (count($data) < 2) {
+                return new Result(Result::CODE_ERROR_PARAM);
             }
 
-            // 查找加入了这个房间的另一个好友的nickname
-            $name = ChatMemberModel::where('chatroom_id', '=', $id)->where('user_id', '<>', $userId)->value('nickname');
-
-            if (empty($name)) {
-                return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
-            }
-
-            return Result::success($name);
+            return Result::success($data->where('user_id', '<>', $userId)[0]->nickname);
         }
 
         return Result::success($chatroom->name);
@@ -136,7 +136,7 @@ class Chatroom
         $avatar = $chatroom->avatar;
 
         $chatroom->avatar          = $ossClient->signImageUrl($avatar, OssClient::getOriginalImgStylename());
-        $chatroom->avatarThumbnail = $ossClient->signImageUrl($avatar, OssClient::getThumbnailImgStylename());
+        $chatroom->avatarThumbnail = $ossClient->signImageUrl($avatar);
 
         return Result::success($chatroom->toArray());
     }
@@ -168,18 +168,13 @@ class Chatroom
             }
         }
 
-        $maxPeopleNum = 1;
+
         $timestamp = time() * 1000;
-
-        switch ($type) {
-            case ChatroomModel::TYPE_PRIVATE_CHAT:
-                $maxPeopleNum = 2;
-                break;
-
-            case ChatroomModel::TYPE_GROUP_CHAT:
-                $maxPeopleNum = 1000;
-                break;
-        }
+        $maxPeopleNum = [
+            ChatroomModel::TYPE_SINGLE_CHAT  => 1,
+            ChatroomModel::TYPE_PRIVATE_CHAT => 2,
+            ChatroomModel::TYPE_GROUP_CHAT   => 100,
+        ][$type];
 
         // 创建一个聊天室
         $chatroom = ChatroomModel::create([
@@ -210,7 +205,7 @@ class Chatroom
             ]);
 
             $chatroom->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
-            $chatroom->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+            $chatroom->avatarThumbnail = $ossClient->signImageUrl($object);
         }
 
         return Result::success($chatroom->toArray());
@@ -318,7 +313,7 @@ class Chatroom
             $msg['id'] = $id;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
-            $msg['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+            $msg['avatarThumbnail'] = $ossClient->signImageUrl($object);
             $msg['createTime'] = $timestamp;
 
             // 提交事务
@@ -352,12 +347,6 @@ class Chatroom
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        // 用于缓存 user id => nickname
-        $nicknameMap = [];
-        $nicknameMap[$userId] = $nickname;
-        // 用于缓存 user id => avatarThumbnail
-        $avatarThumbnailMap = [];
-
         // 查询的时候，顺带把未读消息数归零
         ChatSessionModel::update([
             'unread' => 0,
@@ -368,42 +357,38 @@ class Chatroom
             'data->chatroomId' => $id
         ]);
 
-        $chatRecord = ChatRecordModel::opt($id)->where('chatroom_id', '=', $id);
-        if ($chatRecord->count() === 0) { // 如果没有消息
+        $query = ChatRecordModel::opt($id)
+            ->alias('chat_record')
+            ->join('user_info', 'user_info.user_id = chat_record.user_id')
+            ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $id)
+            ->where('chat_record.chatroom_id', '=', $id)
+            ->field([
+                'chat_member.nickname',
+                'user_info.avatar AS avatarThumbnail',
+                'chat_record.*',
+            ])
+            ->order('chat_record.id', 'DESC')
+            ->limit(self::MSG_ROWS);
+
+        if ($query->count() === 0) { // 如果没有消息
             return new Result(self::CODE_NO_RECORD, '没有消息');
         }
 
         // 如果msgId为0，则代表初次查询
-        $data = $msgId == 0 ? $chatRecord : $chatRecord->where('id', '<', $msgId);
+        $query = $msgId == 0 ? $query : $query->where('chat_record.id', '<', $msgId);
 
         $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
 
-        $object = null;
         $records = [];
-        foreach ($data->order('id', 'DESC')->limit(self::MSG_ROWS)->cursor() as $item) {
+        foreach ($query->cursor() as $item) {
             $item = $item->toArray();
 
-            // 如果nicknameMap里面没有找到已经缓存的nickname
-            if (!isset($nicknameMap[$item['user_id']])) {
-                $nickname = User::getNicknameInChatroom($item['user_id'], $id);
-
-                if (!$nickname) { // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
-                    $nickname = User::getUsernameById($item['user_id']);
-                }
-
-                $nicknameMap[$item['user_id']] = $nickname;
+            // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
+            if (!$item['nickname']) {
+                $item['nickname'] = User::getUsernameById($item['user_id']);
             }
 
-            // 如果avatarThumbnailMap里面没有找到已经缓存的avatarThumbnail
-            if (!isset($avatarThumbnailMap[$item['user_id']])) {
-                $object = User::getInfoByKey('id', $item['user_id'], 'avatar')['avatar'];
-
-                $avatarThumbnailMap[$item['user_id']] = $ossClient->signImageUrl($object, $stylename);
-            }
-
-            $item['nickname'] = $nicknameMap[$item['user_id']];
-            $item['avatarThumbnail'] = $avatarThumbnailMap[$item['user_id']];
+            $item['avatarThumbnail'] = $ossClient->signImageUrl($item['avatarThumbnail']);
             $item['data'] = json_decode($item['data']);
 
             // 如果是群聊邀请消息
@@ -411,7 +396,7 @@ class Chatroom
                 $chatroom = ChatroomModel::find($item['data']->chatroomId);
                 $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
                 $item['data']->description     = $chatroom ? $chatroom->description : null;
-                $item['data']->avatarThumbnail = $chatroom ? $ossClient->signImageUrl($chatroom->avatar, $stylename) : null;
+                $item['data']->avatarThumbnail = $chatroom ? $ossClient->signImageUrl($chatroom->avatar) : null;
             }
 
             $records[] = $item;
@@ -557,10 +542,9 @@ class Chatroom
             ->toArray();
 
         $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($data as $key => $value) {
-            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail']);
         }
 
         return Result::success($data);
@@ -648,7 +632,7 @@ class Chatroom
 
             return Result::success([
                 'avatar'          => $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename()),
-                'avatarThumbnail' => $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename())
+                'avatarThumbnail' => $ossClient->signImageUrl($object)
             ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());

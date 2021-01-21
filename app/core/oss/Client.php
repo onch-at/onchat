@@ -108,16 +108,16 @@ class Client
     }
 
     /**
-     *  签名图像URL
+     * 签名图像URL
      *
      * @param string $object
-     * @param string $stylename
+     * @param string|null $stylename 默认为省略图样式
      * @return string
      */
-    public function signImageUrl(string $object, string $stylename): string
+    public function signImageUrl(string $object, ?string $stylename = null): string
     {
         return $this->signUrl(self::getBucket(), $object, 86400, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . $stylename
+            OssClient::OSS_PROCESS => 'style/' . $stylename ?: self::getThumbnailImgStylename()
         ]);
     }
 

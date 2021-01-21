@@ -183,7 +183,7 @@ class User
             unset($user->password); // 删掉密码
 
             $userInfo['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
-            $userInfo['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+            $userInfo['avatarThumbnail'] = $ossClient->signImageUrl($object);
 
             // 创建一个聊天室通知会话
             ChatSessionModel::create([
@@ -250,7 +250,7 @@ class User
         $object = $user['avatar'];
 
         $user['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
-        $user['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+        $user['avatarThumbnail'] = $ossClient->signImageUrl($object);
 
         return Result::success($user, '登录成功！即将跳转…');
     }
@@ -319,7 +319,7 @@ class User
         $object = $user->avatar;
 
         $user->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
-        $user->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+        $user->avatarThumbnail = $ossClient->signImageUrl($object);
 
         return Result::success($user->toArray());
     }
@@ -343,7 +343,7 @@ class User
         $object = $user->avatar;
 
         $user->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
-        $user->avatarThumbnail = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+        $user->avatarThumbnail = $ossClient->signImageUrl($object);
 
         return Result::success($user->toArray());
     }
@@ -422,7 +422,7 @@ class User
         $object = $user['avatar'];
 
         $user['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
-        $user['avatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+        $user['avatarThumbnail'] = $ossClient->signImageUrl($object);
 
         unset($user['password']);
 
@@ -524,7 +524,7 @@ class User
 
             return Result::success([
                 'avatar'          => $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename()),
-                'avatarThumbnail' => $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename())
+                'avatarThumbnail' => $ossClient->signImageUrl($object)
             ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
@@ -558,7 +558,6 @@ class User
         }
 
         $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
 
         // 存放私聊聊天室ID列表
         $privateChatroomIdList = [];
@@ -602,7 +601,7 @@ class User
 
                     switch ($value['data']->chatroomType) {
                         case ChatroomModel::TYPE_GROUP_CHAT:
-                            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+                            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail']);
                             break;
 
                         case ChatroomModel::TYPE_PRIVATE_CHAT:
@@ -682,7 +681,7 @@ class User
                         if ($info) {
                             $data[$key]['data']->userId = $info->user_id;
                             $data[$key]['title'] = $info->nickname;
-                            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar, $stylename);
+                            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($info->avatar);
                         }
                     }
                     break;
@@ -711,7 +710,8 @@ class User
                     'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
                     'chat_member.user_id' => $id
                 ])->field('chatroom.id');
-            })->where('chat_member.user_id', '<>', $id)
+            })
+            ->where('chat_member.user_id', '<>', $id)
             ->field([
                 'chat_member.id',
                 'chat_member.user_id as friendId',
@@ -721,11 +721,11 @@ class User
                 'chat_member.update_time',
                 'user_info.signature AS content',
                 'user_info.avatar AS avatarThumbnail',
-            ])->select()
+            ])
+            ->select()
             ->toArray();
 
         $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($data as $key => $value) {
             $data[$key]['userId'] = $id;
@@ -735,7 +735,7 @@ class User
                 'chatroomType' => ChatroomModel::TYPE_PRIVATE_CHAT,
                 'userId' => $value['friendId']
             ];
-            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail'], $stylename);
+            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail']);
 
             unset($data[$key]['friendId'], $data[$key]['chatroom_id']);
         }

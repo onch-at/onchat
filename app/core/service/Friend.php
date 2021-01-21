@@ -71,7 +71,6 @@ class Friend
         }
 
         $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
 
         $selfAvatarThumbnail = null;
         $targetAvatarThumbnail = null;
@@ -80,21 +79,23 @@ class Friend
             'user_id',
             'avatar',
             'nickname'
-        ])->select()->toArray();
+        ])->limit(2)->select();
 
         $signUrl = null;
         $selfUsername = null;
+        $targetUsername = null;
         foreach ($userInfos as $userInfo) {
-            $signUrl = $ossClient->signImageUrl($userInfo['avatar'],  $stylename);
+            $signUrl = $ossClient->signImageUrl($userInfo->avatar);
 
             switch ($userInfo['user_id']) {
                 case $selfId:
                     $selfAvatarThumbnail = $signUrl;
-                    $selfUsername = $userInfo['nickname'];
+                    $selfUsername = $userInfo->nickname;
                     break;
 
                 case $targetId:
                     $targetAvatarThumbnail = $signUrl;
+                    $targetUsername = $userInfo->nickname;
                     break;
             }
         }
@@ -133,7 +134,7 @@ class Friend
         $friendRequest['selfAvatarThumbnail'] = $selfAvatarThumbnail;
         $friendRequest['selfUsername'] = $selfUsername;
         $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
-        $friendRequest['targetUsername'] = User::getUsernameById($targetId);
+        $friendRequest['targetUsername'] = $targetUsername;
 
         return Result::success($friendRequest);
     }
@@ -180,11 +181,12 @@ class Friend
         }
 
         // 找到自己被申请的
-        $friendRequests = FriendRequestModel::where([
-            'friend_request.target_id' => $userId,
-            'friend_request.target_status' => FriendRequestModel::STATUS_WAIT
-        ])->join('user', 'friend_request.self_id = user.id')
+        $friendRequests = FriendRequestModel::join('user', 'friend_request.self_id = user.id')
             ->join('user_info', 'friend_request.self_id = user_info.user_id')
+            ->where([
+                'friend_request.target_id' => $userId,
+                'friend_request.target_status' => FriendRequestModel::STATUS_WAIT
+            ])
             ->field([
                 'friend_request.id',
                 'friend_request.self_id',
@@ -197,13 +199,15 @@ class Friend
                 'friend_request.update_time',
                 'user_info.avatar AS selfAvatarThumbnail',
                 'user.username AS selfUsername',
-            ])->order('friend_request.update_time', 'DESC')->select()->toArray();
+            ])
+            ->order('friend_request.update_time', 'DESC')
+            ->select()
+            ->toArray();
 
         $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['selfAvatarThumbnail'] = $ossClient->signImageUrl($value['selfAvatarThumbnail'], $stylename);
+            $friendRequests[$key]['selfAvatarThumbnail'] = $ossClient->signImageUrl($value['selfAvatarThumbnail']);
             $friendRequests[$key]['targetUsername'] = $username;
         }
 
@@ -224,13 +228,15 @@ class Friend
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $friendRequests = FriendRequestModel::where('friend_request.self_id', '=', $userId)->where(function ($query) {
-            $query->whereOr([
-                ['friend_request.self_status', '=', FriendRequestModel::STATUS_WAIT],
-                ['friend_request.self_status', '=', FriendRequestModel::STATUS_REJECT]
-            ]);
-        })->join('user', 'friend_request.target_id = user.id')
+        $friendRequests = FriendRequestModel::join('user', 'friend_request.target_id = user.id')
             ->join('user_info', 'friend_request.target_id = user_info.user_id')
+            ->where('friend_request.self_id', '=', $userId)
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['friend_request.self_status', '=', FriendRequestModel::STATUS_WAIT],
+                    ['friend_request.self_status', '=', FriendRequestModel::STATUS_REJECT]
+                ]);
+            })
             ->field([
                 'friend_request.id',
                 'friend_request.self_id',
@@ -243,13 +249,15 @@ class Friend
                 'friend_request.update_time',
                 'user_info.avatar AS targetAvatarThumbnail',
                 'user.username AS targetUsername',
-            ])->order('update_time', 'DESC')->select()->toArray();
+            ])
+            ->order('update_time', 'DESC')
+            ->select()
+            ->toArray();
 
         $ossClient = OssClient::getInstance();
-        $stylename = OssClient::getThumbnailImgStylename();
 
         foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['targetAvatarThumbnail'] = $ossClient->signImageUrl($value['targetAvatarThumbnail'], $stylename);
+            $friendRequests[$key]['targetAvatarThumbnail'] = $ossClient->signImageUrl($value['targetAvatarThumbnail']);
             $friendRequests[$key]['selfUsername'] = $username;
         }
 
@@ -389,7 +397,7 @@ class Friend
                 'selfId'                => $friendRequest->self_id,
                 'targetId'              => $friendRequest->target_id,
                 'targetUsername'        => $userInfo['username'],
-                'targetAvatarThumbnail' => $ossClient->signImageUrl($userInfo['avatar'], OssClient::getThumbnailImgStylename())
+                'targetAvatarThumbnail' => $ossClient->signImageUrl($userInfo['avatar'])
             ]);
         } catch (\Exception $e) {
             // 回滚事务
@@ -452,7 +460,7 @@ class Friend
             $data = $friendRequest->toArray();
             $data['selfUsername'] = User::getUsernameById($friendRequest->self_id);
             $data['targetUsername'] = RedisUtil::getUserByUserId($targetId)['username'];
-            $data['targetAvatarThumbnail'] = $ossClient->signImageUrl($object, OssClient::getThumbnailImgStylename());
+            $data['targetAvatarThumbnail'] = $ossClient->signImageUrl($object);
             Db::commit();
 
             return Result::success($data);
@@ -476,6 +484,7 @@ class Friend
         if ($selfId == $targetId) {
             return 0; // TODO 找到自己的单聊聊天室
         }
+
         // 找到二人的共同聊天室，且聊天室类型为私聊
         $chatroom = ChatroomModel::where('type', '=', ChatroomModel::TYPE_PRIVATE_CHAT)->where('id', 'IN', function ($query) use ($selfId, $targetId) {
             // 找到self跟target共同聊天室的ID
