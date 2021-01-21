@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace app\middleware;
 
 use Closure;
-use think\App;
 use think\Request;
 use think\Response;
-use think\Session;
 use think\middleware\SessionInit as OriginSessionInit;
 
 /**
@@ -16,11 +14,6 @@ use think\middleware\SessionInit as OriginSessionInit;
  */
 class SessionInit extends OriginSessionInit
 {
-
-    public function __construct(App $app, Session $session)
-    {
-        parent::__construct($app, $session);
-    }
 
     /**
      * Session初始化
