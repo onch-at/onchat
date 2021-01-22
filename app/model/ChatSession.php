@@ -12,7 +12,6 @@ use think\Model;
 class ChatSession extends Model
 {
     protected $json = ['data'];
-
     protected $jsonType = [
         'data->chatroomId'    =>    'int'
     ];

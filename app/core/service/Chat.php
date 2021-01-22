@@ -146,7 +146,7 @@ class Chat
                     })->field('user_id');
             })
             ->update([
-                'chat_session.update_time' => SqlUtil::rawTimestamp(),
+                'chat_session.update_time' => time() * 1000,
                 'chat_session.visible' => true
             ]);
 

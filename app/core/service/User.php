@@ -441,9 +441,9 @@ class User
 
         if ($length < self::PASSWORD_MIN_LENGTH || $length > self::PASSWORD_MAX_LENGTH) {
             return self::CODE_PASSWORD_IRREGULAR;
-        } else {
-            return Result::CODE_SUCCESS;
         }
+
+        return Result::CODE_SUCCESS;
     }
 
     /**

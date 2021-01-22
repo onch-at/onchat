@@ -437,7 +437,7 @@ class Chatroom
             }
 
             ChatSessionModel::update([
-                'update_time' => SqlUtil::rawTimestamp(),
+                'update_time' => time() * 1000,
                 // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
                 'unread'      => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
             ], [
