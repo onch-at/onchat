@@ -82,16 +82,6 @@ class User extends BaseController
     }
 
     /**
-     * 获取用户ID
-     *
-     * @return Result
-     */
-    public function getUserId(): Result
-    {
-        return UserService::getUserId();
-    }
-
-    /**
      * 获取用户的聊天列表
      *
      * @return Result

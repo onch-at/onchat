@@ -1,6 +1,7 @@
 <?php
 
 use think\facade\Route;
+use app\middleware\Auth;
 
 /** 聊天室模块路由 */
 Route::group('chatroom', function () {
@@ -14,4 +15,4 @@ Route::group('chatroom/<id>', function () {
     Route::get('members', 'getChatMembers');
 
     Route::post('avatar', 'avatar');
-})->completeMatch()->prefix('Chatroom/');
+})->completeMatch()->prefix('Chatroom/')->middleware(Auth::class);

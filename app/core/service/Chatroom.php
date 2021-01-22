@@ -58,9 +58,6 @@ class Chatroom
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
         if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = User::getId();
-            if (empty($userId)) {
-                return new Result(Result::CODE_ERROR_NO_PERMISSION);
-            }
 
             // 找到自己和好友
             $data = ChatMemberModel::where([
@@ -103,9 +100,6 @@ class Chatroom
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
         if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = User::getId();
-            if (!$userId) {
-                return new Result(Result::CODE_ERROR_NO_PERMISSION);
-            }
 
             // 找到自己
             $self = ChatMemberModel::where([
@@ -337,9 +331,6 @@ class Chatroom
     public static function getRecords(int $id, int $msgId): Result
     {
         $userId = User::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         // 拿到当前用户在这个聊天室的昵称
         $nickname = User::getNicknameInChatroom($userId, $id);
@@ -559,9 +550,6 @@ class Chatroom
     public static function avatar(int $id): Result
     {
         $userId = User::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $role = self::getMemberRole($id, $userId);
         // 如果不是群主、管理员

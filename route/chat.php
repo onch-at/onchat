@@ -1,7 +1,7 @@
 <?php
 
-use app\middleware\Auth;
 use think\facade\Route;
+use app\middleware\Auth;
 
 /** 聊天室模块路由 */
 Route::group('chat', function () {

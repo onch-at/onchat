@@ -87,9 +87,6 @@ class Friend extends BaseController
     public function isFriend(int $id): Result
     {
         $userId = UserService::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
         $data = FriendService::isFriend($userId, $id);
         return Result::success($data);
     }

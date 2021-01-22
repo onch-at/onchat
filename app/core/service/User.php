@@ -308,8 +308,10 @@ class User
      */
     public static function getUserById(int $id): Result
     {
-        $user = UserModel::where('user.id', '=', $id)->join('user_info', 'user_info.user_id = user.id')
-            ->field(self::USER_FIELDS)->find();
+        $user = UserModel::join('user_info', 'user_info.user_id = user.id')
+            ->where('user.id', '=', $id)
+            ->field(self::USER_FIELDS)
+            ->find();
 
         if (!$user) {
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
@@ -386,18 +388,6 @@ class User
     }
 
     /**
-     * 获取用户ID
-     *
-     * @return Result
-     */
-    public static function getUserId(): Result
-    {
-        $id = self::getId();
-
-        return $id ? Result::success($id) : new Result(Result::CODE_ERROR_NO_PERMISSION);
-    }
-
-    /**
      * 检查用户是否已经登录/处于登录状态
      * 如果已登录，则返回User, 否则返回false
      *
@@ -453,10 +443,7 @@ class User
      */
     public static function avatar(): Result
     {
-        $id = self::getId();
-        if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
+        $userId = self::getId();
 
         $bucket = OssClient::getBucket();
 
@@ -466,7 +453,7 @@ class User
         // 由于搜索用户所有历史头像
         $options = [
             // 文件路径前缀
-            'prefix' => $root . 'avatar/user/' . $id . '/',
+            'prefix' => $root . 'avatar/user/' . $userId . '/',
             // 最大数量
             'max-keys' => 20,
         ];
@@ -489,7 +476,7 @@ class User
 
             $ossClient = OssClient::getInstance();
 
-            $object = $root . 'avatar/user/' . $id . '/' . md5((string) DateUtil::now()) . '.' . substr($mine, 6);
+            $object = $root . 'avatar/user/' . $userId . '/' . md5((string) DateUtil::now()) . '.' . substr($mine, 6);
             // 上传到OSS
             $ossClient->uploadFile($bucket, $object, $image->getRealPath(), OssClient::$imageHeadersOptions);
 
@@ -519,7 +506,7 @@ class User
 
             // 更新新头像
             UserInfoModel::update(['avatar' => $object], [
-                'user_id' => $id
+                'user_id' => $userId
             ]);
 
             return Result::success([
@@ -553,9 +540,6 @@ class User
     public static function getChatSessions(): Result
     {
         $userId = self::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $ossClient = OssClient::getInstance();
 
@@ -698,20 +682,17 @@ class User
      */
     public static function getPrivateChatrooms(): Result
     {
-        $id = self::getId();
-        if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
+        $userId = self::getId();
 
         $data = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')
-            ->where('chat_member.chatroom_id', 'IN', function ($query)  use ($id) {
+            ->where('chat_member.chatroom_id', 'IN', function ($query)  use ($userId) {
                 // 私聊聊天室ID列表
                 $query->table('chatroom')->join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
                     'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
-                    'chat_member.user_id' => $id
+                    'chat_member.user_id' => $userId
                 ])->field('chatroom.id');
             })
-            ->where('chat_member.user_id', '<>', $id)
+            ->where('chat_member.user_id', '<>', $userId)
             ->field([
                 'chat_member.id',
                 'chat_member.user_id as friendId',
@@ -728,7 +709,7 @@ class User
         $ossClient = OssClient::getInstance();
 
         foreach ($data as $key => $value) {
-            $data[$key]['userId'] = $id;
+            $data[$key]['userId'] = $userId;
             $data[$key]['type'] = ChatSessionModel::TYPE_CHATROOM;
             $data[$key]['data'] = [
                 'chatroomId' => $value['chatroom_id'],
@@ -753,9 +734,6 @@ class User
     public static function stickyChatSession(int $id, $sticky = true): Result
     {
         $userId = self::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $chatSession = ChatSessionModel::where([
             'id'      => $id,
@@ -793,9 +771,6 @@ class User
     public static function readedChatSession(int $id, int $unread = 0): Result
     {
         $userId = self::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $chatSession = ChatSessionModel::where([
             'id'      => $id,
@@ -830,10 +805,7 @@ class User
      */
     public static function saveUserInfo(): Result
     {
-        $id = self::getId();
-        if (!$id) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
+        $userId = self::getId();
 
         $nickname      = input('put.nickname/s') ?: self::getUsername();
         $signature     = input('put.signature/s');
@@ -872,7 +844,7 @@ class User
             'age'           => $age,
             'constellation' => $constellation,
         ], [
-            'user_id' => $id
+            'user_id' => $userId
         ]);
 
         return Result::success($userInfo->toArray());

@@ -148,9 +148,6 @@ class Friend
     public static function getRequestById(int $id): Result
     {
         $userId = User::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $friendRequest = FriendRequestModel::find($id);
 
@@ -175,10 +172,6 @@ class Friend
     {
         $userId = User::getId();
         $username = User::getUsername();
-
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         // 找到自己被申请的
         $friendRequests = FriendRequestModel::join('user', 'friend_request.self_id = user.id')
@@ -223,10 +216,6 @@ class Friend
     {
         $userId = User::getId();
         $username = User::getUsername();
-
-        if (!$userId || !$username) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $friendRequests = FriendRequestModel::join('user', 'friend_request.target_id = user.id')
             ->join('user_info', 'friend_request.target_id = user_info.user_id')
@@ -273,9 +262,6 @@ class Friend
     public static function getRequestByTargetId(int $targetId): Result
     {
         $userId = User::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $friendRequest = FriendRequestModel::where([
             'self_id'   => $userId,
@@ -298,9 +284,6 @@ class Friend
     public static function getRequestBySelfId(int $selfId): Result
     {
         $userId = User::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         $friendRequest = FriendRequestModel::where([
             'self_id'   => $selfId,
@@ -507,9 +490,6 @@ class Friend
     public static function setFriendAlias(int $chatroomId, string $alias): Result
     {
         $userId = User::getId();
-        if (!$userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         // 如果有传入别名
         if (mb_strlen(StrUtil::trimAll($alias), 'utf-8') != 0) {

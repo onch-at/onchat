@@ -1,6 +1,7 @@
 <?php
 
 use think\facade\Route;
+use app\middleware\Auth;
 
 /** 好友模块路由 */
 Route::group('friend', function () {
@@ -18,4 +19,4 @@ Route::group('friend', function () {
 
 Route::group('friend/<id>', function () {
     Route::get('isfriend', 'isFriend');
-})->completeMatch()->prefix('Friend/');
+})->completeMatch()->prefix('Friend/')->middleware(Auth::class);
