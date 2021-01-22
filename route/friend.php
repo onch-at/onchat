@@ -13,9 +13,7 @@ Route::group('friend', function () {
     Route::get('requests/send', 'getSendRequests');
 
     Route::put('alias/<chatroomId>', 'setFriendAlias');
-})->completeMatch()->prefix('Friend/');
-
-
+})->completeMatch()->prefix('Friend/')->middleware(Auth::class);
 
 Route::group('friend/<id>', function () {
     Route::get('isfriend', 'isFriend');

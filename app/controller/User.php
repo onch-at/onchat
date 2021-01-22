@@ -102,6 +102,16 @@ class User extends BaseController
     }
 
     /**
+     * 获取群聊聊天室列表
+     *
+     * @return Result
+     */
+    public function getGroupChatrooms(): Result
+    {
+        return UserService::getGroupChatrooms();
+    }
+
+    /**
      * 置顶聊天列表子项
      *
      * @param integer $id 聊天室成员表ID

@@ -20,6 +20,7 @@ Route::group('user', function () {
 
     Route::group('chatrooms', function () {
         Route::get('private', 'getPrivateChatrooms');
+        Route::get('group', 'getGroupChatrooms');
     });
 
     Route::group('chatsession', function () {

@@ -38,14 +38,8 @@ class Index extends BaseController
 
     public function index()
     {
-        // $data = ChatroomModel::join('user', 'user.id = chatroom.id')->field('chatroom.*')->where('chatroom.id', 1)->find();
-        // $data->name = 'TestChatroom';
-        // $data->save();
-        // dump(ChatService::agree(1, 1));
-        // dump(User::find(1));
-        $id = 21;
-        $userId = 1;
-        dump('sss' . (null ?: 111));
+
+        dump(UserService::getGroupChatrooms());
     }
 
     /**

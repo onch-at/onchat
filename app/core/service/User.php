@@ -683,6 +683,7 @@ class User
     public static function getPrivateChatrooms(): Result
     {
         $userId = self::getId();
+        $ossClient = OssClient::getInstance();
 
         $data = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')
             ->where('chat_member.chatroom_id', 'IN', function ($query)  use ($userId) {
@@ -706,8 +707,6 @@ class User
             ->select()
             ->toArray();
 
-        $ossClient = OssClient::getInstance();
-
         foreach ($data as $key => $value) {
             $data[$key]['userId'] = $userId;
             $data[$key]['type'] = ChatSessionModel::TYPE_CHATROOM;
@@ -719,6 +718,48 @@ class User
             $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail']);
 
             unset($data[$key]['friendId'], $data[$key]['chatroom_id']);
+        }
+
+        return Result::success($data);
+    }
+
+    /**
+     * 获取群聊聊天室列表
+     *
+     * @return Result
+     */
+    public static function getGroupChatrooms(): Result
+    {
+        $userId = self::getId();
+        $ossClient = OssClient::getInstance();
+
+        $data = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
+            ->where([
+                'chat_member.user_id' => $userId,
+                'chatroom.type' => ChatroomModel::TYPE_GROUP_CHAT
+            ])
+            ->field([
+                'chat_member.id',
+                'chat_member.chatroom_id',
+                'chat_member.create_time',
+                'chat_member.update_time',
+                'chatroom.name AS title',
+                'chatroom.description AS content',
+                'chatroom.avatar AS avatarThumbnail',
+            ])
+            ->select()
+            ->toArray();
+
+        foreach ($data as $key => $value) {
+            $data[$key]['userId'] = $userId;
+            $data[$key]['type'] = ChatSessionModel::TYPE_CHATROOM;
+            $data[$key]['data'] = [
+                'chatroomId' => $value['chatroom_id'],
+                'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT
+            ];
+            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail']);
+
+            unset($data[$key]['chatroom_id']);
         }
 
         return Result::success($data);
