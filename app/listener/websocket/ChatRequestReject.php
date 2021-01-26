@@ -9,7 +9,7 @@ use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Chat as ChatService;
 
-class ChatRequestReject extends BaseListener
+class ChatRequestReject extends SocketEventHandler
 {
 
     /**
@@ -19,10 +19,6 @@ class ChatRequestReject extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
 
         $result = ChatService::reject($event['requestId'], $user['id'], $event['rejectReason']);

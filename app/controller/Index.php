@@ -39,7 +39,13 @@ class Index extends BaseController
     public function index()
     {
 
-        dump(UserService::getGroupChatrooms());
+        dump(
+            ChatRecord::unionAll(function ($query) {
+                $query->table(ChatRecord::getTableNameById(1))->where('id', 1)->limit(1);
+            })->unionAll(function ($query) {
+                $query->table(ChatRecord::getTableNameById(2))->where('id', 1)->limit(1);
+            })->buildSql()
+        );
     }
 
     /**

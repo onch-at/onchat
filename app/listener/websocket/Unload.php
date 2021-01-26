@@ -7,7 +7,7 @@ namespace app\listener\websocket;
 use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 
-class Unload extends BaseListener
+class Unload extends SocketEventHandler
 {
 
     /**

@@ -13,30 +13,32 @@ use app\listener\websocket\ChatRequestReject;
 use app\listener\websocket\FriendRequestAgree;
 use app\listener\websocket\InviteJoinChatroom;
 use app\listener\websocket\FriendRequestReject;
+use app\listener\websocket\SocketEventDispatcher;
 
 return [
     'bind'      => [],
 
     'listen'    => [
-        'AppInit'                              => [],
-        'HttpRun'                              => [],
-        'HttpEnd'                              => [],
-        'LogLevel'                             => [],
-        'LogWrite'                             => [],
-        'swoole.websocket.Test'                => [Test::class],
-        'swoole.websocket.Init'                => [Init::class],
-        'swoole.websocket.Unload'              => [Unload::class],
-        'swoole.websocket.Message'             => [Message::class],
-        'swoole.websocket.RevokeMsg'           => [RevokeMsg::class],
-        'swoole.websocket.FriendRequest'       => [FriendRequest::class],
-        'swoole.websocket.FriendRequestAgree'  => [FriendRequestAgree::class],
-        'swoole.websocket.FriendRequestReject' => [FriendRequestReject::class],
-        'swoole.websocket.CreateChatroom'      => [CreateChatroom::class],
-        'swoole.websocket.InviteJoinChatroom'  => [InviteJoinChatroom::class],
-        'swoole.websocket.ChatRequest'         => [ChatRequest::class],
-        'swoole.websocket.ChatRequestAgree'    => [ChatRequestAgree::class],
-        'swoole.websocket.ChatRequestReject'   => [ChatRequestReject::class],
-        'swoole.websocket.Close'               => [Unload::class],
+        'AppInit'                                    => [],
+        'HttpRun'                                    => [],
+        'HttpEnd'                                    => [],
+        'LogLevel'                                   => [],
+        'LogWrite'                                   => [],
+        'swoole.websocket.Event'                     => [SocketEventDispatcher::class],
+        'swoole.websocket.Event.Test'                => [Test::class],
+        'swoole.websocket.Event.Init'                => [Init::class],
+        'swoole.websocket.Event.Unload'              => [Unload::class],
+        'swoole.websocket.Event.Message'             => [Message::class],
+        'swoole.websocket.Event.RevokeMsg'           => [RevokeMsg::class],
+        'swoole.websocket.Event.FriendRequest'       => [FriendRequest::class],
+        'swoole.websocket.Event.FriendRequestAgree'  => [FriendRequestAgree::class],
+        'swoole.websocket.Event.FriendRequestReject' => [FriendRequestReject::class],
+        'swoole.websocket.Event.CreateChatroom'      => [CreateChatroom::class],
+        'swoole.websocket.Event.InviteJoinChatroom'  => [InviteJoinChatroom::class],
+        'swoole.websocket.Event.ChatRequest'         => [ChatRequest::class],
+        'swoole.websocket.Event.ChatRequestAgree'    => [ChatRequestAgree::class],
+        'swoole.websocket.Event.ChatRequestReject'   => [ChatRequestReject::class],
+        'swoole.websocket.Event.Close'               => [Unload::class],
     ],
 
     'subscribe' => [],

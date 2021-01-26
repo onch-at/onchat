@@ -9,7 +9,7 @@ use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
 
-class CreateChatroom extends BaseListener
+class CreateChatroom extends SocketEventHandler
 {
 
     /**
@@ -19,10 +19,6 @@ class CreateChatroom extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
 
         $result = ChatroomService::create($event['name'], $event['description'], $user['id'], $user['username']);

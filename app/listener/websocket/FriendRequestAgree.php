@@ -9,7 +9,7 @@ use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
 use app\core\service\Friend as FriendService;
 
-class FriendRequestAgree extends BaseListener
+class FriendRequestAgree extends SocketEventHandler
 {
 
     /**
@@ -19,10 +19,6 @@ class FriendRequestAgree extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
 
         $result = FriendService::agree($event['friendRequestId'], $user['id'], $event['selfAlias']);

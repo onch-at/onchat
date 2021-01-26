@@ -9,7 +9,7 @@ use app\core\util\Redis as RedisUtil;
 use app\core\service\Chat as ChatService;
 use app\core\service\User as UserService;
 
-class ChatRequestAgree extends BaseListener
+class ChatRequestAgree extends SocketEventHandler
 {
 
     /**
@@ -19,10 +19,6 @@ class ChatRequestAgree extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
 
         $result = ChatService::agree($event['requestId'], $user['id']);

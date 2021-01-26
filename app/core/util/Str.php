@@ -27,6 +27,6 @@ class Str
     {
         $arr = mb_str_split($str, 1, 'utf-8');
         shuffle($arr);
-        return implode($arr);
+        return implode('', $arr);
     }
 }

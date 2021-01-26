@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use think\swoole\Manager;
 use think\swoole\Websocket;
 use app\core\util\Redis as RedisUtil;
 
-abstract class BaseListener
+/**
+ * Socket事件处理程序
+ */
+abstract class SocketEventHandler
 {
+    /** WebSocket */
     protected $websocket;
-    protected $server;
     /** 当前用户的FD */
     protected $fd;
 
@@ -25,8 +27,7 @@ abstract class BaseListener
     public function __construct(Websocket $websocket)
     {
         $this->websocket = $websocket;
-        $this->server = app(Manager::class)->getServer();
-        $this->fd = $this->websocket->getSender();
+        $this->fd = $websocket->getSender();
     }
 
     /**
@@ -37,15 +38,5 @@ abstract class BaseListener
     public function getUser(): ?array
     {
         return RedisUtil::getUserByFd($this->fd);
-    }
-
-    /**
-     * 判断是否是正确的websocket连接
-     *
-     * @return bool
-     */
-    protected function isEstablished(): bool
-    {
-        return $this->server->isEstablished($this->fd);
     }
 }

@@ -7,7 +7,7 @@ namespace app\listener\websocket;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
 
-class Message extends BaseListener
+class Message extends SocketEventHandler
 {
 
     /**
@@ -17,10 +17,6 @@ class Message extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
         // TODO 群聊的头像
         $this->websocket

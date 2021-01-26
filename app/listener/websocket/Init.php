@@ -9,7 +9,7 @@ use app\core\util\Redis as RedisUtil;
 use app\model\UserInfo as UserInfoModel;
 use app\core\service\User as UserService;
 
-class Init extends BaseListener
+class Init extends SocketEventHandler
 {
     /**
      * 事件监听处理
@@ -18,10 +18,6 @@ class Init extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         RedisUtil::setFdUserPair($this->fd, $event['sessId']);
 
         $user = $this->getUser();

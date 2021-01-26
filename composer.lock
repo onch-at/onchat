@@ -794,16 +794,16 @@
         },
         {
             "name": "swoole/ide-helper",
-            "version": "4.6.1",
+            "version": "4.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swoole/ide-helper.git",
-                "reference": "5b36a9722eb8c693ff9831023cfb807474eab07c"
+                "reference": "62d923e3406d4d9c5a4749d810d11e2beb201abe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/5b36a9722eb8c693ff9831023cfb807474eab07c",
-                "reference": "5b36a9722eb8c693ff9831023cfb807474eab07c",
+                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/62d923e3406d4d9c5a4749d810d11e2beb201abe",
+                "reference": "62d923e3406d4d9c5a4749d810d11e2beb201abe",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -830,7 +830,7 @@
                 }
             ],
             "description": "IDE help files for Swoole.",
-            "time": "2021-01-11T19:15:13+00:00"
+            "time": "2021-01-26T00:17:29+00:00"
         },
         {
             "name": "symfony/finder",
@@ -898,16 +898,16 @@
         },
         {
             "name": "topthink/framework",
-            "version": "v6.0.6",
+            "version": "v6.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/framework.git",
-                "reference": "dd265d9e962da2c033a45190b839d5538770a760"
+                "reference": "db8fe22520a9660dd5e4c87e304034ac49e39270"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/framework/zipball/dd265d9e962da2c033a45190b839d5538770a760",
-                "reference": "dd265d9e962da2c033a45190b839d5538770a760",
+                "url": "https://api.github.com/repos/top-think/framework/zipball/db8fe22520a9660dd5e4c87e304034ac49e39270",
+                "reference": "db8fe22520a9660dd5e4c87e304034ac49e39270",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -961,7 +961,7 @@
                 "orm",
                 "thinkphp"
             ],
-            "time": "2021-01-10T15:35:54+00:00"
+            "time": "2021-01-25T14:48:29+00:00"
         },
         {
             "name": "topthink/think-captcha",
@@ -1116,16 +1116,16 @@
         },
         {
             "name": "topthink/think-swoole",
-            "version": "v3.0.10",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/think-swoole.git",
-                "reference": "044caf6430f153f752199dd643b3e499e382724f"
+                "reference": "111309985b0c22011d7fe09c794bdf52867ee653"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/044caf6430f153f752199dd643b3e499e382724f",
-                "reference": "044caf6430f153f752199dd643b3e499e382724f",
+                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/111309985b0c22011d7fe09c794bdf52867ee653",
+                "reference": "111309985b0c22011d7fe09c794bdf52867ee653",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -1177,7 +1177,7 @@
                 }
             ],
             "description": "Swoole extend for thinkphp",
-            "time": "2020-12-09T10:41:21+00:00"
+            "time": "2021-01-21T18:15:16+00:00"
         },
         {
             "name": "yzalis/identicon",

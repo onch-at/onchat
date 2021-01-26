@@ -10,7 +10,7 @@ use app\core\service\Chat as ChatService;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
 
-class ChatRequest extends BaseListener
+class ChatRequest extends SocketEventHandler
 {
 
     /**
@@ -20,10 +20,6 @@ class ChatRequest extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
 
         $result = ChatService::request(

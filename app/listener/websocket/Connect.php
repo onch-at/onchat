@@ -8,7 +8,7 @@ use think\facade\Session;
 use think\swoole\Websocket;
 use app\core\service\User as UserService;
 
-class Connect extends BaseListener
+class Connect extends SocketEventHandler
 {
 
     /**

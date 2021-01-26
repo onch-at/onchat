@@ -7,7 +7,7 @@ namespace app\listener\websocket;
 use app\core\service\User as UserService;
 use app\core\service\Chatroom as ChatroomService;
 
-class RevokeMsg extends BaseListener
+class RevokeMsg extends SocketEventHandler
 {
 
     /**
@@ -17,13 +17,10 @@ class RevokeMsg extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
+        $result = ChatroomService::revokeMsg($event['chatroomId'], $user['id'], $event['msgId']);
 
         $this->websocket->to(parent::ROOM_CHATROOM . $event['chatroomId'])
-            ->emit('revoke_msg', ChatroomService::revokeMsg($event['chatroomId'], $user['id'], $event['msgId']));
+            ->emit('revoke_msg', $result);
     }
 }

@@ -11,7 +11,7 @@ use app\core\service\User as UserService;
 use app\core\service\Message as MessageService;
 use app\core\service\Chatroom as ChatroomService;
 
-class InviteJoinChatroom extends BaseListener
+class InviteJoinChatroom extends SocketEventHandler
 {
 
     /**
@@ -21,10 +21,6 @@ class InviteJoinChatroom extends BaseListener
      */
     public function handle($event)
     {
-        if (!$this->isEstablished()) {
-            return false;
-        }
-
         $user = $this->getUser();
 
         $result = ChatService::invite($user['id'], $event['chatroomId'], $event['chatroomIdList']);
