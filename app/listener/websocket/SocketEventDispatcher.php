@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\core\Result;
 use think\helper\Str;
 use think\facade\Event;
+use app\core\util\Throttle;
 
 /**
  * Socket.io 事件分发器
@@ -13,7 +15,7 @@ use think\facade\Event;
  * 所有socket event集中发射到swoole.websocket.Event，
  * 因此我们需要自行分发事件
  */
-class SocketEventDispatcher
+class SocketEventDispatcher extends BaseListener
 {
 
     /**
@@ -23,6 +25,10 @@ class SocketEventDispatcher
      */
     public function handle($event)
     {
+        if (!Throttle::try($this->getClientIP())) {
+            return $this->websocket->emit($event['type'], new Result(Result::CODE_ERROR_HIGH_FREQUENCY));
+        }
+
         Event::trigger('swoole.websocket.Event.' . Str::studly($event['type']),  $event['data']);
     }
 }

@@ -30,6 +30,7 @@ use app\core\service\Friend as FriendService;
 use app\core\service\Chatroom as ChatroomService;
 use app\core\service\Chat as ChatService;
 use app\core\identicon\generator\ImageMagickGenerator;
+use app\core\util\Throttle;
 use app\model\ChatRequest;
 use think\facade\Config;
 
@@ -39,13 +40,7 @@ class Index extends BaseController
     public function index()
     {
 
-        dump(
-            ChatRecord::unionAll(function ($query) {
-                $query->table(ChatRecord::getTableNameById(1))->where('id', 1)->limit(1);
-            })->unionAll(function ($query) {
-                $query->table(ChatRecord::getTableNameById(2))->where('id', 1)->limit(1);
-            })->buildSql()
-        );
+        dump();
     }
 
     /**

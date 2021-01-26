@@ -23,13 +23,16 @@ class Result
     const CODE_ERROR_PARAM = -2;
     /** 权限不足 */
     const CODE_ERROR_NO_PERMISSION = -3;
+    /** 访问频率过高 */
+    const CODE_ERROR_HIGH_FREQUENCY = -4;
 
     /** 响应信息预定义 */
     const MSG = [
-        self::CODE_SUCCESS             => null,
-        self::CODE_ERROR_UNKNOWN       => '未知错误',
-        self::CODE_ERROR_PARAM         => '参数错误',
-        self::CODE_ERROR_NO_PERMISSION => '权限不足',
+        self::CODE_SUCCESS              => null,
+        self::CODE_ERROR_UNKNOWN        => '未知错误',
+        self::CODE_ERROR_PARAM          => '参数错误',
+        self::CODE_ERROR_NO_PERMISSION  => '权限不足',
+        self::CODE_ERROR_HIGH_FREQUENCY => '访问频率过高',
     ];
 
     public function __construct(int $code, ?string $msg = null, $data = null)
