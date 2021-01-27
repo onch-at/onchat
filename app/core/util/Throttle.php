@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace app\core\util;
 
+/**
+ * 频率限制器
+ */
 class Throttle
 {
     /** Redis Hash 名称 储存IP => 数据 */
@@ -11,8 +14,14 @@ class Throttle
     /** 限制时间（秒） */
     const LIMIT_TIME = 60;
     /** 时间内次数限制 */
-    const LIMIT_COUNT = 50;
+    const LIMIT_COUNT = 40;
 
+    /**
+     * 根据IP进行尝试
+     *
+     * @param string $ip
+     * @return boolean
+     */
     public static function try(string $ip): bool
     {
         $redis = Redis::getRedis();
@@ -40,6 +49,12 @@ class Throttle
         return self::reset($ip);
     }
 
+    /**
+     * 重置某个IP的数据
+     *
+     * @param string $ip
+     * @return boolean
+     */
     public static function reset(string $ip): bool
     {
         $redis = Redis::getRedis();
@@ -48,5 +63,16 @@ class Throttle
             'time'  => time(),
             'count' => 1
         ])) !== false;
+    }
+
+    /**
+     * 清理所有数据
+     *
+     * @return void
+     */
+    public static function clearAll()
+    {
+        $redis = Redis::getRedis();
+        $redis->del(self::REDIS_HASH_KEY);
     }
 }

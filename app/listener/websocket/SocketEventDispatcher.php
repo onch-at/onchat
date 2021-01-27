@@ -7,7 +7,7 @@ namespace app\listener\websocket;
 use app\core\Result;
 use think\helper\Str;
 use think\facade\Event;
-use app\core\util\Throttle;
+use app\core\util\Throttle as ThrottleUtil;
 
 /**
  * Socket.io 事件分发器
@@ -25,7 +25,7 @@ class SocketEventDispatcher extends BaseListener
      */
     public function handle($event)
     {
-        if (!Throttle::try($this->getClientIP())) {
+        if (!ThrottleUtil::try($this->getClientIP())) {
             return $this->websocket->emit($event['type'], new Result(Result::CODE_ERROR_HIGH_FREQUENCY));
         }
 

@@ -12,6 +12,7 @@ use think\facade\Console;
 use think\console\Command;
 use think\console\input\Argument;
 use app\core\util\Redis as RedisUtil;
+use app\core\util\Throttle as ThrottleUtil;
 use app\core\service\Chatroom as ChatroomService;
 
 class OnChat extends Command
@@ -39,6 +40,7 @@ class OnChat extends Command
     {
         RedisUtil::clearFdUserPair();
         RedisUtil::clearUserIdFdPair();
+        ThrottleUtil::clearAll();
     }
 
     protected function execute(Input $input, Output $output)
