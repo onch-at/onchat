@@ -9,57 +9,57 @@ namespace app\core\util;
  */
 class Throttle
 {
-    /** Redis Hash 名称 储存IP => 数据 */
-    const REDIS_HASH_KEY = 'ONCHAT_PAIR:ip-throttle';
+    /** Redis Hash 名称 储存uid => 数据 */
+    const REDIS_HASH_KEY = 'ONCHAT_PAIR:uid-throttle';
     /** 限制时间（秒） */
     const LIMIT_TIME = 60;
     /** 时间内次数限制 */
     const LIMIT_COUNT = 40;
 
     /**
-     * 根据IP进行尝试
+     * 根据用户ID进行尝试
      *
-     * @param string $ip
+     * @param int $userId
      * @return boolean
      */
-    public static function try(string $ip): bool
+    public static function try(int $userId): bool
     {
         $redis = Redis::getRedis();
-        $data  = $redis->hGet(self::REDIS_HASH_KEY, $ip);
+        $data  = $redis->hGet(self::REDIS_HASH_KEY, (string) $userId);
 
         if (!$data) {
-            return self::reset($ip);
+            return self::reset($userId);
         }
 
         $data = unserialize($data);
 
         // 如果当前时间在首次计数的时间内
         if (time() < $data['time'] + self::LIMIT_TIME) {
-            if ($data['count'] > self::LIMIT_COUNT) {
+            if ($data['count'] >= self::LIMIT_COUNT) {
                 return false;
             }
 
             // 增加次数
             $data['count'] += 1;
-            $redis->hSet(self::REDIS_HASH_KEY, $ip, serialize($data));
+            $redis->hSet(self::REDIS_HASH_KEY, (string) $userId, serialize($data));
 
             return true;
         }
 
-        return self::reset($ip);
+        return self::reset($userId);
     }
 
     /**
      * 重置某个IP的数据
      *
-     * @param string $ip
+     * @param int $userId
      * @return boolean
      */
-    public static function reset(string $ip): bool
+    public static function reset(int $userId): bool
     {
         $redis = Redis::getRedis();
 
-        return $redis->hSet(self::REDIS_HASH_KEY, $ip, serialize([
+        return $redis->hSet(self::REDIS_HASH_KEY, (string) $userId, serialize([
             'time'  => time(),
             'count' => 1
         ])) !== false;

@@ -15,7 +15,7 @@ use app\core\util\Throttle as ThrottleUtil;
  * 所有socket event集中发射到swoole.websocket.Event，
  * 因此我们需要自行分发事件
  */
-class SocketEventDispatcher extends BaseListener
+class SocketEventDispatcher extends SocketEventHandler
 {
 
     /**
@@ -25,7 +25,9 @@ class SocketEventDispatcher extends BaseListener
      */
     public function handle($event)
     {
-        if (!ThrottleUtil::try($this->getClientIP())) {
+        $user = $this->getUser();
+
+        if ($user && !ThrottleUtil::try($user['id'])) {
             return $this->websocket->emit($event['type'], new Result(Result::CODE_ERROR_HIGH_FREQUENCY));
         }
 
