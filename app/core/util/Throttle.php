@@ -66,6 +66,18 @@ class Throttle
     }
 
     /**
+     * 清理某个用户的数据
+     *
+     * @param integer $userId
+     * @return void
+     */
+    public static function clear(int $userId)
+    {
+        $redis = Redis::getRedis();
+        $redis->hDel(self::REDIS_HASH_KEY, (string) $userId);
+    }
+
+    /**
      * 清理所有数据
      *
      * @return void

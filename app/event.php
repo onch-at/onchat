@@ -27,7 +27,6 @@ return [
         'swoole.websocket.Event'                     => [SocketEventDispatcher::class],
         'swoole.websocket.Event.Test'                => [Test::class],
         'swoole.websocket.Event.Init'                => [Init::class],
-        'swoole.websocket.Event.Unload'              => [Unload::class],
         'swoole.websocket.Event.Message'             => [Message::class],
         'swoole.websocket.Event.RevokeMsg'           => [RevokeMsg::class],
         'swoole.websocket.Event.FriendRequest'       => [FriendRequest::class],
@@ -38,6 +37,8 @@ return [
         'swoole.websocket.Event.ChatRequest'         => [ChatRequest::class],
         'swoole.websocket.Event.ChatRequestAgree'    => [ChatRequestAgree::class],
         'swoole.websocket.Event.ChatRequestReject'   => [ChatRequestReject::class],
+        'swoole.websocket.Event.Unload'              => [Unload::class],
+        'swoole.websocket.Event.Disconnect'          => [Unload::class],
         'swoole.websocket.Event.Close'               => [Unload::class],
     ],
 

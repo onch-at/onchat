@@ -6,6 +6,7 @@ namespace app\listener\websocket;
 
 use app\core\util\Redis as RedisUtil;
 use app\core\service\User as UserService;
+use app\core\util\Throttle as ThrottleUtil;
 
 class Unload extends SocketEventHandler
 {
@@ -18,8 +19,14 @@ class Unload extends SocketEventHandler
     public function handle($event)
     {
         $user = $this->getUser();
+
+        if (!$user) {
+            return false;
+        }
+
         RedisUtil::removeFdUserPair($this->fd);
         RedisUtil::removeUserIdFdPair($user['id']);
+        ThrottleUtil::clear($user['id']);
 
         $chatrooms = UserService::getChatrooms($user['id']);
 
