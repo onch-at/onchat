@@ -39,8 +39,9 @@ return [
                 'client_size' => 2048,
             ],
             'redis' => [
-                'host'          => '127.0.0.1',
-                'port'          => 6379,
+                'host'          => env('redis.host', '127.0.0.1'),
+                'port'          => env('redis.port', 6379),
+                'password'      => env('redis.password', ''),
                 'max_active'    => 10,
                 'max_wait_time' => 5,
             ],
