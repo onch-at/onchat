@@ -1,5 +1,6 @@
 <?php
 
+use app\listener\task\SendMail;
 use app\listener\websocket\Init;
 use app\listener\websocket\Test;
 use app\listener\websocket\Unload;
@@ -40,6 +41,7 @@ return [
         'swoole.websocket.Event.Unload'              => [Unload::class],
         'swoole.websocket.Event.Disconnect'          => [Unload::class],
         'swoole.websocket.Event.Close'               => [Unload::class],
+        'swoole.task'                                => [SendMail::class]
     ],
 
     'subscribe' => [],

@@ -19,9 +19,9 @@ abstract class BaseListener
     /** 当前用户的FD */
     protected $fd;
 
-    public function __construct(Websocket $websocket)
+    public function __construct(Websocket $websocket, Server $server)
     {
-        $this->server    = app(Server::class);
+        $this->server    = $server;
         $this->websocket = $websocket;
         $this->fd        = $websocket->getSender();
     }
