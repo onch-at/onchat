@@ -75,13 +75,13 @@ class OnChat extends Command
 
     protected function install($output)
     {
-        $path = root_path() . '/resource/sql/';
+        $path = root_path('resource/sql/table/');
 
-        $dir = scandir($path . 'table');
+        $dir = scandir($path);
 
         $output->comment('Execute SQL statement…');
         foreach ($dir as $file) {
-            $filename = $path . 'table/' . $file;
+            $filename = $path . $file;
             if (preg_match('/(.sql)$/', $file) && is_file($filename)) {
                 Db::execute(file_get_contents($filename));
                 $output->comment(' > ' . $file);

@@ -15,7 +15,7 @@ class Mailer
         $debug = env('app_debug', false);
 
         $mail = new PHPMailer($debug);
-        $mail->SMTPDebug = $debug ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
+        $mail->SMTPDebug  = $debug ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
         $mail->isSMTP();
         $mail->Host       = Config::get('smtp.host');
         $mail->SMTPAuth   = true;

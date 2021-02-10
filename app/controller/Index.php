@@ -30,6 +30,7 @@ use app\core\service\Friend as FriendService;
 use app\core\service\Chatroom as ChatroomService;
 use app\core\service\Chat as ChatService;
 use app\core\identicon\generator\ImageMagickGenerator;
+use app\core\util\Str;
 use app\core\util\Throttle;
 use app\core\util\Tpl;
 use app\listener\task\SendMail;
@@ -47,14 +48,14 @@ class Index extends BaseController
 
     public function index(Server $server)
     {
-        $path = root_path() . '/resource/tpl/mail/captcha.html';
+        $path = root_path('resource/tpl/mail/') . 'captcha.html';
 
         $server->task(new Job([SendMail::class, 'handle'], [
             'from'      => ['system@chat.hypergo.net', 'OnChat'],
             'addresses' => ['hyperlife1119@qq.com'],
             'isHTML'    => true,
             'subject'   => 'OnChat：电子邮箱验证',
-            'body'      => Tpl::replace(file_get_contents($path), ['captcha' => 6666])
+            'body'      => Tpl::replace(file_get_contents($path), ['captcha' => Str::captcha(6)])
         ]));
     }
 
