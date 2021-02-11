@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\controller;
 
+use think\App;
 use think\Response;
-use app\facade\UserService;
 use think\captcha\facade\Captcha;
 use app\service\Index as IndexService;
 
@@ -13,19 +13,27 @@ class Index extends BaseController
 {
     protected $service;
 
-    public function __construct(IndexService $service)
+    public function __construct(App $app, IndexService $service)
     {
+        parent::__construct($app);
         $this->service = $service;
     }
 
     public function index()
     {
-        dump(UserService::checkLogin());
+        // $this->service->sendEmailCaptcha('1838491745@qq.com');
     }
 
-    public function sendMailCaptcha()
+    /**
+     * 发送邮箱验证码
+     * 验证码10分钟内有效，1分钟内不允许重复发送
+     *
+     * @param string $email
+     * @return Result
+     */
+    public function sendEmailCaptcha(string $email)
     {
-        $this->service->sendMailCaptcha();
+        return $this->service->sendEmailCaptcha($email);
     }
 
     /**
@@ -33,7 +41,7 @@ class Index extends BaseController
      *
      * @return Response
      */
-    public function captcha(): Response
+    public function imageCaptcha(): Response
     {
         return Captcha::create();
     }

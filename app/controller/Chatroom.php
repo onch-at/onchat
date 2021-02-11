@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\controller;
 
+use think\App;
 use app\core\Result;
 use app\service\Chatroom as ChatroomService;
 
@@ -11,8 +12,9 @@ class Chatroom extends BaseController
 {
     protected $service;
 
-    public function __construct(ChatroomService $service)
+    public function __construct(App $app, ChatroomService $service)
     {
+        parent::__construct($app);
         $this->service = $service;
     }
 

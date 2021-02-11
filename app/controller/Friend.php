@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\controller;
 
+use think\App;
 use app\core\Result;
 use app\facade\UserService;
 use app\service\Friend as FriendService;
@@ -12,8 +13,9 @@ class Friend extends BaseController
 {
     protected $service;
 
-    public function __construct(FriendService $service)
+    public function __construct(App $app, FriendService $service)
     {
+        parent::__construct($app);
         $this->service = $service;
     }
 

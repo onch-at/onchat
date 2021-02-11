@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\listener\task;
 
+use think\Event;
 use app\core\Job;
 use Swoole\Server\Task;
-use think\facade\Event;
 
 /**
  * 任务分发器
@@ -19,10 +19,10 @@ class TaskDispatcher
      *
      * @return mixed
      */
-    public function handle(Task $task)
+    public function handle(Task $task, Event $event)
     {
         if ($task->data instanceof Job) {
-            Event::trigger('swoole.task.' . $task->data->name, $task->data->params);
+            $event->trigger('swoole.task.' . $task->data->name, $task->data->params);
         }
     }
 }

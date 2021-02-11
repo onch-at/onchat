@@ -8,17 +8,18 @@ use app\core\Result;
 
 use think\facade\Db;
 use Identicon\Identicon;
-use app\facade\ChatroomService;
-use app\model\User as UserModel;
+use app\facade\IndexService;
 use app\util\Str as StrUtil;
 use app\util\Date as DateUtil;
+use app\facade\ChatroomService;
+use app\model\User as UserModel;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
+use app\core\identicon\ImageMagickGenerator;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatSession as ChatSessionModel;
-use app\core\identicon\ImageMagickGenerator;
 
 class User
 {
@@ -109,19 +110,21 @@ class User
      */
     public function register(): Result
     {
+        if (!self::CAN_REGISTER) {
+            return new Result(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
+        }
+
         $username = input('post.username/s');
         $password = input('post.password/s');
+        $email    = input('post.email/s');
+        $captcha  = input('post.captcha/s');
 
-        if (!$username || !$password || !input('post.captcha')) { // 如果参数缺失
+        if (!$username || !$password || !$email || !$captcha || !$this->checkEmail($email)->data) { // 如果参数缺失
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        if (!captcha_check(input('post.captcha'))) {
+        if (!IndexService::checkEmailCaptcha($email, $captcha)) {
             return new Result(Result::CODE_ERROR_PARAM, '验证码错误！');
-        }
-
-        if (!self::CAN_REGISTER) {
-            return new Result(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
         }
 
         $username = StrUtil::trimAll($username);
@@ -155,6 +158,7 @@ class User
             $user = UserModel::create([
                 'username'    => $username,
                 'password'    => $hash,
+                'email'       => strtolower($email),
                 'create_time' => $timestamp,
                 'update_time' => $timestamp,
             ]);

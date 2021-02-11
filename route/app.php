@@ -18,5 +18,7 @@ Route::get('/', function () {
 /** 应用主路由/公共路由/杂项路由 */
 Route::group('index', function () {
     Route::get('/', 'index');
-    Route::get('captcha', 'captcha');
+    Route::get('imagecaptcha', 'imageCaptcha');
+
+    Route::post('emailcaptcha', 'sendEmailCaptcha');
 })->completeMatch()->prefix('Index/');

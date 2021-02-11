@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\controller;
 
+use think\App;
 use app\core\Result;
 use app\service\User as UserService;
 
@@ -11,8 +12,9 @@ class User extends BaseController
 {
     protected $service;
 
-    public function __construct(UserService $service)
+    public function __construct(App $app, UserService $service)
     {
+        parent::__construct($app);
         $this->service = $service;
     }
 
