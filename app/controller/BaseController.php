@@ -1,7 +1,8 @@
 <?php
-declare (strict_types = 1);
 
-namespace app;
+declare(strict_types=1);
+
+namespace app\controller;
 
 use think\App;
 use think\exception\ValidateException;
@@ -52,7 +53,8 @@ abstract class BaseController
 
     // 初始化
     protected function initialize()
-    {}
+    {
+    }
 
     /**
      * 验证数据
@@ -90,5 +92,4 @@ abstract class BaseController
 
         return $v->failException(true)->check($data);
     }
-
 }

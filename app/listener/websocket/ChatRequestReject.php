@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\core\util\Redis as RedisUtil;
-use app\core\service\User as UserService;
-use app\core\service\Chat as ChatService;
+use app\service\Chat as ChatService;
+use app\util\Redis as RedisUtil;
 
 class ChatRequestReject extends SocketEventHandler
 {
@@ -17,11 +16,13 @@ class ChatRequestReject extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, ChatService $chatService)
     {
+        ['requestId' => $requestId, 'reason' => $reason] = $event;
+
         $user = $this->getUser();
 
-        $result = ChatService::reject($event['requestId'], $user['id'], $event['rejectReason']);
+        $result = $chatService->reject($$requestId, $user['id'], $reason);
 
         $this->websocket->emit('chat_request_reject', $result);
 

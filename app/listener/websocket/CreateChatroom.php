@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\core\util\Redis as RedisUtil;
-use app\core\service\User as UserService;
-use app\core\service\Chatroom as ChatroomService;
+use app\service\User as UserService;
+use app\util\Redis as RedisUtil;
+use app\service\Chatroom as ChatroomService;
 
 class CreateChatroom extends SocketEventHandler
 {
@@ -17,11 +17,13 @@ class CreateChatroom extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, ChatroomService $chatroomService)
     {
+        ['name' => $name, 'description' => $description] = $event;
+
         $user = $this->getUser();
 
-        $result = ChatroomService::create($event['name'], $event['description'], $user['id'], $user['username']);
+        $result = $chatroomService->create($name, $description, $user['id'], $user['username']);
 
         $this->websocket->emit('create_chatroom', $result);
 

@@ -7,7 +7,7 @@ namespace app\middleware;
 use think\Response;
 use app\core\Result;
 use think\facade\Session;
-use app\core\service\User;
+use app\service\User;
 
 class Auth
 {

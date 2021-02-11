@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\core;
 
-use app\core\util\Arr as ArrUtil;
+use app\util\Arr as ArrUtil;
 
 class Result
 {

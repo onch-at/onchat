@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use app\BaseController;
-
-use app\core\service\Friend as FriendService;
-use app\core\service\User as UserService;
 use app\core\Result;
+use app\facade\UserService;
+use app\service\Friend as FriendService;
 
 class Friend extends BaseController
 {
+    protected $service;
+
+    public function __construct(FriendService $service)
+    {
+        $this->service = $service;
+    }
 
     /**
      * 获取我的收到好友申请
@@ -20,7 +24,7 @@ class Friend extends BaseController
      */
     public function getReceiveRequests(): Result
     {
-        return FriendService::getReceiveRequests();
+        return $this->service->getReceiveRequests();
     }
 
     /**
@@ -30,7 +34,7 @@ class Friend extends BaseController
      */
     public function getSendRequests(): Result
     {
-        return FriendService::getSendRequests();
+        return $this->service->getSendRequests();
     }
 
     /**
@@ -41,7 +45,7 @@ class Friend extends BaseController
      */
     public function getRequestByTargetId(int $targetId): Result
     {
-        return FriendService::getRequestByTargetId($targetId);
+        return $this->service->getRequestByTargetId($targetId);
     }
 
     /**
@@ -52,7 +56,7 @@ class Friend extends BaseController
      */
     public function getRequestBySelfId(int $selfId): Result
     {
-        return FriendService::getRequestBySelfId($selfId);
+        return $this->service->getRequestBySelfId($selfId);
     }
 
     /**
@@ -63,7 +67,7 @@ class Friend extends BaseController
      */
     public function getRequestById(int $id): Result
     {
-        return FriendService::getRequestById($id);
+        return $this->service->getRequestById($id);
     }
 
     /**
@@ -74,7 +78,7 @@ class Friend extends BaseController
      */
     public function setFriendAlias(int $chatroomId): Result
     {
-        return FriendService::setFriendAlias($chatroomId, input('put.alias/s'));
+        return $this->service->setFriendAlias($chatroomId, input('put.alias/s'));
     }
 
     /**
@@ -87,7 +91,7 @@ class Friend extends BaseController
     public function isFriend(int $id): Result
     {
         $userId = UserService::getId();
-        $data = FriendService::isFriend($userId, $id);
+        $data = $this->service->isFriend($userId, $id);
         return Result::success($data);
     }
 }

@@ -7,7 +7,7 @@ namespace app\listener\websocket;
 use app\core\Result;
 use think\helper\Str;
 use think\facade\Event;
-use app\core\util\Throttle as ThrottleUtil;
+use app\util\Throttle as ThrottleUtil;
 
 /**
  * Socket.io 事件分发器
@@ -25,12 +25,14 @@ class SocketEventDispatcher extends SocketEventHandler
      */
     public function handle($event)
     {
+        ['type' => $type, 'data' => $data] = $event;
+
         $user = $this->getUser();
 
         if ($user && !ThrottleUtil::try($user['id'])) {
-            return $this->websocket->emit($event['type'], new Result(Result::CODE_ERROR_HIGH_FREQUENCY));
+            return $this->websocket->emit($type, new Result(Result::CODE_ERROR_HIGH_FREQUENCY));
         }
 
-        Event::trigger('swoole.websocket.Event.' . Str::studly($event['type']),  $event['data']);
+        Event::trigger('swoole.websocket.Event.' . Str::studly($type),  $data);
     }
 }

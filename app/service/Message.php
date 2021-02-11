@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace app\core\service;
+namespace app\service;
 
-use app\core\Result;
-use app\core\util\Str as StrUtil;
 use HTMLPurifier;
+use app\core\Result;
 use HTMLPurifier_Config;
+
+use app\util\Str as StrUtil;
 
 class Message
 {
@@ -28,7 +29,7 @@ class Message
         self::CODE_MSG_LONG  => '文本消息长度过长',
     ];
 
-    public static function handler(array $msg): Result
+    public function handler(array $msg): Result
     {
         switch ($msg['type']) {
             case self::TYPE_TEXT:

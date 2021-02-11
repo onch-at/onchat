@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\core\util\Redis as RedisUtil;
-use app\core\service\User as UserService;
-use app\core\service\Friend as FriendService;
+use app\service\User as UserService;
+use app\util\Redis as RedisUtil;
+use app\service\Friend as FriendService;
 
 class FriendRequest extends SocketEventHandler
 {
@@ -17,22 +17,29 @@ class FriendRequest extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, FriendService $friendService)
     {
+        [
+            'targetId'     => $targetId,
+            'targetAlias' => $targetAlias,
+            'reason'      => $reason,
+        ] = $event;
+
         $user = $this->getUser();
 
-        $result = FriendService::request(
+        $result = $friendService->request(
             $user['id'],
-            $event['userId'],
-            $event['requestReason'],
-            $event['targetAlias']
+            $targetId,
+            $reason,
+            $targetAlias
         );
 
         $this->websocket->emit('friend_request', $result);
 
         // 如果成功发出申请，则尝试给被申请人推送消息
         if ($result->code === Result::CODE_SUCCESS) {
-            $this->websocket->to(parent::ROOM_FRIEND_REQUEST . $event['userId'])->emit('friend_request', $result);
+            $this->websocket->to(parent::ROOM_FRIEND_REQUEST . $targetId)
+                ->emit('friend_request', $result);
         }
     }
 }

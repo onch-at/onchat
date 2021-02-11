@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\util\Redis as RedisUtil;
-use app\core\service\User as UserService;
-use app\core\util\Throttle as ThrottleUtil;
+use app\service\User as UserService;
+use app\util\Redis as RedisUtil;
+use app\util\Throttle as ThrottleUtil;
 
 class Unload extends SocketEventHandler
 {
@@ -16,26 +16,26 @@ class Unload extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, UserService $userService)
     {
         $user = $this->getUser();
 
-        if (!$user) {
-            return false;
-        }
+        if (!$user) return false;
+
+        ['id' => $userId] = $user;
 
         RedisUtil::removeFdUserPair($this->fd);
-        RedisUtil::removeUserIdFdPair($user['id']);
-        ThrottleUtil::clear($user['id']);
+        RedisUtil::removeUserIdFdPair($userId);
+        ThrottleUtil::clear($userId);
 
-        $chatrooms = UserService::getChatrooms($user['id']);
+        $chatrooms = $userService->getChatrooms($userId);
 
         // 退出房间
         foreach ($chatrooms as $chatroom) {
             $this->websocket->leave(parent::ROOM_CHATROOM . $chatroom['id']);
         }
 
-        $this->websocket->leave(parent::ROOM_FRIEND_REQUEST . $user['id']);
-        $this->websocket->leave(parent::ROOM_CHAT_REQUEST . $user['id']);
+        $this->websocket->leave(parent::ROOM_FRIEND_REQUEST . $userId);
+        $this->websocket->leave(parent::ROOM_CHAT_REQUEST . $userId);
     }
 }

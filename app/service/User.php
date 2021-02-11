@@ -2,21 +2,23 @@
 
 declare(strict_types=1);
 
-namespace app\core\service;
+namespace app\service;
 
 use app\core\Result;
+
 use think\facade\Db;
 use Identicon\Identicon;
+use app\facade\ChatroomService;
 use app\model\User as UserModel;
-use app\core\util\Str as StrUtil;
-use app\core\util\Date as DateUtil;
+use app\util\Str as StrUtil;
+use app\util\Date as DateUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatSession as ChatSessionModel;
-use app\core\identicon\generator\ImageMagickGenerator;
+use app\core\identicon\ImageMagickGenerator;
 
 class User
 {
@@ -85,7 +87,7 @@ class User
      *
      * @return integer|null
      */
-    public static function getId(): ?int
+    public function getId(): ?int
     {
         return session(self::SESSION_USER_LOGIN . '.id');
     }
@@ -95,7 +97,7 @@ class User
      *
      * @return string|null
      */
-    public static function getUsername(): ?string
+    public function getUsername(): ?string
     {
         return session(self::SESSION_USER_LOGIN . '.username');
     }
@@ -105,7 +107,7 @@ class User
      *
      * @return Result
      */
-    public static function register(): Result
+    public function register(): Result
     {
         $username = input('post.username/s');
         $password = input('post.password/s');
@@ -129,12 +131,12 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
 
-        $result = self::checkPassword($password);
+        $result = $this->checkPassword($password);
         if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
         }
 
-        if (!empty(self::getIdByUsername($username))) { // 如果已经有这个用户了
+        if (!empty($this->getIdByUsername($username))) { // 如果已经有这个用户了
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_EXIST]);
         }
 
@@ -176,9 +178,9 @@ class User
 
             UserInfoModel::create($userInfo);
 
-            self::saveLoginStatus($user->id, $username, $hash); // 保存登录状态
+            $this->saveLoginStatus($user->id, $username, $hash); // 保存登录状态
 
-            Chatroom::addMember(1, $user->id); // 添加新用户到默认聊天室
+            ChatroomService::addMember(1, $user->id); // 添加新用户到默认聊天室
 
             unset($user->password); // 删掉密码
 
@@ -211,7 +213,7 @@ class User
      *
      * @return Result
      */
-    public static function login(): Result
+    public function login(): Result
     {
         $username = input('post.username/s');
         $password = input('post.password/s');
@@ -224,7 +226,7 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
 
-        $result = self::checkPassword($password);
+        $result = $this->checkPassword($password);
         if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
         }
@@ -232,7 +234,7 @@ class User
         $fields = self::USER_FIELDS;
         $fields[] = 'user.password';
 
-        $user = self::getInfoByKey('username', $username, $fields);
+        $user = $this->getInfoByKey('username', $username, $fields);
 
         if (empty($user)) { // 如果用户不存在
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
@@ -242,7 +244,7 @@ class User
             return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_PASSWORD_ERROR]);
         }
 
-        self::saveLoginStatus($user['id'], $user['username'], $user['password']); // 保存登录状态
+        $this->saveLoginStatus($user['id'], $user['username'], $user['password']); // 保存登录状态
 
         unset($user['password']);
 
@@ -260,7 +262,7 @@ class User
      *
      * @return void
      */
-    public static function logout(): void
+    public function logout(): void
     {
         session(self::SESSION_USER_LOGIN, null);
     }
@@ -273,7 +275,7 @@ class User
      * @param string $hashPassword 密码密文
      * @return void
      */
-    public static function saveLoginStatus(int $id, string $username, string $hashPassword): void
+    public function saveLoginStatus(int $id, string $username, string $hashPassword): void
     {
         session(self::SESSION_USER_LOGIN, [
             'id'       => $id,
@@ -290,7 +292,7 @@ class User
      * @param string|array $field 需要获取的字段名
      * @return array
      */
-    public static function getInfoByKey(string $key, $value, $field): array
+    public function getInfoByKey(string $key, $value, $field): array
     {
 
         return UserModel::where($key == 'id' ? 'user.id' : $key, '=', $value)
@@ -306,7 +308,7 @@ class User
      * @param integer $id
      * @return Result
      */
-    public static function getUserById(int $id): Result
+    public function getUserById(int $id): Result
     {
         $user = UserModel::join('user_info', 'user_info.user_id = user.id')
             ->where('user.id', '=', $id)
@@ -332,7 +334,7 @@ class User
      * @param string $username
      * @return Result
      */
-    public static function getUserByUsername(string $username): Result
+    public function getUserByUsername(string $username): Result
     {
         $user = UserModel::where('user.username', '=', $username)->join('user_info', 'user_info.user_id = user.id')
             ->field(self::USER_FIELDS)->find();
@@ -357,7 +359,7 @@ class User
      * @param integer $chatroomId
      * @return string|null
      */
-    public static function getNicknameInChatroom(int $id, int $chatroomId): ?string
+    public function getNicknameInChatroom(int $id, int $chatroomId): ?string
     {
         return ChatMemberModel::where([
             'user_id'     => $id,
@@ -371,7 +373,7 @@ class User
      * @param integer $id 用户ID
      * @return string|null
      */
-    public static function getUsernameById(int $id): ?string
+    public function getUsernameById(int $id): ?string
     {
         return UserModel::where('id', '=', $id)->value('username');
     }
@@ -382,7 +384,7 @@ class User
      * @param string $username 用户名
      * @return integer
      */
-    public static function getIdByUsername(string $username): ?int
+    public function getIdByUsername(string $username): ?int
     {
         return UserModel::where('username', '=', $username)->value('id');
     }
@@ -393,7 +395,7 @@ class User
      *
      * @return Result
      */
-    public static function checkLogin(): Result
+    public function checkLogin(): Result
     {
         $session = session(self::SESSION_USER_LOGIN);
         if (empty($session)) { // 如果没有登录的Session
@@ -402,7 +404,7 @@ class User
 
         $fields = self::USER_FIELDS;
         $fields[] = 'user.password';
-        $user = self::getInfoByKey('id', $session['id'], $fields);
+        $user = $this->getInfoByKey('id', $session['id'], $fields);
 
         if ($session['password'] !== $user['password']) { // 如果密码错误
             return Result::success(false);
@@ -425,7 +427,7 @@ class User
      * @param string $password
      * @return integer
      */
-    public static function checkPassword(string $password): int
+    public function checkPassword(string $password): int
     {
         $length = mb_strlen($password, 'utf-8');
 
@@ -437,13 +439,32 @@ class User
     }
 
     /**
+     * 检测邮箱是否可用
+     *
+     * @param string $email
+     * @return Result
+     */
+    public function checkEmail(?string $email = null): Result
+    {
+        if (!$email) {
+            $email = input('get.email/s');
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return Result::success(false);
+        }
+
+        return Result::success(UserModel::where('email', '=', $email)->field('id')->find() === null);
+    }
+
+    /**
      * 上传头像
      *
      * @return Result
      */
-    public static function avatar(): Result
+    public function avatar(): Result
     {
-        $userId = self::getId();
+        $userId = $this->getId();
 
         $bucket = OssClient::getBucket();
 
@@ -523,10 +544,10 @@ class User
      *
      * @return array
      */
-    public static function getChatrooms($userId = null): array
+    public function getChatrooms($userId = null): array
     {
         return ChatMemberModel::join('chatroom', 'chat_member.chatroom_id = chatroom.id')
-            ->where('chat_member.user_id', '=', $userId ?: self::getId())
+            ->where('chat_member.user_id', '=', $userId ?: $this->getId())
             ->field('chatroom.*')
             ->select()
             ->toArray();
@@ -537,9 +558,9 @@ class User
      *
      * @return Result
      */
-    public static function getChatSessions(): Result
+    public function getChatSessions(): Result
     {
-        $userId = self::getId();
+        $userId = $this->getId();
 
         $ossClient = OssClient::getInstance();
 
@@ -680,9 +701,9 @@ class User
      *
      * @return Result
      */
-    public static function getPrivateChatrooms(): Result
+    public function getPrivateChatrooms(): Result
     {
-        $userId = self::getId();
+        $userId = $this->getId();
         $ossClient = OssClient::getInstance();
 
         $data = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')
@@ -728,9 +749,9 @@ class User
      *
      * @return Result
      */
-    public static function getGroupChatrooms(): Result
+    public function getGroupChatrooms(): Result
     {
-        $userId = self::getId();
+        $userId = $this->getId();
         $ossClient = OssClient::getInstance();
 
         $data = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
@@ -772,9 +793,9 @@ class User
      * @param boolean $sticky
      * @return Result
      */
-    public static function stickyChatSession(int $id, $sticky = true): Result
+    public function stickyChatSession(int $id, $sticky = true): Result
     {
-        $userId = self::getId();
+        $userId = $this->getId();
 
         $chatSession = ChatSessionModel::where([
             'id'      => $id,
@@ -797,9 +818,9 @@ class User
      * @param integer $id 聊天室成员表ID
      * @return Result
      */
-    public static function unstickyChatSession(int $id): Result
+    public function unstickyChatSession(int $id): Result
     {
-        return self::stickyChatSession($id, false);
+        return $this->stickyChatSession($id, false);
     }
 
     /**
@@ -809,9 +830,9 @@ class User
      * @param integer $unread
      * @return Result
      */
-    public static function readedChatSession(int $id, int $unread = 0): Result
+    public function readedChatSession(int $id, int $unread = 0): Result
     {
-        $userId = self::getId();
+        $userId = $this->getId();
 
         $chatSession = ChatSessionModel::where([
             'id'      => $id,
@@ -834,9 +855,9 @@ class User
      * @param integer $id
      * @return Result
      */
-    public static function unreadChatSession(int $id): Result
+    public function unreadChatSession(int $id): Result
     {
-        return self::readedChatSession($id, 1);
+        return $this->readedChatSession($id, 1);
     }
 
     /**
@@ -844,11 +865,11 @@ class User
      *
      * @return Result
      */
-    public static function saveUserInfo(): Result
+    public function saveUserInfo(): Result
     {
-        $userId = self::getId();
+        $userId = $this->getId();
 
-        $nickname      = input('put.nickname/s') ?: self::getUsername();
+        $nickname      = input('put.nickname/s') ?: $this->getUsername();
         $signature     = input('put.signature/s');
         $mood          = input('put.mood/d');
         $birthday      = input('put.birthday/d');

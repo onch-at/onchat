@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\util\Sql as SqlUtil;
-use app\core\util\Redis as RedisUtil;
+use app\util\Sql as SqlUtil;
+use app\util\Redis as RedisUtil;
 use app\model\UserInfo as UserInfoModel;
-use app\core\service\User as UserService;
+use app\service\User as UserService;
 
 class Init extends SocketEventHandler
 {
@@ -16,12 +16,12 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, UserService $userService)
     {
         RedisUtil::setFdUserPair($this->fd, $event['sessId']);
 
         $user = $this->getUser();
-        $chatrooms = UserService::getChatrooms($user['id']);
+        $chatrooms = $userService->getChatrooms($user['id']);
 
         // 储存uid - fd
         RedisUtil::setUserIdFdPair($user['id'], $this->fd);

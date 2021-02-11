@@ -10,10 +10,10 @@ use think\console\Input;
 use think\console\Output;
 use think\facade\Console;
 use think\console\Command;
+use app\facade\ChatroomService;
 use think\console\input\Argument;
-use app\core\util\Redis as RedisUtil;
-use app\core\util\Throttle as ThrottleUtil;
-use app\core\service\Chatroom as ChatroomService;
+use app\util\Redis as RedisUtil;
+use app\util\Throttle as ThrottleUtil;
 
 class OnChat extends Command
 {

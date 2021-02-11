@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\core\util;
+namespace app\util;
 
 class Tpl
 {
@@ -13,7 +13,7 @@ class Tpl
      * @param array $kv 键值对
      * @return string
      */
-    public static function replace(string $tpl, array $kv): string
+    public static function assign(string $tpl, array $kv): string
     {
         foreach ($kv as $key => $value) {
             $tpl = preg_replace("/\{\{\s*({$key})\s*\}\}/",  $value, $tpl);

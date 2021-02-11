@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\core\util\Redis as RedisUtil;
-use app\core\service\Chat as ChatService;
-use app\core\service\User as UserService;
-use app\core\service\Message as MessageService;
-use app\core\service\Chatroom as ChatroomService;
+use app\service\Chat as ChatService;
+use app\service\User as UserService;
+use app\util\Redis as RedisUtil;
+use app\service\Message as MessageService;
+use app\service\Chatroom as ChatroomService;
 
 class InviteJoinChatroom extends SocketEventHandler
 {
@@ -19,11 +19,13 @@ class InviteJoinChatroom extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, ChatService $chatService, ChatroomService $chatroomService)
     {
+        ['chatroomId' => $chatroomId, 'chatroomIdList' => $chatroomIdList] = $event;
+
         $user = $this->getUser();
 
-        $result = ChatService::invite($user['id'], $event['chatroomId'], $event['chatroomIdList']);
+        $result = $chatService->invite($user['id'], $chatroomId, $chatroomIdList);
 
         $this->websocket->emit('invite_join_chatroom', $result);
 
@@ -34,7 +36,7 @@ class InviteJoinChatroom extends SocketEventHandler
         $msg = [
             'type' => MessageService::TYPE_CHAT_INVITATION,
             'data' => [
-                'chatroomId' => $event['chatroomId']
+                'chatroomId' => $chatroomId
             ]
         ];
 
@@ -43,7 +45,7 @@ class InviteJoinChatroom extends SocketEventHandler
             $msg['chatroomId'] = $chatroomId;
             $this->websocket
                 ->to(parent::ROOM_CHATROOM . $chatroomId)
-                ->emit('message', ChatroomService::setMessage($user['id'], $msg));
+                ->emit('message', $chatroomService->setMessage($user['id'], $msg));
         }
     }
 }

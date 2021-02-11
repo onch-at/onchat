@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace app\core\service;
+namespace app\service;
 
 use app\core\Result;
 use think\facade\Db;
-use app\model\User as UserModel;
-use app\core\util\Sql as SqlUtil;
-use app\core\util\Str as StrUtil;
+use app\facade\UserService;
+use app\facade\ChatroomService;
+use app\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
-use app\core\util\Redis as RedisUtil;
+use app\util\Redis as RedisUtil;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
@@ -36,6 +36,9 @@ class Chat
         self::CODE_REQUEST_HANDLED => '该请求已被处理！'
     ];
 
+    protected $userService;
+    protected $chatroomService;
+
     /**
      * 邀请好友入群
      *
@@ -44,7 +47,7 @@ class Chat
      * @param array $chatroomIdList 受邀人的私聊聊天室ID列表
      * @return Result
      */
-    public static function invite(int $inviter, int $chatroomId, array $chatroomIdList): Result
+    public function invite(int $inviter, int $chatroomId, array $chatroomIdList): Result
     {
         // 找到这个聊天室
         $chatroom = ChatroomModel::join('chat_member', 'chat_member.chatroom_id = chatroom.id')
@@ -59,7 +62,7 @@ class Chat
         }
 
         // 人数超出上限
-        if (Chatroom::isPeopleNumFull($chatroomId)) {
+        if (ChatroomService::isPeopleNumFull($chatroomId)) {
             return new Result(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
         }
 
@@ -82,15 +85,15 @@ class Chat
      * @param string $reason 申请原因
      * @return Result
      */
-    public static function request(int $applicant, int $chatroomId, string $reason = null): Result
+    public function request(int $applicant, int $chatroomId, string $reason = null): Result
     {
         // 如果已经是聊天室成员了
-        if (Chatroom::isMember($chatroomId, $applicant)) {
+        if (ChatroomService::isMember($chatroomId, $applicant)) {
             return new Result(Result::CODE_ERROR_PARAM, '你已加入该聊天室！');
         }
 
         // 如果人数已满
-        if (Chatroom::isPeopleNumFull($chatroomId)) {
+        if (ChatroomService::isPeopleNumFull($chatroomId)) {
             return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满！');
         }
 
@@ -175,7 +178,7 @@ class Chat
      * @param integer $handler 处理人ID
      * @return Result
      */
-    public static function agree(int $id, int $handler): Result
+    public function agree(int $id, int $handler): Result
     {
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
             ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
@@ -211,7 +214,7 @@ class Chat
         $chatroomId = $request->chatroom_id;
 
         // 人数超出上限
-        if (Chatroom::isPeopleNumFull($chatroomId)) {
+        if (ChatroomService::isPeopleNumFull($chatroomId)) {
             return new Result(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
         }
 
@@ -230,7 +233,7 @@ class Chat
             $request->update_time = time() * 1000;
             $request->save();
 
-            $result = Chatroom::addMember($chatroomId, $request->applicant_id, $request->applicantNickname);
+            $result = ChatroomService::addMember($chatroomId, $request->applicant_id, $request->applicantNickname);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
@@ -270,7 +273,7 @@ class Chat
      * @param string $reason 拒绝原因
      * @return Result
      */
-    public static function reject(int $id, int $handler, ?string $reason): Result
+    public function reject(int $id, int $handler, ?string $reason): Result
     {
         // 如果剔除空格后长度为零，则直接置空
         if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
@@ -341,9 +344,9 @@ class Chat
      *
      * @return Result
      */
-    public static function readed(): Result
+    public function readed(): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
         ChatRequestModel::whereRaw("!JSON_CONTAINS(readed_list, JSON_ARRAY({$userId}))")
             ->update([
                 'readed_list' => Db::raw("JSON_ARRAY_APPEND(readed_list, '$', {$userId})")
@@ -363,9 +366,9 @@ class Chat
      * @param integer $id
      * @return Result
      */
-    public static function getReceiveRequestById(int $id): Result
+    public function getReceiveRequestById(int $id): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
 
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
             ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
@@ -405,9 +408,9 @@ class Chat
      *
      * @return Result
      */
-    public static function getReceiveRequests(): Result
+    public function getReceiveRequests(): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
         $ossClient = OssClient::getInstance();
 
         $data = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')

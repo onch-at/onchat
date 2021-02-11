@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\util\Redis as RedisUtil;
+use app\util\Redis as RedisUtil;
 
 /**
  * Socket事件处理程序

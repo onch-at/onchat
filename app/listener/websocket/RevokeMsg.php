@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\service\User as UserService;
-use app\core\service\Chatroom as ChatroomService;
+use app\service\User as UserService;
+use app\service\Chatroom as ChatroomService;
 
 class RevokeMsg extends SocketEventHandler
 {
@@ -15,12 +15,14 @@ class RevokeMsg extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, ChatroomService $chatroomService)
     {
-        $user = $this->getUser();
-        $result = ChatroomService::revokeMsg($event['chatroomId'], $user['id'], $event['msgId']);
+        ['chatroomId' => $chatroomId, 'msgId' => $msgId] = $event;
 
-        $this->websocket->to(parent::ROOM_CHATROOM . $event['chatroomId'])
+        $user = $this->getUser();
+        $result = $chatroomService->revokeMsg($chatroomId, $user['id'], $msgId);
+
+        $this->websocket->to(parent::ROOM_CHATROOM . $chatroomId)
             ->emit('revoke_msg', $result);
     }
 }

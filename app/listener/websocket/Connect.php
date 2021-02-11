@@ -6,7 +6,7 @@ namespace app\listener\websocket;
 
 use think\facade\Session;
 use think\swoole\Websocket;
-use app\core\service\User as UserService;
+use app\service\User as UserService;
 
 class Connect extends SocketEventHandler
 {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\core\util\Redis as RedisUtil;
-use app\core\service\User as UserService;
-use app\core\service\Friend as FriendService;
+use app\service\User as UserService;
+use app\util\Redis as RedisUtil;
+use app\service\Friend as FriendService;
 
 class FriendRequestReject extends SocketEventHandler
 {
@@ -17,11 +17,13 @@ class FriendRequestReject extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, FriendService $friendService)
     {
+        ['requestId' => $requestId, 'reason' => $reason] = $event;
+
         $user = $this->getUser();
 
-        $result = FriendService::reject($event['friendRequestId'], $user['id'], $event['rejectReason']);
+        $result = $friendService->reject($requestId, $user['id'], $reason);
 
         $this->websocket->emit('friend_request_reject', $result);
 

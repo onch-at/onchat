@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use app\BaseController;
-
-use app\core\service\Chat as ChatService;
-use app\core\service\User as UserService;
 use app\core\Result;
+use app\service\Chat as ChatService;
 
 class Chat extends BaseController
 {
+    protected $service;
+
+    public function __construct(ChatService $service)
+    {
+        $this->service = $service;
+    }
 
     /**
      * 获取我收到的入群申请
@@ -20,7 +23,7 @@ class Chat extends BaseController
      */
     public function getReceiveRequests(): Result
     {
-        return ChatService::getReceiveRequests();
+        return $this->service->getReceiveRequests();
     }
 
     /**
@@ -31,7 +34,7 @@ class Chat extends BaseController
      */
     public function getReceiveRequestById(int $id): Result
     {
-        return ChatService::getReceiveRequestById($id);
+        return $this->service->getReceiveRequestById($id);
     }
 
     /**
@@ -41,6 +44,6 @@ class Chat extends BaseController
      */
     public function readed(): Result
     {
-        return ChatService::readed();
+        return $this->service->readed();
     }
 }

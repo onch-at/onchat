@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace app\core\service;
+namespace app\service;
 
 use app\core\Result;
 use think\facade\Db;
 use Identicon\Identicon;
-use app\model\User as UserModel;
-use app\core\util\Sql as SqlUtil;
-use app\core\util\Date as DateUtil;
+use app\facade\UserService;
+use app\facade\MessageService;
+use app\util\Date as DateUtil;
 use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatSession as ChatSessionModel;
-use app\core\identicon\generator\ImageMagickGenerator;
+use app\core\identicon\ImageMagickGenerator;
 
 class Chatroom
 {
@@ -48,7 +48,7 @@ class Chatroom
      * @param integer $id 聊天室ID
      * @return Result
      */
-    public static function getName(int $id): Result
+    public function getName(int $id): Result
     {
         $chatroom = ChatroomModel::field(['name', 'type'])->find($id);
         if (!$chatroom) {
@@ -57,7 +57,7 @@ class Chatroom
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
         if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
-            $userId = User::getId();
+            $userId = UserService::getId();
 
             // 找到自己和好友
             $data = ChatMemberModel::where([
@@ -89,7 +89,7 @@ class Chatroom
      * @param integer $id
      * @return Result
      */
-    public static function getChatroom(int $id): Result
+    public function getChatroom(int $id): Result
     {
         $chatroom = ChatroomModel::find($id);
 
@@ -99,7 +99,7 @@ class Chatroom
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
         if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
-            $userId = User::getId();
+            $userId = UserService::getId();
 
             // 找到自己
             $self = ChatMemberModel::where([
@@ -143,7 +143,7 @@ class Chatroom
      * @param integer $description 聊天室描述、简介
      * @return Result
      */
-    public static function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT, ?string $description = null): Result
+    public function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT, ?string $description = null): Result
     {
         if ($name) {
             $name = trim($name);
@@ -180,7 +180,7 @@ class Chatroom
             'update_time'    => $timestamp,
         ]);
 
-        self::createChatRecordTable($chatroom->id);
+        $this->createChatRecordTable($chatroom->id);
 
         if ($type == ChatroomModel::TYPE_GROUP_CHAT) {
             $ossClient = OssClient::getInstance();
@@ -214,19 +214,19 @@ class Chatroom
      * @param integer $role 角色
      * @return Result
      */
-    public static function addMember(int $id, int $userId, string $nickname = null, int $role = ChatMemberModel::ROLE_NORMAL): Result
+    public function addMember(int $id, int $userId, string $nickname = null, int $role = ChatMemberModel::ROLE_NORMAL): Result
     {
-        $username = User::getUsernameById($userId);
+        $username = UserService::getUsernameById($userId);
         // 如果没有这个房间，或者没有这个用户，或者这个用户已经加入了这个房间
         if (
             empty(ChatroomModel::find($id)) ||
             empty($username) ||
-            self::isMember($id, $userId)
+            $this->isMember($id, $userId)
         ) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        if (self::isPeopleNumFull($id)) {
+        if ($this->isPeopleNumFull($id)) {
             return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满!');
         }
 
@@ -260,15 +260,15 @@ class Chatroom
      * @param array $msg 消息体
      * @return Result
      */
-    public static function setMessage(int $userId, array $msg): Result
+    public function setMessage(int $userId, array $msg): Result
     {
         // 拿到当前用户在这个聊天室的昵称
-        $nickname = User::getNicknameInChatroom($userId, $msg['chatroomId']);
+        $nickname = UserService::getNicknameInChatroom($userId, $msg['chatroomId']);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $result = Message::handler($msg);
+        $result = MessageService::handler($msg);
 
         if ($result->code !== Result::CODE_SUCCESS) {
             return $result;
@@ -302,7 +302,7 @@ class Chatroom
             ]);
 
             $ossClient = OssClient::getInstance();
-            $object = User::getInfoByKey('id', $userId, 'avatar')['avatar'];
+            $object = UserService::getInfoByKey('id', $userId, 'avatar')['avatar'];
 
             $msg['id'] = $id;
             $msg['userId'] = $userId;
@@ -328,12 +328,12 @@ class Chatroom
      * @param integer $msgId 消息ID
      * @return Result
      */
-    public static function getRecords(int $id, int $msgId): Result
+    public function getRecords(int $id, int $msgId): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
 
         // 拿到当前用户在这个聊天室的昵称
-        $nickname = User::getNicknameInChatroom($userId, $id);
+        $nickname = UserService::getNicknameInChatroom($userId, $id);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
@@ -376,7 +376,7 @@ class Chatroom
 
             // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
             if (!$item['nickname']) {
-                $item['nickname'] = User::getUsernameById($item['user_id']);
+                $item['nickname'] = UserService::getUsernameById($item['user_id']);
             }
 
             $item['avatarThumbnail'] = $ossClient->signImageUrl($item['avatarThumbnail']);
@@ -404,7 +404,7 @@ class Chatroom
      * @param integer $msgId 消息ID
      * @return Result
      */
-    public static function revokeMsg(int $id, int $userId, int $msgId): Result
+    public function revokeMsg(int $id, int $userId, int $msgId): Result
     {
         $query = ChatRecordModel::opt($id)->where('id', '=', $msgId);
         $msg = $query->find();
@@ -455,7 +455,7 @@ class Chatroom
      * @param string $username
      * @return Result
      */
-    public static function create(string $name, ?string $description, int $userId, string $username): Result
+    public function create(string $name, ?string $description, int $userId, string $username): Result
     {
         if (!$name) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -473,7 +473,7 @@ class Chatroom
         // 启动事务
         Db::startTrans();
         try {
-            $result = self::creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
+            $result = $this->creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
@@ -482,7 +482,7 @@ class Chatroom
             $chatroom = $result->data;
 
             // 将自己添加到聊天室，角色为主人
-            $result = self::addMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
+            $result = $this->addMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
@@ -512,7 +512,7 @@ class Chatroom
      * @param integer $id 聊天室ID
      * @return Result
      */
-    public static function getChatMembers(int $id)
+    public function getChatMembers(int $id)
     {
         $data = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
             ->join('user_info', 'user_info.user_id = chat_member.user_id')
@@ -547,11 +547,11 @@ class Chatroom
      * @param integer $id 聊天室ID
      * @return Result
      */
-    public static function avatar(int $id): Result
+    public function avatar(int $id): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
 
-        $role = self::getMemberRole($id, $userId);
+        $role = $this->getMemberRole($id, $userId);
         // 如果不是群主、管理员
         if ($role != ChatMemberModel::ROLE_HOST && $role != ChatMemberModel::ROLE_MANAGE) {
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
@@ -634,7 +634,7 @@ class Chatroom
      * @param integer $userId 用户ID
      * @return boolean
      */
-    public static function isMember(int $id, int $userId): bool
+    public function isMember(int $id, int $userId): bool
     {
         return !!ChatMemberModel::where([
             'chatroom_id' => $id,
@@ -648,7 +648,7 @@ class Chatroom
      * @param integer $id 聊天室ID
      * @return boolean
      */
-    public static function isPeopleNumFull(int $id): bool
+    public function isPeopleNumFull(int $id): bool
     {
         $data = ChatroomModel::join('chat_member', 'chat_member.chatroom_id = chatroom.id')
             ->where('chatroom.id', '=', $id)
@@ -669,7 +669,7 @@ class Chatroom
      * @param integer $userId 成员ID
      * @return integer
      */
-    public static function getMemberRole(int $id, int $userId): ?int
+    public function getMemberRole(int $id, int $userId): ?int
     {
         return ChatMemberModel::where([
             'chatroom_id' => $id,
@@ -683,7 +683,7 @@ class Chatroom
      * @param integer $id 聊天室ID
      * @return array|null
      */
-    public static function getHostAndManagerIdList(int $id): ?array
+    public function getHostAndManagerIdList(int $id): ?array
     {
         return ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
             ->where([
@@ -706,7 +706,7 @@ class Chatroom
      * @param integer $chatroomId
      * @return void
      */
-    public static function createChatRecordTable(int $chatroomId)
+    public function createChatRecordTable(int $chatroomId)
     {
         $table = ChatRecordModel::getTableNameById($chatroomId);
         // 如果没有这个表

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\core\service\User as UserService;
-use app\core\service\Chatroom as ChatroomService;
+use app\service\User as UserService;
+use app\service\Chatroom as ChatroomService;
 
 class Message extends SocketEventHandler
 {
@@ -15,12 +15,14 @@ class Message extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, ChatroomService $chatroomService)
     {
+        ['msg' => $msg] = $event;
+
         $user = $this->getUser();
         // TODO 群聊的头像
         $this->websocket
-            ->to(parent::ROOM_CHATROOM . $event['msg']['chatroomId'])
-            ->emit('message', ChatroomService::setMessage($user['id'], $event['msg']));
+            ->to(parent::ROOM_CHATROOM . $msg['chatroomId'])
+            ->emit('message', $chatroomService->setMessage($user['id'], $msg));
     }
 }

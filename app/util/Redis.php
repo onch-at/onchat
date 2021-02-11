@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace app\core\util;
+namespace app\util;
 
 use think\facade\Cache;
 use think\facade\Config;
-use app\core\service\User as UserService;
+use app\service\User as UserService;
 
 class Redis
 {

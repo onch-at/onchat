@@ -1,6 +1,6 @@
 <?php
 
-namespace app\core\identicon\generator;
+namespace app\core\identicon;
 
 use ImagickDraw;
 use ImagickPixel;

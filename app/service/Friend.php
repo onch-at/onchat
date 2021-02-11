@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace app\core\service;
+namespace app\service;
 
 use app\core\Result;
+
 use think\facade\Db;
-use app\model\User as UserModel;
-use app\core\util\Sql as SqlUtil;
-use app\core\util\Str as StrUtil;
+use app\facade\UserService;
+use app\facade\ChatroomService;
+use app\util\Str as StrUtil;
 use app\core\oss\Client as OssClient;
-use app\core\util\Redis as RedisUtil;
+use app\util\Redis as RedisUtil;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
@@ -43,10 +44,10 @@ class Friend
      * @param string $targetAlias 被申请人的别名
      * @return Result
      */
-    public static function request(int $selfId, int $targetId, ?string $reason = null, ?string $targetAlias = null): Result
+    public function request(int $selfId, int $targetId, ?string $reason = null, ?string $targetAlias = null): Result
     {
         // 如果两人已经是好友关系，则不允许申请了
-        if ($selfId == $targetId || self::isFriend($selfId, $targetId)) {
+        if ($selfId == $targetId || $this->isFriend($selfId, $targetId)) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
@@ -145,9 +146,9 @@ class Friend
      * @param integer $id
      * @return Result
      */
-    public static function getRequestById(int $id): Result
+    public function getRequestById(int $id): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
 
         $friendRequest = FriendRequestModel::find($id);
 
@@ -168,10 +169,10 @@ class Friend
      *
      * @return Result
      */
-    public static function getReceiveRequests(): Result
+    public function getReceiveRequests(): Result
     {
-        $userId = User::getId();
-        $username = User::getUsername();
+        $userId = UserService::getId();
+        $username = UserService::getUsername();
 
         // 找到自己被申请的
         $friendRequests = FriendRequestModel::join('user', 'friend_request.self_id = user.id')
@@ -212,10 +213,10 @@ class Friend
      *
      * @return Result
      */
-    public static function getSendRequests(): Result
+    public function getSendRequests(): Result
     {
-        $userId = User::getId();
-        $username = User::getUsername();
+        $userId = UserService::getId();
+        $username = UserService::getUsername();
 
         $friendRequests = FriendRequestModel::join('user', 'friend_request.target_id = user.id')
             ->join('user_info', 'friend_request.target_id = user_info.user_id')
@@ -259,9 +260,9 @@ class Friend
      * @param integer $targetId
      * @return Result
      */
-    public static function getRequestByTargetId(int $targetId): Result
+    public function getRequestByTargetId(int $targetId): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
 
         $friendRequest = FriendRequestModel::where([
             'self_id'   => $userId,
@@ -281,9 +282,9 @@ class Friend
      * @param integer $selfId
      * @return Result
      */
-    public static function getRequestBySelfId(int $selfId): Result
+    public function getRequestBySelfId(int $selfId): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
 
         $friendRequest = FriendRequestModel::where([
             'self_id'   => $selfId,
@@ -300,12 +301,12 @@ class Friend
     /**
      * 同意好友申请
      *
-     * @param integer $friendRequestId 好友申请表的ID
+     * @param integer $requestId 好友申请表的ID
      * @param integer $targetId 被申请人的ID
      * @param string $selfAlias 申请人的别名
      * @return Result
      */
-    public static function agree(int $friendRequestId, int $targetId, string $selfAlias = null): Result
+    public function agree(int $requestId, int $targetId, string $selfAlias = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
         $selfAlias && mb_strlen(StrUtil::trimAll($selfAlias), 'utf-8') == 0 && ($selfAlias = null);
@@ -315,7 +316,7 @@ class Friend
             return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
-        $friendRequest = FriendRequestModel::find($friendRequestId);
+        $friendRequest = FriendRequestModel::find($requestId);
 
         if (!$friendRequest) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -345,7 +346,7 @@ class Friend
             ])->delete();
 
             // 创建一个类型为私聊的聊天室
-            $result = Chatroom::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
+            $result = ChatroomService::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
@@ -353,13 +354,13 @@ class Friend
 
             $chatroomId = $result->data['id'];
 
-            $result = Chatroom::addMember($chatroomId, $friendRequest->self_id, $selfAlias);
+            $result = ChatroomService::addMember($chatroomId, $friendRequest->self_id, $selfAlias);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
 
-            $result = Chatroom::addMember($chatroomId, $friendRequest->target_id, $friendRequest->target_alias);
+            $result = ChatroomService::addMember($chatroomId, $friendRequest->target_id, $friendRequest->target_alias);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
@@ -367,7 +368,7 @@ class Friend
 
             Db::commit();
 
-            $userInfo = User::getInfoByKey('id', $friendRequest->target_id, [
+            $userInfo = UserService::getInfoByKey('id', $friendRequest->target_id, [
                 'username',
                 'avatar'
             ]);
@@ -392,12 +393,12 @@ class Friend
     /**
      * 拒绝好友申请
      *
-     * @param integer $friendRequestId 好友申请表的ID
+     * @param integer $requestId 好友申请表的ID
      * @param integer $targetId 被申请人的ID
      * @param string $reason 拒绝原因
      * @return Result
      */
-    public static function reject(int $friendRequestId, int $targetId, string $reason = null): Result
+    public function reject(int $requestId, int $targetId, string $reason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
         if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
@@ -409,7 +410,7 @@ class Friend
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
-        $friendRequest = FriendRequestModel::find($friendRequestId);
+        $friendRequest = FriendRequestModel::find($requestId);
 
         if (!$friendRequest) {
             return new Result(Result::CODE_ERROR_PARAM);
@@ -438,10 +439,10 @@ class Friend
             ])->delete();
 
             $ossClient = OssClient::getInstance();
-            $object = User::getInfoByKey('id', $targetId, 'avatar')['avatar'];
+            $object = UserService::getInfoByKey('id', $targetId, 'avatar')['avatar'];
 
             $data = $friendRequest->toArray();
-            $data['selfUsername'] = User::getUsernameById($friendRequest->self_id);
+            $data['selfUsername'] = UserService::getUsernameById($friendRequest->self_id);
             $data['targetUsername'] = RedisUtil::getUserByUserId($targetId)['username'];
             $data['targetAvatarThumbnail'] = $ossClient->signImageUrl($object);
             Db::commit();
@@ -462,7 +463,7 @@ class Friend
      * @param integer $targetId
      * @return integer
      */
-    public static function isFriend(int $selfId, int $targetId): int
+    public function isFriend(int $selfId, int $targetId): int
     {
         if ($selfId == $targetId) {
             return 0; // TODO 找到自己的单聊聊天室
@@ -487,9 +488,9 @@ class Friend
      * @param string $alias 好友别名
      * @return Result
      */
-    public static function setFriendAlias(int $chatroomId, string $alias): Result
+    public function setFriendAlias(int $chatroomId, string $alias): Result
     {
-        $userId = User::getId();
+        $userId = UserService::getId();
 
         // 如果有传入别名
         if (mb_strlen(StrUtil::trimAll($alias), 'utf-8') != 0) {
@@ -519,7 +520,7 @@ class Friend
         }
 
         if (!$alias) {
-            $alias = User::getUsernameById($chatMember->user_id);
+            $alias = UserService::getUsernameById($chatMember->user_id);
         }
 
         $chatMember->nickname = $alias;

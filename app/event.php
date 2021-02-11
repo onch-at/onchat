@@ -5,6 +5,7 @@ use app\listener\websocket\Init;
 use app\listener\websocket\Test;
 use app\listener\websocket\Unload;
 use app\listener\websocket\Message;
+use app\listener\task\TaskDispatcher;
 use app\listener\websocket\RevokeMsg;
 use app\listener\websocket\ChatRequest;
 use app\listener\websocket\FriendRequest;
@@ -41,7 +42,8 @@ return [
         'swoole.websocket.Event.Unload'              => [Unload::class],
         'swoole.websocket.Event.Disconnect'          => [Unload::class],
         'swoole.websocket.Event.Close'               => [Unload::class],
-        'swoole.task'                                => [SendMail::class]
+        'swoole.task'                                => [TaskDispatcher::class],
+        'swoole.task.SendMail'                       => [SendMail::class],
     ],
 
     'subscribe' => [],

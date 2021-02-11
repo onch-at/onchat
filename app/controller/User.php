@@ -5,11 +5,17 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\core\Result;
-use app\BaseController;
-use app\core\service\User as UserService;
+use app\service\User as UserService;
 
 class User extends BaseController
 {
+    protected $service;
+
+    public function __construct(UserService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * 用户登录
      *
@@ -17,7 +23,7 @@ class User extends BaseController
      */
     public function login(): Result
     {
-        return UserService::login();
+        return $this->service->login();
     }
 
     /**
@@ -27,7 +33,7 @@ class User extends BaseController
      */
     public function logout(): void
     {
-        UserService::logout();
+        $this->service->logout();
     }
 
     /**
@@ -38,7 +44,7 @@ class User extends BaseController
      */
     public function checkLogin(): Result
     {
-        return UserService::checkLogin();
+        return $this->service->checkLogin();
     }
 
     /**
@@ -48,7 +54,18 @@ class User extends BaseController
      */
     public function register(): Result
     {
-        return UserService::register();
+        return $this->service->register();
+    }
+
+    /**
+     * 验证邮箱是否可用
+     *
+     * @param string $email
+     * @return Result
+     */
+    public function checkEmail(string $email): Result
+    {
+        return $this->service->checkEmail($email);
     }
 
     /**
@@ -58,7 +75,7 @@ class User extends BaseController
      */
     public function avatar(): Result
     {
-        return UserService::avatar();
+        return $this->service->avatar();
     }
 
     /**
@@ -68,7 +85,7 @@ class User extends BaseController
      */
     public function saveUserInfo(): Result
     {
-        return UserService::saveUserInfo();
+        return $this->service->saveUserInfo();
     }
 
     /**
@@ -78,7 +95,7 @@ class User extends BaseController
      */
     public function getUserById($id): Result
     {
-        return UserService::getUserById((int) $id);
+        return $this->service->getUserById((int) $id);
     }
 
     /**
@@ -88,7 +105,7 @@ class User extends BaseController
      */
     public function getChatSessions(): Result
     {
-        return UserService::getChatSessions();
+        return $this->service->getChatSessions();
     }
 
     /**
@@ -98,7 +115,7 @@ class User extends BaseController
      */
     public function getPrivateChatrooms(): Result
     {
-        return UserService::getPrivateChatrooms();
+        return $this->service->getPrivateChatrooms();
     }
 
     /**
@@ -108,7 +125,7 @@ class User extends BaseController
      */
     public function getGroupChatrooms(): Result
     {
-        return UserService::getGroupChatrooms();
+        return $this->service->getGroupChatrooms();
     }
 
     /**
@@ -119,7 +136,7 @@ class User extends BaseController
      */
     public function stickyChatSession(int $id): Result
     {
-        return UserService::stickyChatSession($id);
+        return $this->service->stickyChatSession($id);
     }
 
     /**
@@ -130,7 +147,7 @@ class User extends BaseController
      */
     public function unstickyChatSession(int $id): Result
     {
-        return UserService::unstickyChatSession($id);
+        return $this->service->unstickyChatSession($id);
     }
 
     /**
@@ -141,7 +158,7 @@ class User extends BaseController
      */
     public function readedChatSession(int $id): Result
     {
-        return UserService::readedChatSession($id);
+        return $this->service->readedChatSession($id);
     }
 
     /**
@@ -152,6 +169,6 @@ class User extends BaseController
      */
     public function unreadChatSession(int $id): Result
     {
-        return UserService::unreadChatSession($id);
+        return $this->service->unreadChatSession($id);
     }
 }

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\core\util\Redis as RedisUtil;
-use app\core\service\User as UserService;
-use app\core\service\Friend as FriendService;
+use app\service\User as UserService;
+use app\util\Redis as RedisUtil;
+use app\service\Friend as FriendService;
 
 class FriendRequestAgree extends SocketEventHandler
 {
@@ -17,11 +17,13 @@ class FriendRequestAgree extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event)
+    public function handle($event, FriendService $friendService)
     {
+        ['requestId' => $requestId, 'selfAlias' => $selfAlias] = $event;
+
         $user = $this->getUser();
 
-        $result = FriendService::agree($event['friendRequestId'], $user['id'], $event['selfAlias']);
+        $result = $friendService->agree($requestId, $user['id'], $selfAlias);
 
         $chatroomId = $result->data['chatroomId'];
         $this->websocket->join(parent::ROOM_CHATROOM . $chatroomId);

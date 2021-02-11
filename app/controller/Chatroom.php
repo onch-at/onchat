@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use app\BaseController;
-use app\core\service\Chatroom as ChatroomService;
 use app\core\Result;
+use app\service\Chatroom as ChatroomService;
 
 class Chatroom extends BaseController
 {
+    protected $service;
+
+    public function __construct(ChatroomService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * 获取聊天室名称
      *
@@ -18,7 +24,7 @@ class Chatroom extends BaseController
      */
     public function getName(int $id): Result
     {
-        return ChatroomService::getName($id);
+        return $this->service->getName($id);
     }
 
     /**
@@ -29,7 +35,7 @@ class Chatroom extends BaseController
      */
     public function getChatroom(int $id): Result
     {
-        return ChatroomService::getChatroom($id);
+        return $this->service->getChatroom($id);
     }
 
     /**
@@ -41,7 +47,7 @@ class Chatroom extends BaseController
      */
     public function getRecords(int $id, int $msgId): Result
     {
-        return ChatroomService::getRecords($id, $msgId);
+        return $this->service->getRecords($id, $msgId);
     }
 
     /**
@@ -52,7 +58,7 @@ class Chatroom extends BaseController
      */
     public function getChatMembers(int $id): Result
     {
-        return ChatroomService::getChatMembers($id);
+        return $this->service->getChatMembers($id);
     }
 
     /**
@@ -63,6 +69,6 @@ class Chatroom extends BaseController
      */
     public function avatar(int $id): Result
     {
-        return ChatroomService::avatar($id);
+        return $this->service->avatar($id);
     }
 }
