@@ -76,11 +76,12 @@ class Friend extends BaseController
      * 设置好友别名
      *
      * @param integer $chatroomId 私聊聊天室ID
+     * @param string $alias 别名
      * @return Result
      */
-    public function setFriendAlias(int $chatroomId): Result
+    public function setFriendAlias(int $chatroomId, string $alias): Result
     {
-        return $this->service->setFriendAlias($chatroomId, input('put.alias/s'));
+        return $this->service->setFriendAlias($chatroomId, $alias);
     }
 
     /**

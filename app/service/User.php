@@ -106,20 +106,19 @@ class User
     /**
      * 注册账户
      *
+     * @param string $username 用户名
+     * @param string $password 密码
+     * @param string $email 邮箱
+     * @param string $captcha 验证码
      * @return Result
      */
-    public function register(): Result
+    public function register(string $username, string $password, string $email, string $captcha): Result
     {
         if (!self::CAN_REGISTER) {
             return new Result(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
         }
 
-        $username = input('post.username/s');
-        $password = input('post.password/s');
-        $email    = input('post.email/s');
-        $captcha  = input('post.captcha/s');
-
-        if (!$username || !$password || !$email || !$captcha || !$this->checkEmail($email)->data) { // 如果参数缺失
+        if (!$this->checkEmail($email)->data) { // 如果邮箱不可用
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
@@ -204,7 +203,7 @@ class User
             // 提交事务
             Db::commit();
 
-            return Result::success($user->toArray() + $userInfo, '注册成功！即将跳转…');
+            return Result::success($user->toArray() + $userInfo);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -215,16 +214,12 @@ class User
     /**
      * 用户登录
      *
+     * @param string $username 用户名
+     * @param string $password 密码
      * @return Result
      */
-    public function login(): Result
+    public function login(string $username, string $password): Result
     {
-        $username = input('post.username/s');
-        $password = input('post.password/s');
-
-        if (!$username || !$password) { // 如果参数缺失
-            return new Result(Result::CODE_ERROR_PARAM);
-        }
 
         if (!preg_match(self::USERNAME_PATTERN, $username)) {
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
@@ -258,7 +253,7 @@ class User
         $user['avatar'] = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
         $user['avatarThumbnail'] = $ossClient->signImageUrl($object);
 
-        return Result::success($user, '登录成功！即将跳转…');
+        return Result::success($user);
     }
 
     /**
@@ -448,11 +443,8 @@ class User
      * @param string $email
      * @return Result
      */
-    public function checkEmail(?string $email = null): Result
+    public function checkEmail(string $email): Result
     {
-        if (!$email) {
-            $email = input('get.email/s');
-        }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return Result::success(false);
@@ -914,5 +906,35 @@ class User
         ]);
 
         return Result::success($userInfo->toArray());
+    }
+
+    /**
+     * 绑定电子邮箱
+     *
+     * @param string $email 邮箱
+     * @param string $captcha 验证码
+     * @return Result
+     */
+    public function bindEmail(string $email, string $captcha): Result
+    {
+        $userId = $this->getId();
+
+        if (!$this->checkEmail($email)->data) { // 如果邮箱不可用
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        if (!IndexService::checkEmailCaptcha($email, $captcha)) {
+            return new Result(Result::CODE_ERROR_PARAM, '验证码错误！');
+        }
+
+        $email = strtolower($email);
+
+        UserModel::update([
+            'id'          => $userId,
+            'email'       => $email,
+            'update_time' => time() * 1000
+        ]);
+
+        return Result::success($email);
     }
 }

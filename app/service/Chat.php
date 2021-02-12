@@ -7,10 +7,10 @@ namespace app\service;
 use app\core\Result;
 use think\facade\Db;
 use app\facade\UserService;
-use app\facade\ChatroomService;
 use app\util\Str as StrUtil;
-use app\core\oss\Client as OssClient;
+use app\facade\ChatroomService;
 use app\util\Redis as RedisUtil;
+use app\core\oss\Client as OssClient;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
 use app\model\ChatMember as ChatMemberModel;
@@ -35,9 +35,6 @@ class Chat
         self::CODE_REASON_LONG  => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符',
         self::CODE_REQUEST_HANDLED => '该请求已被处理！'
     ];
-
-    protected $userService;
-    protected $chatroomService;
 
     /**
      * 邀请好友入群

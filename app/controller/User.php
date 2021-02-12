@@ -21,11 +21,13 @@ class User extends BaseController
     /**
      * 用户登录
      *
+     * @param string $username 用户名
+     * @param string $password 密码
      * @return Result
      */
-    public function login(): Result
+    public function login(string $username, string $password): Result
     {
-        return $this->service->login();
+        return $this->service->login($username, $password);
     }
 
     /**
@@ -50,13 +52,17 @@ class User extends BaseController
     }
 
     /**
-     * 用户注册
+     * 注册账户
      *
+     * @param string $username 用户名
+     * @param string $password 密码
+     * @param string $email 邮箱
+     * @param string $captcha 验证码
      * @return Result
      */
-    public function register(): Result
+    public function register(string $username, string $password, string $email, string $captcha): Result
     {
-        return $this->service->register();
+        return $this->service->register($username,  $password,  $email,  $captcha);
     }
 
     /**
@@ -88,6 +94,18 @@ class User extends BaseController
     public function saveUserInfo(): Result
     {
         return $this->service->saveUserInfo();
+    }
+
+    /**
+     * 绑定电子邮箱
+     *
+     * @param string $email 邮箱
+     * @param string $captcha 验证码
+     * @return Result
+     */
+    public function bindEmail(string $email, string $captcha): Result
+    {
+        return $this->service->bindEmail($email, $captcha);
     }
 
     /**

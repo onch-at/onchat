@@ -17,6 +17,7 @@ Route::group('user', function () {
         Route::post('avatar', 'avatar');
 
         Route::put('info', 'saveUserInfo');
+        Route::put('bindemail', 'bindEmail');
 
         Route::group('chatrooms', function () {
             Route::get('private', 'getPrivateChatrooms');

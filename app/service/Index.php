@@ -23,7 +23,7 @@ class Index
     public function __construct(Session $session, Config $config)
     {
         $this->session = $session;
-        $this->config = $config;
+        $this->config  = $config;
     }
 
     /**
@@ -83,7 +83,11 @@ class Index
             return false;
         }
 
-        ['captcha' => $hash, 'email' => $mail, 'time' => $time] = $data;
+        [
+            'captcha' => $hash,
+            'email'   => $mail,
+            'time'    => $time
+        ] = $data;
 
         // 验证验证码是否过期，邮箱是否一致，验证码是否正确
         if (time() > $time + 600 || $email !== $mail || !password_verify($captcha, $hash)) {
