@@ -21,18 +21,16 @@ class SendMail
             'altBody'   => $altBody,
         ] = $event;
 
-        $mail = Mailer::create();
-
-        $mail->setFrom(...$from);
+        $mail = Mailer::create()
+            ->setFrom(...$from)
+            ->isHTML($isHTML)
+            ->setSubject($subject)
+            ->setBody($body)
+            ->setAltBody($altBody);
 
         foreach ($addresses as $address) {
             $mail->addAddress($address);
         }
-
-        $mail->isHTML($isHTML);
-        $mail->Subject = $subject;
-        $mail->Body    = $body;
-        $mail->AltBody = $altBody;
 
         $mail->send();
     }

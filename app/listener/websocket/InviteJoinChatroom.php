@@ -6,8 +6,6 @@ namespace app\listener\websocket;
 
 use app\core\Result;
 use app\service\Chat as ChatService;
-use app\service\User as UserService;
-use app\util\Redis as RedisUtil;
 use app\service\Message as MessageService;
 use app\service\Chatroom as ChatroomService;
 
