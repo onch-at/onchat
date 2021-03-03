@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use think\helper\Str;
-use think\facade\Event;
 use app\util\Throttle as ThrottleUtil;
+use think\facade\Event;
+use think\helper\Str;
 
 /**
  * Socket.io 事件分发器

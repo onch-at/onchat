@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace app\service;
 
 use app\core\Job;
-use app\util\Str;
+use app\core\Result;
+use app\listener\task\SendMail;
+use app\util\Str as StrUtil;
 use think\Config;
 use think\Session;
-use app\core\Result;
-use app\util\Tpl as TplUtil;
-use app\listener\task\SendMail;
 use think\swoole\facade\Server;
 
 class Index
@@ -46,7 +45,7 @@ class Index
             return Result::success(false);
         }
 
-        $captcha = Str::captcha(6);
+        $captcha = StrUtil::captcha(6);
 
         $this->session->set(self::SESSION_EMAIL_CAPTCHA, [
             'captcha' => password_hash($captcha, PASSWORD_DEFAULT),
@@ -61,7 +60,7 @@ class Index
             'addresses' => [$email],
             'isHTML'    => true,
             'subject'   => 'OnChat：电子邮箱验证',
-            'body'      => TplUtil::assign(file_get_contents($path), ['captcha' => $captcha]),
+            'body'      => StrUtil::assign(file_get_contents($path), ['captcha' => $captcha]),
             'altBody'   => null
         ]));
 

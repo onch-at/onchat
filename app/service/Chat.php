@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace app\service;
 
 use app\core\Result;
-use think\facade\Db;
-use app\facade\UserService;
-use app\util\Str as StrUtil;
+use app\core\storage\Storage;
 use app\facade\ChatroomService;
-use app\util\Redis as RedisUtil;
-use app\core\oss\Client as OssClient;
-use app\model\Chatroom as ChatroomModel;
-use app\model\UserInfo as UserInfoModel;
+use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
 use app\model\ChatSession as ChatSessionModel;
+use app\model\Chatroom as ChatroomModel;
+use app\model\UserInfo as UserInfoModel;
+use app\util\Redis as RedisUtil;
+use app\util\Str as StrUtil;
+use think\facade\Db;
 
 class Chat
 {
@@ -150,7 +150,7 @@ class Chat
                 'chat_session.visible' => true
             ]);
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         $info = UserInfoModel::where('user_info.user_id', '=', $applicant)
             ->field([
@@ -159,7 +159,7 @@ class Chat
             ])
             ->find()
             ->toArray();
-        $info['applicantAvatarThumbnail'] = $ossClient->signImageUrl($info['applicantAvatarThumbnail']);
+        $info['applicantAvatarThumbnail'] = $storage->getThumbnailImageUrl($info['applicantAvatarThumbnail']);
 
         $chatroom = ChatroomModel::field('chatroom.name AS chatroomName')
             ->find($chatroomId)
@@ -236,16 +236,16 @@ class Chat
                 return $result;
             }
 
-            $ossClient = OssClient::getInstance();
+            $storage = Storage::getInstance();
 
             $chatSession = $result->data;
 
             // 补充一些信息
             $chatSession['title'] = $request->chatroomName;
-            $chatSession['avatarThumbnail'] = $ossClient->signImageUrl($request->chatroomAvatarThumbnail);
+            $chatSession['avatarThumbnail'] = $storage->getThumbnailImageUrl($request->chatroomAvatarThumbnail);
             $chatSession['data']['chatroomType'] = ChatroomModel::TYPE_GROUP_CHAT;
 
-            $request->applicantAvatarThumbnail = $ossClient->signImageUrl($request->applicantAvatarThumbnail);
+            $request->applicantAvatarThumbnail = $storage->getThumbnailImageUrl($request->applicantAvatarThumbnail);
 
             $request = $request->toArray();
 
@@ -326,11 +326,11 @@ class Chat
         $request->update_time   = time() * 1000;
         $request->save();
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         $request = $request->toArray();
-        $request['applicantAvatarThumbnail'] = $ossClient->signImageUrl($request['applicantAvatarThumbnail']);
-        $request['chatroomAvatarThumbnail']  = $ossClient->signImageUrl($request['chatroomAvatarThumbnail']);
+        $request['applicantAvatarThumbnail'] = $storage->getThumbnailImageUrl($request['applicantAvatarThumbnail']);
+        $request['chatroomAvatarThumbnail']  = $storage->getThumbnailImageUrl($request['chatroomAvatarThumbnail']);
         $request['handlerNickname'] = RedisUtil::getUserByUserId($handler)['username'];
 
         return Result::success($request);
@@ -394,8 +394,8 @@ class Chat
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        $ossClient = OssClient::getInstance();
-        $request->applicantAvatarThumbnail = $ossClient->signImageUrl($request->applicantAvatarThumbnail);
+        $storage = Storage::getInstance();
+        $request->applicantAvatarThumbnail = $storage->getThumbnailImageUrl($request->applicantAvatarThumbnail);
 
         return Result::success($request->toArray());
     }
@@ -408,7 +408,7 @@ class Chat
     public function getReceiveRequests(): Result
     {
         $userId = UserService::getId();
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         $data = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
             ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
@@ -432,7 +432,7 @@ class Chat
             ->toArray();
 
         foreach ($data as $key => $value) {
-            $data[$key]['applicantAvatarThumbnail'] = $ossClient->signImageUrl($value['applicantAvatarThumbnail']);
+            $data[$key]['applicantAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['applicantAvatarThumbnail']);
         }
 
         return Result::success($data);

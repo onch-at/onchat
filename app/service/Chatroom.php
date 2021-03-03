@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace app\service;
 
-use app\core\Result;
-use think\facade\Db;
 use Identicon\Identicon;
-use app\facade\UserService;
+use app\core\Result;
+use app\core\identicon\ImageMagickGenerator;
+use app\core\storage\Storage;
 use app\facade\MessageService;
-use app\util\Date as DateUtil;
-use app\core\oss\Client as OssClient;
-use app\model\Chatroom as ChatroomModel;
+use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatSession as ChatSessionModel;
-use app\core\identicon\ImageMagickGenerator;
+use app\model\Chatroom as ChatroomModel;
+use app\util\Date as DateUtil;
+use app\util\File as FileUtil;
+use think\facade\Db;
 
 class Chatroom
 {
@@ -126,11 +127,12 @@ class Chatroom
             $chatroom->avatar = $friendInfo->avatar;
         }
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
+
         $avatar = $chatroom->avatar;
 
-        $chatroom->avatar          = $ossClient->signImageUrl($avatar, OssClient::getOriginalImgStylename());
-        $chatroom->avatarThumbnail = $ossClient->signImageUrl($avatar);
+        $chatroom->avatar          = $storage->getOriginalImageUrl($avatar);
+        $chatroom->avatarThumbnail = $storage->getThumbnailImageUrl($avatar);
 
         return Result::success($chatroom->toArray());
     }
@@ -167,7 +169,7 @@ class Chatroom
         $maxPeopleNum = [
             ChatroomModel::TYPE_SINGLE_CHAT  => 1,
             ChatroomModel::TYPE_PRIVATE_CHAT => 2,
-            ChatroomModel::TYPE_GROUP_CHAT   => 100,
+            ChatroomModel::TYPE_GROUP_CHAT   => 1000,
         ][$type];
 
         // 创建一个聊天室
@@ -183,23 +185,28 @@ class Chatroom
         $this->createChatRecordTable($chatroom->id);
 
         if ($type == ChatroomModel::TYPE_GROUP_CHAT) {
-            $ossClient = OssClient::getInstance();
-            $bucket = OssClient::getBucket();
+            $storage = Storage::getInstance();
             $identicon = new Identicon(new ImageMagickGenerator());
-            // 如果为调试模式，则将数据存放到dev/目录下
-            $object = OssClient::getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/' . md5((string) DateUtil::now()) . '.png';
+
             // 根据用户ID创建哈希头像
-            $content = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
-            // 上传到OSS
-            $ossClient->putObject($bucket, $object, $content, OssClient::$imageHeadersOptions);
+            $imageData = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
+            $path = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
+            $file = md5((string) DateUtil::now()) . '.png';
+            $result = $storage->saveObject($path, $file, $imageData);
+
+            if ($result->code !== Result::CODE_SUCCESS) {
+                return $result;
+            }
+
+            $filename = $path . $file;
 
             ChatroomModel::update([
                 'id' => $chatroom->id,
-                'avatar' => $object
+                'avatar' => $filename
             ]);
 
-            $chatroom->avatar = $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename());
-            $chatroom->avatarThumbnail = $ossClient->signImageUrl($object);
+            $chatroom->avatar = $storage->getOriginalImageUrl($filename);
+            $chatroom->avatarThumbnail = $storage->getThumbnailImageUrl($filename);
         }
 
         return Result::success($chatroom->toArray());
@@ -268,7 +275,7 @@ class Chatroom
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $result = MessageService::handler($msg);
+        $result = MessageService::handle($msg);
 
         if ($result->code !== Result::CODE_SUCCESS) {
             return $result;
@@ -301,13 +308,13 @@ class Chatroom
                 'data->chatroomId' => $msg['chatroomId']
             ]);
 
-            $ossClient = OssClient::getInstance();
-            $object = UserService::getInfoByKey('id', $userId, 'avatar')['avatar'];
+            $storage = Storage::getInstance();
+            $avatar = UserService::getInfoByKey('id', $userId, 'avatar')['avatar'];
 
             $msg['id'] = $id;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
-            $msg['avatarThumbnail'] = $ossClient->signImageUrl($object);
+            $msg['avatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
             $msg['createTime'] = $timestamp;
 
             // 提交事务
@@ -368,7 +375,7 @@ class Chatroom
         // 如果msgId为0，则代表初次查询
         $query = $msgId == 0 ? $query : $query->where('chat_record.id', '<', $msgId);
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         $records = [];
         foreach ($query->cursor() as $item) {
@@ -379,7 +386,7 @@ class Chatroom
                 $item['nickname'] = UserService::getUsernameById($item['user_id']);
             }
 
-            $item['avatarThumbnail'] = $ossClient->signImageUrl($item['avatarThumbnail']);
+            $item['avatarThumbnail'] = $storage->getThumbnailImageUrl($item['avatarThumbnail']);
             $item['data'] = json_decode($item['data']);
 
             // 如果是群聊邀请消息
@@ -387,7 +394,7 @@ class Chatroom
                 $chatroom = ChatroomModel::find($item['data']->chatroomId);
                 $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
                 $item['data']->description     = $chatroom ? $chatroom->description : null;
-                $item['data']->avatarThumbnail = $chatroom ? $ossClient->signImageUrl($chatroom->avatar) : null;
+                $item['data']->avatarThumbnail = $chatroom ? $storage->getThumbnailImageUrl($chatroom->avatar) : null;
             }
 
             $records[] = $item;
@@ -532,10 +539,10 @@ class Chatroom
             ->select()
             ->toArray();
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         foreach ($data as $key => $value) {
-            $data[$key]['avatarThumbnail'] = $ossClient->signImageUrl($value['avatarThumbnail']);
+            $data[$key]['avatarThumbnail'] = $storage->getThumbnailImageUrl($value['avatarThumbnail']);
         }
 
         return Result::success($data);
@@ -557,70 +564,29 @@ class Chatroom
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        $bucket = OssClient::getBucket();
-        // 如果为调试模式，则将数据存放到dev/目录下
-        $root = OssClient::getRootPath();
-        // 由于搜索用户所有历史头像
-        $options = [
-            // 文件路径前缀
-            'prefix' => $root . 'avatar/chatroom/' . $id . '/',
-            // 最大数量
-            'max-keys' => 20,
-        ];
-
-        // 头像数量最大值
-        $maxCount = 10;
-
         try {
+            $storage = Storage::getInstance();
+
             $image = request()->file('image');
-            $mine = $image->getMime();
+            $path = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
+            $file = md5((string) DateUtil::now()) . '.' . FileUtil::getImageExt($image);
 
-            if (!in_array($mine, ['image/webp', 'image/jpeg', 'image/png'])) {
-                return new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp/jpeg/png的图片文件');
+            $result = $storage->saveImage($path, $file, $image);
+
+            if ($result->code !== Result::CODE_SUCCESS) {
+                return $result;
             }
 
-            if ($image->getSize() > 1048576) { // 1MB
-                return new Result(Result::CODE_ERROR_PARAM, '文件体积过大，仅接受体积为1MB以内的文件');
-            }
-
-            $ossClient = OssClient::getInstance();
-
-            $object = $root . 'avatar/chatroom/' . $id . '/' . md5((string) DateUtil::now()) . '.' . substr($mine, 6);
-            // 上传到OSS
-            $ossClient->uploadFile($bucket, $object, $image->getRealPath(), OssClient::$imageHeadersOptions);
-
-            // 列举用户所有头像
-            $objectList = $ossClient->listObjects($bucket, $options)->getObjectList();
-
-            $count = count($objectList);
-
-            // 如果用户的头像大于10张
-            if ($count > $maxCount) {
-                // 按照时间进行升序
-                usort($objectList, function ($a, $b) {
-                    return strtotime($a->getLastModified()) - strtotime($b->getLastModified());
-                });
-
-                // 需要删除的OBJ
-                $objects = [];
-
-                $num = $count - $maxCount;
-                for ($i = 0; $i < $num; $i++) {
-                    $objects[] = $objectList[$i]->getKey();
-                }
-
-                // 把超过的删除
-                $ossClient->deleteObjects($bucket, $objects);
-            }
+            $filename = $path . $file;
 
             // 更新新头像
             $chatroom = ChatroomModel::field('avatar')->find($id);
-            $chatroom->avatar = $object;
+            $chatroom->avatar = $filename;
             $chatroom->save();
 
             return Result::success([
-                'avatar'          => $ossClient->signImageUrl($object, OssClient::getOriginalImgStylename()),
-                'avatarThumbnail' => $ossClient->signImageUrl($object)
+                'avatar'          => $storage->getOriginalImageUrl($filename),
+                'avatarThumbnail' => $storage->getThumbnailImageUrl($filename)
             ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());

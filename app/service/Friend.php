@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace app\service;
 
 use app\core\Result;
-
-use think\facade\Db;
-use app\facade\UserService;
+use app\core\storage\Storage;
 use app\facade\ChatroomService;
-use app\util\Str as StrUtil;
-use app\core\oss\Client as OssClient;
-use app\util\Redis as RedisUtil;
-use app\model\Chatroom as ChatroomModel;
-use app\model\UserInfo as UserInfoModel;
+use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
+use app\model\Chatroom as ChatroomModel;
 use app\model\FriendRequest as FriendRequestModel;
+use app\model\UserInfo as UserInfoModel;
+use app\util\Redis as RedisUtil;
+use app\util\Str as StrUtil;
+use think\facade\Db;
 
 class Friend
 {
@@ -71,7 +70,7 @@ class Friend
             return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         $selfAvatarThumbnail = null;
         $targetAvatarThumbnail = null;
@@ -82,20 +81,20 @@ class Friend
             'nickname'
         ])->limit(2)->select();
 
-        $signUrl = null;
+        $url = null;
         $selfUsername = null;
         $targetUsername = null;
         foreach ($userInfos as $userInfo) {
-            $signUrl = $ossClient->signImageUrl($userInfo->avatar);
+            $url = $storage->getThumbnailImageUrl($userInfo->avatar);
 
             switch ($userInfo['user_id']) {
                 case $selfId:
-                    $selfAvatarThumbnail = $signUrl;
+                    $selfAvatarThumbnail = $url;
                     $selfUsername = $userInfo->nickname;
                     break;
 
                 case $targetId:
-                    $targetAvatarThumbnail = $signUrl;
+                    $targetAvatarThumbnail = $url;
                     $targetUsername = $userInfo->nickname;
                     break;
             }
@@ -198,10 +197,10 @@ class Friend
             ->select()
             ->toArray();
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['selfAvatarThumbnail'] = $ossClient->signImageUrl($value['selfAvatarThumbnail']);
+            $friendRequests[$key]['selfAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['selfAvatarThumbnail']);
             $friendRequests[$key]['targetUsername'] = $username;
         }
 
@@ -244,10 +243,10 @@ class Friend
             ->select()
             ->toArray();
 
-        $ossClient = OssClient::getInstance();
+        $storage = Storage::getInstance();
 
         foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['targetAvatarThumbnail'] = $ossClient->signImageUrl($value['targetAvatarThumbnail']);
+            $friendRequests[$key]['targetAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['targetAvatarThumbnail']);
             $friendRequests[$key]['selfUsername'] = $username;
         }
 
@@ -373,7 +372,7 @@ class Friend
                 'avatar'
             ]);
 
-            $ossClient = OssClient::getInstance();
+            $storage = Storage::getInstance();
 
             return Result::success([
                 'friendRequestId'       => $friendRequest->id,
@@ -381,7 +380,7 @@ class Friend
                 'selfId'                => $friendRequest->self_id,
                 'targetId'              => $friendRequest->target_id,
                 'targetUsername'        => $userInfo['username'],
-                'targetAvatarThumbnail' => $ossClient->signImageUrl($userInfo['avatar'])
+                'targetAvatarThumbnail' => $storage->getThumbnailImageUrl($userInfo['avatar'])
             ]);
         } catch (\Exception $e) {
             // 回滚事务
@@ -438,13 +437,13 @@ class Friend
                 'target_id' => $friendRequest->self_id
             ])->delete();
 
-            $ossClient = OssClient::getInstance();
+            $storage = Storage::getInstance();
             $object = UserService::getInfoByKey('id', $targetId, 'avatar')['avatar'];
 
             $data = $friendRequest->toArray();
             $data['selfUsername'] = UserService::getUsernameById($friendRequest->self_id);
             $data['targetUsername'] = RedisUtil::getUserByUserId($targetId)['username'];
-            $data['targetAvatarThumbnail'] = $ossClient->signImageUrl($object);
+            $data['targetAvatarThumbnail'] = $storage->getThumbnailImageUrl($object);
             Db::commit();
 
             return Result::success($data);

@@ -2,9 +2,9 @@
 
 namespace app\core\identicon;
 
+use Identicon\Generator\ImageMagickGenerator as OriginImageMagickGenerator;
 use ImagickDraw;
 use ImagickPixel;
-use Identicon\Generator\ImageMagickGenerator as OriginImageMagickGenerator;
 
 /**
  * 重写OriginImageMagickGenerator的部分方法
@@ -74,8 +74,7 @@ class ImageMagickGenerator extends OriginImageMagickGenerator
      */
     public function getImageResource($string, $size = null, $color = null, $backgroundColor = null)
     {
-        $this
-            ->setString($string)
+        $this->setString($string)
             ->setSize($size)
             ->setColor($color)
             ->setBackgroundColor($backgroundColor)

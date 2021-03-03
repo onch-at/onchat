@@ -1,7 +1,8 @@
 <?php
 
-use think\facade\Route;
 use app\middleware\Auth;
+use app\middleware\ImageFile;
+use think\facade\Route;
 
 /** 用户模块路由 */
 Route::group('user', function () {
@@ -14,7 +15,7 @@ Route::group('user', function () {
     Route::group(function () {
         Route::get('logout', 'logout');
 
-        Route::post('avatar', 'avatar');
+        Route::post('avatar', 'avatar')->middleware(ImageFile::class);
 
         Route::put('info', 'saveUserInfo');
         Route::put('bindemail', 'bindEmail');

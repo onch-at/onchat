@@ -49,4 +49,19 @@ class Str
 
         return $captcha;
     }
+
+    /**
+     * 插值替换
+     *
+     * @param string $tpl 模板
+     * @param array $kv 键值对
+     * @return string
+     */
+    public static function assign(string $tpl, array $kv): string
+    {
+        foreach ($kv as $key => $value) {
+            $tpl = preg_replace("/\{\{\s*({$key})\s*\}\}/", $value, $tpl);
+        }
+        return $tpl;
+    }
 }
