@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace app\facade;
 
-use think\Facade;
 use app\service\Index;
+use think\Facade;
 
+/**
+ * @see app\service\Index
+ */
 class IndexService extends Facade
 {
     protected static function getFacadeClass()

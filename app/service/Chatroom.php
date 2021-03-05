@@ -192,7 +192,7 @@ class Chatroom
             $imageData = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
             $path = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
             $file = md5((string) DateUtil::now()) . '.png';
-            $result = $storage->saveObject($path, $file, $imageData);
+            $result = $storage->save($path, $file, $imageData);
 
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;
@@ -566,12 +566,12 @@ class Chatroom
 
         try {
             $storage = Storage::getInstance();
+            $image   = request()->file('image');
+            $path    = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
+            $file    = md5((string) DateUtil::now()) . '.' . FileUtil::getExtension($image);
 
-            $image = request()->file('image');
-            $path = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
-            $file = md5((string) DateUtil::now()) . '.' . FileUtil::getImageExt($image);
-
-            $result = $storage->saveImage($path, $file, $image);
+            $result = $storage->save($path, $file, $image);
+            $storage->clear($path, Storage::IMAGE_MAX_COUNT);
 
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;

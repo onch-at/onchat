@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\core;
 
 use app\util\Arr as ArrUtil;
-use think\Response;
 use think\response\Json;
 
 class Result
@@ -51,6 +50,6 @@ class Result
 
     public function toJson(): Json
     {
-        return Response::create($this, 'json');
+        return Json::create($this, 'json');
     }
 }

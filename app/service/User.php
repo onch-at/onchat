@@ -169,7 +169,7 @@ class User
             $path = $storage->getRootPath() . 'avatar/user/' . $user->id . '/';
             $file = md5((string) DateUtil::now()) . '.png';
 
-            $result = $storage->saveObject($path, $file, $imageData);
+            $result = $storage->save($path, $file, $imageData);
 
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;
@@ -470,13 +470,13 @@ class User
         $userId = $this->getId();
 
         try {
-            $image     = request()->file('image');
             $storage = Storage::getInstance();
-            $image = request()->file('image');
-            $path = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
-            $file = md5((string) DateUtil::now()) . '.' . FileUtil::getImageExt($image);
+            $image   = request()->file('image');
+            $path    = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
+            $file    = md5((string) DateUtil::now()) . '.' . FileUtil::getExtension($image);
 
-            $result = $storage->saveImage($path, $file, $image);
+            $result = $storage->save($path, $file, $image);
+            $storage->clear($path, Storage::IMAGE_MAX_COUNT);
 
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;

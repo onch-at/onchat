@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use think\App;
 use app\core\Result;
 use app\service\Chatroom as ChatroomService;
+use think\App;
 
 class Chatroom extends BaseController
 {

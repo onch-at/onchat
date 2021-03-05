@@ -8,6 +8,13 @@ use app\contract\StorageDriver;
 
 abstract class Driver implements StorageDriver
 {
-    /** 最大图片储存数 */
-    protected const IMAGE_MAX_COUNT = 10;
+    /**
+     * 获取根目录路径
+     *
+     * @return string
+     */
+    public function getRootPath(): string
+    {
+        return '';
+    }
 }

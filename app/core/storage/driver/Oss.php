@@ -21,61 +21,66 @@ class Oss extends Driver
 
     public function __construct(Config $config)
     {
-        $accessKeyId = config('oss.access_key_id');
-        $accessKeySecret = config('oss.access_key_secret');
-        $endpoint = config('oss.endpoint');
+        $accessKeyId     = $config->get('oss.access_key_id');
+        $accessKeySecret = $config->get('oss.access_key_secret');
+        $endpoint        = $config->get('oss.endpoint');
 
         $this->client = new OssClient($accessKeyId, $accessKeySecret, $endpoint);
         $this->config = $config;
     }
 
-    public function saveObject(string $path, string $file, string $data): Result
+    public function getRootPath(): string
+    {
+        return env('app_debug') ? 'dev/' : '';
+    }
+
+    public function save(string $path, string $file, $data): Result
     {
         $bucket = $this->getBucket();
-        $this->putObject($bucket, $path . $file, $data);
+        $filename =  $path . $file;
+
+        switch (true) {
+            case $data instanceof File:
+                $this->uploadFile($bucket, $filename, $data->getRealPath());
+                break;
+
+            case is_string($data):
+                $this->putObject($bucket, $path . $file, $data);
+                break;
+        }
 
         return Result::success();
     }
 
-    public function saveImage(string $path, string $file, File $image): Result
+    public function clear(string $path, int $count): void
     {
         $bucket = $this->getBucket();
-        // 用于搜索用户所有历史头像
+
         $options = [
             'prefix'   => $path, // 文件路径前缀
-            'max-keys' => 20,     // 最大数量
+            'max-keys' => 15,    // 最大数量
         ];
 
-        $object =  $path . $file;
-
-        // 上传到OSS
-        $this->uploadFile($bucket, $object, $image->getRealPath());
-
         // 列举用户所有头像
-        $objectList = $this->listObjects($bucket, $options)->getObjectList();
-
-        $count = count($objectList);
-
-        // 如果用户的头像大于10张
-        if ($count > self::IMAGE_MAX_COUNT) {
+        $list = $this->listObjects($bucket, $options)->getObjectList();
+        $num = count($list);
+        // 如果文件冗余
+        if ($num > $count) {
             // 按照时间进行升序
-            usort($objectList, function ($a, $b) {
+            usort($list, function ($a, $b) {
                 return strtotime($a->getLastModified()) - strtotime($b->getLastModified());
             });
 
             // 需要删除的OBJ
             $objects = [];
 
-            $num = $count - self::IMAGE_MAX_COUNT;
+            $num -= $count;
             for ($i = 0; $i < $num; $i++) {
-                $objects[] = $objectList[$i]->getKey();
+                $objects[] = $list[$i]->getKey();
             }
 
-            // 把超过的删除
             $this->deleteObjects($bucket, $objects);
         }
-
-        return Result::success();
     }
 
     public function delete(): Result
@@ -149,6 +154,6 @@ class Oss extends Driver
 
     public function __call($method, $args)
     {
-        return call_user_func_array([$this->client, $method], $args);
+        return $this->client->$method(...$args);
     }
 }

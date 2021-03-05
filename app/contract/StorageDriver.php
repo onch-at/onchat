@@ -11,26 +11,32 @@ use think\File;
 interface StorageDriver
 {
     /**
-     * 保存对象
+     * 获取根目录
      *
-     * @param string $path 路径
-     * @param string $file 文件名
-     * @param string $data 对象数据
-     * @return Result
+     * @return string
      */
-    function saveObject(string $path, string $file, string $data): Result;
+    function getRootPath(): string;
 
     /**
-     * 保存图片
+     * 保存文件
      *
      * @param string $path 路径
      * @param string $file 文件名
-     * @param File $image 图片文件
+     * @param File|string $data
      * @return Result
      */
-    function saveImage(string $path, string $file, File $image): Result;
+    function save(string $path, string $file, $data): Result;
 
     function delete(): Result;
+
+    /**
+     * 清理目录下冗余文件
+     *
+     * @param string $path 目录
+     * @param integer $count 要保留的文件数量
+     * @return void
+     */
+    function clear(string $path, int $count): void;
 
     /**
      * 获取原图URL

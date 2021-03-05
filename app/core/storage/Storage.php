@@ -6,7 +6,6 @@ namespace app\core\storage;
 
 use app\contract\StorageDriver;
 use app\core\Result;
-use think\App;
 use think\Config;
 use think\Container;
 use think\File;
@@ -16,15 +15,19 @@ use think\File;
  */
 class Storage implements StorageDriver
 {
+    /** 最大图片储存数 */
+    const IMAGE_MAX_COUNT = 5;
+
     /** @var Driver */
     protected $driver;
-
+    protected $container;
     protected $config;
 
-    public function __construct(App $app, Config $config)
+    public function __construct(Container $container, Config $config)
     {
-        $this->driver = $app->make($config->get('storage.driver'));
-        $this->config = $config;
+        $this->driver    = $container->make($config->get('storage.driver'));
+        $this->config    = $config;
+        $this->container = $container;
     }
 
     /**
@@ -38,29 +41,34 @@ class Storage implements StorageDriver
     }
 
     /**
-     * 获取根目录路径
-     * 如果是开发模式，则根目录为dev/，否则为空字符串
+     * 设置驱动
      *
-     * @return string
+     * @param string $driver 驱动类类路径
+     * @return void
      */
+    public function setDriver(string $driver)
+    {
+        $this->driver = $this->container->make($driver);
+    }
+
     public function getRootPath(): string
     {
-        return env('app_debug') ? 'dev/' : '';
+        return $this->driver->getRootPath();
     }
 
-    public function saveObject(string $path, string $file, string $data): Result
+    public function save(string $path, string $file, $image): Result
     {
-        return $this->driver->saveObject($path, $file, $data);
-    }
-
-    public function saveImage(string $path, string $file, File $image): Result
-    {
-        return $this->driver->saveImage($path,  $file, $image);
+        return $this->driver->save($path,  $file, $image);
     }
 
     public function delete(): Result
     {
         return $this->driver->delete();
+    }
+
+    public function clear(string $path, int $count): void
+    {
+        $this->driver->clear($path, $count);
     }
 
     public function getOriginalImageUrl(string $filename): string

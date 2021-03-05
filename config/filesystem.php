@@ -2,7 +2,7 @@
 
 return [
     // 默认磁盘
-    'default' => env('filesystem.driver', 'local'),
+    'default' => env('filesystem.driver', 'public'),
     // 磁盘列表
     'disks'   => [
         'local'  => [
