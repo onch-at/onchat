@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace app\command;
 
 use app\core\Result;
-use think\facade\Db;
-use think\console\Input;
-use think\console\Output;
-use think\facade\Console;
-use think\console\Command;
 use app\facade\ChatroomService;
-use think\console\input\Argument;
 use app\util\Redis as RedisUtil;
 use app\util\Throttle as ThrottleUtil;
+use think\console\Command;
+use think\console\Input;
+use think\console\Output;
+use think\console\input\Argument;
+use think\facade\Console;
+use think\facade\Db;
 
 class OnChat extends Command
 {
@@ -28,7 +28,7 @@ class OnChat extends Command
         // 指令配置
         $this->setName('onchat')
             ->addArgument('action', Argument::OPTIONAL, 'start|stop|restart|reload|install', self::ACTION_START)
-            ->setDescription('the onchat command');
+            ->setDescription('OnChat Application');
     }
 
     /**

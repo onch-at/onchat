@@ -28,6 +28,7 @@ abstract class BaseListener
 
     public function getClientIP(): string
     {
+        // 通过读取 $request->header['x-real-ip'] 来获取客户端的真实 IP
         return $this->server->getClientInfo($this->fd)['remote_ip'];
     }
 }

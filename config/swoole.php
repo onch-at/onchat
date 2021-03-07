@@ -1,7 +1,6 @@
 <?php
 
 use think\swoole\websocket\socketio\Handler;
-use think\swoole\websocket\socketio\Parser;
 
 return [
     'server'     => [
@@ -12,13 +11,13 @@ return [
         'options'   => [
             'pid_file'              => runtime_path() . 'swoole.pid',
             'log_file'              => runtime_path() . 'swoole.log',
-            'daemonize'             => true,
+            'daemonize'             => !env('APP_DEBUG', false),
             // Normally this value should be 1~4 times larger according to your cpu cores.
             'reactor_num'           => swoole_cpu_num() * 2,
             'worker_num'            => swoole_cpu_num() * 2,
             'task_worker_num'       => swoole_cpu_num(),
             'enable_static_handler' => true,
-            'document_root'         => root_path('public'),
+            'document_root'         => public_path(),
             'package_max_length'    => 20 * 1024 * 1024,
             'buffer_output_size'    => 10 * 1024 * 1024,
             'socket_buffer_size'    => 128 * 1024 * 1024
@@ -27,7 +26,6 @@ return [
     'websocket'  => [
         'enable'        => true,
         'handler'       => Handler::class,
-        'parser'        => Parser::class,
         'ping_interval' => 25000,
         'ping_timeout'  => 60000,
         'room'          => [

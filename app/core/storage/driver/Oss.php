@@ -31,7 +31,7 @@ class Oss extends Driver
 
     public function getRootPath(): string
     {
-        return env('app_debug') ? 'dev/' : '';
+        return env('APP_DEBUG') ? 'dev/' : '';
     }
 
     public function save(string $path, string $file, $data): Result
