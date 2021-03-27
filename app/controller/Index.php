@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace app\controller;
 
+use app\model\ChatRequest;
+use app\service\Index as IndexService;
 use think\App;
 use think\Response;
 use think\captcha\facade\Captcha;
-use app\service\Index as IndexService;
 
 class Index extends BaseController
 {

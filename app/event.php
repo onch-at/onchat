@@ -1,5 +1,7 @@
 <?php
 
+use app\listener\task\ClearChatRequest;
+use app\listener\task\ClearFriendRequest;
 use app\listener\task\SendMail;
 use app\listener\task\TaskDispatcher;
 use app\listener\websocket\ChatRequest;
@@ -26,6 +28,7 @@ return [
         'HttpEnd'                                    => [],
         'LogLevel'                                   => [],
         'LogWrite'                                   => [],
+        'swoole.start'                               => [ClearFriendRequest::class, ClearChatRequest::class],
         'swoole.websocket.Event'                     => [SocketEventDispatcher::class],
         'swoole.websocket.Event.Test'                => [Test::class],
         'swoole.websocket.Event.Init'                => [Init::class],

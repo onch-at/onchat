@@ -11,7 +11,7 @@ return [
         'options'   => [
             'pid_file'              => runtime_path() . 'swoole.pid',
             'log_file'              => runtime_path() . 'swoole.log',
-            'daemonize'             => !env('APP_DEBUG', false),
+            'daemonize'             => true,
             // Normally this value should be 1~4 times larger according to your cpu cores.
             'reactor_num'           => swoole_cpu_num() * 2,
             'worker_num'            => swoole_cpu_num() * 2,
