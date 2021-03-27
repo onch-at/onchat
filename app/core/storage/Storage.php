@@ -25,7 +25,8 @@ class Storage implements StorageDriver
 
     public function __construct(Container $container, Config $config)
     {
-        $this->driver    = $container->make($config->get('storage.driver'));
+        $default         = $config->get('storage.default');
+        $this->driver    = $container->make($config->get("storage.stores.{$default}.driver"));
         $this->config    = $config;
         $this->container = $container;
     }

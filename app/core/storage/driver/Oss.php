@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace app\core\storage\driver;
 
 use OSS\OssClient;
+use app\contract\StorageDriver;
 use app\core\Result;
-use app\core\storage\Driver;
 use think\Config;
 use think\File;
 
 /**
  * 阿里云OSS对象存储服务 存储驱动
  */
-class Oss extends Driver
+class Oss implements StorageDriver
 {
     private $client;
 
@@ -21,9 +21,9 @@ class Oss extends Driver
 
     public function __construct(Config $config)
     {
-        $accessKeyId     = $config->get('oss.access_key_id');
-        $accessKeySecret = $config->get('oss.access_key_secret');
-        $endpoint        = $config->get('oss.endpoint');
+        $accessKeyId     = $config->get('storage.stores.oss.access_key_id');
+        $accessKeySecret = $config->get('storage.stores.oss.access_key_secret');
+        $endpoint        = $config->get('storage.stores.oss.endpoint');
 
         $this->client = new OssClient($accessKeyId, $accessKeySecret, $endpoint);
         $this->config = $config;

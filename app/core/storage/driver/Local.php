@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace app\core\storage\driver;
 
+use app\contract\StorageDriver;
 use app\core\Result;
-use app\core\storage\Driver;
 use think\File;
 use think\Filesystem;
 
 /**
- * 本地 存储驱动
+ * 简易的本地 存储驱动
  */
-class Local extends Driver
+class Local implements StorageDriver
 {
     private $filesystem;
 
@@ -25,6 +25,11 @@ class Local extends Driver
     {
         $type = $this->filesystem->getDefaultDriver();
         return $this->filesystem->getDiskConfig($type, 'root') . DIRECTORY_SEPARATOR;
+    }
+
+    public function getRootPath(): string
+    {
+        return '';
     }
 
     public function save(string $path, string $file, $data): Result
