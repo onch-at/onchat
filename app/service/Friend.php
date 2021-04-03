@@ -8,6 +8,7 @@ use app\core\Result;
 use app\core\storage\Storage;
 use app\facade\ChatroomService;
 use app\facade\UserService;
+use app\facade\UserTable;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\FriendRequest as FriendRequestModel;
@@ -442,7 +443,7 @@ class Friend
 
             $data = $friendRequest->toArray();
             $data['selfUsername'] = UserService::getUsernameById($friendRequest->self_id);
-            $data['targetUsername'] = RedisUtil::getUserByUserId($targetId)['username'];
+            $data['targetUsername'] = UserTable::getByUserId($targetId, 'username');
             $data['targetAvatarThumbnail'] = $storage->getThumbnailImageUrl($object);
             Db::commit();
 

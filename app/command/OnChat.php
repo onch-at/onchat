@@ -6,8 +6,6 @@ namespace app\command;
 
 use app\core\Result;
 use app\facade\ChatroomService;
-use app\util\Redis as RedisUtil;
-use app\util\Throttle as ThrottleUtil;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -31,18 +29,6 @@ class OnChat extends Command
             ->setDescription('OnChat Application');
     }
 
-    /**
-     * 清理缓存
-     *
-     * @return void
-     */
-    protected function clearCache()
-    {
-        RedisUtil::clearFdUserPair();
-        RedisUtil::clearUserIdFdPair();
-        ThrottleUtil::clearAll();
-    }
-
     protected function execute(Input $input, Output $output)
     {
         $output->info('OnChat: Starting execution…');
@@ -53,7 +39,6 @@ class OnChat extends Command
             case self::ACTION_START:
             case self::ACTION_STOP:
             case self::ACTION_RESTART:
-                $this->clearCache();
                 Console::call('swoole', [$action]);
                 break;
 

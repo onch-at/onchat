@@ -6,7 +6,6 @@ namespace app\listener\websocket;
 
 use app\core\Result;
 use app\service\Chat as ChatService;
-use app\util\Redis as RedisUtil;
 
 class ChatRequestAgree extends SocketEventHandler
 {
@@ -34,7 +33,7 @@ class ChatRequestAgree extends SocketEventHandler
         $chatSession = $result->data[1];
 
         // 拿到申请人的FD
-        $applicantFd = RedisUtil::getFdByUserId($chatSession['userId']);
+        $applicantFd = $this->fdTable->getFd($chatSession['userId']);
         if ($applicantFd) {
             // 加入新的聊天室
             $this->websocket->setSender($applicantFd)

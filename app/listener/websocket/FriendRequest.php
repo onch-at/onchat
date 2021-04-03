@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\service\User as UserService;
-use app\util\Redis as RedisUtil;
 use app\service\Friend as FriendService;
 
 class FriendRequest extends SocketEventHandler

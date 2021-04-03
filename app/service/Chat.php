@@ -8,12 +8,12 @@ use app\core\Result;
 use app\core\storage\Storage;
 use app\facade\ChatroomService;
 use app\facade\UserService;
+use app\facade\UserTable;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
 use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
-use app\util\Redis as RedisUtil;
 use app\util\Str as StrUtil;
 use think\facade\Db;
 
@@ -249,7 +249,7 @@ class Chat
 
             $request = $request->toArray();
 
-            $request['handlerNickname'] = RedisUtil::getUserByUserId($handler)['username'];
+            $request['handlerNickname'] = UserTable::getByUserId($handler, 'username');
 
             unset($request['chatroomAvatarThumbnail']);
 
@@ -331,7 +331,7 @@ class Chat
         $request = $request->toArray();
         $request['applicantAvatarThumbnail'] = $storage->getThumbnailImageUrl($request['applicantAvatarThumbnail']);
         $request['chatroomAvatarThumbnail']  = $storage->getThumbnailImageUrl($request['chatroomAvatarThumbnail']);
-        $request['handlerNickname'] = RedisUtil::getUserByUserId($handler)['username'];
+        $request['handlerNickname'] = UserTable::getByUserId($handler, 'username');
 
         return Result::success($request);
     }

@@ -1,5 +1,6 @@
 <?php
 
+use Swoole\Table;
 use think\swoole\websocket\socketio\Handler;
 
 return [
@@ -79,7 +80,48 @@ return [
         'enable' => true,
         'flags'  => SWOOLE_HOOK_ALL ^ SWOOLE_HOOK_CURL,
     ],
-    'tables'     => [],
+    'tables'     => [
+        'user' => [
+            'size'    => 4096,
+            'columns' => [
+                [
+                    'name' => 'id',
+                    'type' => Table::TYPE_INT,
+                    'size' => 4
+                ],
+                [
+                    'name' => 'username',
+                    'type' => Table::TYPE_STRING,
+                    'size' => 30
+                ]
+            ]
+        ],
+        'fd' => [
+            'size'    => 4096,
+            'columns' => [
+                [
+                    'name' => 'fd',
+                    'type' => Table::TYPE_INT,
+                    'size' => 4
+                ],
+            ]
+        ],
+        'throttle' => [
+            'size'    => 4096,
+            'columns' => [
+                [
+                    'name' => 'time',
+                    'type' => Table::TYPE_INT,
+                    'size' => 4
+                ],
+                [
+                    'name' => 'count',
+                    'type' => Table::TYPE_INT,
+                    'size' => 1
+                ],
+            ]
+        ]
+    ],
     //每个worker里需要预加载以共用的实例
     'concretes'  => [],
     //重置器

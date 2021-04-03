@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\service\User as UserService;
-use app\util\Redis as RedisUtil;
 use app\service\Friend as FriendService;
 
 class FriendRequestAgree extends SocketEventHandler
@@ -35,7 +33,7 @@ class FriendRequestAgree extends SocketEventHandler
         }
 
         // 拿到申请人的FD
-        $selfFd = RedisUtil::getFdByUserId($result->data['selfId']);
+        $selfFd = $this->fdTable->getFd($result->data['selfId']);
         if ($selfFd) {
             // 加入新的聊天室
             $this->websocket->setSender($selfFd)

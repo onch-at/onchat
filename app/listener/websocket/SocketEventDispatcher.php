@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\core\Result;
-use app\util\Throttle as ThrottleUtil;
 use think\facade\Event;
 use think\helper\Str;
 
@@ -29,7 +28,7 @@ class SocketEventDispatcher extends SocketEventHandler
 
         $user = $this->getUser();
 
-        if ($user && !ThrottleUtil::try($user['id'])) {
+        if ($user && !$this->throttleTable->try($user['id'])) {
             return $this->websocket->emit($type, new Result(Result::CODE_ERROR_HIGH_FREQUENCY));
         }
 

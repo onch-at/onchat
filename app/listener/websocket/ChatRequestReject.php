@@ -6,7 +6,6 @@ namespace app\listener\websocket;
 
 use app\core\Result;
 use app\service\Chat as ChatService;
-use app\util\Redis as RedisUtil;
 
 class ChatRequestReject extends SocketEventHandler
 {
@@ -32,7 +31,7 @@ class ChatRequestReject extends SocketEventHandler
         }
 
         // 拿到申请人的FD
-        $applicantFd = RedisUtil::getFdByUserId($result->data['applicantId']);
+        $applicantFd = $this->fdTable->getFd($result->data['applicantId']);
         $applicantFd && $this->websocket->setSender($applicantFd)->emit('chat_request_reject', $result);
     }
 }
