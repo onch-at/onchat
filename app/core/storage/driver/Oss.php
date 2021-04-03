@@ -105,7 +105,7 @@ class Oss implements StorageDriver
      */
     public function getDomain(): string
     {
-        return $this->config->get('oss.domain');
+        return $this->config->get('storage.stores.oss.domain');
     }
 
     /**
@@ -115,7 +115,7 @@ class Oss implements StorageDriver
      */
     public function getBucket(): string
     {
-        return $this->config->get('oss.bucket');
+        return $this->config->get('storage.stores.oss.bucket');
     }
 
     /**
@@ -125,7 +125,7 @@ class Oss implements StorageDriver
      */
     public function getOriginalImgStylename(): string
     {
-        return $this->config->get('oss.img_stylename_original');
+        return $this->config->get('storage.stores.oss.img_stylename_original');
     }
 
     /**
@@ -135,7 +135,7 @@ class Oss implements StorageDriver
      */
     public function getThumbnailImgStylename(): string
     {
-        return $this->config->get('oss.img_stylename_thumbnail');
+        return $this->config->get('storage.stores.oss.img_stylename_thumbnail');
     }
 
     /**
