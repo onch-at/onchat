@@ -23,8 +23,6 @@ return [
             // Bucket 域名（可填写自己绑定的域名）
             'domain'                  => env('oss.domain', 'https://x.oss-cn-shanghai.aliyuncs.com/'),
             // 包括自定义分隔符
-            // 图片样式名：原图
-            'img_stylename_original'  => env('oss.img_stylename_original', 'original'),
             // 图片样式名：缩略图
             'img_stylename_thumbnail' => env('oss.img_stylename_thumbnail', 'thumbnail'),
         ],

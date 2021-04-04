@@ -32,6 +32,17 @@ class File
         return finfo_file($finfo, $filename);
     }
 
+    /**
+     * 是否为动图
+     *
+     * @param string $filename
+     * @return boolean
+     */
+    public static function isAnimation(string $filename): bool
+    {
+        return !!preg_match('/.(gif|apng)$/i', $filename);
+    }
+
     // /**
     //  * 压缩图片并保存
     //  *

@@ -100,11 +100,11 @@ class Message
                 break;
 
             case self::TYPE_IMAGE:
-                if (!isset($msg['data']['baseUrl'])) {
+                if (!isset($msg['data']['filename'])) {
                     return new Result(Result::CODE_ERROR_PARAM);
                 }
 
-                $data['baseUrl'] = $msg['data']['baseUrl'];
+                $data['filename'] = $msg['data']['filename'];
                 $msg['data'] = $data;
                 break;
 

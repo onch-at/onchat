@@ -91,23 +91,12 @@ class Oss implements StorageDriver
 
     public function getOriginalImageUrl(string $filename): string
     {
-        return $this->signImageUrl($filename, $this->isAnimation($filename) ? null : $this->getOriginalImgStylename());
+        return $this->signImageUrl($filename);
     }
 
     public function getThumbnailImageUrl(string $filename): string
     {
-        return $this->signImageUrl($filename, $this->isAnimation($filename) ? null : $this->getThumbnailImgStylename());
-    }
-
-    /**
-     * 是否为动图
-     *
-     * @param string $filename
-     * @return boolean
-     */
-    public function isAnimation(string $filename): bool
-    {
-        return !!preg_match('/.(gif|apng)$/i', $filename);
+        return $this->signImageUrl($filename, $this->getThumbnailImgStylename());
     }
 
     /**
@@ -131,16 +120,6 @@ class Oss implements StorageDriver
     }
 
     /**
-     * 获取图片样式名：原图
-     *
-     * @return string
-     */
-    public function getOriginalImgStylename(): string
-    {
-        return $this->config->get('storage.stores.oss.img_stylename_original');
-    }
-
-    /**
      * 获取图片样式名：缩略图
      *
      * @return string
@@ -157,7 +136,7 @@ class Oss implements StorageDriver
      * @param string|null $stylename
      * @return string
      */
-    private function signImageUrl(string $object, string $stylename = null): string
+    private function signImageUrl(string $object, ?string $stylename = null): string
     {
         $options = null;
         if ($stylename) {

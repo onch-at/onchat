@@ -318,9 +318,9 @@ class Chatroom
             $msg['createTime'] = $timestamp;
 
             if ($msg['type'] === Message::TYPE_IMAGE) {
-                $url = $msg['data']['baseUrl'];
-                $msg['data']['url'] = $storage->getThumbnailImageUrl($url);
-                $msg['data']['thumbnailUrl'] = $storage->getThumbnailImageUrl($url);
+                $url = $msg['data']['filename'];
+                $msg['data']['url'] = $storage->getOriginalImageUrl($url);
+                $msg['data']['thumbnailUrl'] = FileUtil::isAnimation($url) ? $msg['data']['url'] : $storage->getThumbnailImageUrl($url);
             }
 
             // 提交事务
@@ -402,9 +402,9 @@ class Chatroom
                 $item['data']->description     = $chatroom ? $chatroom->description : null;
                 $item['data']->avatarThumbnail = $chatroom ? $storage->getThumbnailImageUrl($chatroom->avatar) : null;
             } else if ($item['type'] === Message::TYPE_IMAGE) {
-                $url = $item['data']->baseUrl;
-                $item['data']->url = $storage->getThumbnailImageUrl($url);
-                $item['data']->thumbnailUrl = $storage->getThumbnailImageUrl($url);
+                $url = $item['data']->filename;
+                $item['data']->url = $storage->getOriginalImageUrl($url);
+                $item['data']->thumbnailUrl = FileUtil::isAnimation($url) ? $item['data']->url : $storage->getThumbnailImageUrl($url);
             }
 
             $records[] = $item;
@@ -456,7 +456,7 @@ class Chatroom
             // 如果为图片，就把文件也删了
             if ($msg['type'] === Message::TYPE_IMAGE) {
                 $storage = Storage::getInstance();
-                $storage->delete($msg['data']->baseUrl);
+                $storage->delete($msg['data']->filename);
             }
 
             // 提交事务
