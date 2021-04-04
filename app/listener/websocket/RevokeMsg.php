@@ -19,7 +19,7 @@ class RevokeMsg extends SocketEventHandler
         ['chatroomId' => $chatroomId, 'msgId' => $msgId] = $event;
 
         $user = $this->getUser();
-        $result = $chatroomService->revokeMsg($chatroomId, $user['id'], $msgId);
+        $result = $chatroomService->revokeMessage($chatroomId, $user['id'], $msgId);
 
         $this->websocket->to(parent::ROOM_CHATROOM . $chatroomId)
             ->emit('revoke_msg', $result);

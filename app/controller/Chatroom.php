@@ -73,4 +73,15 @@ class Chatroom extends BaseController
     {
         return $this->service->avatar($id);
     }
+
+    /**
+     * 上传图片
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public function image(int $id): Result
+    {
+        return $this->service->image($id);
+    }
 }

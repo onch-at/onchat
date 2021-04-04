@@ -84,9 +84,9 @@ class Local implements StorageDriver
         }
     }
 
-    function delete(): Result
+    function delete(string $filename): Result
     {
-        return Result::success();
+        return new Result(unlink($filename) ? Result::CODE_SUCCESS : Result::CODE_ERROR_UNKNOWN);
     }
 
 

@@ -83,19 +83,31 @@ class Oss implements StorageDriver
         }
     }
 
-    public function delete(): Result
+    public function delete(string $filename): Result
     {
+        $this->deleteObject($this->getBucket(), $filename);
         return Result::success();
     }
 
     public function getOriginalImageUrl(string $filename): string
     {
-        return $this->signImageUrl($filename, $this->getOriginalImgStylename());
+        return $this->signImageUrl($filename, $this->isAnimation($filename) ? null : $this->getOriginalImgStylename());
     }
 
     public function getThumbnailImageUrl(string $filename): string
     {
-        return $this->signImageUrl($filename);
+        return $this->signImageUrl($filename, $this->isAnimation($filename) ? null : $this->getThumbnailImgStylename());
+    }
+
+    /**
+     * 是否为动图
+     *
+     * @param string $filename
+     * @return boolean
+     */
+    public function isAnimation(string $filename): bool
+    {
+        return !!preg_match('/.(gif|apng)$/i', $filename);
     }
 
     /**
@@ -142,14 +154,17 @@ class Oss implements StorageDriver
      * 签名图像URL
      *
      * @param string $object
-     * @param string|null $stylename 默认为缩略图样式
+     * @param string|null $stylename
      * @return string
      */
     private function signImageUrl(string $object, string $stylename = null): string
     {
-        return $this->signUrl($this->getBucket(), $object, 86400, 'GET', [
-            OssClient::OSS_PROCESS => 'style/' . ($stylename ?: $this->getThumbnailImgStylename())
-        ]);
+        $options = null;
+        if ($stylename) {
+            $options = [OssClient::OSS_PROCESS => 'style/' . $stylename];
+        }
+
+        return $this->signUrl($this->getBucket(), $object, 86400, 'GET', $options);
     }
 
     public function __call($method, $args)

@@ -27,7 +27,13 @@ interface StorageDriver
      */
     function save(string $path, string $file, $data): Result;
 
-    function delete(): Result;
+    /**
+     * 删除文件
+     *
+     * @param string $filename 文件完整名
+     * @return Result
+     */
+    function delete(string $filename): Result;
 
     /**
      * 清理目录下冗余文件

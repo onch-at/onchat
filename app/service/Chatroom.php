@@ -267,7 +267,7 @@ class Chatroom
      * @param array $msg 消息体
      * @return Result
      */
-    public function setMessage(int $userId, array $msg): Result
+    public function addMessage(int $userId, array $msg): Result
     {
         // 拿到当前用户在这个聊天室的昵称
         $nickname = UserService::getNicknameInChatroom($userId, $msg['chatroomId']);
@@ -316,6 +316,12 @@ class Chatroom
             $msg['nickname'] = $nickname;
             $msg['avatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
             $msg['createTime'] = $timestamp;
+
+            if ($msg['type'] === Message::TYPE_IMAGE) {
+                $url = $msg['data']['baseUrl'];
+                $msg['data']['url'] = $storage->getThumbnailImageUrl($url);
+                $msg['data']['thumbnailUrl'] = $storage->getThumbnailImageUrl($url);
+            }
 
             // 提交事务
             Db::commit();
@@ -390,11 +396,15 @@ class Chatroom
             $item['data'] = json_decode($item['data']);
 
             // 如果是群聊邀请消息
-            if ($item['type'] == Message::TYPE_CHAT_INVITATION) {
+            if ($item['type'] === Message::TYPE_CHAT_INVITATION) {
                 $chatroom = ChatroomModel::find($item['data']->chatroomId);
                 $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
                 $item['data']->description     = $chatroom ? $chatroom->description : null;
                 $item['data']->avatarThumbnail = $chatroom ? $storage->getThumbnailImageUrl($chatroom->avatar) : null;
+            } else if ($item['type'] === Message::TYPE_IMAGE) {
+                $url = $item['data']->baseUrl;
+                $item['data']->url = $storage->getThumbnailImageUrl($url);
+                $item['data']->thumbnailUrl = $storage->getThumbnailImageUrl($url);
             }
 
             $records[] = $item;
@@ -411,7 +421,7 @@ class Chatroom
      * @param integer $msgId 消息ID
      * @return Result
      */
-    public function revokeMsg(int $id, int $userId, int $msgId): Result
+    public function revokeMessage(int $id, int $userId, int $msgId): Result
     {
         $query = ChatRecordModel::opt($id)->where('id', '=', $msgId);
         $msg = $query->find();
@@ -442,6 +452,12 @@ class Chatroom
                 'type' => ChatSessionModel::TYPE_CHATROOM,
                 'data->chatroomId' => $id
             ]);
+
+            // 如果为图片，就把文件也删了
+            if ($msg['type'] === Message::TYPE_IMAGE) {
+                $storage = Storage::getInstance();
+                $storage->delete($msg['data']->baseUrl);
+            }
 
             // 提交事务
             Db::commit();
@@ -546,6 +562,35 @@ class Chatroom
         }
 
         return Result::success($data);
+    }
+
+    /**
+     * 上传图片
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public function image(int $id): Result
+    {
+        $userId = UserService::getId();
+
+        try {
+            $storage = Storage::getInstance();
+            $image   = request()->file('image');
+            $path    = $storage->getRootPath() . "image/chatroom/{$id}/{$userId}/";
+            $file    = md5((string) DateUtil::now()) . '.' . FileUtil::getExtension($image);
+            $result  = $storage->save($path, $file, $image);
+
+            if ($result->code !== Result::CODE_SUCCESS) {
+                return $result;
+            }
+
+            $filename = $path . $file;
+
+            return Result::success($filename);
+        } catch (\Exception $e) {
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+        }
     }
 
     /**

@@ -62,9 +62,9 @@ class Storage implements StorageDriver
         return $this->driver->save($path,  $file, $image);
     }
 
-    public function delete(): Result
+    public function delete(string $filename): Result
     {
-        return $this->driver->delete();
+        return $this->driver->delete($filename);
     }
 
     public function clear(string $path, int $count): void

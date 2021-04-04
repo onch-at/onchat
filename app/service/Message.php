@@ -17,6 +17,7 @@ class Message
     const TYPE_RICH_TEXT = 2;
     const TYPE_TIPS = 3;
     const TYPE_CHAT_INVITATION = 4;
+    const TYPE_IMAGE = 5;
 
     /** 文本消息最长长度 */
     const TEXT_MSG_MAX_LENGTH = 3000;
@@ -95,6 +96,15 @@ class Message
 
             case self::TYPE_CHAT_INVITATION:
                 $data['chatroomId'] = $msg['data']['chatroomId'];
+                $msg['data'] = $data;
+                break;
+
+            case self::TYPE_IMAGE:
+                if (!isset($msg['data']['baseUrl'])) {
+                    return new Result(Result::CODE_ERROR_PARAM);
+                }
+
+                $data['baseUrl'] = $msg['data']['baseUrl'];
                 $msg['data'] = $data;
                 break;
 

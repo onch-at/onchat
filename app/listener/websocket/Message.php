@@ -23,6 +23,6 @@ class Message extends SocketEventHandler
         // TODO 群聊的头像
         $this->websocket
             ->to(parent::ROOM_CHATROOM . $msg['chatroomId'])
-            ->emit('message', $chatroomService->setMessage($user['id'], $msg));
+            ->emit('message', $chatroomService->addMessage($user['id'], $msg));
     }
 }
