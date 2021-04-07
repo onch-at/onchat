@@ -67,6 +67,11 @@ class Storage implements StorageDriver
         return $this->driver->delete($filename);
     }
 
+    public function exist(string $filename): Result
+    {
+        return $this->driver->exist($filename);
+    }
+
     public function clear(string $path, int $count): void
     {
         $this->driver->clear($path, $count);

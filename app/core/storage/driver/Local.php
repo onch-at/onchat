@@ -89,6 +89,10 @@ class Local implements StorageDriver
         return new Result(unlink($filename) ? Result::CODE_SUCCESS : Result::CODE_ERROR_UNKNOWN);
     }
 
+    public function exist(string $filename): Result
+    {
+        return Result::success(file_exists($filename));
+    }
 
     function getOriginalImageUrl(string $filename): string
     {

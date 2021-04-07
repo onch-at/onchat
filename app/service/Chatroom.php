@@ -453,12 +453,6 @@ class Chatroom
                 'data->chatroomId' => $id
             ]);
 
-            // 如果为图片，就把文件也删了
-            if ($msg['type'] === Message::TYPE_IMAGE) {
-                $storage = Storage::getInstance();
-                $storage->delete($msg['data']->filename);
-            }
-
             // 提交事务
             Db::commit();
             return Result::success(['chatroomId' => $id, 'msgId' => $msgId]);
@@ -572,22 +566,24 @@ class Chatroom
      */
     public function image(int $id): Result
     {
-        $userId = UserService::getId();
-
         try {
             $storage = Storage::getInstance();
             $image   = request()->file('image');
-            $path    = $storage->getRootPath() . "image/chatroom/{$id}/{$userId}/";
-            $file    = md5((string) DateUtil::now()) . '.' . FileUtil::getExtension($image);
+            $path    = $storage->getRootPath() . 'image/';
+            $file    = $image->md5() . '.' . FileUtil::getExtension($image);
             $result  = $storage->save($path, $file, $image);
 
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;
             }
 
-            $filename = $path . $file;
+            [$width, $height] = getimagesize($image->getPathname());
 
-            return Result::success($filename);
+            $data['filename'] = $path . $file;
+            $data['width'] = $width;
+            $data['height'] = $height;
+
+            return Result::success($data);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
@@ -613,7 +609,7 @@ class Chatroom
             $storage = Storage::getInstance();
             $image   = request()->file('image');
             $path    = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
-            $file    = md5((string) DateUtil::now()) . '.' . FileUtil::getExtension($image);
+            $file    = $image->md5() . '.' . FileUtil::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::IMAGE_MAX_COUNT);

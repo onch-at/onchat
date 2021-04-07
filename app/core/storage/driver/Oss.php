@@ -89,6 +89,12 @@ class Oss implements StorageDriver
         return Result::success();
     }
 
+    public function exist(string $filename): Result
+    {
+        $exist = $this->doesObjectExist($this->getBucket(), $filename);
+        return Result::success($exist);
+    }
+
     public function getOriginalImageUrl(string $filename): string
     {
         return $this->signImageUrl($filename);

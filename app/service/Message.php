@@ -7,7 +7,7 @@ namespace app\service;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use app\core\Result;
-
+use app\core\storage\Storage;
 use app\util\Str as StrUtil;
 
 class Message
@@ -100,16 +100,35 @@ class Message
                 break;
 
             case self::TYPE_IMAGE:
-                if (!isset($msg['data']['filename'])) {
+                $temp = $msg['data'];
+
+                if (!isset($temp['filename']) || !isset($temp['width']) || !isset($temp['height'])) {
                     return new Result(Result::CODE_ERROR_PARAM);
                 }
 
-                $data['filename'] = $msg['data']['filename'];
-                $msg['data'] = $data;
+                try {
+                    $storage = Storage::getInstance();
+
+                    if (!$storage->exist($msg['data']['filename'])) {
+                        return new Result(Result::CODE_ERROR_PARAM, '图片不存在');
+                    }
+
+                    $data['filename'] = $temp['filename'];
+                    $data['width'] = $temp['width'];
+                    $data['height'] = $temp['height'];
+
+                    $msg['data'] = $data;
+                } catch (\Exception $e) {
+                    return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+                }
                 break;
 
             default:
                 return new Result(Result::CODE_ERROR_PARAM, '未知消息类型');
+        }
+
+        if (isset($msg['loading'])) {
+            unset($msg['loading']);
         }
 
         return Result::success($msg);

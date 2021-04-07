@@ -473,7 +473,7 @@ class User
             $storage = Storage::getInstance();
             $image   = request()->file('image');
             $path    = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
-            $file    = md5((string) DateUtil::now()) . '.' . FileUtil::getExtension($image);
+            $file    = $image->md5() . '.' . FileUtil::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::IMAGE_MAX_COUNT);
