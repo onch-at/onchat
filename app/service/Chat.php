@@ -73,19 +73,49 @@ class Chat
         return Result::success($chatroomIdList);
     }
 
+    /**
+     * 显示群主/管理员/某用户的聊天室通知会话
+     *
+     * @param integer $chatroomId 聊天室ID
+     * @param integer $userId 用户ID
+     * @return void
+     */
+    public function showChatroomNoticeChatSession(int $chatroomId, ?int $userId = null)
+    {
+        $userIdList = ChatMemberModel::where('chatroom_id', '=', $chatroomId)
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['role', '=', ChatMemberModel::ROLE_HOST],
+                    ['role', '=', ChatMemberModel::ROLE_MANAGE],
+                ]);
+            })
+            ->column('user_id');
+
+        if ($userId) {
+            $userIdList[] = $userId;
+        }
+
+        ChatSessionModel::where('type', '=', ChatSessionModel::TYPE_CHATROOM_NOTICE)
+            ->where('user_id', 'IN', $userIdList)
+            ->update([
+                'chat_session.update_time' => time() * 1000,
+                'chat_session.visible' => true
+            ]);
+    }
+
 
     /**
      * 申请加入聊天室
      *
-     * @param integer $applicant 申请人ID
+     * @param integer $requester 申请人ID
      * @param integer $chatroomId 聊天室ID
      * @param string $reason 申请原因
      * @return Result
      */
-    public function request(int $applicant, int $chatroomId, string $reason = null): Result
+    public function request(int $requester, int $chatroomId, string $reason = null): Result
     {
         // 如果已经是聊天室成员了
-        if (ChatroomService::isMember($chatroomId, $applicant)) {
+        if (ChatroomService::isMember($chatroomId, $requester)) {
             return new Result(Result::CODE_ERROR_PARAM, '你已加入该聊天室！');
         }
 
@@ -106,7 +136,7 @@ class Chat
 
         // 先找找之前有没有申请过
         $request = ChatRequestModel::where([
-            ['applicant_id', '=', $applicant],
+            ['requester_id', '=', $requester],
             ['chatroom_id', '=', $chatroomId],
             ['status', '<>', ChatRequestModel::STATUS_AGREE]
         ])->find();
@@ -124,7 +154,7 @@ class Chat
         } else {
             $request = ChatRequestModel::create([
                 'chatroom_id'    => $chatroomId,
-                'applicant_id'   => $applicant,
+                'requester_id'   => $requester,
                 'status'         => ChatRequestModel::STATUS_WAIT,
                 'request_reason' => $reason,
                 'readed_list'    => [],
@@ -133,37 +163,27 @@ class Chat
             ]);
         }
 
-        // 显示群主/管理员的聊天室通知会话
-        ChatSessionModel::where('type', '=', ChatSessionModel::TYPE_CHATROOM_NOTICE)
-            ->where('user_id', 'IN', function ($query) use ($chatroomId) {
-                $query->table('chat_member')
-                    ->where('chatroom_id', '=', $chatroomId)
-                    ->where(function ($query) {
-                        $query->whereOr([
-                            ['role', '=', ChatMemberModel::ROLE_HOST],
-                            ['role', '=', ChatMemberModel::ROLE_MANAGE],
-                        ]);
-                    })->field('user_id');
-            })
-            ->update([
-                'chat_session.update_time' => time() * 1000,
-                'chat_session.visible' => true
-            ]);
+        $this->showChatroomNoticeChatSession($chatroomId, $requester);
 
         $storage = Storage::getInstance();
 
-        $info = UserInfoModel::where('user_info.user_id', '=', $applicant)
+        $info = UserInfoModel::where('user_info.user_id', '=', $requester)
             ->field([
-                'user_info.nickname AS applicantNickname',
-                'user_info.avatar AS applicantAvatarThumbnail'
+                'user_info.nickname AS requesterNickname',
+                'user_info.avatar AS requesterAvatarThumbnail'
             ])
             ->find()
             ->toArray();
-        $info['applicantAvatarThumbnail'] = $storage->getThumbnailImageUrl($info['applicantAvatarThumbnail']);
+        $info['requesterAvatarThumbnail'] = $storage->getThumbnailImageUrl($info['requesterAvatarThumbnail']);
 
-        $chatroom = ChatroomModel::field('chatroom.name AS chatroomName')
-            ->find($chatroomId)
-            ->toArray();
+        $chatroom = ChatroomModel::field([
+            'chatroom.name AS chatroomName',
+            'chatroom.avatar AS chatroomAvatar',
+        ])->find($chatroomId)->toArray();
+
+        $avatar = $chatroom['chatroomAvatar'];
+        $chatroom['chatroomAvatar'] = $storage->getOriginalImageUrl($avatar);
+        $chatroom['chatroomAvatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
 
         return Result::success($request->toArray() + $info + $chatroom);
     }
@@ -178,7 +198,7 @@ class Chat
     public function agree(int $id, int $handler): Result
     {
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
-            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->join('user_info requester', 'chat_request.requester_id = requester.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where([
                 'chat_request.id' => $id,
@@ -191,10 +211,10 @@ class Chat
                 ]);
             })
             ->field([
-                'applicant.nickname AS applicantNickname',
-                'applicant.avatar AS applicantAvatarThumbnail',
+                'requester.nickname AS requesterNickname',
+                'requester.avatar AS requesterAvatarThumbnail',
                 'chatroom.name AS chatroomName',
-                'chatroom.avatar AS chatroomAvatarThumbnail',
+                'chatroom.avatar AS chatroomAvatar',
                 'chat_request.*'
             ])
             ->find();
@@ -230,28 +250,30 @@ class Chat
             $request->update_time = time() * 1000;
             $request->save();
 
-            $result = ChatroomService::addMember($chatroomId, $request->applicant_id, $request->applicantNickname);
+            $result = ChatroomService::addMember($chatroomId, $request->requester_id, $request->requesterNickname);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
 
+            $this->showChatroomNoticeChatSession($request->chatroom_id, $request->requester_id);
+
             $storage = Storage::getInstance();
 
             $chatSession = $result->data;
+            $avatar = $request->chatroomAvatar;
 
             // 补充一些信息
             $chatSession['title'] = $request->chatroomName;
-            $chatSession['avatarThumbnail'] = $storage->getThumbnailImageUrl($request->chatroomAvatarThumbnail);
+            $chatSession['avatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
             $chatSession['data']['chatroomType'] = ChatroomModel::TYPE_GROUP_CHAT;
 
-            $request->applicantAvatarThumbnail = $storage->getThumbnailImageUrl($request->applicantAvatarThumbnail);
-
+            $request->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($request->requesterAvatarThumbnail);
+            $request->chatroomAvatar = $storage->getOriginalImageUrl($avatar);
+            $request->chatroomAvatarThumbnail = $chatSession['avatarThumbnail'];
+            $request->handlerNickname = UserTable::getByUserId($handler, 'username');
             $request = $request->toArray();
 
-            $request['handlerNickname'] = UserTable::getByUserId($handler, 'username');
-
-            unset($request['chatroomAvatarThumbnail']);
 
             Db::commit();
             return Result::success([$request, $chatSession]);
@@ -283,7 +305,7 @@ class Chat
         }
 
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
-            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->join('user_info requester', 'chat_request.requester_id = requester.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where([
                 'chat_request.id' => $id,
@@ -296,10 +318,10 @@ class Chat
                 ]);
             })
             ->field([
-                'applicant.nickname AS applicantNickname',
-                'applicant.avatar AS applicantAvatarThumbnail',
+                'requester.nickname AS requesterNickname',
+                'requester.avatar AS requesterAvatarThumbnail',
                 'chatroom.name AS chatroomName',
-                'chatroom.avatar AS chatroomAvatarThumbnail',
+                'chatroom.avatar AS chatroomAvatar',
                 'chat_request.*'
             ])
             ->find();
@@ -326,14 +348,17 @@ class Chat
         $request->update_time   = time() * 1000;
         $request->save();
 
+        $this->showChatroomNoticeChatSession($request->chatroom_id, $request->requester_id);
+
         $storage = Storage::getInstance();
+        $avatar = $request->chatroomAvatar;
 
-        $request = $request->toArray();
-        $request['applicantAvatarThumbnail'] = $storage->getThumbnailImageUrl($request['applicantAvatarThumbnail']);
-        $request['chatroomAvatarThumbnail']  = $storage->getThumbnailImageUrl($request['chatroomAvatarThumbnail']);
-        $request['handlerNickname'] = UserTable::getByUserId($handler, 'username');
+        $request->chatroomAvatar = $storage->getOriginalImageUrl($avatar);
+        $request->chatroomAvatarThumbnail = $storage->getThumbnailImageUrl($avatar);
+        $request->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($request->requesterAvatarThumbnail);
+        $request->handlerNickname = UserTable::getByUserId($handler, 'username');
 
-        return Result::success($request);
+        return Result::success($request->toArray());
     }
 
     /**
@@ -368,7 +393,7 @@ class Chat
         $userId = UserService::getId();
 
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
-            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->join('user_info requester', 'chat_request.requester_id = requester.user_id')
             ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where([
@@ -382,8 +407,8 @@ class Chat
                 ]);
             })
             ->field([
-                'applicant.nickname AS applicantNickname',
-                'applicant.avatar AS applicantAvatarThumbnail',
+                'requester.nickname AS requesterNickname',
+                'requester.avatar AS requesterAvatarThumbnail',
                 'handler.nickname AS handlerNickname',
                 'chatroom.name AS chatroomName',
                 'chat_request.*'
@@ -395,7 +420,7 @@ class Chat
         }
 
         $storage = Storage::getInstance();
-        $request->applicantAvatarThumbnail = $storage->getThumbnailImageUrl($request->applicantAvatarThumbnail);
+        $request->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($request->requesterAvatarThumbnail);
 
         return Result::success($request->toArray());
     }
@@ -411,7 +436,7 @@ class Chat
         $storage = Storage::getInstance();
 
         $data = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
-            ->join('user_info applicant', 'chat_request.applicant_id = applicant.user_id')
+            ->join('user_info requester', 'chat_request.requester_id = requester.user_id')
             ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where('chat_member.user_id', '=', $userId)
@@ -422,8 +447,8 @@ class Chat
                 ]);
             })
             ->field([
-                'applicant.nickname AS applicantNickname',
-                'applicant.avatar AS applicantAvatarThumbnail',
+                'requester.nickname AS requesterNickname',
+                'requester.avatar AS requesterAvatarThumbnail',
                 'handler.nickname AS handlerNickname',
                 'chatroom.name AS chatroomName',
                 'chat_request.*'
@@ -432,7 +457,80 @@ class Chat
             ->toArray();
 
         foreach ($data as $key => $value) {
-            $data[$key]['applicantAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['applicantAvatarThumbnail']);
+            $data[$key]['requesterAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['requesterAvatarThumbnail']);
+        }
+
+        return Result::success($data);
+    }
+
+    /**
+     * 通过请求ID获取我发送的入群请求
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public function getSendRequestById(int $id): Result
+    {
+        $userId = UserService::getId();
+
+        $request = ChatRequestModel::join('user_info requester', 'chat_request.requester_id = requester.user_id')
+            ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
+            ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
+            ->where([
+                'chat_request.id' => $id,
+                'chat_request.requester_id' => $userId
+            ])
+            ->field([
+                'requester.nickname AS requesterNickname',
+                'handler.nickname AS handlerNickname',
+                'chatroom.name AS chatroomName',
+                'chatroom.avatar AS chatroomAvatar',
+                'chat_request.*'
+            ])
+            ->find();
+
+        if (!$request) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        $avatar = $request->chatroomAvatar;
+        $storage = Storage::getInstance();
+        $request->chatroomAvatar = $storage->getOriginalImageUrl($avatar);
+        $request->chatroomAvatarThumbnail = $storage->getThumbnailImageUrl($avatar);
+
+        return Result::success($request->toArray());
+    }
+
+    /**
+     * 获取我发送的所有入群申请
+     *
+     * @return Result
+     */
+    public function getSendRequests(): Result
+    {
+        $userId = UserService::getId();
+
+        $data = ChatRequestModel::join('user_info requester', 'chat_request.requester_id = requester.user_id')
+            ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
+            ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
+            ->where('chat_request.requester_id', '=', $userId)
+            ->field([
+                'requester.nickname AS requesterNickname',
+                'handler.nickname AS handlerNickname',
+                'chatroom.name AS chatroomName',
+                'chatroom.avatar AS chatroomAvatar',
+                'chat_request.*'
+            ])
+            ->select()
+            ->toArray();
+
+        $storage = Storage::getInstance();
+        $avatar = null;
+
+        foreach ($data as $key => $value) {
+            $avatar = $value['chatroomAvatar'];
+            $data[$key]['chatroomAvatar'] = $storage->getOriginalImageUrl($avatar);
+            $data[$key]['chatroomAvatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
         }
 
         return Result::success($data);

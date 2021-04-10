@@ -13,7 +13,6 @@ use app\model\ChatMember as ChatMemberModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\FriendRequest as FriendRequestModel;
 use app\model\UserInfo as UserInfoModel;
-use app\util\Redis as RedisUtil;
 use app\util\Str as StrUtil;
 use think\facade\Db;
 

@@ -27,9 +27,9 @@ class ChatRequest extends Model
 
 
     /** 申请人 */
-    public function applicant()
+    public function requester()
     {
-        return $this->belongsTo(User::class, 'applicant_id');
+        return $this->belongsTo(User::class, 'requester_id');
     }
 
     public function handler()

@@ -33,10 +33,10 @@ class ChatRequestAgree extends SocketEventHandler
         $chatSession = $result->data[1];
 
         // 拿到申请人的FD
-        $applicantFd = $this->fdTable->getFd($chatSession['userId']);
-        if ($applicantFd) {
+        $requesterFd = $this->fdTable->getFd($chatSession['userId']);
+        if ($requesterFd) {
             // 加入新的聊天室
-            $this->websocket->setSender($applicantFd)
+            $this->websocket->setSender($requesterFd)
                 ->join(parent::ROOM_CHATROOM . $chatSession['data']['chatroomId'])
                 ->emit('chat_request_agree', $result);
         }

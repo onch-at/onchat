@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use think\App;
 use app\core\Result;
 use app\service\Chat as ChatService;
+use think\App;
 
 class Chat extends BaseController
 {
@@ -47,5 +47,26 @@ class Chat extends BaseController
     public function readed(): Result
     {
         return $this->service->readed();
+    }
+
+    /**
+     * 获取我发送的所有入群申请
+     *
+     * @return Result
+     */
+    public function getSendRequests(): Result
+    {
+        return $this->service->getSendRequests();
+    }
+
+    /**
+     * 通过请求ID获取我发送的入群请求
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public function getSendRequestById(int $id): Result
+    {
+        return $this->service->getSendRequestById($id);
     }
 }
