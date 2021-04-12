@@ -19,7 +19,7 @@ use think\facade\Db;
 class Friend
 {
     /** 别名最大长度 */
-    const ALIAS_MAX_LENGTH = 30;
+    const ALIAS_MAX_LENGTH = 15;
     /** 附加消息最大长度 */
     const REASON_MAX_LENGTH = 50;
 
@@ -487,7 +487,7 @@ class Friend
      * @param string $alias 好友别名
      * @return Result
      */
-    public function setFriendAlias(int $chatroomId, string $alias): Result
+    public function setFriendAlias(int $chatroomId, ?string $alias): Result
     {
         $userId = UserService::getId();
 

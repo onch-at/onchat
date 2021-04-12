@@ -18,4 +18,7 @@ Route::group('chatroom/<id>', function () {
 
     Route::post('avatar', 'avatar')->middleware(AvatarImage::class);
     Route::post('image', 'image')->middleware(ImageFile::class);
+
+    Route::put('name', 'setName');
+    Route::put('member/nickname', 'setNickname');
 })->completeMatch()->prefix('Chatroom/')->middleware(Auth::class);

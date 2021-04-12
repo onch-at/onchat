@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\model\ChatRequest;
+use app\model\User as UserModel;
+use app\model\UserInfo as UserInfoModel;
 use app\service\Index as IndexService;
 use think\App;
 use think\Response;

@@ -16,6 +16,7 @@ use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
 use app\util\Date as DateUtil;
 use app\util\File as FileUtil;
+use app\util\Str as StrUtil;
 use think\facade\Db;
 
 class Chatroom
@@ -30,6 +31,8 @@ class Chatroom
     const CODE_GROUP_CHAT_COUNT_FULL = 4;
     /** 聊天室人数已满 */
     const CODE_PEOPLE_NUM_FULL = 5;
+    /** 昵称过长 */
+    const CODE_NICKNAME_LONG = 6;
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
@@ -39,6 +42,9 @@ class Chatroom
     const DESCRIPTION_MIN_LENGTH = 5;
     /** 群介绍最大长度 */
     const DESCRIPTION_MAX_LENGTH = 300;
+
+    /** 昵称最大长度 */
+    const NICKNAME_MAX_LENGTH = 15;
 
     /** 用户创建群聊最大数量 */
     const MAX_GROUP_CHAT_COUNT = 10;
@@ -82,6 +88,78 @@ class Chatroom
         }
 
         return Result::success($chatroom->name);
+    }
+
+    /**
+     * 设置聊天室名称
+     *
+     * @param integer $id 聊天室ID
+     * @param string $name 名称
+     * @return Result
+     */
+    public function setName(int $id, string $name): Result
+    {
+        $userId = UserService::getId();
+        $role = $this->getMemberRole($id, $userId);
+
+        // 如果不是群主、管理员
+        if ($role != ChatMemberModel::ROLE_HOST && $role != ChatMemberModel::ROLE_MANAGE) {
+            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+        }
+
+        $name = trim($name);
+        // 如果长度超出
+        if (mb_strlen($name, 'utf-8') > self::NAME_MAX_LENGTH) {
+            return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符');
+        }
+
+        ChatroomModel::update([
+            'id'   => $id,
+            'name' => $name
+        ]);
+
+        return Result::success();
+    }
+
+    /**
+     * 设置群昵称
+     *
+     * @param integer $id 聊天室ID
+     * @param string|null $nickname 昵称
+     * @return Result
+     */
+    public function setNickname(int $id, ?string $nickname): Result
+    {
+        // 如果有传入昵称
+        if (mb_strlen(StrUtil::trimAll($nickname), 'utf-8') !== 0) {
+            $nickname = trim($nickname);
+            // 如果昵称长度超出
+            if (mb_strlen($nickname, 'utf-8') > self::NICKNAME_MAX_LENGTH) {
+                return new Result(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . self::NICKNAME_MAX_LENGTH . '位字符');
+            }
+        } else {
+            $nickname = null;
+        }
+
+        $userId = UserService::getId();
+
+        $chatMember = ChatMemberModel::where([
+            'chatroom_id' => $id,
+            'user_id'     => $userId
+        ])->find();
+
+        if (!$chatMember) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
+        if (!$nickname) {
+            $nickname = UserService::getUsernameById($userId);
+        }
+
+        $chatMember->nickname = $nickname;
+        $chatMember->save();
+
+        return Result::success($nickname);
     }
 
     /**

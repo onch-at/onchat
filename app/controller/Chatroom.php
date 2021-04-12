@@ -30,6 +30,30 @@ class Chatroom extends BaseController
     }
 
     /**
+     * 设置聊天室名称
+     *
+     * @param integer $id 聊天室ID
+     * @param string $name 名称
+     * @return Result
+     */
+    public function setName(int $id, string $name): Result
+    {
+        return $this->service->setName($id, $name);
+    }
+
+    /**
+     * 设置群昵称
+     *
+     * @param integer $id 聊天室ID
+     * @param string $nickname 昵称
+     * @return Result
+     */
+    public function setNickname(int $id, string $nickname): Result
+    {
+        return $this->service->setNickname($id, $nickname);
+    }
+
+    /**
      * 获取聊天室
      *
      * @param integer $id 聊天室ID
