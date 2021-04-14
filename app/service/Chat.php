@@ -50,8 +50,8 @@ class Chat
         $chatroom = ChatroomModel::join('chat_member', 'chat_member.chatroom_id = chatroom.id')
             ->where([
                 ['chatroom.id', '=', $chatroomId],
-                ['chat_member.user_id', '=', $inviter],
-                ['chat_member.role', '=', ChatMemberModel::ROLE_HOST]
+                ['chatroom.type', '=', ChatroomModel::TYPE_GROUP_CHAT],
+                ['chat_member.user_id', '=', $inviter]
             ])->field('chatroom.*')->find();
 
         if (!$chatroom) {
