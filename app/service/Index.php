@@ -48,7 +48,7 @@ class Index
         $captcha = StrUtil::captcha(6);
 
         $this->session->set(self::SESSION_EMAIL_CAPTCHA, [
-            'captcha' => password_hash($captcha, PASSWORD_DEFAULT),
+            'captcha' => password_hash(strtolower($captcha), PASSWORD_DEFAULT),
             'email'   => $email,
             'time'    => time()
         ]);
@@ -89,7 +89,7 @@ class Index
         ] = $data;
 
         // 验证验证码是否过期，邮箱是否一致，验证码是否正确
-        if (time() > $time + 600 || $email !== $mail || !password_verify($captcha, $hash)) {
+        if (time() > $time + 600 || $email !== $mail || !password_verify(strtolower($captcha), $hash)) {
             return false;
         }
 

@@ -11,6 +11,10 @@ Route::group('user', function () {
 
     Route::post('login', 'login');
     Route::post('register', 'register');
+    Route::post('emailcaptcha', 'sendEmailCaptcha');
+
+    Route::put('password', 'changePassword');
+    Route::put('password/reset', 'resetPassword');
 
     Route::group(function () {
         Route::get('logout', 'logout');

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use think\App;
 use app\core\Result;
 use app\service\User as UserService;
+use think\App;
 
 class User extends BaseController
 {
@@ -38,6 +38,42 @@ class User extends BaseController
     public function logout(): void
     {
         $this->service->logout();
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param string $oldPassword 原密码
+     * @param string $newPassword 新密码
+     * @return Result
+     */
+    public function changePassword(string $oldPassword, string $newPassword): Result
+    {
+        return $this->service->changePassword($oldPassword, $newPassword);
+    }
+
+    /**
+     * 通过用户名发送邮件
+     *
+     * @param string $username
+     * @return Result
+     */
+    public function sendEmailCaptcha(string $username): Result
+    {
+        return $this->service->sendEmailCaptcha($username);
+    }
+
+    /**
+     * 重置密码
+     *
+     * @param string $username 用户名
+     * @param string $password 密码
+     * @param string $captcha 验证码
+     * @return Result
+     */
+    public function resetPassword(string $username, string $password, string $captcha): Result
+    {
+        return $this->service->resetPassword($username,  $password,  $captcha);
     }
 
     /**

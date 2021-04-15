@@ -227,7 +227,6 @@ class User
      */
     public function login(string $username, string $password): Result
     {
-
         if (!preg_match(self::USERNAME_PATTERN, $username)) {
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
@@ -274,6 +273,96 @@ class User
     }
 
     /**
+     * 修改密码
+     *
+     * @param string $oldPassword 原密码
+     * @param string $newPassword 新密码
+     * @return Result
+     */
+    public function changePassword(string $oldPassword, string $newPassword): Result
+    {
+        $result = $this->checkPassword($newPassword);
+        if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
+            return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+        }
+
+        $id = $this->getId();
+
+        $user = UserModel::find($id);
+
+        if (!password_verify($oldPassword, $user->password)) { // 如果密码错误
+            return new Result(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_PASSWORD_ERROR]);
+        }
+
+        $newPassword = StrUtil::trimAll($newPassword);
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        if (!$hash) { // 如果密码散列创建失败
+            return new Result(Result::CODE_ERROR_UNKNOWN, '密码散列创建失败');
+        }
+
+        $user->password = $hash;
+        $user->update_time = time() * 1000;
+        $user->save();
+
+        $this->logout();
+
+        return Result::success();
+    }
+
+    /**
+     * 通过用户名发送邮件
+     *
+     * @param string $username
+     * @return Result
+     */
+    public function sendEmailCaptcha(string $username): Result
+    {
+        $email = UserModel::where('username', '=', $username)->value('email');
+
+        return IndexService::sendEmailCaptcha($email);
+    }
+
+    /**
+     * 重置密码
+     *
+     * @param string $username 用户名
+     * @param string $password 密码
+     * @param string $captcha 验证码
+     * @return Result
+     */
+    public function resetPassword(string $username, string $password, string $captcha): Result
+    {
+        if (!preg_match(self::USERNAME_PATTERN, $username)) {
+            return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
+        }
+
+        $result = $this->checkPassword($password);
+        if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
+            return new Result(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+        }
+
+        $user = UserModel::where('username', '=', $username)->find();
+
+        if (!IndexService::checkEmailCaptcha($user->email, $captcha)) {
+            return new Result(Result::CODE_ERROR_PARAM, '验证码错误！');
+        }
+
+        $password = StrUtil::trimAll($password);
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        if (!$hash) { // 如果密码散列创建失败
+            return new Result(Result::CODE_ERROR_UNKNOWN, '密码散列创建失败');
+        }
+
+        $user->password = $hash;
+        $user->update_time = time() * 1000;
+        $user->save();
+
+        return Result::success();
+    }
+
+    /**
      * 设置用户登录Session，用于保存登录状态
      *
      * @param integer $id 用户ID
@@ -300,8 +389,7 @@ class User
      */
     public function getInfoByKey(string $key, $value, $field): array
     {
-
-        return UserModel::where($key == 'id' ? 'user.id' : $key, '=', $value)
+        return UserModel::where($key === 'id' ? 'user.id' : $key, '=', $value)
             ->join('user_info', 'user_info.user_id = user.id')
             ->field($field)
             ->findOrEmpty()
