@@ -320,6 +320,10 @@ class User
     {
         $email = UserModel::where('username', '=', $username)->value('email');
 
+        if (!$email) {
+            return new Result(Result::CODE_ERROR_PARAM);
+        }
+
         return IndexService::sendEmailCaptcha($email);
     }
 
