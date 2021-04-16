@@ -147,7 +147,7 @@ class Chat
             $request->status = ChatRequestModel::STATUS_WAIT;
             $request->request_reason = $reason;
             $request->reject_reason  = null;
-            $request->readed_list    = [];
+            $request->readed_list    = [$requester];
             $request->handler_id     = null;
             $request->update_time    = $timestamp;
             $request->save();
@@ -157,7 +157,7 @@ class Chat
                 'requester_id'   => $requester,
                 'status'         => ChatRequestModel::STATUS_WAIT,
                 'request_reason' => $reason,
-                'readed_list'    => [],
+                'readed_list'    => [$requester],
                 'create_time'    => $timestamp,
                 'update_time'    => $timestamp,
             ]);
@@ -238,13 +238,16 @@ class Chat
         // 启动事务
         Db::startTrans();
         try {
+            $readedList = array_filter($request->readed_list, function ($o) use ($request) {
+                return $o !== $request->requester_id;
+            });
+
             // 如果自己还未读
             if (!in_array($handler, $request->readed_list)) {
-                $readedList = $request->readed_list;
                 $readedList[] = $handler;
-                $request->readed_list = $readedList;
             }
 
+            $request->readed_list = array_values($readedList);
             $request->handler_id  = $handler;
             $request->status      = ChatRequestModel::STATUS_AGREE;
             $request->update_time = time() * 1000;
@@ -335,13 +338,16 @@ class Chat
             return new Result(self::CODE_REQUEST_HANDLED, self::MSG[self::CODE_REQUEST_HANDLED]);
         }
 
+        $readedList = array_filter($request->readed_list, function ($o) use ($request) {
+            return $o !== $request->requester_id;
+        });
+
         // 如果自己还未读
         if (!in_array($handler, $request->readed_list)) {
-            // 这里需要拿个变量存起来先，否则错误
-            $readedList = $request->readed_list;
             $readedList[] = $handler;
-            $request->readed_list = $readedList;
         }
+
+        $request->readed_list = array_values($readedList);
         $request->reject_reason = $reason;
         $request->status        = ChatRequestModel::STATUS_REJECT;
         $request->handler_id    = $handler;
