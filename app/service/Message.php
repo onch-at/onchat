@@ -6,22 +6,13 @@ namespace app\service;
 
 use HTMLPurifier;
 use HTMLPurifier_Config;
+use app\constant\MessageType;
 use app\core\Result;
 use app\core\storage\Storage;
 use app\util\Str as StrUtil;
 
 class Message
 {
-    const TYPE_SYSTEM = 0;
-    const TYPE_TEXT = 1;
-    const TYPE_RICH_TEXT = 2;
-    const TYPE_TIPS = 3;
-    const TYPE_CHAT_INVITATION = 4;
-    const TYPE_IMAGE = 5;
-
-    /** 文本消息最长长度 */
-    const TEXT_MSG_MAX_LENGTH = 3000;
-
     /** 消息过长 */
     const CODE_MSG_LONG  = 1;
 
@@ -33,14 +24,14 @@ class Message
     public function handle(array $msg): Result
     {
         switch ($msg['type']) {
-            case self::TYPE_TEXT:
+            case MessageType::TEXT:
                 $content = $msg['data']['content'];
 
-                if (mb_strlen(StrUtil::trimAll($content), 'utf-8') === 0) {
+                if (StrUtil::length(StrUtil::trimAll($content)) === 0) {
                     return new Result(Result::CODE_ERROR_PARAM);
                 }
 
-                if (mb_strlen($content, 'utf-8') > self::TEXT_MSG_MAX_LENGTH) {
+                if (StrUtil::length($content) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
                     return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
                 }
 
@@ -48,15 +39,15 @@ class Message
                 $msg['data'] = $data;
                 break;
 
-            case self::TYPE_RICH_TEXT:
+            case MessageType::RICH_TEXT:
                 $html = $msg['data']['html'];
                 $text = $msg['data']['text'];
 
-                if (mb_strlen(StrUtil::trimAll($text), 'utf-8') === 0) {
+                if (StrUtil::length(StrUtil::trimAll($text)) === 0) {
                     return new Result(Result::CODE_ERROR_PARAM);
                 }
 
-                if (mb_strlen($text, 'utf-8') > self::TEXT_MSG_MAX_LENGTH) {
+                if (StrUtil::length($text) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
                     return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
                 }
 
@@ -94,12 +85,12 @@ class Message
                 $msg['data'] = $data;
                 break;
 
-            case self::TYPE_CHAT_INVITATION:
+            case MessageType::CHAT_INVITATION:
                 $data['chatroomId'] = $msg['data']['chatroomId'];
                 $msg['data'] = $data;
                 break;
 
-            case self::TYPE_IMAGE:
+            case MessageType::IMAGE:
                 $temp = $msg['data'];
 
                 if (!isset($temp['filename']) || !isset($temp['width']) || !isset($temp['height'])) {

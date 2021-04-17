@@ -125,12 +125,12 @@ class Chat
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
+        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && mb_strlen($reason, 'utf-8') > self::REASON_MAX_LENGTH) {
+        if ($reason && StrUtil::length($reason) > self::REASON_MAX_LENGTH) {
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
@@ -298,12 +298,12 @@ class Chat
     public function reject(int $id, int $handler, ?string $reason): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
+        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && mb_strlen($reason, 'utf-8') > self::REASON_MAX_LENGTH) {
+        if ($reason && StrUtil::length($reason) > self::REASON_MAX_LENGTH) {
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 

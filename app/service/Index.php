@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use app\constant\SessionKey;
 use app\core\Job;
 use app\core\Result;
 use app\listener\task\SendMail;
@@ -14,8 +15,6 @@ use think\swoole\facade\Server;
 
 class Index
 {
-    const SESSION_EMAIL_CAPTCHA = 'email_captcha';
-
     private $session;
     private $config;
 
@@ -38,7 +37,11 @@ class Index
             return Result::success(false);
         }
 
-        $data = $this->session->get(self::SESSION_EMAIL_CAPTCHA);
+        if (StrUtil::length($email) > ONCHAT_EMAIL_MAX_LENGTH) {
+            return Result::success(false);
+        }
+
+        $data = $this->session->get(SessionKey::EMAIL_CAPTCHA);
 
         // 如果在60秒内再次发送，则不处理
         if ($data && time() <= $data['time'] + 60) {
@@ -47,7 +50,7 @@ class Index
 
         $captcha = StrUtil::captcha(6);
 
-        $this->session->set(self::SESSION_EMAIL_CAPTCHA, [
+        $this->session->set(SessionKey::EMAIL_CAPTCHA, [
             'captcha' => password_hash(strtolower($captcha), PASSWORD_DEFAULT),
             'email'   => $email,
             'time'    => time()
@@ -76,7 +79,7 @@ class Index
      */
     public function checkEmailCaptcha(string $email, string $captcha): bool
     {
-        $data = $this->session->get(self::SESSION_EMAIL_CAPTCHA);
+        $data = $this->session->get(SessionKey::EMAIL_CAPTCHA);
 
         if (!$data) {
             return false;

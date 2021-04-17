@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\middleware;
 
+use app\constant\SessionKey;
 use app\core\Result;
-use app\service\User;
 use think\Request;
 use think\Response;
 use think\facade\Session;
@@ -21,7 +21,7 @@ class Auth
      */
     public function handle(Request $request, \Closure $next): Response
     {
-        if (!Session::has(User::SESSION_USER_LOGIN)) {
+        if (!Session::has(SessionKey::USER_LOGIN)) {
             return (new Result(Result::CODE_ERROR_NO_PERMISSION))->toJson();
         }
 

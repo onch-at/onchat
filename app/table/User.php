@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\table;
 
+use app\constant\SessionKey;
 use app\facade\FdTable;
 use app\service\User as UserService;
 use app\util\Redis;
@@ -24,7 +25,7 @@ class User extends Table
         }
 
         $session = unserialize(unserialize($data));
-        $userInfo = $session[UserService::SESSION_USER_LOGIN];
+        $userInfo = $session[SessionKey::USER_LOGIN];
 
         return $this->table->set((string) $fd, [
             'id'       => $userInfo['id'],

@@ -18,11 +18,6 @@ use think\facade\Db;
 
 class Friend
 {
-    /** 别名最大长度 */
-    const ALIAS_MAX_LENGTH = 15;
-    /** 附加消息最大长度 */
-    const REASON_MAX_LENGTH = 50;
-
     /** 别名过长 */
     const CODE_ALIAS_LONG = 1;
     /** 附加消息过长 */
@@ -30,8 +25,8 @@ class Friend
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_ALIAS_LONG => '好友别名长度不能大于' . self::ALIAS_MAX_LENGTH . '位字符',
-        self::CODE_REASON_LONG  => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符'
+        self::CODE_ALIAS_LONG => '好友别名长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符',
+        self::CODE_REASON_LONG  => '附加消息长度不能大于' . ONCHAT_REASON_MAX_LENGTH . '位字符'
     ];
 
     /**
@@ -51,22 +46,22 @@ class Friend
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
+        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && mb_strlen($reason, 'utf-8') > self::REASON_MAX_LENGTH) {
+        if ($reason && StrUtil::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($targetAlias && mb_strlen(StrUtil::trimAll($targetAlias), 'utf-8') == 0) {
+        if ($targetAlias && StrUtil::length(StrUtil::trimAll($targetAlias)) === 0) {
             $targetAlias = null;
         }
 
         // 如果别名长度超出
-        if ($targetAlias && mb_strlen($targetAlias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
+        if ($targetAlias && StrUtil::length($targetAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
             return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
@@ -308,10 +303,10 @@ class Friend
     public function agree(int $requestId, int $targetId, string $selfAlias = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        $selfAlias && mb_strlen(StrUtil::trimAll($selfAlias), 'utf-8') == 0 && ($selfAlias = null);
+        $selfAlias && StrUtil::length(StrUtil::trimAll($selfAlias)) === 0 && ($selfAlias = null);
 
         // 如果别名长度超出
-        if ($selfAlias && mb_strlen($selfAlias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
+        if ($selfAlias && StrUtil::length($selfAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
             return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
@@ -400,12 +395,12 @@ class Friend
     public function reject(int $requestId, int $targetId, string $reason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && mb_strlen(StrUtil::trimAll($reason), 'utf-8') == 0) {
+        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && mb_strlen($reason, 'utf-8') > self::REASON_MAX_LENGTH) {
+        if ($reason && StrUtil::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
@@ -492,10 +487,10 @@ class Friend
         $userId = UserService::getId();
 
         // 如果有传入别名
-        if (mb_strlen(StrUtil::trimAll($alias), 'utf-8') != 0) {
+        if (StrUtil::length(StrUtil::trimAll($alias)) > 0) {
             $alias = trim($alias);
             // 如果别名长度超出
-            if (mb_strlen($alias, 'utf-8') > self::ALIAS_MAX_LENGTH) {
+            if (StrUtil::length($alias) > ONCHAT_NICKNAME_MAX_LENGTH) {
                 return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
             }
         } else {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\service;
 
 use Identicon\Identicon;
+use app\constant\SessionKey;
 
 use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
@@ -24,17 +25,6 @@ use think\facade\Db;
 
 class User
 {
-    /** 用户名最小长度 */
-    const USERNAME_MIN_LENGTH = 5;
-    /** 用户名最大长度 */
-    const USERNAME_MAX_LENGTH = 15;
-    /** 用户密码最小长度 */
-    const PASSWORD_MIN_LENGTH = 8;
-    /** 用户密码最大长度 */
-    const PASSWORD_MAX_LENGTH = 50;
-    /** 个性签名 */
-    const SIGNATURE_MAX_LENGTH = 100;
-
     /** 用户已存在 */
     const CODE_USER_EXIST = 1;
     /** 用户不存在 */
@@ -43,20 +33,17 @@ class User
     const CODE_PASSWORD_ERROR = 3;
     /** 用户密码过短/过长 */
     const CODE_PASSWORD_IRREGULAR  = 4;
+    /** 个性签名过短/过长 */
+    const CODE_SIGNATURE_IRREGULAR  = 5;
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_USER_EXIST         => '用户已存在',
-        self::CODE_USER_NOT_EXIST     => '用户不存在',
-        self::CODE_PASSWORD_ERROR     => '密码错误',
-        self::CODE_PASSWORD_IRREGULAR => '密码长度必须在' . self::PASSWORD_MIN_LENGTH . '~' . self::PASSWORD_MAX_LENGTH . '位字符之间',
+        self::CODE_USER_EXIST          => '用户已存在',
+        self::CODE_USER_NOT_EXIST      => '用户不存在',
+        self::CODE_PASSWORD_ERROR      => '密码错误',
+        self::CODE_PASSWORD_IRREGULAR  => '密码长度必须在' . ONCHAT_PASSWORD_MIN_LENGTH . '~' . ONCHAT_PASSWORD_MAX_LENGTH . '位字符之间',
+        self::CODE_SIGNATURE_IRREGULAR => '个性签名长度必须在' . ONCHAT_SIGNATURE_MIN_LENGTH . '~' . ONCHAT_SIGNATURE_MAX_LENGTH . '位字符之间',
     ];
-
-    /** 用户登录SESSION名 */
-    const SESSION_USER_LOGIN = 'user_login';
-
-    /** 是否开放注册 */
-    const CAN_REGISTER = true;
 
     /** User 字段 */
     const USER_FIELDS = [
@@ -79,19 +66,13 @@ class User
     ];
 
     /**
-     * 用户名的正则表达式
-     * 匹配字母/汉字/数字/下划线/横杠，5-15位字符
-     */
-    const USERNAME_PATTERN = "/^([a-z]|[A-Z]|[0-9]|_|-|[\x{4e00}-\x{9fa5}]){" . self::USERNAME_MIN_LENGTH . "," . self::USERNAME_MAX_LENGTH . "}$/u";
-
-    /**
      * 获取储存在SESSION中的用户ID
      *
      * @return integer|null
      */
     public function getId(): ?int
     {
-        return session(self::SESSION_USER_LOGIN . '.id');
+        return session(SessionKey::USER_LOGIN . '.id');
     }
 
     /**
@@ -101,7 +82,7 @@ class User
      */
     public function getUsername(): ?string
     {
-        return session(self::SESSION_USER_LOGIN . '.username');
+        return session(SessionKey::USER_LOGIN . '.username');
     }
 
     /**
@@ -115,7 +96,7 @@ class User
      */
     public function register(string $username, string $password, string $email, string $captcha): Result
     {
-        if (!self::CAN_REGISTER) {
+        if (!ONCHAT_CAN_REGISTER) {
             return new Result(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
         }
 
@@ -130,7 +111,7 @@ class User
         $username = StrUtil::trimAll($username);
         $password = StrUtil::trimAll($password);
 
-        if (!preg_match(self::USERNAME_PATTERN, $username)) {
+        if (!preg_match(ONCHAT_USERNAME_PATTERN, $username)) {
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
 
@@ -227,7 +208,7 @@ class User
      */
     public function login(string $username, string $password): Result
     {
-        if (!preg_match(self::USERNAME_PATTERN, $username)) {
+        if (!preg_match(ONCHAT_USERNAME_PATTERN, $username)) {
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
 
@@ -269,7 +250,7 @@ class User
      */
     public function logout(): void
     {
-        session(self::SESSION_USER_LOGIN, null);
+        session(SessionKey::USER_LOGIN, null);
     }
 
     /**
@@ -337,7 +318,7 @@ class User
      */
     public function resetPassword(string $username, string $password, string $captcha): Result
     {
-        if (!preg_match(self::USERNAME_PATTERN, $username)) {
+        if (!preg_match(ONCHAT_USERNAME_PATTERN, $username)) {
             return new Result(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
         }
 
@@ -376,7 +357,7 @@ class User
      */
     public function saveLoginStatus(int $id, string $username, string $hashPassword): void
     {
-        session(self::SESSION_USER_LOGIN, [
+        session(SessionKey::USER_LOGIN, [
             'id'       => $id,
             'username' => $username,
             'password' => $hashPassword,
@@ -495,7 +476,7 @@ class User
      */
     public function checkLogin(): Result
     {
-        $session = session(self::SESSION_USER_LOGIN);
+        $session = session(SessionKey::USER_LOGIN);
         if (empty($session)) { // 如果没有登录的Session
             return Result::success(false);
         }
@@ -527,9 +508,9 @@ class User
      */
     public function checkPassword(string $password): int
     {
-        $length = mb_strlen($password, 'utf-8');
+        $length = StrUtil::length($password);
 
-        if ($length < self::PASSWORD_MIN_LENGTH || $length > self::PASSWORD_MAX_LENGTH) {
+        if ($length < ONCHAT_PASSWORD_MIN_LENGTH || $length > ONCHAT_PASSWORD_MAX_LENGTH) {
             return self::CODE_PASSWORD_IRREGULAR;
         }
 
@@ -929,13 +910,13 @@ class User
         $constellation = isset($birthday) ? DateUtil::getConstellation((int) $birthday / 1000) : null;
 
         if ($signature) {
-            if (mb_strlen(StrUtil::trimAll($signature), 'utf-8') == 0) {
+            if (StrUtil::length(StrUtil::trimAll($signature)) === 0) {
                 $signature = null;
             } else {
                 $signature = trim($signature);
 
-                if (mb_strlen($signature, 'utf-8') > self::SIGNATURE_MAX_LENGTH) {
-                    return new Result(Result::CODE_ERROR_PARAM);
+                if (StrUtil::length($signature) > ONCHAT_SIGNATURE_MAX_LENGTH) {
+                    return new Result(self::CODE_SIGNATURE_IRREGULAR, self::MSG[self::CODE_SIGNATURE_IRREGULAR]);
                 }
             }
         }

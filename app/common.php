@@ -2,6 +2,8 @@
 // 应用公共文件
 declare(strict_types=1);
 
+include_once 'constants.php';
+
 use think\console\Output;
 
 if (!function_exists('output')) {

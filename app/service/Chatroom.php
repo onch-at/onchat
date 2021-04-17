@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\service;
 
 use Identicon\Identicon;
+use app\constant\MessageType;
 use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
@@ -36,18 +37,6 @@ class Chatroom
 
     /** 每次查询的消息行数 */
     const MSG_ROWS = 15;
-    /** 群名最大长度 */
-    const NAME_MAX_LENGTH = 30;
-    /** 群介绍最小长度 */
-    const DESCRIPTION_MIN_LENGTH = 5;
-    /** 群介绍最大长度 */
-    const DESCRIPTION_MAX_LENGTH = 300;
-
-    /** 昵称最大长度 */
-    const NICKNAME_MAX_LENGTH = 15;
-
-    /** 用户创建群聊最大数量 */
-    const MAX_GROUP_CHAT_COUNT = 10;
 
     /**
      * 获取聊天室名称
@@ -109,8 +98,8 @@ class Chatroom
 
         $name = trim($name);
         // 如果长度超出
-        if (mb_strlen($name, 'utf-8') > self::NAME_MAX_LENGTH) {
-            return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符');
+        if (StrUtil::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
+            return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
         }
 
         ChatroomModel::update([
@@ -131,11 +120,11 @@ class Chatroom
     public function setNickname(int $id, ?string $nickname): Result
     {
         // 如果有传入昵称
-        if (mb_strlen(StrUtil::trimAll($nickname), 'utf-8') !== 0) {
+        if (StrUtil::length(StrUtil::trimAll($nickname)) !== 0) {
             $nickname = trim($nickname);
             // 如果昵称长度超出
-            if (mb_strlen($nickname, 'utf-8') > self::NICKNAME_MAX_LENGTH) {
-                return new Result(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . self::NICKNAME_MAX_LENGTH . '位字符');
+            if (StrUtil::length($nickname) > ONCHAT_NICKNAME_MAX_LENGTH) {
+                return new Result(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符');
             }
         } else {
             $nickname = null;
@@ -228,17 +217,17 @@ class Chatroom
         if ($name) {
             $name = trim($name);
             // 如果长度超出
-            if (mb_strlen($name, 'utf-8') > self::NAME_MAX_LENGTH) {
-                return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . self::NAME_MAX_LENGTH . '位字符');
+            if (StrUtil::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
+                return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
             }
         }
 
         if ($description) {
             $description = trim($description);
-            $length = mb_strlen($description, 'utf-8');
+            $length = StrUtil::length($description);
             // 如果长度超出
-            if ($length < self::DESCRIPTION_MIN_LENGTH || $length > self::DESCRIPTION_MAX_LENGTH) {
-                return new Result(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . self::DESCRIPTION_MIN_LENGTH  . '~' . self::DESCRIPTION_MAX_LENGTH  . '位字符之间');
+            if ($length < ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH || $length > ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH) {
+                return new Result(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH  . '~' . ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH  . '位字符之间');
             }
         }
 
@@ -395,7 +384,7 @@ class Chatroom
             $msg['avatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
             $msg['createTime'] = $timestamp;
 
-            if ($msg['type'] === Message::TYPE_IMAGE) {
+            if ($msg['type'] === MessageType::IMAGE) {
                 $url = $msg['data']['filename'];
                 $msg['data']['url'] = $storage->getOriginalImageUrl($url);
                 $msg['data']['thumbnailUrl'] = FileUtil::isAnimation($url) ? $msg['data']['url'] : $storage->getThumbnailImageUrl($url);
@@ -474,12 +463,12 @@ class Chatroom
             $item['data'] = json_decode($item['data']);
 
             // 如果是群聊邀请消息
-            if ($item['type'] === Message::TYPE_CHAT_INVITATION) {
+            if ($item['type'] === MessageType::CHAT_INVITATION) {
                 $chatroom = ChatroomModel::find($item['data']->chatroomId);
                 $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
                 $item['data']->description     = $chatroom ? $chatroom->description : null;
                 $item['data']->avatarThumbnail = $chatroom ? $storage->getThumbnailImageUrl($chatroom->avatar) : null;
-            } else if ($item['type'] === Message::TYPE_IMAGE) {
+            } else if ($item['type'] === MessageType::IMAGE) {
                 $url = $item['data']->filename;
                 $item['data']->url = $storage->getOriginalImageUrl($url);
                 $item['data']->thumbnailUrl = FileUtil::isAnimation($url) ? $item['data']->url : $storage->getThumbnailImageUrl($url);
@@ -561,7 +550,7 @@ class Chatroom
             'role' => ChatMemberModel::ROLE_HOST
         ])->count();
 
-        if ($count >= self::MAX_GROUP_CHAT_COUNT) {
+        if ($count >= ONCHAT_USER_MAX_GROUP_CHAT_COUNT) {
             return new Result(self::CODE_GROUP_CHAT_COUNT_FULL, '你可创建的聊天室数量已满！');
         }
 
