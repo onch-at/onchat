@@ -77,6 +77,8 @@ class Friend
         if ($request) {
             $request->request_reason = $reason;
             $request->target_alias = $targetAlias;
+            $request->requester_readed = true;
+            $request->target_readed = false;
             $request->status = FriendRequestModel::STATUS_WAIT;
             $request->update_time = $timestamp;
             $request->save();
