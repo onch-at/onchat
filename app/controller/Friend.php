@@ -97,4 +97,26 @@ class Friend extends BaseController
         $data = $this->service->isFriend($userId, $id);
         return Result::success($data);
     }
+
+    /**
+     * 已读收到的好友请求
+     * @param integer $id
+     *
+     * @return Result
+     */
+    public function readedReceiveRequest(int $id): Result
+    {
+        return $this->service->readedReceiveRequest($id);
+    }
+
+    /**
+     * 已读发送的好友请求
+     * @param integer $id
+     *
+     * @return Result
+     */
+    public function readedSendRequest(int $id): Result
+    {
+        return $this->service->readedSendRequest($id);
+    }
 }

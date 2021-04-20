@@ -8,10 +8,10 @@ use app\core\Result;
 use app\core\storage\Storage;
 use app\facade\ChatroomService;
 use app\facade\UserService;
-use app\facade\UserTable;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\FriendRequest as FriendRequestModel;
+use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
 use app\util\Str as StrUtil;
 use think\facade\Db;
@@ -65,73 +65,56 @@ class Friend
             return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
-        $storage = Storage::getInstance();
-
-        $requesterAvatarThumbnail = null;
-        $targetAvatarThumbnail = null;
-
-        $userInfos = UserInfoModel::where('user_id', 'IN', [$requesterId, $targetId])->field([
-            'user_id',
-            'avatar',
-            'nickname'
-        ])->limit(2)->select();
-
-        $url = null;
-        $requesterUsername = null;
-        $targetUsername = null;
-        foreach ($userInfos as $userInfo) {
-            $url = $storage->getThumbnailImageUrl($userInfo->avatar);
-
-            switch ($userInfo['user_id']) {
-                case $requesterId:
-                    $requesterAvatarThumbnail = $url;
-                    $requesterUsername = $userInfo->nickname;
-                    break;
-
-                case $targetId:
-                    $targetAvatarThumbnail = $url;
-                    $targetUsername = $userInfo->nickname;
-                    break;
-            }
-        }
-
         $timestamp = time() * 1000;
 
-        $friendRequest = FriendRequestModel::where([
-            ['requester_id', '=', $requesterId],
-            ['target_id', '=', $targetId],
-            ['target_status', '<>', FriendRequestModel::STATUS_AGREE]
+        $request = FriendRequestModel::where([
+            ['requester_id', '=',  $requesterId],
+            ['target_id',    '=',  $targetId],
+            ['status',       '<>', FriendRequestModel::STATUS_AGREE]
         ])->find();
 
         // 如果之前已经申请过，但对方没有同意，就把对方的状态设置成等待验证
-        if ($friendRequest) {
-            $friendRequest->request_reason = $reason;
-            $friendRequest->target_alias = $targetAlias;
-            // 将双方的状态都设置为等待验证
-            $friendRequest->requester_status = FriendRequestModel::STATUS_WAIT;
-            $friendRequest->target_status = FriendRequestModel::STATUS_WAIT;
-
-            $friendRequest->update_time = $timestamp;
-            $friendRequest->save();
+        if ($request) {
+            $request->request_reason = $reason;
+            $request->target_alias = $targetAlias;
+            $request->status = FriendRequestModel::STATUS_WAIT;
+            $request->update_time = $timestamp;
+            $request->save();
         } else {
-            $friendRequest = FriendRequestModel::create([
-                'requester_id'        => $requesterId,
-                'target_id'      => $targetId,
-                'request_reason' => $reason,
-                'target_alias'   => $targetAlias,
-                'create_time'    => $timestamp,
-                'update_time'    => $timestamp,
+            $request = FriendRequestModel::create([
+                'requester_id'     => $requesterId,
+                'target_id'        => $targetId,
+                'request_reason'   => $reason,
+                'target_alias'     => $targetAlias,
+                'requester_readed' => true,
+                'create_time'      => $timestamp,
+                'update_time'      => $timestamp,
             ]);
         }
 
-        $friendRequest = $friendRequest->toArray();
+        $storage = Storage::getInstance();
 
-        $friendRequest['requesterAvatarThumbnail'] = $requesterAvatarThumbnail;
-        $friendRequest['requesterUsername'] = $requesterUsername;
-        $friendRequest['targetAvatarThumbnail'] = $targetAvatarThumbnail;
-        $friendRequest['targetUsername'] = $targetUsername;
+        $userInfos = UserModel::join('user_info', 'user_info.user_id = user.id')
+            ->where('user_id', 'IN', [$requesterId, $targetId])->field([
+                'user_id',
+                'avatar',
+                'username'
+            ])->limit(2)->select();
 
-        return Result::success($friendRequest);
+        $avatarThumbnail = null;
+        foreach ($userInfos as $userInfo) {
+            $avatarThumbnail = $storage->getThumbnailImageUrl($userInfo->avatar);
+
+            if ($userInfo->user_id ===  $requesterId) {
+                $request->requesterAvatarThumbnail = $avatarThumbnail;
+                $request->requesterUsername = $userInfo->username;
+            } else {
+                $request->targetAvatarThumbnail = $avatarThumbnail;
+                $request->targetUsername = $userInfo->username;
+            }
+        }
+
+        return Result::success($request->toArray());
     }
 
     /**
@@ -144,18 +127,18 @@ class Friend
     {
         $userId = UserService::getId();
 
-        $friendRequest = FriendRequestModel::find($id);
+        $request = FriendRequestModel::find($id);
 
-        if (!$friendRequest) {
+        if (!$request) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
         // 如果发请求的这个人不是申请人也不是被申请人，则无权获取
-        if ($friendRequest->requester_id != $userId && $friendRequest->target_id != $userId) {
+        if ($request->requester_id != $userId && $request->target_id !== $userId) {
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        return Result::success($friendRequest->toArray());
+        return Result::success($request->toArray());
     }
 
     /**
@@ -165,91 +148,64 @@ class Friend
      */
     public function getReceiveRequests(): Result
     {
-        $userId = UserService::getId();
-        $username = UserService::getUsername();
+        $targetId = UserService::getId();
+        $targetUsername = UserService::getUsername();
 
         // 找到自己被申请的
-        $friendRequests = FriendRequestModel::join('user', 'friend_request.requester_id = user.id')
+        $requests = FriendRequestModel::join('user', 'friend_request.requester_id = user.id')
             ->join('user_info', 'friend_request.requester_id = user_info.user_id')
-            ->where([
-                'friend_request.target_id' => $userId,
-                'friend_request.target_status' => FriendRequestModel::STATUS_WAIT
-            ])
+            ->where('friend_request.target_id', '=', $targetId)
             ->field([
-                'friend_request.id',
-                'friend_request.requester_id',
-                'friend_request.target_id',
-                'friend_request.request_reason',
-                'friend_request.reject_reason',
-                'friend_request.requester_status',
-                'friend_request.target_status',
-                'friend_request.create_time',
-                'friend_request.update_time',
+                'friend_request.*',
                 'user_info.avatar AS requesterAvatarThumbnail',
                 'user.username AS requesterUsername',
             ])
             ->order('friend_request.update_time', 'DESC')
-            ->select()
-            ->toArray();
+            ->select();
 
         $storage = Storage::getInstance();
 
-        foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['requesterAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['requesterAvatarThumbnail']);
-            $friendRequests[$key]['targetUsername'] = $username;
+        foreach ($requests as $key => $value) {
+            $requests[$key]->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($value->requesterAvatarThumbnail);
+            $requests[$key]->targetUsername = $targetUsername;
         }
 
-        return Result::success($friendRequests);
+        return Result::success($requests->toArray());
     }
 
     /**
-     * 获取我的发起的好友申请（不包含已经同意的）
+     * 获取我的发起的好友申请
      *
      * @return Result
      */
     public function getSendRequests(): Result
     {
-        $userId = UserService::getId();
-        $username = UserService::getUsername();
+        $requesterId = UserService::getId();
+        $requesterUsername = UserService::getUsername();
 
-        $friendRequests = FriendRequestModel::join('user', 'friend_request.target_id = user.id')
+        $requests = FriendRequestModel::join('user', 'friend_request.target_id = user.id')
             ->join('user_info', 'friend_request.target_id = user_info.user_id')
-            ->where('friend_request.requester_id', '=', $userId)
-            ->where(function ($query) {
-                $query->whereOr([
-                    ['friend_request.requester_status', '=', FriendRequestModel::STATUS_WAIT],
-                    ['friend_request.requester_status', '=', FriendRequestModel::STATUS_REJECT]
-                ]);
-            })
+            ->where('friend_request.requester_id', '=', $requesterId)
             ->field([
-                'friend_request.id',
-                'friend_request.requester_id',
-                'friend_request.target_id',
-                'friend_request.request_reason',
-                'friend_request.reject_reason',
-                'friend_request.requester_status',
-                'friend_request.target_status',
-                'friend_request.create_time',
-                'friend_request.update_time',
+                'friend_request.*',
                 'user_info.avatar AS targetAvatarThumbnail',
                 'user.username AS targetUsername',
             ])
             ->order('update_time', 'DESC')
-            ->select()
-            ->toArray();
+            ->select();
 
         $storage = Storage::getInstance();
 
-        foreach ($friendRequests as $key => $value) {
-            $friendRequests[$key]['targetAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['targetAvatarThumbnail']);
-            $friendRequests[$key]['requesterUsername'] = $username;
+        foreach ($requests as $key => $value) {
+            $requests[$key]->targetAvatarThumbnail = $storage->getThumbnailImageUrl($value->targetAvatarThumbnail);
+            $requests[$key]->requesterUsername = $requesterUsername;
         }
 
-        return Result::success($friendRequests);
+        return Result::success($requests->toArray());
     }
 
     /**
-     * 根据被申请人UID来获取FriendRequest
+     * 根据被申请人ID来获取FriendRequest
      *
      * @param integer $targetId
      * @return Result
@@ -258,20 +214,20 @@ class Friend
     {
         $userId = UserService::getId();
 
-        $friendRequest = FriendRequestModel::where([
+        $request = FriendRequestModel::where([
             'requester_id'   => $userId,
             'target_id' => $targetId
         ])->find();
 
-        if (!$friendRequest) {
+        if (!$request) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return Result::success($friendRequest->toArray());
+        return Result::success($request->toArray());
     }
 
     /**
-     * 根据申请人UID来获取FriendRequest
+     * 根据申请人ID来获取FriendRequest
      *
      * @param integer $requesterId
      * @return Result
@@ -280,16 +236,16 @@ class Friend
     {
         $userId = UserService::getId();
 
-        $friendRequest = FriendRequestModel::where([
+        $request = FriendRequestModel::where([
             'requester_id'   => $requesterId,
             'target_id' => $userId
         ])->find();
 
-        if (!$friendRequest) {
+        if (!$request) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
-        return Result::success($friendRequest->toArray());
+        return Result::success($request->toArray());
     }
 
     /**
@@ -310,33 +266,33 @@ class Friend
             return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
-        $friendRequest = FriendRequestModel::find($requestId);
+        $request = FriendRequestModel::find($requestId);
 
-        if (!$friendRequest) {
+        if (!$request) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
         // 确认被申请人的身份
-        if ($friendRequest->target_id != $targetId) {
+        if ($request->target_id !== $targetId) {
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
         Db::startTrans();
         try {
-            // $friendRequest->requester_status = FriendRequestModel::STATUS_AGREE;
-            // $friendRequest->target_status = FriendRequestModel::STATUS_AGREE;
-            // $friendRequest->requester_alias = $requesterAlias;
-            // $friendRequest->update_time = $timestamp;
-            // $friendRequest->save();
-            $friendRequest->delete(); // 同意就直接删除吧
+            $request->status           = FriendRequestModel::STATUS_AGREE;
+            $request->requester_alias  = $requesterAlias;
+            $request->target_readed    = true;
+            $request->requester_readed = false;
+            $request->update_time      = time() * 1000;
+            $request->save();
 
             // 去找一下有没有自己申请加对方的申请记录
             // 场景：自己同意了对方的申请，但是自己之前也向对方提出好友申请
             // 找到就直接删除吧，省点空间
             FriendRequestModel::where([
                 'requester_id' => $targetId,
-                'target_id' => $friendRequest->requester_id
+                'target_id' => $request->requester_id
             ])->delete();
 
             // 创建一个类型为私聊的聊天室
@@ -348,13 +304,13 @@ class Friend
 
             $chatroomId = $result->data['id'];
 
-            $result = ChatroomService::addMember($chatroomId, $friendRequest->requester_id, $requesterAlias);
+            $result = ChatroomService::addMember($chatroomId, $request->requester_id, $requesterAlias);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
             }
 
-            $result = ChatroomService::addMember($chatroomId, $friendRequest->target_id, $friendRequest->target_alias);
+            $result = ChatroomService::addMember($chatroomId, $request->target_id, $request->target_alias);
             if ($result->code !== Result::CODE_SUCCESS) {
                 Db::rollback();
                 return $result;
@@ -362,7 +318,7 @@ class Friend
 
             Db::commit();
 
-            $userInfo = UserService::getInfoByKey('id', $friendRequest->target_id, [
+            $userInfo = UserService::getInfoByKey('id', $request->target_id, [
                 'username',
                 'avatar'
             ]);
@@ -370,10 +326,10 @@ class Friend
             $storage = Storage::getInstance();
 
             return Result::success([
-                'friendRequestId'       => $friendRequest->id,
+                'friendRequestId'       => $request->id,
                 'chatroomId'            => $chatroomId,
-                'requesterId'                => $friendRequest->requester_id,
-                'targetId'              => $friendRequest->target_id,
+                'requesterId'           => $request->requester_id,
+                'targetId'              => $request->target_id,
                 'targetUsername'        => $userInfo['username'],
                 'targetAvatarThumbnail' => $storage->getThumbnailImageUrl($userInfo['avatar'])
             ]);
@@ -404,44 +360,62 @@ class Friend
             return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
-        $friendRequest = FriendRequestModel::find($requestId);
+        $request = FriendRequestModel::where([
+            'id' => $requestId,
+            'status' => FriendRequestModel::STATUS_WAIT
+        ])->find();
 
-        if (!$friendRequest) {
+        if (!$request) {
             return new Result(Result::CODE_ERROR_PARAM);
         }
 
         // 确认被申请人的身份
-        if ($friendRequest->target_id != $targetId) {
+        if ($request->target_id != $targetId) {
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
         Db::startTrans();
         try {
-            $friendRequest->requester_status = FriendRequestModel::STATUS_REJECT;
-            $friendRequest->target_status = FriendRequestModel::STATUS_REJECT;
-            $friendRequest->reject_reason = $reason;
-            $friendRequest->update_time = time() * 1000;
-            $friendRequest->save();
+            $request->status           = FriendRequestModel::STATUS_REJECT;
+            $request->target_readed    = true;
+            $request->requester_readed = false;
+            $request->reject_reason    = $reason;
+            $request->update_time      = time() * 1000;
+            $request->save();
 
             // 去找一下有没有自己申请加对方的申请记录
             // 场景：自己拒绝了对方的申请，但是自己之前也向对方提出好友申请
             // 找到就直接删除吧，省点空间
             FriendRequestModel::where([
                 'requester_id' => $targetId,
-                'target_id' => $friendRequest->requester_id
+                'target_id' => $request->requester_id
             ])->delete();
 
             $storage = Storage::getInstance();
-            $object = UserService::getInfoByKey('id', $targetId, 'avatar')['avatar'];
 
-            $data = $friendRequest->toArray();
-            $data['requesterUsername'] = UserService::getUsernameById($friendRequest->requester_id);
-            $data['targetUsername'] = UserTable::getByUserId($targetId, 'username');
-            $data['targetAvatarThumbnail'] = $storage->getThumbnailImageUrl($object);
+            $userInfos = UserModel::join('user_info', 'user_info.user_id = user.id')
+                ->where('user_id', 'IN', [$request->requester_id, $targetId])->field([
+                    'user_id',
+                    'avatar',
+                    'username'
+                ])->limit(2)->select();
+
+            $avatarThumbnail = null;
+            foreach ($userInfos as $userInfo) {
+                $avatarThumbnail = $storage->getThumbnailImageUrl($userInfo->avatar);
+
+                if ($userInfo->user_id === $targetId) {
+                    $request->targetUsername = $userInfo->username;
+                    $request->targetAvatarThumbnail = $avatarThumbnail;
+                } else {
+                    $request->requesterUsername = $userInfo->username;
+                    $request->requesterAvatarThumbnail = $avatarThumbnail;
+                }
+            }
+
             Db::commit();
-
-            return Result::success($data);
+            return Result::success($request->toArray());
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -459,7 +433,7 @@ class Friend
      */
     public function isFriend(int $requesterId, int $targetId): int
     {
-        if ($requesterId == $targetId) {
+        if ($requesterId === $targetId) {
             return 0; // TODO 找到自己的单聊聊天室
         }
 
@@ -521,5 +495,47 @@ class Friend
         $chatMember->save();
 
         return Result::success($alias);
+    }
+
+    /**
+     * 已读收到的好友请求
+     * @param integer $id
+     *
+     * @return Result
+     */
+    public function readedReceiveRequest(int $id): Result
+    {
+        $userId = UserService::getId();
+
+        FriendRequestModel::where([
+            'id'            => $id,
+            'target_id'     => $userId,
+            'target_readed' => false
+        ])->update([
+            'target_readed' => true
+        ]);
+
+        return Result::success();
+    }
+
+    /**
+     * 已读发送的好友请求
+     * @param integer $id
+     *
+     * @return Result
+     */
+    public function readedSendRequest(int $id): Result
+    {
+        $userId = UserService::getId();
+
+        FriendRequestModel::where([
+            'id'               => $id,
+            'requester_id'     => $userId,
+            'requester_readed' => false
+        ])->update([
+            'requester_readed' => true
+        ]);
+
+        return Result::success();
     }
 }

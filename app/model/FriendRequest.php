@@ -19,13 +19,9 @@ class FriendRequest extends Model
     const STATUS_AGREE = 1;
     /** 状态：拒绝 */
     const STATUS_REJECT = 2;
-    /** 状态：忽略 */
-    const STATUS_IGNORE = 3;
-    /** 状态：删除 */
-    const STATUS_DELETE = 4;
 
     /** 申请人 */
-    public function self()
+    public function requester()
     {
         return $this->belongsTo(User::class, 'requester_id');
     }
