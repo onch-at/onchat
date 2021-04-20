@@ -1,12 +1,12 @@
 <?php
 
-use think\facade\Route;
 use app\middleware\Auth;
+use think\facade\Route;
 
 /** 好友模块路由 */
 Route::group('friend', function () {
     Route::get('request/<id>', 'getRequestById');
-    Route::get('request/self/<selfId>', 'getRequestBySelfId');
+    Route::get('request/requester/<requesterId>', 'getRequestByRequesterId');
     Route::get('request/target/<targetId>', 'getRequestByTargetId');
 
     Route::get('requests/receive', 'getReceiveRequests');

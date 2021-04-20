@@ -31,7 +31,7 @@ class FriendRequestReject extends SocketEventHandler
         }
 
         // 拿到申请人的FD
-        $selfFd = $this->fdTable->getFd($result->data['selfId']);
-        $selfFd && $this->websocket->setSender($selfFd)->emit('friend_request_reject', $result);
+        $requesterFd = $this->fdTable->getFd($result->data['requesterId']);
+        $requesterFd && $this->websocket->setSender($requesterFd)->emit('friend_request_reject', $result);
     }
 }

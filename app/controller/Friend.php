@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace app\controller;
 
-use think\App;
 use app\core\Result;
 use app\facade\UserService;
 use app\service\Friend as FriendService;
+use think\App;
 
 class Friend extends BaseController
 {
@@ -53,12 +53,12 @@ class Friend extends BaseController
     /**
      * 根据申请人UID来获取FriendRequest
      *
-     * @param integer $selfId
+     * @param integer $requesterId
      * @return Result
      */
-    public function getRequestBySelfId(int $selfId): Result
+    public function getRequestByRequesterId(int $requesterId): Result
     {
-        return $this->service->getRequestBySelfId($selfId);
+        return $this->service->getRequestByRequesterId($requesterId);
     }
 
     /**

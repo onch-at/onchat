@@ -14,16 +14,16 @@ class ChatRequest extends Model
     protected $json = ['readed_list'];
     protected $jsonAssoc = true;
 
-    /** 状态：等待 */
+    /** 状态：等待验证 */
     const STATUS_WAIT = 0;
     /** 状态：同意 */
     const STATUS_AGREE = 1;
     /** 状态：拒绝 */
     const STATUS_REJECT = 2;
-    /** 状态：删除 */
-    const STATUS_DELETE = 3;
     /** 状态：忽略 */
-    const STATUS_IGNORE = 4;
+    const STATUS_IGNORE = 3;
+    /** 状态：删除 */
+    const STATUS_DELETE = 4;
 
 
     /** 申请人 */

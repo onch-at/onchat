@@ -17,11 +17,11 @@ class FriendRequestAgree extends SocketEventHandler
      */
     public function handle($event, FriendService $friendService)
     {
-        ['requestId' => $requestId, 'selfAlias' => $selfAlias] = $event;
+        ['requestId' => $requestId, 'requesterAlias' => $requesterAlias] = $event;
 
         $user = $this->getUser();
 
-        $result = $friendService->agree($requestId, $user['id'], $selfAlias);
+        $result = $friendService->agree($requestId, $user['id'], $requesterAlias);
 
         $chatroomId = $result->data['chatroomId'];
         $this->websocket->join(parent::ROOM_CHATROOM . $chatroomId);
@@ -33,10 +33,10 @@ class FriendRequestAgree extends SocketEventHandler
         }
 
         // 拿到申请人的FD
-        $selfFd = $this->fdTable->getFd($result->data['selfId']);
-        if ($selfFd) {
+        $requesterFd = $this->fdTable->getFd($result->data['requesterId']);
+        if ($requesterFd) {
             // 加入新的聊天室
-            $this->websocket->setSender($selfFd)
+            $this->websocket->setSender($requesterFd)
                 ->join(parent::ROOM_CHATROOM . $chatroomId)
                 ->emit('friend_request_agree', $result);
         }
