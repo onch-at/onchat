@@ -19,11 +19,7 @@ class ClearFriendRequest
     {
         Timer::tick(86400 * 1000, function () {
             // 清理过期的好友申请（30天，并且双方都已读）
-            FriendRequest::where('update_time', '<', (time() - 86400 * 30) * 1000)
-                ->where([
-                    'requester_readed' => true,
-                    'target_readed'   => true,
-                ])->delete();
+            FriendRequest::where('update_time', '<', (time() - 86400 * 30) * 1000)->delete();
         });
     }
 }

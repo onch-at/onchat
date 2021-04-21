@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\constant\MessageType;
 use app\core\Result;
 use app\service\Chat as ChatService;
-use app\service\Message as MessageService;
 use app\service\Chatroom as ChatroomService;
+use app\service\Message as MessageService;
 
 class InviteJoinChatroom extends SocketEventHandler
 {
@@ -32,7 +33,7 @@ class InviteJoinChatroom extends SocketEventHandler
         }
 
         $msg = [
-            'type' => MessageService::TYPE_CHAT_INVITATION,
+            'type' => MessageType::CHAT_INVITATION,
             'data' => [
                 'chatroomId' => $chatroomId
             ]
