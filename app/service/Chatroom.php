@@ -249,8 +249,6 @@ class Chatroom
             'update_time'    => $timestamp,
         ]);
 
-        $this->createChatRecordTable($chatroom->id);
-
         if ($type == ChatroomModel::TYPE_GROUP_CHAT) {
             $storage = Storage::getInstance();
             $identicon = new Identicon(new ImageMagickGenerator());
@@ -771,31 +769,5 @@ class Chatroom
                 ]);
             })
             ->column('user_id');
-    }
-
-    /**
-     * 根据房间号尝试动态添加聊天记录表
-     * 策略：1000个聊天室 使用100个数据表记录聊天记录，等于100个聊天室共用一个数据表
-     *
-     * @param integer $chatroomId
-     * @return void
-     */
-    public function createChatRecordTable(int $chatroomId)
-    {
-        $table = ChatRecordModel::getTableNameById($chatroomId);
-        // 如果没有这个表
-        if (Db::execute("SHOW TABLES LIKE '{$table}'") == 0) {
-            Db::execute("CREATE TABLE IF NOT EXISTS {$table} (
-                    id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
-                    user_id     INT        UNSIGNED NULL     COMMENT '消息发送者ID',
-                    type        TINYINT(1) UNSIGNED NOT NULL COMMENT '消息类型',
-                    data        JSON                NOT NULL COMMENT '消息数据体',
-                    reply_id    INT        UNSIGNED NULL     COMMENT '回复消息的消息记录ID',
-                    create_time BIGINT     UNSIGNED NOT NULL,
-                    FOREIGN KEY (chatroom_id) REFERENCES chatroom(id) ON DELETE CASCADE ON UPDATE CASCADE,
-                    FOREIGN KEY (user_id)     REFERENCES user(id)     ON DELETE CASCADE ON UPDATE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-        }
     }
 }

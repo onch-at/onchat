@@ -6,6 +6,7 @@ namespace app\command;
 
 use app\core\Result;
 use app\facade\ChatroomService;
+use app\util\Str as StrUtil;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -68,7 +69,20 @@ class OnChat extends Command
         foreach ($dir as $file) {
             $filename = $path . $file;
             if (preg_match('/(.sql)$/', $file) && is_file($filename)) {
-                Db::execute(file_get_contents($filename));
+                $sql = file_get_contents($filename);
+
+                switch ($file) {
+                    case 'chat-record.sql': // 如果是消息记录表，则需要生成分表
+                        for ($i = 0; $i < 10; $i++) {
+                            Db::execute(StrUtil::assign($sql, ['index' => $i]));
+                        }
+                        break;
+
+                    default:
+                        Db::execute($sql);
+                        break;
+                }
+
                 $output->comment(' > ' . $file);
             }
         }

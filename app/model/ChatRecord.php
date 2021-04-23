@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\model;
 
-use think\Model;
-use app\model\User;
 use app\model\Chatroom;
+use app\model\User;
+use think\Model;
 
 /**
  * 聊天记录
@@ -41,9 +41,7 @@ class ChatRecord extends Model
      */
     public static function getTableNameById(int $chatroomId): string
     {
-        // 拿到千位数（小于1000，千位数为1）
-        $thousand = $chatroomId < 1000 ? 1 : substr((string) $chatroomId, 0, -3);
-        return 'chat_record_' . $thousand . '_' . $chatroomId % 100;
+        return 'chat_record_' . $chatroomId % 10;
     }
 
     public function chatroom()

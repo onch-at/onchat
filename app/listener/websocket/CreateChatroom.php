@@ -26,7 +26,7 @@ class CreateChatroom extends SocketEventHandler
         $this->websocket->emit('create_chatroom', $result);
 
         if ($result->code === Result::CODE_SUCCESS) {
-            $this->websocket->join(parent::ROOM_CHATROOM . $result->data['chatroomId']);
+            $this->websocket->join(parent::ROOM_CHATROOM . $result->data['data']['chatroomId']);
         }
     }
 }

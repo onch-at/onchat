@@ -1,6 +1,6 @@
 -- 聊天记录表
 -- type：文字，图片，视频，语音，文件，撤回消息
-CREATE TABLE IF NOT EXISTS chat_record (
+CREATE TABLE IF NOT EXISTS chat_record_{{ index }} (
     id          INT        UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     chatroom_id INT        UNSIGNED NOT NULL COMMENT '聊天室ID',
     user_id     INT        UNSIGNED     NULL COMMENT '消息发送者ID',

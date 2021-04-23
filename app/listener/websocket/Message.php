@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use app\service\User as UserService;
 use app\service\Chatroom as ChatroomService;
 
 class Message extends SocketEventHandler
