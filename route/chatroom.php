@@ -3,6 +3,7 @@
 use app\middleware\Auth;
 use app\middleware\AvatarImage;
 use app\middleware\ImageFile;
+use app\middleware\VoiceFile;
 use think\facade\Route;
 
 /** 聊天室模块路由 */
@@ -18,6 +19,7 @@ Route::group('chatroom/<id>', function () {
 
     Route::post('avatar', 'avatar')->middleware(AvatarImage::class);
     Route::post('image', 'image')->middleware(ImageFile::class);
+    Route::post('voice', 'voice')->middleware(VoiceFile::class);
 
     Route::put('name', 'setName');
     Route::put('member/nickname', 'setNickname');

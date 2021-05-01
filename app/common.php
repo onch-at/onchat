@@ -18,3 +18,16 @@ if (!function_exists('output')) {
         (new Output())->writeln($msg);
     }
 }
+
+if (!function_exists('resource_path')) {
+    /**
+     * 获取应用资源目录
+     *
+     * @param string $path
+     * @return string
+     */
+    function resource_path(string $path = '')
+    {
+        return root_path('resource' . DIRECTORY_SEPARATOR . $path);
+    }
+}

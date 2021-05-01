@@ -25,7 +25,8 @@
         "ezyang/htmlpurifier": "^4.13",
         "reasno/swoole-aliyunoss-addon": "^1.0",
         "phpmailer/phpmailer": "^6.2",
-        "ralouphie/mimey": "^2.1"
+        "ralouphie/mimey": "^2.1",
+        "php-ffmpeg/php-ffmpeg": "^0.18.0"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",

@@ -58,7 +58,7 @@ class Oss implements StorageDriver
 
         $options = [
             'prefix'   => $path, // 文件路径前缀
-            'max-keys' => 15,    // 最大数量
+            'max-keys' => 10,    // 最大数量
         ];
 
         // 列举用户所有头像

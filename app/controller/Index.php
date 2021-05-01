@@ -24,7 +24,7 @@ class Index extends BaseController
 
     public function index()
     {
-        // $this->service->sendEmailCaptcha('1838491745@qq.com');
+        // \FFMpeg\FFMpeg::create();
     }
 
     /**

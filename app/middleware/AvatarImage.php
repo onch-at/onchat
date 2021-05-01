@@ -22,7 +22,7 @@ class AvatarImage
     {
 
         $image = $request->file('image');
-        $mine = $image->getMime();
+        $mine = $image->getOriginalMime();
 
         if (!in_array($mine, ['image/webp', 'image/jpeg', 'image/png'])) {
             return (new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp/jpeg/png的图片文件'))->toJson();

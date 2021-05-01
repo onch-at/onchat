@@ -56,7 +56,7 @@ class Index
             'time'    => time()
         ]);
 
-        $path = root_path('resource/tpl/mail/') . 'captcha.html';
+        $path = resource_path('tpl/mail') . 'captcha.html';
 
         $result = Server::task(new Job(SendMail::TASK_NAME, [
             'from'      => [$this->config->get('smtp.username'), 'OnChat'],

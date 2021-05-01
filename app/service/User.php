@@ -549,7 +549,7 @@ class User
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
-            $storage->clear($path, Storage::IMAGE_MAX_COUNT);
+            $storage->clear($path, Storage::AVATAR_MAX_COUNT);
 
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;

@@ -61,7 +61,7 @@ class OnChat extends Command
 
     protected function install($output)
     {
-        $path = root_path('resource/sql/table/');
+        $path = resource_path('sql/table');
 
         $dir = scandir($path);
 

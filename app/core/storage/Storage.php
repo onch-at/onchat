@@ -15,8 +15,8 @@ use think\File;
  */
 class Storage implements StorageDriver
 {
-    /** 最大图片储存数 */
-    const IMAGE_MAX_COUNT = 5;
+    /** 最大头像储存数 */
+    const AVATAR_MAX_COUNT = 5;
 
     /** @var Driver */
     protected $driver;
@@ -57,9 +57,9 @@ class Storage implements StorageDriver
         return $this->driver->getRootPath();
     }
 
-    public function save(string $path, string $file, $image): Result
+    public function save(string $path, string $file, $data): Result
     {
-        return $this->driver->save($path,  $file, $image);
+        return $this->driver->save($path,  $file, $data);
     }
 
     public function delete(string $filename): Result

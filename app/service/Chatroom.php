@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use FFMpeg\FFMpeg;
+use FFMpeg\FFProbe;
+use FFMpeg\Format\Audio\Mp3;
 use Identicon\Identicon;
 use app\constant\MessageType;
 use app\core\Result;
@@ -655,6 +658,42 @@ class Chatroom
     }
 
     /**
+     * 上传语音
+     *
+     * @param integer $id 聊天室ID
+     * @return Result
+     */
+    public function voice(int $id): Result
+    {
+        try {
+            $voice = request()->file('voice');
+            $md5   = $voice->md5();
+            $temp  = sys_get_temp_dir() . "/{$md5}.mp3"; // 存到临时目录中
+
+            FFMpeg::create()->open($voice)->save(new Mp3(), $temp);
+
+            $storage = Storage::getInstance();
+            $path    = $storage->getRootPath() . "voice/chatroom/{$id}/";
+            $file    = $md5 . '.mp3';
+            $result  = $storage->save($path, $file, $temp);
+
+            if ($result->code !== Result::CODE_SUCCESS) {
+                return $result;
+            }
+
+            // 获得音频时长（毫秒）
+            $duration =  (int) (FFProbe::create()->format($temp)->get('duration') * 1000);
+
+            $data['filename'] = $path . $file;
+            $data['duration'] = $duration;
+
+            return Result::success($data);
+        } catch (\Exception $e) {
+            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+        }
+    }
+
+    /**
      * 上传聊天室头像
      *
      * @param integer $id 聊天室ID
@@ -677,7 +716,7 @@ class Chatroom
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
-            $storage->clear($path, Storage::IMAGE_MAX_COUNT);
+            $storage->clear($path, Storage::AVATAR_MAX_COUNT);
 
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;
