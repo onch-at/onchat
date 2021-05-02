@@ -16,7 +16,7 @@ class RevokeMsg extends SocketEventHandler
      */
     public function handle($event, ChatroomService $chatroomService)
     {
-        ['chatroomId' => $chatroomId, 'msgId' => $msgId] = $event;
+        [['chatroomId' => $chatroomId, 'msgId' => $msgId]] = $event;
 
         $user = $this->getUser();
         $result = $chatroomService->revokeMessage($chatroomId, $user['id'], $msgId);

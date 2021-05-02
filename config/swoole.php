@@ -20,7 +20,7 @@ return [
             'enable_static_handler' => true,
             'document_root'         => public_path(),
             'package_max_length'    => 128 * 1024 * 1024,
-            'buffer_output_size'    => 10 * 1024 * 1024,
+            'buffer_output_size'    => 128 * 1024 * 1024,
             'socket_buffer_size'    => 128 * 1024 * 1024
         ],
     ],

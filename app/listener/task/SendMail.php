@@ -8,8 +8,6 @@ use app\core\mail\Mailer;
 
 class SendMail
 {
-    const TASK_NAME = 'SendMail';
-
     public function handle($event)
     {
         [

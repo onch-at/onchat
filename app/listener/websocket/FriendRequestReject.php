@@ -17,7 +17,7 @@ class FriendRequestReject extends SocketEventHandler
      */
     public function handle($event, FriendService $friendService)
     {
-        ['requestId' => $requestId, 'reason' => $reason] = $event;
+        [['requestId' => $requestId, 'reason' => $reason]] = $event;
 
         $user = $this->getUser();
 

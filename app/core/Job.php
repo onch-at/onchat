@@ -13,12 +13,12 @@ class Job
     /**
      * 工作
      *
-     * @param string $name 任务名
+     * @param string $class 任务类名
      * @param array $params 任务参数
      */
-    public function __construct(string $name, array $params = null)
+    public function __construct(string $class, array $params = null)
     {
-        $this->name   = $name;
+        $this->name   = (new \ReflectionClass($class))->getShortName();
         $this->params = $params;
     }
 }

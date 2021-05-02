@@ -17,11 +17,11 @@ class FriendRequest extends SocketEventHandler
      */
     public function handle($event, FriendService $friendService)
     {
-        [
-            'targetId'     => $targetId,
+        [[
+            'targetId'    => $targetId,
             'targetAlias' => $targetAlias,
             'reason'      => $reason,
-        ] = $event;
+        ]] = $event;
 
         $user = $this->getUser();
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\listener\task;
 
-use think\Event;
-use app\core\Job;
 use Swoole\Server\Task;
+use app\core\Job;
+use think\Event;
 
 /**
  * 任务分发器

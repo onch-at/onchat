@@ -20,7 +20,7 @@ class InviteJoinChatroom extends SocketEventHandler
      */
     public function handle($event, ChatService $chatService, ChatroomService $chatroomService)
     {
-        ['chatroomId' => $chatroomId, 'chatroomIdList' => $chatroomIdList] = $event;
+        [['chatroomId' => $chatroomId, 'chatroomIdList' => $chatroomIdList]] = $event;
 
         $user = $this->getUser();
 

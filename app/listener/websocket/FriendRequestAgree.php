@@ -17,7 +17,7 @@ class FriendRequestAgree extends SocketEventHandler
      */
     public function handle($event, FriendService $friendService)
     {
-        ['requestId' => $requestId, 'requesterAlias' => $requesterAlias] = $event;
+        [['requestId' => $requestId, 'requesterAlias' => $requesterAlias]] = $event;
 
         $user = $this->getUser();
 

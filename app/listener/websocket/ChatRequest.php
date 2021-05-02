@@ -18,7 +18,7 @@ class ChatRequest extends SocketEventHandler
      */
     public function handle($event, ChatService $chatService, ChatroomService $chatroomService)
     {
-        ['chatroomId' => $chatroomId, 'reason' => $reason] = $event;
+        [['chatroomId' => $chatroomId, 'reason' => $reason]] = $event;
 
         $user = $this->getUser();
 

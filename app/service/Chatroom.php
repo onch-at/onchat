@@ -514,7 +514,7 @@ class Chatroom
         }
 
         // 如果消息不是它本人发的 或者 已经超时了
-        if ($msg['user_id'] != $userId || time() > $msg['create_time'] + 120000) {
+        if ($msg['user_id'] !== $userId || time() > $msg['create_time'] + 120000) {
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
@@ -522,7 +522,7 @@ class Chatroom
         Db::startTrans();
         try {
             // 如果消息删除失败
-            if ($query->delete() == 0) {
+            if ($query->delete() === 0) {
                 Db::rollback();
                 return new Result(Result::CODE_ERROR_UNKNOWN);
             }
@@ -681,11 +681,17 @@ class Chatroom
     public function voice(int $id): Result
     {
         try {
-            $voice = request()->file('voice');
-            $md5   = $voice->md5();
-            $temp  = sys_get_temp_dir() . "/{$md5}.mp3"; // 存到临时目录中
-
-            FFMpeg::create()->open($voice)->save(new Mp3(), $temp);
+            $voice    = request()->file('voice');
+            $md5      = $voice->md5();
+            $temp     = sys_get_temp_dir() . "/{$md5}.mp3"; // 存到临时目录中
+            // 设置音频通道为1，比特率为64（比特率默认为128，这里将其减半）
+            $mp3      = (new Mp3())->setAudioChannels(1)->setAudioKiloBitrate(64);
+            $duration = (int) FFMpeg::create()
+                ->open($voice)
+                ->save($mp3, $temp)
+                ->getFFProbe()
+                ->format($temp)
+                ->get('duration');
 
             $storage = Storage::getInstance();
             $path    = $storage->getRootPath() . "voice/chatroom/{$id}/";
@@ -695,9 +701,6 @@ class Chatroom
             if ($result->code !== Result::CODE_SUCCESS) {
                 return $result;
             }
-
-            // 获得音频时长（秒）
-            $duration = (int) FFProbe::create()->format($temp)->get('duration');
 
             $data['filename'] = $path . $file;
             $data['duration'] = $duration;

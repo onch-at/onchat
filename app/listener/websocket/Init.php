@@ -16,7 +16,9 @@ class Init extends SocketEventHandler
      */
     public function handle($event, UserService $userService)
     {
-        $this->userTable->set($this->fd, $event['sessId']);
+        [['sessId' => $sessId]] = $event;
+
+        $this->userTable->set($this->fd, $sessId);
 
         $userId = $this->getUser()['id'];
 
