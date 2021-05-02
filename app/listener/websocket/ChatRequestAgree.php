@@ -17,7 +17,7 @@ class ChatRequestAgree extends SocketEventHandler
      */
     public function handle($event, ChatService $chatService)
     {
-        [['requestId' => $requestId]] = $event;
+        ['requestId' => $requestId] = $event;
 
         $user = $this->getUser();
 

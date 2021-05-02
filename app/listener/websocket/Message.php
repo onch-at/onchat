@@ -16,7 +16,7 @@ class Message extends SocketEventHandler
      */
     public function handle($event, ChatroomService $chatroomService)
     {
-        [['msg' => $msg]] = $event;
+        ['msg' => $msg] = $event;
 
         $user = $this->getUser();
         // TODO 群聊的头像

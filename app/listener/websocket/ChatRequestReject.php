@@ -17,7 +17,7 @@ class ChatRequestReject extends SocketEventHandler
      */
     public function handle($event, ChatService $chatService)
     {
-        [['requestId' => $requestId, 'reason' => $reason]] = $event;
+        ['requestId' => $requestId, 'reason' => $reason] = $event;
 
         $user = $this->getUser();
 

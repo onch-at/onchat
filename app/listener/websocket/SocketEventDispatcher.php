@@ -24,7 +24,8 @@ class SocketEventDispatcher extends SocketEventHandler
      */
     public function handle($event)
     {
-        ['type' => $type, 'data' => $data] = $event;
+        // 这里的data支持多参数，一般只需要第一个参数，故直接解构出第一个参数
+        ['type' => $type, 'data' => [$data]] = $event;
 
         $user = $this->getUser();
 
