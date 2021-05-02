@@ -53,12 +53,12 @@ interface StorageDriver
     function clear(string $path, int $count): void;
 
     /**
-     * 获取原图URL
+     * 获取URL
      *
      * @param string $filename 文件路径
      * @return string
      */
-    function getOriginalImageUrl(string $filename): string;
+    function getUrl(string $filename): string;
 
     /**
      * 获取缩略图URL
@@ -66,5 +66,5 @@ interface StorageDriver
      * @param string $filename 文件路径
      * @return string
      */
-    function getThumbnailImageUrl(string $filename): string;
+    function getThumbnailUrl(string $filename): string;
 }

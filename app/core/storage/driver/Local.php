@@ -45,6 +45,14 @@ class Local implements StorageDriver
                 }
                 break;
 
+            case is_file($data):
+                $result = $this->filesystem->putFileAs($path, $data, $file);
+
+                if ($result === false) {
+                    return new Result(Result::CODE_ERROR_UNKNOWN);
+                }
+                break;
+
             case is_string($data):
                 $result = file_put_contents($this->getRoot() . $filename, $data);
 
@@ -94,13 +102,13 @@ class Local implements StorageDriver
         return Result::success(file_exists($filename));
     }
 
-    function getOriginalImageUrl(string $filename): string
+    function getUrl(string $filename): string
     {
         $type = $this->filesystem->getDefaultDriver();
         return '/onchat' . $this->filesystem->getDiskConfig($type, 'url') . '/' . $filename;
     }
 
-    function getThumbnailImageUrl(string $filename): string
+    function getThumbnailUrl(string $filename): string
     {
         $type = $this->filesystem->getDefaultDriver();
         return '/onchat' . $this->filesystem->getDiskConfig($type, 'url') . '/' . $filename;

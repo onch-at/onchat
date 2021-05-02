@@ -12,4 +12,5 @@ class MessageType
   const TIPS = 3;
   const CHAT_INVITATION = 4;
   const IMAGE = 5;
+  const VOICE = 6;
 }

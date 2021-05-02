@@ -44,6 +44,10 @@ class Oss implements StorageDriver
                 $this->uploadFile($bucket, $filename, $data->getRealPath());
                 break;
 
+            case is_file($data):
+                $this->uploadFile($bucket, $filename, $data);
+                break;
+
             case is_string($data):
                 $this->putObject($bucket, $path . $file, $data);
                 break;
@@ -95,14 +99,14 @@ class Oss implements StorageDriver
         return Result::success($exist);
     }
 
-    public function getOriginalImageUrl(string $filename): string
+    public function getUrl(string $filename): string
     {
         return $this->signImageUrl($filename);
     }
 
-    public function getThumbnailImageUrl(string $filename): string
+    public function getThumbnailUrl(string $filename): string
     {
-        return $this->signImageUrl($filename, $this->getThumbnailImgStylename());
+        return $this->signImageUrl($filename, $this->getThumbnailStylename());
     }
 
     /**
@@ -130,7 +134,7 @@ class Oss implements StorageDriver
      *
      * @return string
      */
-    public function getThumbnailImgStylename(): string
+    public function getThumbnailStylename(): string
     {
         return $this->config->get('storage.stores.oss.img_stylename_thumbnail');
     }

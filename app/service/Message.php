@@ -114,6 +114,30 @@ class Message
                 }
                 break;
 
+            case MessageType::VOICE:
+                $temp = $msg['data'];
+
+                if (!isset($temp['filename']) || !isset($temp['duration'])) {
+                    return new Result(Result::CODE_ERROR_PARAM);
+                }
+
+                try {
+                    $storage = Storage::getInstance();
+
+                    if (!$storage->exist($msg['data']['filename'])) {
+                        return new Result(Result::CODE_ERROR_PARAM, '语音不存在');
+                    }
+
+                    $data['filename'] = $temp['filename'];
+                    $data['duration'] = $temp['duration'] > 60 ? 60 : $temp['duration'];
+                    $data['readedList'] = [];
+
+                    $msg['data'] = $data;
+                } catch (\Exception $e) {
+                    return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+                }
+                break;
+
             default:
                 return new Result(Result::CODE_ERROR_PARAM, '未知消息类型');
         }

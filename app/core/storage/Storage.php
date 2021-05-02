@@ -77,13 +77,13 @@ class Storage implements StorageDriver
         $this->driver->clear($path, $count);
     }
 
-    public function getOriginalImageUrl(string $filename): string
+    public function getUrl(string $filename): string
     {
-        return $this->driver->getOriginalImageUrl($filename);
+        return $this->driver->getUrl($filename);
     }
 
-    public function getThumbnailImageUrl(string $filename): string
+    public function getThumbnailUrl(string $filename): string
     {
-        return $this->driver->getThumbnailImageUrl($filename);
+        return $this->driver->getThumbnailUrl($filename);
     }
 }

@@ -175,8 +175,8 @@ class User
 
             unset($user->password); // 删掉密码
 
-            $userInfo['avatar'] = $storage->getOriginalImageUrl($filename);
-            $userInfo['avatarThumbnail'] = $storage->getThumbnailImageUrl($filename);
+            $userInfo['avatar'] = $storage->getUrl($filename);
+            $userInfo['avatarThumbnail'] = $storage->getThumbnailUrl($filename);
 
             // 创建一个聊天室通知会话
             ChatSessionModel::create([
@@ -237,8 +237,8 @@ class User
         $storage = Storage::getInstance();
         $object = $user['avatar'];
 
-        $user['avatar'] = $storage->getOriginalImageUrl($object);
-        $user['avatarThumbnail'] = $storage->getThumbnailImageUrl($object);
+        $user['avatar'] = $storage->getUrl($object);
+        $user['avatarThumbnail'] = $storage->getThumbnailUrl($object);
 
         return Result::success($user);
     }
@@ -401,8 +401,8 @@ class User
         $storage = Storage::getInstance();
         $object = $user->avatar;
 
-        $user->avatar = $storage->getOriginalImageUrl($object);
-        $user->avatarThumbnail = $storage->getThumbnailImageUrl($object);
+        $user->avatar = $storage->getUrl($object);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($object);
 
         return Result::success($user->toArray());
     }
@@ -425,8 +425,8 @@ class User
         $storage = Storage::getInstance();
         $object = $user->avatar;
 
-        $user->avatar = $storage->getOriginalImageUrl($object);
-        $user->avatarThumbnail = $storage->getThumbnailImageUrl($object);
+        $user->avatar = $storage->getUrl($object);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($object);
 
         return Result::success($user->toArray());
     }
@@ -492,8 +492,8 @@ class User
         $storage = Storage::getInstance();
         $object = $user['avatar'];
 
-        $user['avatar'] = $storage->getOriginalImageUrl($object);
-        $user['avatarThumbnail'] = $storage->getThumbnailImageUrl($object);
+        $user['avatar'] = $storage->getUrl($object);
+        $user['avatarThumbnail'] = $storage->getThumbnailUrl($object);
 
         unset($user['password']);
 
@@ -563,8 +563,8 @@ class User
             ]);
 
             return Result::success([
-                'avatar'          => $storage->getOriginalImageUrl($filename),
-                'avatarThumbnail' => $storage->getThumbnailImageUrl($filename)
+                'avatar'          => $storage->getUrl($filename),
+                'avatarThumbnail' => $storage->getThumbnailUrl($filename)
             ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
@@ -638,7 +638,7 @@ class User
 
                     switch ($value['data']->chatroomType) {
                         case ChatroomModel::TYPE_GROUP_CHAT:
-                            $data[$key]['avatarThumbnail'] = $storage->getThumbnailImageUrl($value['avatarThumbnail']);
+                            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
                             break;
 
                         case ChatroomModel::TYPE_PRIVATE_CHAT:
@@ -718,7 +718,7 @@ class User
                         if ($info) {
                             $data[$key]['data']->userId = $info->user_id;
                             $data[$key]['title'] = $info->nickname;
-                            $data[$key]['avatarThumbnail'] = $storage->getThumbnailImageUrl($info->avatar);
+                            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($info->avatar);
                         }
                     }
                     break;
@@ -768,7 +768,7 @@ class User
                 'chatroomType' => ChatroomModel::TYPE_PRIVATE_CHAT,
                 'userId' => $value['friendId']
             ];
-            $data[$key]['avatarThumbnail'] = $storage->getThumbnailImageUrl($value['avatarThumbnail']);
+            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
 
             unset($data[$key]['friendId'], $data[$key]['chatroom_id']);
         }
@@ -810,7 +810,7 @@ class User
                 'chatroomId' => $value['chatroom_id'],
                 'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT
             ];
-            $data[$key]['avatarThumbnail'] = $storage->getThumbnailImageUrl($value['avatarThumbnail']);
+            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
 
             unset($data[$key]['chatroom_id']);
         }

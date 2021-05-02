@@ -174,7 +174,7 @@ class Chat
             ])
             ->find()
             ->toArray();
-        $info['requesterAvatarThumbnail'] = $storage->getThumbnailImageUrl($info['requesterAvatarThumbnail']);
+        $info['requesterAvatarThumbnail'] = $storage->getThumbnailUrl($info['requesterAvatarThumbnail']);
 
         $chatroom = ChatroomModel::field([
             'chatroom.name AS chatroomName',
@@ -182,8 +182,8 @@ class Chat
         ])->find($chatroomId)->toArray();
 
         $avatar = $chatroom['chatroomAvatar'];
-        $chatroom['chatroomAvatar'] = $storage->getOriginalImageUrl($avatar);
-        $chatroom['chatroomAvatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
+        $chatroom['chatroomAvatar'] = $storage->getUrl($avatar);
+        $chatroom['chatroomAvatarThumbnail'] = $storage->getThumbnailUrl($avatar);
 
         return Result::success($request->toArray() + $info + $chatroom);
     }
@@ -268,11 +268,11 @@ class Chat
 
             // 补充一些信息
             $chatSession['title'] = $request->chatroomName;
-            $chatSession['avatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
+            $chatSession['avatarThumbnail'] = $storage->getThumbnailUrl($avatar);
             $chatSession['data']['chatroomType'] = ChatroomModel::TYPE_GROUP_CHAT;
 
-            $request->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($request->requesterAvatarThumbnail);
-            $request->chatroomAvatar = $storage->getOriginalImageUrl($avatar);
+            $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
+            $request->chatroomAvatar = $storage->getUrl($avatar);
             $request->chatroomAvatarThumbnail = $chatSession['avatarThumbnail'];
             $request->handlerNickname = UserTable::getByUserId($handler, 'username');
             $request = $request->toArray();
@@ -359,9 +359,9 @@ class Chat
         $storage = Storage::getInstance();
         $avatar = $request->chatroomAvatar;
 
-        $request->chatroomAvatar = $storage->getOriginalImageUrl($avatar);
-        $request->chatroomAvatarThumbnail = $storage->getThumbnailImageUrl($avatar);
-        $request->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($request->requesterAvatarThumbnail);
+        $request->chatroomAvatar = $storage->getUrl($avatar);
+        $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
+        $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
         $request->handlerNickname = UserTable::getByUserId($handler, 'username');
 
         return Result::success($request->toArray());
@@ -426,7 +426,7 @@ class Chat
         }
 
         $storage = Storage::getInstance();
-        $request->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($request->requesterAvatarThumbnail);
+        $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
 
         return Result::success($request->toArray());
     }
@@ -463,7 +463,7 @@ class Chat
             ->toArray();
 
         foreach ($data as $key => $value) {
-            $data[$key]['requesterAvatarThumbnail'] = $storage->getThumbnailImageUrl($value['requesterAvatarThumbnail']);
+            $data[$key]['requesterAvatarThumbnail'] = $storage->getThumbnailUrl($value['requesterAvatarThumbnail']);
         }
 
         return Result::success($data);
@@ -501,8 +501,8 @@ class Chat
 
         $avatar = $request->chatroomAvatar;
         $storage = Storage::getInstance();
-        $request->chatroomAvatar = $storage->getOriginalImageUrl($avatar);
-        $request->chatroomAvatarThumbnail = $storage->getThumbnailImageUrl($avatar);
+        $request->chatroomAvatar = $storage->getUrl($avatar);
+        $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
 
         return Result::success($request->toArray());
     }
@@ -535,8 +535,8 @@ class Chat
 
         foreach ($data as $key => $value) {
             $avatar = $value['chatroomAvatar'];
-            $data[$key]['chatroomAvatar'] = $storage->getOriginalImageUrl($avatar);
-            $data[$key]['chatroomAvatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
+            $data[$key]['chatroomAvatar'] = $storage->getUrl($avatar);
+            $data[$key]['chatroomAvatarThumbnail'] = $storage->getThumbnailUrl($avatar);
         }
 
         return Result::success($data);

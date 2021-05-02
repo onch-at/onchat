@@ -105,7 +105,7 @@ class Friend
 
         $avatarThumbnail = null;
         foreach ($userInfos as $userInfo) {
-            $avatarThumbnail = $storage->getThumbnailImageUrl($userInfo->avatar);
+            $avatarThumbnail = $storage->getThumbnailUrl($userInfo->avatar);
 
             if ($userInfo->user_id ===  $requesterId) {
                 $request->requesterAvatarThumbnail = $avatarThumbnail;
@@ -168,7 +168,7 @@ class Friend
         $storage = Storage::getInstance();
 
         foreach ($requests as $key => $value) {
-            $requests[$key]->requesterAvatarThumbnail = $storage->getThumbnailImageUrl($value->requesterAvatarThumbnail);
+            $requests[$key]->requesterAvatarThumbnail = $storage->getThumbnailUrl($value->requesterAvatarThumbnail);
             $requests[$key]->targetUsername = $targetUsername;
         }
 
@@ -199,7 +199,7 @@ class Friend
         $storage = Storage::getInstance();
 
         foreach ($requests as $key => $value) {
-            $requests[$key]->targetAvatarThumbnail = $storage->getThumbnailImageUrl($value->targetAvatarThumbnail);
+            $requests[$key]->targetAvatarThumbnail = $storage->getThumbnailUrl($value->targetAvatarThumbnail);
             $requests[$key]->requesterUsername = $requesterUsername;
         }
 
@@ -333,7 +333,7 @@ class Friend
                 'requesterId'           => $request->requester_id,
                 'targetId'              => $request->target_id,
                 'targetUsername'        => $userInfo['username'],
-                'targetAvatarThumbnail' => $storage->getThumbnailImageUrl($userInfo['avatar'])
+                'targetAvatarThumbnail' => $storage->getThumbnailUrl($userInfo['avatar'])
             ]);
         } catch (\Exception $e) {
             // 回滚事务
@@ -405,7 +405,7 @@ class Friend
 
             $avatarThumbnail = null;
             foreach ($userInfos as $userInfo) {
-                $avatarThumbnail = $storage->getThumbnailImageUrl($userInfo->avatar);
+                $avatarThumbnail = $storage->getThumbnailUrl($userInfo->avatar);
 
                 if ($userInfo->user_id === $targetId) {
                     $request->targetUsername = $userInfo->username;

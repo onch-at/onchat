@@ -201,8 +201,8 @@ class Chatroom
 
         $avatar = $chatroom->avatar;
 
-        $chatroom->avatar          = $storage->getOriginalImageUrl($avatar);
-        $chatroom->avatarThumbnail = $storage->getThumbnailImageUrl($avatar);
+        $chatroom->avatar          = $storage->getUrl($avatar);
+        $chatroom->avatarThumbnail = $storage->getThumbnailUrl($avatar);
 
         return Result::success($chatroom->toArray());
     }
@@ -273,8 +273,8 @@ class Chatroom
                 'avatar' => $filename
             ]);
 
-            $chatroom->avatar = $storage->getOriginalImageUrl($filename);
-            $chatroom->avatarThumbnail = $storage->getThumbnailImageUrl($filename);
+            $chatroom->avatar = $storage->getUrl($filename);
+            $chatroom->avatarThumbnail = $storage->getThumbnailUrl($filename);
         }
 
         return Result::success($chatroom->toArray());
@@ -382,13 +382,20 @@ class Chatroom
             $msg['id'] = $id;
             $msg['userId'] = $userId;
             $msg['nickname'] = $nickname;
-            $msg['avatarThumbnail'] = $storage->getThumbnailImageUrl($avatar);
+            $msg['avatarThumbnail'] = $storage->getThumbnailUrl($avatar);
             $msg['createTime'] = $timestamp;
 
-            if ($msg['type'] === MessageType::IMAGE) {
-                $url = $msg['data']['filename'];
-                $msg['data']['url'] = $storage->getOriginalImageUrl($url);
-                $msg['data']['thumbnailUrl'] = FileUtil::isAnimation($url) ? $msg['data']['url'] : $storage->getThumbnailImageUrl($url);
+            switch ($msg['type']) {
+                case MessageType::IMAGE:
+                    $url = $msg['data']['filename'];
+                    $msg['data']['url'] = $storage->getUrl($url);
+                    $msg['data']['thumbnailUrl'] = FileUtil::isAnimation($url) ? $msg['data']['url'] : $storage->getThumbnailUrl($url);
+                    break;
+
+                case MessageType::VOICE:
+                    $url = $msg['data']['filename'];
+                    $msg['data']['url'] = $storage->getUrl($url);
+                    break;
             }
 
             // 提交事务
@@ -460,19 +467,27 @@ class Chatroom
                 $item['nickname'] = UserService::getUsernameById($item['user_id']);
             }
 
-            $item['avatarThumbnail'] = $storage->getThumbnailImageUrl($item['avatarThumbnail']);
+            $item['avatarThumbnail'] = $storage->getThumbnailUrl($item['avatarThumbnail']);
             $item['data'] = json_decode($item['data']);
 
-            // 如果是群聊邀请消息
-            if ($item['type'] === MessageType::CHAT_INVITATION) {
-                $chatroom = ChatroomModel::find($item['data']->chatroomId);
-                $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
-                $item['data']->description     = $chatroom ? $chatroom->description : null;
-                $item['data']->avatarThumbnail = $chatroom ? $storage->getThumbnailImageUrl($chatroom->avatar) : null;
-            } else if ($item['type'] === MessageType::IMAGE) {
-                $url = $item['data']->filename;
-                $item['data']->url = $storage->getOriginalImageUrl($url);
-                $item['data']->thumbnailUrl = FileUtil::isAnimation($url) ? $item['data']->url : $storage->getThumbnailImageUrl($url);
+            switch ($item['type']) {
+                case MessageType::CHAT_INVITATION:
+                    $chatroom = ChatroomModel::find($item['data']->chatroomId);
+                    $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
+                    $item['data']->description     = $chatroom ? $chatroom->description : null;
+                    $item['data']->avatarThumbnail = $chatroom ? $storage->getThumbnailUrl($chatroom->avatar) : null;
+                    break;
+
+                case MessageType::IMAGE:
+                    $url = $item['data']->filename;
+                    $item['data']->url = $storage->getUrl($url);
+                    $item['data']->thumbnailUrl = FileUtil::isAnimation($url) ? $item['data']->url : $storage->getThumbnailUrl($url);
+                    break;
+
+                case MessageType::VOICE:
+                    $url = $item['data']->filename;
+                    $item['data']->url = $storage->getUrl($url);
+                    break;
             }
 
             $records[] = $item;
@@ -620,7 +635,7 @@ class Chatroom
         $storage = Storage::getInstance();
 
         foreach ($data as $key => $value) {
-            $data[$key]['avatarThumbnail'] = $storage->getThumbnailImageUrl($value['avatarThumbnail']);
+            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
         }
 
         return Result::success($data);
@@ -681,8 +696,8 @@ class Chatroom
                 return $result;
             }
 
-            // 获得音频时长（毫秒）
-            $duration =  (int) (FFProbe::create()->format($temp)->get('duration') * 1000);
+            // 获得音频时长（秒）
+            $duration = (int) FFProbe::create()->format($temp)->get('duration');
 
             $data['filename'] = $path . $file;
             $data['duration'] = $duration;
@@ -730,8 +745,8 @@ class Chatroom
             $chatroom->save();
 
             return Result::success([
-                'avatar'          => $storage->getOriginalImageUrl($filename),
-                'avatarThumbnail' => $storage->getThumbnailImageUrl($filename)
+                'avatar'          => $storage->getUrl($filename),
+                'avatarThumbnail' => $storage->getThumbnailUrl($filename)
             ]);
         } catch (\Exception $e) {
             return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
