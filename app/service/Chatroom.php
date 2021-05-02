@@ -514,7 +514,7 @@ class Chatroom
         }
 
         // 如果消息不是它本人发的 或者 已经超时了
-        if ($msg['user_id'] !== $userId || time() > $msg['create_time'] + 120000) {
+        if ($msg->user_id !== $userId || time() > $msg->create_time + 120000) {
             return new Result(Result::CODE_ERROR_NO_PERMISSION);
         }
 
@@ -525,6 +525,12 @@ class Chatroom
             if ($query->delete() === 0) {
                 Db::rollback();
                 return new Result(Result::CODE_ERROR_UNKNOWN);
+            }
+
+            // 如果是语音消息，则删除语音文件
+            if ($msg->type === MessageType::VOICE) {
+                $storage = Storage::getInstance();
+                $storage->delete($msg->data->filename);
             }
 
             ChatSessionModel::update([
