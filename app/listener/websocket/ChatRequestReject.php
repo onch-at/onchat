@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\constant\SocketEvent;
 use app\core\Result;
 use app\service\Chat as ChatService;
 
@@ -23,7 +24,7 @@ class ChatRequestReject extends SocketEventHandler
 
         $result = $chatService->reject($requestId, $user['id'], $reason);
 
-        $this->websocket->emit('chat_request_reject', $result);
+        $this->websocket->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
 
         // 如果成功拒绝申请，则尝试给申请人推送消息
         if ($result->code !== Result::CODE_SUCCESS) {
@@ -32,6 +33,6 @@ class ChatRequestReject extends SocketEventHandler
 
         // 拿到申请人的FD
         $requesterFd = $this->fdTable->getFd($result->data['requesterId']);
-        $requesterFd && $this->websocket->setSender($requesterFd)->emit('chat_request_reject', $result);
+        $requesterFd && $this->websocket->setSender($requesterFd)->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
     }
 }

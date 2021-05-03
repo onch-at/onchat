@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\constant\SocketEvent;
 use app\model\UserInfo as UserInfoModel;
 use app\service\User as UserService;
 
@@ -37,7 +38,7 @@ class Init extends SocketEventHandler
         // 加入群聊申请房间
         $this->websocket->join(parent::ROOM_CHAT_REQUEST . $userId);
 
-        $this->websocket->emit('init');
+        $this->websocket->emit(SocketEvent::INIT);
 
         UserInfoModel::update([
             'login_time' => time() * 1000,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\constant\SocketEvent;
 use app\core\Result;
 use app\service\Chat as ChatService;
 use app\service\Chatroom as ChatroomService;
@@ -28,7 +29,7 @@ class ChatRequest extends SocketEventHandler
             $reason
         );
 
-        $this->websocket->emit('chat_request', $result);
+        $this->websocket->emit(SocketEvent::CHAT_REQUEST, $result);
 
         // 如果成功发出申请，则尝试给群主和群管理推送消息
         if ($result->code === Result::CODE_SUCCESS) {
@@ -38,7 +39,7 @@ class ChatRequest extends SocketEventHandler
                 $this->websocket->to(parent::ROOM_CHAT_REQUEST . $userId);
             }
 
-            $this->websocket->emit('chat_request', $result);
+            $this->websocket->emit(SocketEvent::CHAT_REQUEST, $result);
         }
     }
 }

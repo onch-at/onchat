@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\constant\SocketEvent;
 use app\core\Result;
 use app\service\Chatroom as ChatroomService;
 
@@ -23,7 +24,7 @@ class CreateChatroom extends SocketEventHandler
 
         $result = $chatroomService->create($name, $description, $user['id'], $user['username']);
 
-        $this->websocket->emit('create_chatroom', $result);
+        $this->websocket->emit(SocketEvent::CREATE_CHATROOM, $result);
 
         if ($result->code === Result::CODE_SUCCESS) {
             $this->websocket->join(parent::ROOM_CHATROOM . $result->data['data']['chatroomId']);

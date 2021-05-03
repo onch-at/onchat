@@ -14,7 +14,7 @@ use app\listener\websocket\FriendRequestReject;
 use app\listener\websocket\Init;
 use app\listener\websocket\InviteJoinChatroom;
 use app\listener\websocket\Message;
-use app\listener\websocket\RevokeMsg;
+use app\listener\websocket\RevokeMessage;
 use app\listener\websocket\SocketEventDispatcher;
 use app\listener\websocket\Test;
 use app\listener\websocket\Unload;
@@ -33,7 +33,7 @@ return [
         'swoole.websocket.Event.Test'                => [Test::class],
         'swoole.websocket.Event.Init'                => [Init::class],
         'swoole.websocket.Event.Message'             => [Message::class],
-        'swoole.websocket.Event.RevokeMsg'           => [RevokeMsg::class],
+        'swoole.websocket.Event.RevokeMessage'       => [RevokeMessage::class],
         'swoole.websocket.Event.FriendRequest'       => [FriendRequest::class],
         'swoole.websocket.Event.FriendRequestAgree'  => [FriendRequestAgree::class],
         'swoole.websocket.Event.FriendRequestReject' => [FriendRequestReject::class],

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\constant\MessageType;
+use app\constant\SocketEvent;
 use app\core\Result;
 use app\service\Chat as ChatService;
 use app\service\Chatroom as ChatroomService;
@@ -26,7 +27,7 @@ class InviteJoinChatroom extends SocketEventHandler
 
         $result = $chatService->invite($user['id'], $chatroomId, $chatroomIdList);
 
-        $this->websocket->emit('invite_join_chatroom', $result);
+        $this->websocket->emit(SocketEvent::INVITE_JOIN_CHATROOM, $result);
 
         if ($result->code !== Result::CODE_SUCCESS) {
             return false;
