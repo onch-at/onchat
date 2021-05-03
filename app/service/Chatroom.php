@@ -236,7 +236,7 @@ class Chatroom
 
 
         $timestamp = time() * 1000;
-        $maxPeopleNum = [
+        $peopleLimit = [
             ChatroomModel::TYPE_SINGLE_CHAT  => 1,
             ChatroomModel::TYPE_PRIVATE_CHAT => 2,
             ChatroomModel::TYPE_GROUP_CHAT   => 1000,
@@ -247,7 +247,7 @@ class Chatroom
             'name'           => $name,
             'type'           => $type,
             'description'    => $description,
-            'max_people_num' => $maxPeopleNum,
+            'people_limit'   => $peopleLimit,
             'create_time'    => $timestamp,
             'update_time'    => $timestamp,
         ]);
@@ -787,14 +787,14 @@ class Chatroom
     {
         $data = ChatroomModel::join('chat_member', 'chat_member.chatroom_id = chatroom.id')
             ->where('chatroom.id', '=', $id)
-            ->field('chatroom.max_people_num AS maxPeopleNum')
+            ->field('chatroom.people_limit AS peopleLimit')
             ->fieldRaw('COUNT(*) AS peopleNum')->find();
 
         if (!$data) {
             return false;
         }
 
-        return $data->peopleNum >= $data->maxPeopleNum;
+        return $data->peopleNum >= $data->peopleLimit;
     }
 
     /**
