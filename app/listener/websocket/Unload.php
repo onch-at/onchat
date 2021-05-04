@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\constant\SocketRoomPrefix;
 use app\service\User as UserService;
 
 class Unload extends SocketEventHandler
@@ -29,10 +30,10 @@ class Unload extends SocketEventHandler
 
         // 退出房间
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->leave(parent::ROOM_CHATROOM . $chatroom['id']);
+            $this->websocket->leave(SocketRoomPrefix::CHATROOM . $chatroom['id']);
         }
 
-        $this->websocket->leave(parent::ROOM_FRIEND_REQUEST . $userId);
-        $this->websocket->leave(parent::ROOM_CHAT_REQUEST . $userId);
+        $this->websocket->leave(SocketRoomPrefix::FRIEND_REQUEST . $userId);
+        $this->websocket->leave(SocketRoomPrefix::CHAT_REQUEST . $userId);
     }
 }

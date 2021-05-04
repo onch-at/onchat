@@ -9,9 +9,15 @@ use FFMpeg\FFProbe;
 use FFMpeg\Format\Audio\Mp3;
 use Identicon\Identicon;
 use app\constant\MessageType;
+use app\constant\SocketEvent;
+use app\constant\SocketRoomPrefix;
 use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
+use app\entity\ImageMessage;
+use app\entity\Message;
+use app\entity\VoiceMessage;
+use app\facade\FdTable;
 use app\facade\MessageService;
 use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
@@ -21,12 +27,13 @@ use app\model\Chatroom as ChatroomModel;
 use app\util\Date as DateUtil;
 use app\util\File as FileUtil;
 use app\util\Str as StrUtil;
+use think\Container;
 use think\facade\Db;
+use think\facade\Request;
+use think\swoole\Websocket;
 
 class Chatroom
 {
-    /** 没有消息 */
-    const CODE_NO_RECORD = 1;
     /** 聊天室名字过长 */
     const CODE_NAME_LONG = 2;
     /** 群介绍长度不符合规范 */
@@ -51,7 +58,7 @@ class Chatroom
     {
         $chatroom = ChatroomModel::field(['name', 'type'])->find($id);
         if (!$chatroom) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
@@ -73,7 +80,7 @@ class Chatroom
 
             // 如果找不到自己和好友（两条数据）
             if (count($data) < 2) {
-                return new Result(Result::CODE_ERROR_PARAM);
+                return Result::create(Result::CODE_ERROR_PARAM);
             }
 
             return Result::success($data->where('user_id', '<>', $userId)[0]->nickname);
@@ -96,13 +103,13 @@ class Chatroom
 
         // 如果不是群主、管理员
         if ($role != ChatMemberModel::ROLE_HOST && $role != ChatMemberModel::ROLE_MANAGE) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $name = trim($name);
         // 如果长度超出
         if (StrUtil::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
-            return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
+            return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
         }
 
         ChatroomModel::update([
@@ -127,7 +134,7 @@ class Chatroom
             $nickname = trim($nickname);
             // 如果昵称长度超出
             if (StrUtil::length($nickname) > ONCHAT_NICKNAME_MAX_LENGTH) {
-                return new Result(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符');
+                return Result::create(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符');
             }
         } else {
             $nickname = null;
@@ -141,7 +148,7 @@ class Chatroom
         ])->find();
 
         if (!$chatMember) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         if (!$nickname) {
@@ -165,7 +172,7 @@ class Chatroom
         $chatroom = ChatroomModel::find($id);
 
         if (!$chatroom) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
@@ -180,7 +187,7 @@ class Chatroom
 
             // 如果找不到，则代表自己没有进这个群
             if (empty($self)) {
-                return new Result(Result::CODE_ERROR_NO_PERMISSION);
+                return Result::create(Result::CODE_ERROR_NO_PERMISSION);
             }
 
             // 查找加入了这个房间的另一个好友的信息
@@ -190,7 +197,7 @@ class Chatroom
             ])->field(['chat_member.nickname', 'user_info.avatar'])->find();
 
             if (empty($friendInfo)) {
-                return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
+                return Result::create(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
             }
 
             $chatroom->name = $friendInfo->nickname;
@@ -221,7 +228,7 @@ class Chatroom
             $name = trim($name);
             // 如果长度超出
             if (StrUtil::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
-                return new Result(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
+                return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
             }
         }
 
@@ -230,7 +237,7 @@ class Chatroom
             $length = StrUtil::length($description);
             // 如果长度超出
             if ($length < ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH || $length > ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH) {
-                return new Result(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH  . '~' . ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH  . '位字符之间');
+                return Result::create(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH  . '~' . ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH  . '位字符之间');
             }
         }
 
@@ -262,7 +269,7 @@ class Chatroom
             $file = md5((string) DateUtil::now()) . '.png';
             $result = $storage->save($path, $file, $imageData);
 
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 return $result;
             }
 
@@ -298,11 +305,11 @@ class Chatroom
             empty($username) ||
             $this->isMember($id, $userId)
         ) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         if ($this->isPeopleNumFull($id)) {
-            return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满!');
+            return Result::create(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满!');
         }
 
         $timestamp = time() * 1000;
@@ -331,37 +338,37 @@ class Chatroom
     /**
      * 添加消息
      *
-     * @param integer $userId 用户ID
      * @param array $msg 消息体
      * @return Result
      */
-    public function addMessage(int $userId, array $msg): Result
+    public function addMessage(array $msg): Result
     {
-        // 拿到当前用户在这个聊天室的昵称
-        $nickname = UserService::getNicknameInChatroom($userId, $msg['chatroomId']);
+        ['userId' => $userId, 'chatroomId' => $chatroomId] = $msg;
+
+        $nickname = UserService::getNicknameInChatroom($userId, $chatroomId);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         $result = MessageService::handle($msg);
 
-        if ($result->code !== Result::CODE_SUCCESS) {
+        if (!$result->isSuccess()) {
             return $result;
         }
 
-        $msg = $result->data;
+        $message = $result->data;
 
         // 启动事务
         Db::startTrans();
         try {
             $timestamp = time() * 1000;
 
-            $id = +ChatRecordModel::opt($msg['chatroomId'])->insertGetId([
-                'chatroom_id' => $msg['chatroomId'],
-                'user_id'     => $userId,
-                'type'        => $msg['type'],
-                'data'        => $msg['data'],
-                'reply_id'    => $msg['replyId'] ?? null,
+            $id = +ChatRecordModel::opt($chatroomId)->insertGetId([
+                'chatroom_id' => $message->chatroomId,
+                'user_id'     => $message->userId,
+                'type'        => $message->type,
+                'data'        => $message->data,
+                'reply_id'    => $message->replyId,
                 'create_time' => $timestamp
             ]);
 
@@ -373,38 +380,37 @@ class Chatroom
                 'unread'      => Db::raw('CASE WHEN user_id = ' . $userId . ' THEN 0 ELSE CASE WHEN unread < 100 THEN unread + 1 ELSE 100 END END')
             ], [
                 'type'             => ChatSessionModel::TYPE_CHATROOM,
-                'data->chatroomId' => $msg['chatroomId']
+                'data->chatroomId' => $chatroomId
             ]);
 
             $storage = Storage::getInstance();
             $avatar = UserService::getInfoByKey('id', $userId, 'avatar')['avatar'];
 
-            $msg['id'] = $id;
-            $msg['userId'] = $userId;
-            $msg['nickname'] = $nickname;
-            $msg['avatarThumbnail'] = $storage->getThumbnailUrl($avatar);
-            $msg['createTime'] = $timestamp;
+            $message->id              = $id;
+            $message->nickname        = $nickname;
+            $message->avatarThumbnail = $storage->getThumbnailUrl($avatar);
+            $message->createTime      = $timestamp;
 
-            switch ($msg['type']) {
+            switch ($message->type) {
                 case MessageType::IMAGE:
-                    $url = $msg['data']['filename'];
-                    $msg['data']['url'] = $storage->getUrl($url);
-                    $msg['data']['thumbnailUrl'] = FileUtil::isAnimation($url) ? $msg['data']['url'] : $storage->getThumbnailUrl($url);
+                    $url = $message->data->filename;
+                    $message->data->url = $storage->getUrl($url);
+                    $message->data->thumbnailUrl = FileUtil::isAnimation($url) ? $message->data->url : $storage->getThumbnailUrl($url);
                     break;
 
                 case MessageType::VOICE:
-                    $url = $msg['data']['filename'];
-                    $msg['data']['url'] = $storage->getUrl($url);
+                    $url = $message->data->filename;
+                    $message->data->url = $storage->getUrl($url);
                     break;
             }
 
             // 提交事务
             Db::commit();
-            return Result::success($msg);
+            return Result::success($message);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -423,7 +429,7 @@ class Chatroom
         // 拿到当前用户在这个聊天室的昵称
         $nickname = UserService::getNicknameInChatroom($userId, $id);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 查询的时候，顺带把未读消息数归零
@@ -450,11 +456,11 @@ class Chatroom
             ->limit(self::MSG_ROWS);
 
         if ($query->count() === 0) { // 如果没有消息
-            return new Result(self::CODE_NO_RECORD, '没有消息');
+            return Result::success([]);
         }
 
         // 如果msgId为0，则代表初次查询
-        $query = $msgId == 0 ? $query : $query->where('chat_record.id', '<', $msgId);
+        $query = $msgId === 0 ? $query : $query->where('chat_record.id', '<', $msgId);
 
         $storage = Storage::getInstance();
 
@@ -510,12 +516,12 @@ class Chatroom
         $msg = $query->find();
         // 如果没找到这条消息
         if (!$msg) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 如果消息不是它本人发的 或者 已经超时了
         if ($msg->user_id !== $userId || time() > $msg->create_time + 120000) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
@@ -524,7 +530,7 @@ class Chatroom
             // 如果消息删除失败
             if ($query->delete() === 0) {
                 Db::rollback();
-                return new Result(Result::CODE_ERROR_UNKNOWN);
+                return Result::create(Result::CODE_ERROR_UNKNOWN);
             }
 
             // 如果是语音消息，则删除语音文件
@@ -548,7 +554,7 @@ class Chatroom
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -564,7 +570,7 @@ class Chatroom
     public function create(string $name, ?string $description, int $userId, string $username): Result
     {
         if (!$name) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         $count = ChatMemberModel::where([
@@ -573,14 +579,14 @@ class Chatroom
         ])->count();
 
         if ($count >= ONCHAT_USER_MAX_GROUP_CHAT_COUNT) {
-            return new Result(self::CODE_GROUP_CHAT_COUNT_FULL, '你可创建的聊天室数量已满！');
+            return Result::create(self::CODE_GROUP_CHAT_COUNT_FULL, '你可创建的聊天室数量已满！');
         }
 
         // 启动事务
         Db::startTrans();
         try {
             $result = $this->creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 Db::rollback();
                 return $result;
             }
@@ -589,7 +595,7 @@ class Chatroom
 
             // 将自己添加到聊天室，角色为主人
             $result = $this->addMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 Db::rollback();
                 return $result;
             }
@@ -608,7 +614,7 @@ class Chatroom
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -655,26 +661,39 @@ class Chatroom
      */
     public function image(int $id): Result
     {
+        $userId    = UserService::getId();
+        $websocket = Container::getInstance()->make(Websocket::class);
+        $image     = Request::file('image');
+
         try {
             $storage = Storage::getInstance();
-            $image   = request()->file('image');
             $path    = $storage->getRootPath() . 'image/';
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
             $result  = $storage->save($path, $file, $image);
 
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 return $result;
             }
 
             [$width, $height] = getimagesize($image->getPathname());
 
-            $data['filename'] = $path . $file;
-            $data['width'] = $width;
-            $data['height'] = $height;
+            $msg = new Message(MessageType::IMAGE);
+            $msg->userId     = $userId;
+            $msg->chatroomId = $id;
+            $msg->sendTime   = +Request::param('time');
+            $msg->data       = new ImageMessage($path . $file, $width, $height);
 
-            return Result::success($data);
+            $result = $this->addMessage($msg->toArray());
+
+            if ($result->isSuccess()) {
+                $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
+            } else {
+                $websocket->setSender(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
+            }
+
+            return $result;
         } catch (\Exception $e) {
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -686,13 +705,17 @@ class Chatroom
      */
     public function voice(int $id): Result
     {
+        $userId    = UserService::getId();
+        $websocket = Container::getInstance()->make(Websocket::class);
+        $voice     = Request::file('voice');
+        $file      = $voice->md5() . '.mp3';
+        $temp      = sys_get_temp_dir() . '/' . $file; // 存到临时目录中
+        // 设置音频通道为1，比特率为64（比特率默认为128，这里将其减半）
+        $mp3       = (new Mp3())->setAudioChannels(1)->setAudioKiloBitrate(64);
+
         try {
-            $voice    = request()->file('voice');
-            $md5      = $voice->md5();
-            $temp     = sys_get_temp_dir() . "/{$md5}.mp3"; // 存到临时目录中
-            // 设置音频通道为1，比特率为64（比特率默认为128，这里将其减半）
-            $mp3      = (new Mp3())->setAudioChannels(1)->setAudioKiloBitrate(64);
-            $duration = (int) FFMpeg::create()
+            // 转码保存并获得音频时长
+            $duration =  +FFMpeg::create()
                 ->open($voice)
                 ->save($mp3, $temp)
                 ->getFFProbe()
@@ -701,19 +724,29 @@ class Chatroom
 
             $storage = Storage::getInstance();
             $path    = $storage->getRootPath() . "voice/chatroom/{$id}/";
-            $file    = $md5 . '.mp3';
             $result  = $storage->save($path, $file, $temp);
 
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 return $result;
             }
 
-            $data['filename'] = $path . $file;
-            $data['duration'] = $duration;
+            $msg = new Message(MessageType::VOICE);
+            $msg->userId     = $userId;
+            $msg->chatroomId = $id;
+            $msg->sendTime   = +Request::param('time');
+            $msg->data       = new VoiceMessage($path . $file, $duration);
 
-            return Result::success($data);
+            $result = $this->addMessage($msg->toArray());
+
+            if ($result->isSuccess()) {
+                $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
+            } else {
+                $websocket->setSender(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
+            }
+
+            return $result;
         } catch (\Exception $e) {
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -730,19 +763,19 @@ class Chatroom
         $role = $this->getMemberRole($id, $userId);
         // 如果不是群主、管理员
         if ($role != ChatMemberModel::ROLE_HOST && $role != ChatMemberModel::ROLE_MANAGE) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         try {
             $storage = Storage::getInstance();
-            $image   = request()->file('image');
+            $image   = Request::file('image');
             $path    = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
 
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 return $result;
             }
 
@@ -758,7 +791,7 @@ class Chatroom
                 'avatarThumbnail' => $storage->getThumbnailUrl($filename)
             ]);
         } catch (\Exception $e) {
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 

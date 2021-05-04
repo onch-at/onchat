@@ -30,7 +30,7 @@ class SocketEventDispatcher extends SocketEventHandler
         $user = $this->getUser();
 
         if ($user && !$this->throttleTable->try($user['id'])) {
-            return $this->websocket->emit($type, new Result(Result::CODE_ERROR_HIGH_FREQUENCY));
+            return $this->websocket->emit($type, Result::create(Result::CODE_ERROR_HIGH_FREQUENCY));
         }
 
         Event::trigger('swoole.websocket.Event.' . Str::studly($type),  $data);

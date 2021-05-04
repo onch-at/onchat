@@ -55,12 +55,12 @@ class Chat
             ])->field('chatroom.*')->find();
 
         if (!$chatroom) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 人数超出上限
         if (ChatroomService::isPeopleNumFull($chatroomId)) {
-            return new Result(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
+            return Result::create(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
         }
 
         // 找到正确的私聊聊天室ID（防止客户端乱传ID）
@@ -116,12 +116,12 @@ class Chat
     {
         // 如果已经是聊天室成员了
         if (ChatroomService::isMember($chatroomId, $requester)) {
-            return new Result(Result::CODE_ERROR_PARAM, '你已加入该聊天室！');
+            return Result::create(Result::CODE_ERROR_PARAM, '你已加入该聊天室！');
         }
 
         // 如果人数已满
         if (ChatroomService::isPeopleNumFull($chatroomId)) {
-            return new Result(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满！');
+            return Result::create(self::CODE_PEOPLE_NUM_FULL, '聊天室人数已满！');
         }
 
         // 如果剔除空格后长度为零，则直接置空
@@ -131,7 +131,7 @@ class Chat
 
         // 如果附加消息长度超出
         if ($reason && StrUtil::length($reason) > self::REASON_MAX_LENGTH) {
-            return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
+            return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
         // 先找找之前有没有申请过
@@ -220,19 +220,19 @@ class Chat
             ->find();
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 已被处理
         if ($request->handler_id) {
-            return new Result(self::CODE_REQUEST_HANDLED, self::MSG[self::CODE_REQUEST_HANDLED]);
+            return Result::create(self::CODE_REQUEST_HANDLED, self::MSG[self::CODE_REQUEST_HANDLED]);
         }
 
         $chatroomId = $request->chatroom_id;
 
         // 人数超出上限
         if (ChatroomService::isPeopleNumFull($chatroomId)) {
-            return new Result(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
+            return Result::create(self::CODE_PEOPLE_NUM_FULL, self::MSG[self::CODE_PEOPLE_NUM_FULL]);
         }
 
         // 启动事务
@@ -254,7 +254,7 @@ class Chat
             $request->save();
 
             $result = ChatroomService::addMember($chatroomId, $request->requester_id, $request->requesterNickname);
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 Db::rollback();
                 return $result;
             }
@@ -283,7 +283,7 @@ class Chat
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -304,7 +304,7 @@ class Chat
 
         // 如果附加消息长度超出
         if ($reason && StrUtil::length($reason) > self::REASON_MAX_LENGTH) {
-            return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
+            return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
         $request = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
@@ -330,12 +330,12 @@ class Chat
             ->find();
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 已被处理
         if ($request->handler_id) {
-            return new Result(self::CODE_REQUEST_HANDLED, self::MSG[self::CODE_REQUEST_HANDLED]);
+            return Result::create(self::CODE_REQUEST_HANDLED, self::MSG[self::CODE_REQUEST_HANDLED]);
         }
 
         $readedList = array_filter($request->readed_list, function ($o) use ($request) {
@@ -422,7 +422,7 @@ class Chat
             ->find();
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         $storage = Storage::getInstance();
@@ -496,7 +496,7 @@ class Chat
             ->find();
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         $avatar = $request->chatroomAvatar;

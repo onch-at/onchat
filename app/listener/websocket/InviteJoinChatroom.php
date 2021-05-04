@@ -6,10 +6,11 @@ namespace app\listener\websocket;
 
 use app\constant\MessageType;
 use app\constant\SocketEvent;
-use app\core\Result;
+use app\constant\SocketRoomPrefix;
+use app\entity\ChatInvitationMessage;
+use app\entity\Message as MessageEntity;
 use app\service\Chat as ChatService;
 use app\service\Chatroom as ChatroomService;
-use app\service\Message as MessageService;
 
 class InviteJoinChatroom extends SocketEventHandler
 {
@@ -29,23 +30,21 @@ class InviteJoinChatroom extends SocketEventHandler
 
         $this->websocket->emit(SocketEvent::INVITE_JOIN_CHATROOM, $result);
 
-        if ($result->code !== Result::CODE_SUCCESS) {
+        if (!$result->isSuccess()) {
             return false;
         }
 
-        $msg = [
-            'type' => MessageType::CHAT_INVITATION,
-            'data' => [
-                'chatroomId' => $chatroomId
-            ]
-        ];
+        $message = new MessageEntity(MessageType::CHAT_INVITATION);
+        $message->userId = $user['id'];
+        $message->data   = new ChatInvitationMessage($chatroomId);
+        $message = $message->toArray();
 
         // 给每个受邀者发消息
         foreach ($result->data as $chatroomId) {
-            $msg['chatroomId'] = $chatroomId;
+            $message['chatroomId'] = $chatroomId;
             $this->websocket
-                ->to(parent::ROOM_CHATROOM . $chatroomId)
-                ->emit('message', $chatroomService->addMessage($user['id'], $msg));
+                ->to(SocketRoomPrefix::CHATROOM . $chatroomId)
+                ->emit('message', $chatroomService->addMessage($message));
         }
     }
 }

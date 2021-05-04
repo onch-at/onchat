@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
+use app\constant\SocketRoomPrefix;
 use app\model\UserInfo as UserInfoModel;
 use app\service\User as UserService;
 
@@ -30,13 +31,13 @@ class Init extends SocketEventHandler
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->join(parent::ROOM_CHATROOM . $chatroom['id']);
+            $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroom['id']);
         }
 
         // 加入好友请求房间
-        $this->websocket->join(parent::ROOM_FRIEND_REQUEST . $userId);
+        $this->websocket->join(SocketRoomPrefix::FRIEND_REQUEST . $userId);
         // 加入群聊申请房间
-        $this->websocket->join(parent::ROOM_CHAT_REQUEST . $userId);
+        $this->websocket->join(SocketRoomPrefix::CHAT_REQUEST . $userId);
 
         $this->websocket->emit(SocketEvent::INIT);
 

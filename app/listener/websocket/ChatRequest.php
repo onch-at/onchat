@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
-use app\core\Result;
+use app\constant\SocketRoomPrefix;
 use app\service\Chat as ChatService;
 use app\service\Chatroom as ChatroomService;
 
@@ -32,11 +32,11 @@ class ChatRequest extends SocketEventHandler
         $this->websocket->emit(SocketEvent::CHAT_REQUEST, $result);
 
         // 如果成功发出申请，则尝试给群主和群管理推送消息
-        if ($result->code === Result::CODE_SUCCESS) {
+        if ($result->isSuccess()) {
             $userIdList = $chatroomService->getHostAndManagerIdList($chatroomId);
 
             foreach ($userIdList as $userId) {
-                $this->websocket->to(parent::ROOM_CHAT_REQUEST . $userId);
+                $this->websocket->to(SocketRoomPrefix::CHAT_REQUEST . $userId);
             }
 
             $this->websocket->emit(SocketEvent::CHAT_REQUEST, $result);

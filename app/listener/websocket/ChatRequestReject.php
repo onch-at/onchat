@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
-use app\core\Result;
 use app\service\Chat as ChatService;
 
 class ChatRequestReject extends SocketEventHandler
@@ -27,7 +26,7 @@ class ChatRequestReject extends SocketEventHandler
         $this->websocket->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
 
         // 如果成功拒绝申请，则尝试给申请人推送消息
-        if ($result->code !== Result::CODE_SUCCESS) {
+        if (!$result->isSuccess()) {
             return false;
         }
 

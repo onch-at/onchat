@@ -53,7 +53,6 @@ class OnChat extends Command
 
             default:
                 $output->error('OnChat: Unknown action!');
-                break;
         }
 
         $output->info('OnChat: Execution finished!');
@@ -80,7 +79,6 @@ class OnChat extends Command
 
                     default:
                         Db::execute($sql);
-                        break;
                 }
 
                 $output->comment(' > ' . $file);
@@ -89,7 +87,7 @@ class OnChat extends Command
 
         $result = ChatroomService::getChatroom(1);
         // 如果没有第一个聊天室，那么就创建一个吧！
-        if ($result->code !== Result::CODE_SUCCESS) {
+        if (!$result->isSuccess()) {
             ChatroomService::creatChatroom('OnChat');
         }
     }

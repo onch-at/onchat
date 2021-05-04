@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace app\service;
 
 use HTMLPurifier;
-use HTMLPurifier_Config;
+use HTMLPurifier_Config as HTMLPurifierConfig;
 use app\constant\MessageType;
 use app\core\Result;
 use app\core\storage\Storage;
+use app\entity\ChatInvitationMessage;
+use app\entity\ImageMessage;
+use app\entity\Message as MessageEntity;
+use app\entity\RichTextMessage;
+use app\entity\TextMessage;
+use app\entity\VoiceMessage;
 use app\util\Str as StrUtil;
 
 class Message
@@ -21,37 +27,44 @@ class Message
         self::CODE_MSG_LONG  => '文本消息长度过长',
     ];
 
+    /**
+     * 净化 $msg['data']
+     *
+     * @param array $msg
+     * @return Result
+     */
     public function handle(array $msg): Result
     {
+        $message = new MessageEntity();
+
         switch ($msg['type']) {
             case MessageType::TEXT:
                 $content = $msg['data']['content'];
 
                 if (StrUtil::length(StrUtil::trimAll($content)) === 0) {
-                    return new Result(Result::CODE_ERROR_PARAM);
+                    return Result::create(Result::CODE_ERROR_PARAM);
                 }
 
                 if (StrUtil::length($content) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
-                    return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
+                    return Result::create(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
                 }
 
-                $data['content'] = htmlspecialchars($content);
-                $msg['data'] = $data;
+                $message->type = MessageType::TEXT;
+                $message->data = new TextMessage(htmlspecialchars($content));
                 break;
 
             case MessageType::RICH_TEXT:
-                $html = $msg['data']['html'];
-                $text = $msg['data']['text'];
+                ['html' => $html, 'text' => $text] = $msg['data'];
 
                 if (StrUtil::length(StrUtil::trimAll($text)) === 0) {
-                    return new Result(Result::CODE_ERROR_PARAM);
+                    return Result::create(Result::CODE_ERROR_PARAM);
                 }
 
                 if (StrUtil::length($text) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
-                    return new Result(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
+                    return Result::create(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
                 }
 
-                $config = HTMLPurifier_Config::createDefault();
+                $config = HTMLPurifierConfig::createDefault();
                 // 允许的元素
                 $config->set('HTML.AllowedElements', [
                     'p', 'strong', 'em', 'u', 's', 'blockquote',
@@ -79,73 +92,67 @@ class Message
                 ]);
                 $purifier = new HTMLPurifier($config);
 
-                $data['html'] = $purifier->purify($html);
-                $data['text'] = htmlspecialchars($text);
+                $html = $purifier->purify($html);
+                $text = htmlspecialchars($text);
 
-                $msg['data'] = $data;
+                $message->type = MessageType::RICH_TEXT;
+                $message->data = new RichTextMessage($html, $text);
                 break;
 
             case MessageType::CHAT_INVITATION:
-                $data['chatroomId'] = $msg['data']['chatroomId'];
-                $msg['data'] = $data;
+                $chatroomId = $msg['data']['chatroomId'];
+
+                $message->type = MessageType::CHAT_INVITATION;
+                $message->data = new ChatInvitationMessage($chatroomId);
                 break;
 
             case MessageType::IMAGE:
-                $temp = $msg['data'];
-
-                if (!isset($temp['filename']) || !isset($temp['width']) || !isset($temp['height'])) {
-                    return new Result(Result::CODE_ERROR_PARAM);
-                }
+                [
+                    'filename' => $filename,
+                    'width'    => $width,
+                    'height'   => $height,
+                ] = $msg['data'];
 
                 try {
                     $storage = Storage::getInstance();
 
-                    if (!$storage->exist($msg['data']['filename'])) {
-                        return new Result(Result::CODE_ERROR_PARAM, '图片不存在');
+                    if (!$storage->exist($filename)) {
+                        return Result::create(Result::CODE_ERROR_PARAM, '图片不存在');
                     }
 
-                    $data['filename'] = $temp['filename'];
-                    $data['width'] = $temp['width'];
-                    $data['height'] = $temp['height'];
-
-                    $msg['data'] = $data;
+                    $message->type = MessageType::IMAGE;
+                    $message->data = new ImageMessage($filename, $width, $height);
                 } catch (\Exception $e) {
-                    return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+                    return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
                 }
                 break;
 
             case MessageType::VOICE:
-                $temp = $msg['data'];
-
-                if (!isset($temp['filename']) || !isset($temp['duration'])) {
-                    return new Result(Result::CODE_ERROR_PARAM);
-                }
+                ['filename' => $filename, 'duration' => $duration] = $msg['data'];
 
                 try {
                     $storage = Storage::getInstance();
 
-                    if (!$storage->exist($msg['data']['filename'])) {
-                        return new Result(Result::CODE_ERROR_PARAM, '语音不存在');
+                    if (!$storage->exist($filename)) {
+                        return Result::create(Result::CODE_ERROR_PARAM, '语音不存在');
                     }
 
-                    $data['filename'] = $temp['filename'];
-                    $data['duration'] = $temp['duration'] > 60 ? 60 : $temp['duration'];
-                    $data['readedList'] = [];
-
-                    $msg['data'] = $data;
+                    $message->type = MessageType::VOICE;
+                    $message->data = new VoiceMessage($filename, $duration);
                 } catch (\Exception $e) {
-                    return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+                    return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
                 }
                 break;
 
             default:
-                return new Result(Result::CODE_ERROR_PARAM, '未知消息类型');
+                return Result::create(Result::CODE_ERROR_PARAM, '未知消息类型');
         }
 
-        if (isset($msg['loading'])) {
-            unset($msg['loading']);
-        }
+        $message->userId     = $msg['userId'];
+        $message->chatroomId = $msg['chatroomId'];
+        $message->replyId    = $msg['replyId'] ?? null;
+        $message->sendTime   = $msg['sendTime'];
 
-        return Result::success($msg);
+        return Result::success($message);
     }
 }

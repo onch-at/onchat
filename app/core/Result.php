@@ -36,16 +36,38 @@ class Result
         self::CODE_ERROR_HIGH_FREQUENCY => '访问频率过高',
     ];
 
-    public function __construct(int $code, ?string $msg = null, $data = null)
+    private function __construct(int $code, ?string $msg = null, $data = null)
     {
         $this->code = $code;
-        $this->msg  = $msg ?: self::MSG[$code];
+        $this->msg  = $msg ?? self::MSG[$code];
         $this->data = is_array($data) ? ArrUtil::keyToCamel($data) : $data;
     }
 
-    public static function success($data = null, string $msg = null): Result
+    public static function create(int $code, ?string $msg = null, $data = null): self
     {
-        return new Result(self::CODE_SUCCESS, $msg ?: self::MSG[self::CODE_SUCCESS], $data);
+        return new self($code, $msg, $data);
+    }
+
+    public static function success($data = null, ?string $msg = null): self
+    {
+        return new self(self::CODE_SUCCESS, $msg, $data);
+    }
+
+    public function msg($msg): self
+    {
+        $this->msg = $msg;
+        return $this;
+    }
+
+    public function data($data): self
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    public function isSuccess(): bool
+    {
+        return $this->code === self::CODE_SUCCESS;
     }
 
     public function toJson(): Json

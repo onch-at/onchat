@@ -26,13 +26,6 @@ abstract class SocketEventHandler
     protected $fdTable;
     protected $throttleTable;
 
-    /** 聊天室房间前缀 */
-    const ROOM_CHATROOM = 'CHATROOM:';
-    /** 好友申请房间前缀 */
-    const ROOM_FRIEND_REQUEST = 'FRIEND_REQUEST:';
-    /** 群聊申请房间前缀 */
-    const ROOM_CHAT_REQUEST = 'CHAT_REQUEST:';
-
     public function __construct(
         Websocket $websocket,
         Server $server,

@@ -25,11 +25,11 @@ class AvatarImage
         $mine = $image->getOriginalMime();
 
         if (!in_array($mine, ['image/webp', 'image/jpeg', 'image/png'])) {
-            return (new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp/jpeg/png的图片文件'))->toJson();
+            return Result::create(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受格式为webp/jpeg/png的图片文件')->toJson();
         }
 
         if ($image->getSize() > $size) { // 1MB
-            return (new Result(Result::CODE_ERROR_PARAM, '文件体积过大，仅接受体积为' . round($size / 1048576, 1) . 'MB以内的文件'))->toJson();
+            return Result::create(Result::CODE_ERROR_PARAM, '文件体积过大，仅接受体积为' . round($size / 1048576, 1) . 'MB以内的文件')->toJson();
         }
 
         return $next($request);

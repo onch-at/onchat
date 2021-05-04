@@ -8,7 +8,6 @@ use app\contract\StorageDriver;
 use app\core\Result;
 use think\Config;
 use think\Container;
-use think\File;
 
 /**
  * 文件存储器
@@ -20,15 +19,11 @@ class Storage implements StorageDriver
 
     /** @var Driver */
     protected $driver;
-    protected $container;
-    protected $config;
 
     public function __construct(Container $container, Config $config)
     {
-        $default         = $config->get('storage.default');
-        $this->driver    = $container->make($config->get("storage.stores.{$default}.driver"));
-        $this->config    = $config;
-        $this->container = $container;
+        $default      = $config->get('storage.default');
+        $this->driver = $container->make($config->get("storage.stores.{$default}.driver"));
     }
 
     /**
@@ -49,7 +44,7 @@ class Storage implements StorageDriver
      */
     public function setDriver(string $driver)
     {
-        $this->driver = $this->container->make($driver);
+        $this->driver = Container::getInstance()->make($driver);
     }
 
     public function getRootPath(): string

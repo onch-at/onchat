@@ -42,7 +42,7 @@ class Friend
     {
         // 如果两人已经是好友关系，则不允许申请了
         if ($requesterId == $targetId || $this->isFriend($requesterId, $targetId)) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 如果剔除空格后长度为零，则直接置空
@@ -52,7 +52,7 @@ class Friend
 
         // 如果附加消息长度超出
         if ($reason && StrUtil::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
-            return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
+            return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
         // 如果剔除空格后长度为零，则直接置空
@@ -62,7 +62,7 @@ class Friend
 
         // 如果别名长度超出
         if ($targetAlias && StrUtil::length($targetAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
-            return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+            return Result::create(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
         $timestamp = time() * 1000;
@@ -132,12 +132,12 @@ class Friend
         $request = FriendRequestModel::find($id);
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 如果发请求的这个人不是申请人也不是被申请人，则无权获取
         if ($request->requester_id != $userId && $request->target_id !== $userId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         return Result::success($request->toArray());
@@ -222,7 +222,7 @@ class Friend
         ])->find();
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         return Result::success($request->toArray());
@@ -244,7 +244,7 @@ class Friend
         ])->find();
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         return Result::success($request->toArray());
@@ -265,18 +265,18 @@ class Friend
 
         // 如果别名长度超出
         if ($requesterAlias && StrUtil::length($requesterAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
-            return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+            return Result::create(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
         $request = FriendRequestModel::find($requestId);
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 确认被申请人的身份
         if ($request->target_id !== $targetId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
@@ -299,7 +299,7 @@ class Friend
 
             // 创建一个类型为私聊的聊天室
             $result = ChatroomService::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 Db::rollback();
                 return $result;
             }
@@ -307,13 +307,13 @@ class Friend
             $chatroomId = $result->data['id'];
 
             $result = ChatroomService::addMember($chatroomId, $request->requester_id, $requesterAlias);
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 Db::rollback();
                 return $result;
             }
 
             $result = ChatroomService::addMember($chatroomId, $request->target_id, $request->target_alias);
-            if ($result->code !== Result::CODE_SUCCESS) {
+            if (!$result->isSuccess()) {
                 Db::rollback();
                 return $result;
             }
@@ -338,7 +338,7 @@ class Friend
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -359,7 +359,7 @@ class Friend
 
         // 如果附加消息长度超出
         if ($reason && StrUtil::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
-            return new Result(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
+            return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
         $request = FriendRequestModel::where([
@@ -368,12 +368,12 @@ class Friend
         ])->find();
 
         if (!$request) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         // 确认被申请人的身份
         if ($request->target_id != $targetId) {
-            return new Result(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
         // 启动事务
@@ -421,7 +421,7 @@ class Friend
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return new Result(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
         }
     }
 
@@ -467,7 +467,7 @@ class Friend
             $alias = trim($alias);
             // 如果别名长度超出
             if (StrUtil::length($alias) > ONCHAT_NICKNAME_MAX_LENGTH) {
-                return new Result(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
+                return Result::create(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
             }
         } else {
             $alias = null;
@@ -477,7 +477,7 @@ class Friend
 
         // 如果没有这个聊天室或者这个聊天室不是私聊的
         if (!$chatroom || $chatroom->type != ChatroomModel::TYPE_PRIVATE_CHAT) {
-            return new Result(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_ERROR_PARAM);
         }
 
         $chatMember = ChatMemberModel::where([
@@ -486,7 +486,7 @@ class Friend
         ])->find();
 
         if (!$chatMember) {
-            return new Result(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有没有其他成员');
+            return Result::create(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有没有其他成员');
         }
 
         if (!$alias) {

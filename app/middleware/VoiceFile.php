@@ -25,11 +25,11 @@ class VoiceFile
         $mine = $voice->getOriginalMime();
 
         if (!stristr($mine, 'audio/')) {
-            return (new Result(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受音频文件'))->toJson();
+            return Result::create(Result::CODE_ERROR_PARAM, '文件格式错误，仅接受音频文件')->toJson();
         }
 
         if ($voice->getSize() > $size) {
-            return (new Result(Result::CODE_ERROR_PARAM, '文件体积过大，仅接受体积为' . round($size / 1048576, 1) . 'MB以内的文件'))->toJson();
+            return Result::create(Result::CODE_ERROR_PARAM, '文件体积过大，仅接受体积为' . round($size / 1048576, 1) . 'MB以内的文件')->toJson();
         }
 
         return $next($request);

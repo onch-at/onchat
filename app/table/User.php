@@ -6,7 +6,6 @@ namespace app\table;
 
 use app\constant\SessionKey;
 use app\facade\FdTable;
-use app\service\User as UserService;
 use app\util\Redis;
 use think\facade\Config;
 
