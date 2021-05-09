@@ -4,7 +4,7 @@ use app\middleware\Auth;
 use app\middleware\Avatar;
 use think\facade\Route;
 
-/** 用户模块路由 */
+// 用户模块路由
 Route::group('user', function () {
     Route::get('checklogin', 'checkLogin');
     Route::get('checkemail', 'checkEmail');
@@ -39,7 +39,6 @@ Route::group('user', function () {
         });
     })->middleware(Auth::class);
 })->completeMatch()->prefix('User/');
-
 
 Route::group('user/<id>', function () {
     Route::get('/', 'getUserById');

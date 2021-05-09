@@ -10,12 +10,12 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 
-/** 测试路由 */
+// 测试路由
 Route::get('/', function () {
     return '<span style="font-size: 150px; font-weight: bolder; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); letter-spacing: -7.5px;">Running Successfully!</span>';
 });
 
-/** 应用主路由/公共路由/杂项路由 */
+// 应用主路由/公共路由/杂项路由
 Route::group('index', function () {
     Route::get('/', 'index');
     Route::get('imagecaptcha', 'imageCaptcha');

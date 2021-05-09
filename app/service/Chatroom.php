@@ -57,12 +57,9 @@ class Chatroom
     public function getName(int $id): Result
     {
         $chatroom = ChatroomModel::field(['name', 'type'])->find($id);
-        if (!$chatroom) {
-            return Result::create(Result::CODE_ERROR_PARAM);
-        }
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
-        if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
+        if ($chatroom->type === ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = UserService::getId();
 
             // 找到自己和好友
@@ -77,11 +74,6 @@ class Chatroom
             })->field(['user_id', 'nickname'])
                 ->limit(2)
                 ->select();
-
-            // 如果找不到自己和好友（两条数据）
-            if (count($data) < 2) {
-                return Result::create(Result::CODE_ERROR_PARAM);
-            }
 
             return Result::success($data->where('user_id', '<>', $userId)[0]->nickname);
         }
@@ -147,10 +139,6 @@ class Chatroom
             'user_id'     => $userId
         ])->find();
 
-        if (!$chatMember) {
-            return Result::create(Result::CODE_ERROR_PARAM);
-        }
-
         if (!$nickname) {
             $nickname = UserService::getUsernameById($userId);
         }
@@ -176,7 +164,7 @@ class Chatroom
         }
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
-        if ($chatroom->type == ChatroomModel::TYPE_PRIVATE_CHAT) {
+        if ($chatroom->type === ChatroomModel::TYPE_PRIVATE_CHAT) {
             $userId = UserService::getId();
 
             // 找到自己
@@ -186,7 +174,7 @@ class Chatroom
             ])->find();
 
             // 如果找不到，则代表自己没有进这个群
-            if (empty($self)) {
+            if (!$self) {
                 return Result::create(Result::CODE_ERROR_NO_PERMISSION);
             }
 
@@ -196,17 +184,12 @@ class Chatroom
                 ['chat_member.user_id', '<>', $userId]
             ])->field(['chat_member.nickname', 'user_info.avatar'])->find();
 
-            if (empty($friendInfo)) {
-                return Result::create(Result::CODE_ERROR_UNKNOWN, '该私聊聊天室没有其他成员');
-            }
-
             $chatroom->name = $friendInfo->nickname;
             $chatroom->avatar = $friendInfo->avatar;
         }
 
         $storage = Storage::getInstance();
-
-        $avatar = $chatroom->avatar;
+        $avatar  = $chatroom->avatar;
 
         $chatroom->avatar          = $storage->getUrl($avatar);
         $chatroom->avatarThumbnail = $storage->getThumbnailUrl($avatar);
@@ -425,12 +408,6 @@ class Chatroom
     public function getRecords(int $id, int $msgId): Result
     {
         $userId = UserService::getId();
-
-        // 拿到当前用户在这个聊天室的昵称
-        $nickname = UserService::getNicknameInChatroom($userId, $id);
-        if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
-        }
 
         // 查询的时候，顺带把未读消息数归零
         ChatSessionModel::update([

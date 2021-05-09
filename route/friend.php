@@ -3,7 +3,7 @@
 use app\middleware\Auth;
 use think\facade\Route;
 
-/** 好友模块路由 */
+// 好友模块路由
 Route::group('friend', function () {
     Route::get('request/<id>', 'getRequestById');
     Route::get('request/requester/<requesterId>', 'getRequestByRequesterId');

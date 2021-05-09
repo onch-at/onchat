@@ -3,7 +3,7 @@
 use app\middleware\Auth;
 use think\facade\Route;
 
-/** 聊天室模块路由 */
+// 聊天室管理相关模块路由
 Route::group('chat', function () {
     Route::get('requests/receive', 'getReceiveRequests');
     Route::get('requests/receive/<id>', 'getReceiveRequestById');
