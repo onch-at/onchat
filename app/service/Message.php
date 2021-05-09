@@ -8,7 +8,6 @@ use HTMLPurifier;
 use HTMLPurifier_Config as HTMLPurifierConfig;
 use app\constant\MessageType;
 use app\core\Result;
-use app\core\storage\Storage;
 use app\entity\ChatInvitationMessage;
 use app\entity\ImageMessage;
 use app\entity\Message as MessageEntity;
@@ -113,35 +112,15 @@ class Message
                     'height'   => $height,
                 ] = $msg['data'];
 
-                try {
-                    $storage = Storage::getInstance();
-
-                    if (!$storage->exist($filename)) {
-                        return Result::create(Result::CODE_ERROR_PARAM, '图片不存在');
-                    }
-
-                    $message->type = MessageType::IMAGE;
-                    $message->data = new ImageMessage($filename, $width, $height);
-                } catch (\Exception $e) {
-                    return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
-                }
+                $message->type = MessageType::IMAGE;
+                $message->data = new ImageMessage($filename, $width, $height);
                 break;
 
             case MessageType::VOICE:
                 ['filename' => $filename, 'duration' => $duration] = $msg['data'];
 
-                try {
-                    $storage = Storage::getInstance();
-
-                    if (!$storage->exist($filename)) {
-                        return Result::create(Result::CODE_ERROR_PARAM, '语音不存在');
-                    }
-
-                    $message->type = MessageType::VOICE;
-                    $message->data = new VoiceMessage($filename, $duration);
-                } catch (\Exception $e) {
-                    return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
-                }
+                $message->type = MessageType::VOICE;
+                $message->data = new VoiceMessage($filename, $duration);
                 break;
 
             default:

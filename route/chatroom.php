@@ -1,7 +1,7 @@
 <?php
 
 use app\middleware\Auth;
-use app\middleware\AvatarImage;
+use app\middleware\Avatar;
 use app\middleware\ImageFile;
 use app\middleware\VoiceFile;
 use think\facade\Route;
@@ -17,7 +17,7 @@ Route::group('chatroom/<id>', function () {
     Route::get('records/<msgId>', 'getRecords');
     Route::get('members', 'getChatMembers');
 
-    Route::post('avatar', 'avatar')->middleware(AvatarImage::class);
+    Route::post('avatar', 'avatar')->middleware(Avatar::class);
     Route::post('image', 'image')->middleware(ImageFile::class);
     Route::post('voice', 'voice')->middleware(VoiceFile::class);
 

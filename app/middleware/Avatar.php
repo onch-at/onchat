@@ -8,7 +8,7 @@ use app\core\Result;
 use think\Request;
 use think\Response;
 
-class AvatarImage
+class Avatar
 {
     /**
      * 处理请求
