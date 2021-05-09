@@ -10,6 +10,9 @@ use app\model\ChatMember as ChatMemberModel;
 use think\Request;
 use think\Response;
 
+/**
+ * 聊天室成员中间件
+ */
 class ChatMember
 {
     /**
@@ -17,7 +20,7 @@ class ChatMember
      *
      * @param Request $request
      * @param \Closure $next
-     * @param string $field Reques中聊天室的字段名
+     * @param string $field Request中聊天室的字段名
      * @return Response
      */
     public function handle(Request $request, \Closure $next, string $field = 'id'): Response

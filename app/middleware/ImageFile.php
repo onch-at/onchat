@@ -8,6 +8,9 @@ use app\core\Result;
 use think\Request;
 use think\Response;
 
+/**
+ * 图片文件中间件
+ */
 class ImageFile
 {
     /**

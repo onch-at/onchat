@@ -28,7 +28,7 @@ return [
         'HttpEnd'                                    => [],
         'LogLevel'                                   => [],
         'LogWrite'                                   => [],
-        'swoole.start'                               => [ClearFriendRequest::class, ClearChatRequest::class],
+        'swoole.workerStart'                         => [ClearFriendRequest::class, ClearChatRequest::class],
         'swoole.websocket.Event'                     => [SocketEventDispatcher::class],
         'swoole.websocket.Event.Test'                => [Test::class],
         'swoole.websocket.Event.Init'                => [Init::class],

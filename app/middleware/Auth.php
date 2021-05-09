@@ -10,6 +10,9 @@ use think\Request;
 use think\Response;
 use think\facade\Session;
 
+/**
+ * 登录认证中间件
+ */
 class Auth
 {
     /**
