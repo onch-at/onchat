@@ -16,7 +16,7 @@ class FriendRequest extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event, FriendService $friendService)
+    public function handle(FriendService $friendService, $event)
     {
         [
             'targetId'    => $targetId,

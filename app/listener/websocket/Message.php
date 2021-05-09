@@ -18,7 +18,7 @@ class Message extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event, ChatroomService $chatroomService)
+    public function handle(ChatroomService $chatroomService, $event)
     {
         ['msg' => $msg] = $event;
 

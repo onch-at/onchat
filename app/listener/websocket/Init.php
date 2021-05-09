@@ -16,7 +16,7 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event, UserService $userService)
+    public function handle(UserService $userService, $event)
     {
         ['sessId' => $sessId] = $event;
 

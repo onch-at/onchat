@@ -27,10 +27,10 @@ abstract class SocketEventHandler
     protected $throttleTable;
 
     public function __construct(
-        Websocket $websocket,
-        Server $server,
-        UserTable $userTable,
-        FdTable $fdTable,
+        Websocket     $websocket,
+        Server        $server,
+        UserTable     $userTable,
+        FdTable       $fdTable,
         ThrottleTable $throttleTable
     ) {
         $this->server        = $server;

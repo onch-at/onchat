@@ -16,7 +16,7 @@ class CreateChatroom extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event, ChatroomService $chatroomService)
+    public function handle(ChatroomService $chatroomService, $event)
     {
         ['name' => $name, 'description' => $description] = $event;
 

@@ -15,7 +15,7 @@ class Unload extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event, UserService $userService)
+    public function handle(UserService $userService)
     {
         $userId = $this->getUser()['id'];
 

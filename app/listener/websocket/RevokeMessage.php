@@ -16,7 +16,7 @@ class RevokeMessage extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle($event, ChatroomService $chatroomService)
+    public function handle(ChatroomService $chatroomService, $event)
     {
         ['chatroomId' => $chatroomId, 'msgId' => $msgId] = $event;
 
