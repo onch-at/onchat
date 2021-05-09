@@ -2,6 +2,7 @@
 
 use app\middleware\Auth;
 use app\middleware\Avatar;
+use app\middleware\ChatManager;
 use app\middleware\ChatMember;
 use app\middleware\ImageFile;
 use app\middleware\VoiceFile;
@@ -15,9 +16,11 @@ Route::group('chatroom', function () {
 Route::group('chatroom/<id>', function () {
     Route::get('/', 'getChatroom');
 
-    Route::post('avatar', 'avatar')->middleware(Avatar::class);
+    Route::group(function () {
+        Route::post('avatar', 'avatar')->middleware(Avatar::class);
 
-    Route::put('name', 'setName');
+        Route::put('name', 'setName');
+    })->middleware(ChatManager::class);
 
     Route::group(function () {
         Route::get('name', 'getName');

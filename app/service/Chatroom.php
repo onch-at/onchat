@@ -90,14 +90,6 @@ class Chatroom
      */
     public function setName(int $id, string $name): Result
     {
-        $userId = UserService::getId();
-        $role = $this->getMemberRole($id, $userId);
-
-        // 如果不是群主、管理员
-        if ($role != ChatMemberModel::ROLE_HOST && $role != ChatMemberModel::ROLE_MANAGE) {
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
-        }
-
         $name = trim($name);
         // 如果长度超出
         if (StrUtil::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
@@ -735,14 +727,6 @@ class Chatroom
      */
     public function avatar(int $id): Result
     {
-        $userId = UserService::getId();
-
-        $role = $this->getMemberRole($id, $userId);
-        // 如果不是群主、管理员
-        if ($role != ChatMemberModel::ROLE_HOST && $role != ChatMemberModel::ROLE_MANAGE) {
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
-        }
-
         try {
             $storage = Storage::getInstance();
             $image   = Request::file('image');

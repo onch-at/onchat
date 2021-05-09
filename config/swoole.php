@@ -5,7 +5,7 @@ use think\swoole\websocket\socketio\Handler;
 
 return [
     'server'     => [
-        'host'      => env('SWOOLE_HOST', '0.0.0.0'), // 监听地址
+        'host'      => env('SWOOLE_HOST', '127.0.0.1'), // 监听地址
         'port'      => env('SWOOLE_PORT', 9501), // 监听端口
         'mode'      => SWOOLE_PROCESS, // 运行模式 默认为SWOOLE_PROCESS
         'sock_type' => SWOOLE_SOCK_TCP, // sock type 默认为SWOOLE_SOCK_TCP
@@ -13,7 +13,6 @@ return [
             'pid_file'              => runtime_path() . 'swoole.pid',
             'log_file'              => runtime_path() . 'swoole.log',
             'daemonize'             => true,
-            'reload_async'          => true,
             // Normally this value should be 1~4 times larger according to your cpu cores.
             'reactor_num'           => swoole_cpu_num() * 2,
             'worker_num'            => swoole_cpu_num() * 2,
