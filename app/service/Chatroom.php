@@ -691,6 +691,10 @@ class Chatroom
                 ->format($temp)
                 ->get('duration');
 
+            if ($duration > 61) {
+                return Result::create(Result::CODE_ERROR_PARAM, '语音消息时长过长');
+            }
+
             $storage = Storage::getInstance();
             $path    = $storage->getRootPath() . "voice/chatroom/{$id}/";
             $result  = $storage->save($path, $file, $temp);

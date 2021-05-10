@@ -18,14 +18,6 @@ use app\util\Str as StrUtil;
 
 class Message
 {
-    /** 消息过长 */
-    const CODE_MSG_LONG  = 1;
-
-    /** 响应消息预定义 */
-    const MSG = [
-        self::CODE_MSG_LONG  => '文本消息长度过长',
-    ];
-
     /**
      * 净化 $msg['data']
      *
@@ -45,7 +37,7 @@ class Message
                 }
 
                 if (StrUtil::length($content) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
-                    return Result::create(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
+                    return Result::create(Result::CODE_ERROR_PARAM, '文本消息长度过长');
                 }
 
                 $message->type = MessageType::TEXT;
@@ -60,7 +52,7 @@ class Message
                 }
 
                 if (StrUtil::length($text) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
-                    return Result::create(self::CODE_MSG_LONG, self::MSG[self::CODE_MSG_LONG]);
+                    return Result::create(Result::CODE_ERROR_PARAM, '文本消息长度过长');
                 }
 
                 $config = HTMLPurifierConfig::createDefault();
