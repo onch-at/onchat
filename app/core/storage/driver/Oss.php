@@ -25,7 +25,7 @@ class Oss implements StorageDriver
         $accessKeySecret = $config->get('storage.stores.oss.access_key_secret');
         $endpoint        = $config->get('storage.stores.oss.endpoint');
 
-        $this->client = new OssClient($accessKeyId, $accessKeySecret, $endpoint);
+        $this->client = new OssClient($accessKeyId, $accessKeySecret, $endpoint, true);
         $this->config = $config;
     }
 
