@@ -4,55 +4,54 @@ declare(strict_types=1);
 
 namespace app\core\mail;
 
-use think\facade\Config;
-use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use think\facade\Config;
 
 class Mailer extends PHPMailer
 {
-    public static function create(): Mailer
+    public static function create(): self
     {
-        $debug = env('app_debug', false);
+        $mailer = new self(env('app_debug', false));
+        $mailer->isSMTP();
+        $mailer->CharSet    = self::CHARSET_UTF8;
+        $mailer->Encoding   = self::ENCODING_BASE64;
+        $mailer->Host       = Config::get('smtp.host');
+        $mailer->Username   = Config::get('smtp.username');
+        $mailer->Password   = Config::get('smtp.password');
+        $mailer->Port       = Config::get('smtp.port');
+        $mailer->SMTPSecure = Config::get('smtp.secure') ? self::ENCRYPTION_SMTPS : self::ENCRYPTION_STARTTLS;
+        $mailer->SMTPDebug  = $mailer->exceptions ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
+        $mailer->SMTPAuth   = true;
 
-        $mail = new Mailer($debug);
-        $mail->Charset    = Mailer::CHARSET_UTF8;
-        $mail->SMTPDebug  = $debug ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
-        $mail->isSMTP();
-        $mail->Host       = Config::get('smtp.host');
-        $mail->SMTPAuth   = true;
-        $mail->Username   = Config::get('smtp.username');
-        $mail->Password   = Config::get('smtp.password');
-        $mail->SMTPSecure = Config::get('smtp.secure') ? Mailer::ENCRYPTION_SMTPS : Mailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = Config::get('smtp.port');
-
-        return $mail;
+        return $mailer;
     }
 
-    public function setSubject(string $subject): Mailer
+    public function setSubject(string $subject): self
     {
         $this->Subject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
         return $this;
     }
 
-    public function setBody(string $body): Mailer
+    public function setBody(string $body): self
     {
         $this->Body = $body;
         return $this;
     }
 
-    public function setAltBody(?string $altBody): Mailer
+    public function setAltBody(?string $altBody): self
     {
         $this->AltBody = $altBody;
         return $this;
     }
 
-    public function setFrom($address, $name = '', $auto = true): Mailer
+    public function setFrom($address, $name = '', $auto = true): self
     {
         parent::setFrom($address, $name, $auto);
         return $this;
     }
 
-    public function isHTML($isHTML = true): Mailer
+    public function isHTML($isHTML = true): self
     {
         parent::isHTML($isHTML);
         return $this;
