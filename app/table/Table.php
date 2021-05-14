@@ -13,9 +13,9 @@ abstract class Table
 
     public $table;
 
-    public function __construct()
+    public function __construct(Container $container)
     {
-        $this->table = Container::getInstance()->make('swoole.table.' . $this->name);
+        $this->table = $container->make('swoole.table.' . $this->name);
     }
 
     /**

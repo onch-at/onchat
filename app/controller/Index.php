@@ -24,7 +24,6 @@ class Index extends BaseController
 
     public function index()
     {
-        // \FFMpeg\FFMpeg::create();
     }
 
     /**

@@ -29,7 +29,7 @@ class Mailer extends PHPMailer
 
     public function setSubject(string $subject): self
     {
-        $this->Subject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+        $this->Subject = $subject;
         return $this;
     }
 

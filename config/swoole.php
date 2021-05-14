@@ -47,6 +47,7 @@ return [
         ],
         'listen'        => [],
         'subscribe'     => [],
+        'middleware'    => []
     ],
     'rpc'        => [
         'server' => [

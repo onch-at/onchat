@@ -8,6 +8,8 @@ use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
 use app\model\UserInfo as UserInfoModel;
 use app\service\User as UserService;
+use think\Config;
+use think\Cookie;
 
 class Init extends SocketEventHandler
 {
@@ -16,9 +18,9 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(UserService $userService, $event)
+    public function handle(UserService $userService, Cookie $cookie, Config $config, $event)
     {
-        ['sessId' => $sessId] = $event;
+        $sessId = $cookie->get($config->get('session.name'));
 
         $this->userTable->set($this->fd, $sessId);
 

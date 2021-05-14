@@ -10,9 +10,9 @@ return [
     // cookie 有效域名
     'domain'    => '',
     //  cookie 启用安全传输
-    'secure'    => false,
+    'secure'    => true,
     // httponly设置
-    'httponly'  => false,
+    'httponly'  => true,
     // 是否使用 setcookie
     'setcookie' => true,
 ];
