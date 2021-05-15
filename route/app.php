@@ -21,4 +21,4 @@ Route::group('index', function () {
     Route::get('imagecaptcha', 'imageCaptcha');
 
     Route::post('emailcaptcha', 'sendEmailCaptcha');
-})->completeMatch()->prefix('Index/');
+})->prefix('Index/');

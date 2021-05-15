@@ -11,7 +11,7 @@ use think\facade\Route;
 // 聊天室模块路由
 Route::group('chatroom', function () {
     // Route::post('create', 'create');
-})->completeMatch()->prefix('Chatroom/');
+})->prefix('Chatroom/');
 
 Route::group('chatroom/<id>', function () {
     Route::get('/', 'getChatroom');
@@ -32,4 +32,4 @@ Route::group('chatroom/<id>', function () {
 
         Route::put('member/nickname', 'setNickname');
     })->middleware(ChatMember::class);
-})->completeMatch()->prefix('Chatroom/')->middleware(Auth::class);
+})->prefix('Chatroom/')->middleware(Auth::class);

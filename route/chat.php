@@ -11,4 +11,4 @@ Route::group('chat', function () {
     Route::get('requests/send/<id>', 'getSendRequestById');
 
     Route::put('requests/readed', 'readed');
-})->completeMatch()->prefix('Chat/')->middleware(Auth::class);
+})->prefix('Chat/')->middleware(Auth::class);

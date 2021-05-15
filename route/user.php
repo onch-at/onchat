@@ -38,8 +38,8 @@ Route::group('user', function () {
             Route::put('unread/<id>', 'unreadChatSession');
         });
     })->middleware(Auth::class);
-})->completeMatch()->prefix('User/');
+})->prefix('User/');
 
 Route::group('user/<id>', function () {
     Route::get('/', 'getUserById');
-})->completeMatch()->prefix('User/')->middleware(Auth::class);
+})->prefix('User/')->middleware(Auth::class);
