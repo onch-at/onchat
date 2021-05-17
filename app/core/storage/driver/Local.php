@@ -45,6 +45,14 @@ class Local implements StorageDriver
                 }
                 break;
 
+            case !ctype_print($data): // 如果是二进制数据
+                $result = file_put_contents($this->getRoot() . $filename, $data);
+
+                if ($result === false) {
+                    return Result::create(Result::CODE_ERROR_UNKNOWN);
+                }
+                break;
+
             case is_file($data):
                 $result = $this->filesystem->putFileAs($path, $data, $file);
 

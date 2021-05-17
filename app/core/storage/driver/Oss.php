@@ -44,6 +44,10 @@ class Oss implements StorageDriver
                 $this->uploadFile($bucket, $filename, $data->getRealPath());
                 break;
 
+            case !ctype_print($data): // 如果是二进制数据
+                $this->putObject($bucket, $path . $file, $data);
+                break;
+
             case is_file($data):
                 $this->uploadFile($bucket, $filename, $data);
                 break;

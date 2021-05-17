@@ -14,7 +14,7 @@ class Throttle extends Table
     /** 限制时间（秒） */
     const LIMIT_TIME = 60;
     /** 时间内次数限制 */
-    const LIMIT_COUNT = 40;
+    const LIMIT_COUNT = 30;
 
     /**
      * 设置行的数据
