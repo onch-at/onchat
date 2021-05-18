@@ -114,7 +114,7 @@ class Chatroom
     public function setNickname(int $id, ?string $nickname): Result
     {
         // 如果有传入昵称
-        if (StrUtil::length(StrUtil::trimAll($nickname)) !== 0) {
+        if ($nickname && StrUtil::isEmpty($nickname)) {
             $nickname = trim($nickname);
             // 如果昵称长度超出
             if (StrUtil::length($nickname) > ONCHAT_NICKNAME_MAX_LENGTH) {

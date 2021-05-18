@@ -20,6 +20,17 @@ class Str extends StrHelper
     }
 
     /**
+     * 判断字符串是否为空（剔除空格，回车）
+     *
+     * @param string $str
+     * @return boolean
+     */
+    public static function isEmpty(string $str): bool
+    {
+        return self::length(self::trimAll($str)) === 0;
+    }
+
+    /**
      * 打乱字符串字符顺序，支持中文
      *
      * @param string $str

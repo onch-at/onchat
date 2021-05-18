@@ -125,7 +125,7 @@ class Chat
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
+        if ($reason && StrUtil::isEmpty($reason)) {
             $reason = null;
         }
 
@@ -298,7 +298,7 @@ class Chat
     public function reject(int $id, int $handler, ?string $reason): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
+        if ($reason && StrUtil::isEmpty($reason)) {
             $reason = null;
         }
 

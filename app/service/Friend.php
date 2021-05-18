@@ -46,7 +46,7 @@ class Friend
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
+        if ($reason && StrUtil::isEmpty($reason)) {
             $reason = null;
         }
 
@@ -56,7 +56,7 @@ class Friend
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($targetAlias && StrUtil::length(StrUtil::trimAll($targetAlias)) === 0) {
+        if ($targetAlias && StrUtil::isEmpty($targetAlias)) {
             $targetAlias = null;
         }
 
@@ -261,7 +261,9 @@ class Friend
     public function agree(int $requestId, int $targetId, string $requesterAlias = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        $requesterAlias && StrUtil::length(StrUtil::trimAll($requesterAlias)) === 0 && ($requesterAlias = null);
+        if ($requesterAlias && StrUtil::isEmpty($requesterAlias)) {
+            $requesterAlias = null;
+        }
 
         // 如果别名长度超出
         if ($requesterAlias && StrUtil::length($requesterAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
@@ -353,7 +355,7 @@ class Friend
     public function reject(int $requestId, int $targetId, string $reason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::length(StrUtil::trimAll($reason)) === 0) {
+        if ($reason && StrUtil::isEmpty($reason)) {
             $reason = null;
         }
 
@@ -463,7 +465,7 @@ class Friend
         $userId = UserService::getId();
 
         // 如果有传入别名
-        if (StrUtil::length(StrUtil::trimAll($alias)) > 0) {
+        if ($alias && !StrUtil::isEmpty($alias)) {
             $alias = trim($alias);
             // 如果别名长度超出
             if (StrUtil::length($alias) > ONCHAT_NICKNAME_MAX_LENGTH) {

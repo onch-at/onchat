@@ -32,7 +32,7 @@ class Message
             case MessageType::TEXT:
                 $content = $msg['data']['content'];
 
-                if (StrUtil::length(StrUtil::trimAll($content)) === 0) {
+                if (StrUtil::isEmpty($content)) {
                     return Result::create(Result::CODE_ERROR_PARAM);
                 }
 
@@ -47,7 +47,7 @@ class Message
             case MessageType::RICH_TEXT:
                 ['html' => $html, 'text' => $text] = $msg['data'];
 
-                if (StrUtil::length(StrUtil::trimAll($text)) === 0) {
+                if (StrUtil::isEmpty($text)) {
                     return Result::create(Result::CODE_ERROR_PARAM);
                 }
 

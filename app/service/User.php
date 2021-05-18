@@ -911,7 +911,7 @@ class User
         $constellation = isset($birthday) ? DateUtil::getConstellation((int) $birthday / 1000) : null;
 
         if ($signature) {
-            if (StrUtil::length(StrUtil::trimAll($signature)) === 0) {
+            if (StrUtil::isEmpty($signature)) {
                 $signature = null;
             } else {
                 $signature = trim($signature);
