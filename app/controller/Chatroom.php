@@ -71,9 +71,9 @@ class Chatroom extends BaseController
      * @param integer $msgId 消息ID
      * @return Result
      */
-    public function getRecords(int $id, int $msgId): Result
+    public function getChatRecords(int $id, int $msgId): Result
     {
-        return $this->service->getRecords($id, $msgId);
+        return $this->service->getChatRecords($id, $msgId);
     }
 
     /**

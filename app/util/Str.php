@@ -16,7 +16,7 @@ class Str extends StrHelper
      */
     public static function trimAll(string $str): string
     {
-        return preg_replace('/[\s|　]+/', '', $str);
+        return preg_replace('/[\s\n]+/', '', $str);
     }
 
     /**

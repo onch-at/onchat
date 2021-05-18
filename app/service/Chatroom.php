@@ -397,7 +397,7 @@ class Chatroom
      * @param integer $msgId 消息ID
      * @return Result
      */
-    public function getRecords(int $id, int $msgId): Result
+    public function getChatRecords(int $id, int $msgId): Result
     {
         $userId = UserService::getId();
 
@@ -417,16 +417,14 @@ class Chatroom
             ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $id)
             ->where('chat_record.chatroom_id', '=', $id)
             ->field([
+                'chat_member.role',
                 'chat_member.nickname',
                 'user_info.avatar AS avatarThumbnail',
                 'chat_record.*',
             ])
+            // ->json(['data']) cursor() 生成器模式下无效
             ->order('chat_record.id', 'DESC')
             ->limit(self::MSG_ROWS);
-
-        if ($query->count() === 0) { // 如果没有消息
-            return Result::success([]);
-        }
 
         // 如果msgId为0，则代表初次查询
         $query = $msgId === 0 ? $query : $query->where('chat_record.id', '<', $msgId);
@@ -435,37 +433,39 @@ class Chatroom
 
         $records = [];
         foreach ($query->cursor() as $item) {
-            $item = $item->toArray();
+            // 如果是用户发的消息
+            if ($item->user_id) {
+                $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
 
-            // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
-            if (!$item['nickname']) {
-                $item['nickname'] = UserService::getUsernameById($item['user_id']);
+                // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
+                if (!isset($item->nickname)) {
+                    $item->nickname = UserService::getUsernameById($item->user_id);
+                }
             }
 
-            $item['avatarThumbnail'] = $storage->getThumbnailUrl($item['avatarThumbnail']);
-            $item['data'] = json_decode($item['data']);
+            $item->data = json_decode($item->data);
 
-            switch ($item['type']) {
+            switch ($item->type) {
                 case MessageType::CHAT_INVITATION:
-                    $chatroom = ChatroomModel::find($item['data']->chatroomId);
-                    $item['data']->name            = $chatroom ? $chatroom->name : '聊天室已解散';
-                    $item['data']->description     = $chatroom ? $chatroom->description : null;
-                    $item['data']->avatarThumbnail = $chatroom ? $storage->getThumbnailUrl($chatroom->avatar) : null;
+                    $chatroom = ChatroomModel::find($item->data->chatroomId);
+                    $item->data->name            = $chatroom ? $chatroom->name : '聊天室已解散';
+                    $item->data->description     = $chatroom ? $chatroom->description : null;
+                    $item->data->avatarThumbnail = $chatroom ? $storage->getThumbnailUrl($chatroom->avatar) : null;
                     break;
 
                 case MessageType::IMAGE:
-                    $url = $item['data']->filename;
-                    $item['data']->url = $storage->getUrl($url);
-                    $item['data']->thumbnailUrl = FileUtil::isAnimation($url) ? $item['data']->url : $storage->getThumbnailUrl($url);
+                    $url = $item->data->filename;
+                    $item->data->url          = $storage->getUrl($url);
+                    $item->data->thumbnailUrl = FileUtil::isAnimation($url) ? $item->data->url : $storage->getThumbnailUrl($url);
                     break;
 
                 case MessageType::VOICE:
-                    $url = $item['data']->filename;
-                    $item['data']->url = $storage->getUrl($url);
+                    $url = $item->data->filename;
+                    $item->data->url = $storage->getUrl($url);
                     break;
             }
 
-            $records[] = $item;
+            $records[] = $item->toArray();
         }
 
         return Result::success($records);

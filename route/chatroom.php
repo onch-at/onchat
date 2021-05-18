@@ -24,7 +24,7 @@ Route::group('chatroom/<id>', function () {
 
     Route::group(function () {
         Route::get('name', 'getName');
-        Route::get('records/<msgId>', 'getRecords');
+        Route::get('records/<msgId>', 'getChatRecords');
         Route::get('members', 'getChatMembers');
 
         Route::post('image', 'image')->middleware(ImageFile::class);
