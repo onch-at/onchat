@@ -459,14 +459,13 @@ class Chat
                 'chatroom.name AS chatroomName',
                 'chat_request.*'
             ])
-            ->select()
-            ->toArray();
+            ->select();
 
-        foreach ($data as $key => $value) {
-            $data[$key]['requesterAvatarThumbnail'] = $storage->getThumbnailUrl($value['requesterAvatarThumbnail']);
+        foreach ($data as $item) {
+            $item->requesterAvatarThumbnail = $storage->getThumbnailUrl($item->requesterAvatarThumbnail);
         }
 
-        return Result::success($data);
+        return Result::success($data->toArray());
     }
 
     /**
@@ -527,18 +526,17 @@ class Chat
                 'chatroom.avatar AS chatroomAvatar',
                 'chat_request.*'
             ])
-            ->select()
-            ->toArray();
+            ->select();
 
         $storage = Storage::getInstance();
         $avatar = null;
 
-        foreach ($data as $key => $value) {
-            $avatar = $value['chatroomAvatar'];
-            $data[$key]['chatroomAvatar'] = $storage->getUrl($avatar);
-            $data[$key]['chatroomAvatarThumbnail'] = $storage->getThumbnailUrl($avatar);
+        foreach ($data as $item) {
+            $avatar = $item->chatroomAvatar;
+            $item->chatroomAvatar          = $storage->getUrl($avatar);
+            $item->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
         }
 
-        return Result::success($data);
+        return Result::success($data->toArray());
     }
 }

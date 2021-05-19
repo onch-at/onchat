@@ -618,8 +618,7 @@ class User
                 'chatroom.avatar AS avatarThumbnail',
                 'chatroom.type AS chatroomType',
             ])
-            ->select()
-            ->toArray();
+            ->select();
 
         $query = null;
         $field = [
@@ -628,18 +627,18 @@ class User
         ];
         $max = 'MAX(chat_record.id)';
 
-        foreach ($data as $key => $value) {
-            switch ($value['type']) {
+        foreach ($data as $item) {
+            switch ($item->type) {
                     // 聊天室类型会话
                 case ChatSessionModel::TYPE_CHATROOM:
-                    $chatroomId = $value['data']->chatroomId;
+                    $chatroomId = $item->data->chatroomId;
                     // 将这些数据丢到data里面
-                    $value['data']->chatroomType = $value['chatroomType'];
-                    unset($data[$key]['chatroomType']);
+                    $item->data->chatroomType = $item->chatroomType;
+                    unset($item->chatroomType);
 
-                    switch ($value['data']->chatroomType) {
+                    switch ($item->data->chatroomType) {
                         case ChatroomModel::TYPE_GROUP_CHAT:
-                            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
+                            $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
                             break;
 
                         case ChatroomModel::TYPE_PRIVATE_CHAT:
@@ -704,29 +703,26 @@ class User
                 ->select();
         }
 
-        foreach ($data as $key => $value) {
-            switch ($value['type']) {
+        foreach ($data as $item) {
+            switch ($item->type) {
                 case ChatSessionModel::TYPE_CHATROOM:
-                    $latestMsg = $latestMsgList->where('chatroom_id', '=', $value['data']->chatroomId)->shift();
                     // 将最新消息填入
-                    if ($latestMsg) {
-                        $data[$key]['content'] = $latestMsg->toArray();
-                    }
+                    $item->content = $latestMsgList->where('chatroom_id', '=', $item->data->chatroomId)->shift();
 
                     // 将私聊聊天室的头像，好友昵称填入
-                    if ($value['data']->chatroomType == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
-                        $info = $friendInfo->where('chatroom_id', '=', $value['data']->chatroomId)->shift();
+                    if ($item->data->chatroomType == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
+                        $info = $friendInfo->where('chatroom_id', '=', $item->data->chatroomId)->shift();
                         if ($info) {
-                            $data[$key]['data']->userId = $info->user_id;
-                            $data[$key]['title'] = $info->nickname;
-                            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($info->avatar);
+                            $item->data->userId = $info->user_id;
+                            $item->title = $info->nickname;
+                            $item->avatarThumbnail = $storage->getThumbnailUrl($info->avatar);
                         }
                     }
                     break;
             }
         }
 
-        return Result::success($data);
+        return Result::success($data->toArray());
     }
 
     /**
@@ -758,23 +754,22 @@ class User
                 'user_info.signature AS content',
                 'user_info.avatar AS avatarThumbnail',
             ])
-            ->select()
-            ->toArray();
+            ->select();
 
-        foreach ($data as $key => $value) {
-            $data[$key]['userId'] = $userId;
-            $data[$key]['type'] = ChatSessionModel::TYPE_CHATROOM;
-            $data[$key]['data'] = [
-                'chatroomId' => $value['chatroom_id'],
+        foreach ($data as $item) {
+            $item->userId = $userId;
+            $item->type = ChatSessionModel::TYPE_CHATROOM;
+            $item->data = [
+                'chatroomId'   => $item->chatroom_id,
                 'chatroomType' => ChatroomModel::TYPE_PRIVATE_CHAT,
-                'userId' => $value['friendId']
+                'userId'       => $item->friendId
             ];
-            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
+            $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
 
-            unset($data[$key]['friendId'], $data[$key]['chatroom_id']);
+            unset($item->friendId, $item->chatroom_id);
         }
 
-        return Result::success($data);
+        return Result::success($data->toArray());
     }
 
     /**
@@ -801,22 +796,21 @@ class User
                 'chatroom.description AS content',
                 'chatroom.avatar AS avatarThumbnail',
             ])
-            ->select()
-            ->toArray();
+            ->select();
 
-        foreach ($data as $key => $value) {
-            $data[$key]['userId'] = $userId;
-            $data[$key]['type'] = ChatSessionModel::TYPE_CHATROOM;
-            $data[$key]['data'] = [
-                'chatroomId' => $value['chatroom_id'],
+        foreach ($data as $item) {
+            $item->userId = $userId;
+            $item->type = ChatSessionModel::TYPE_CHATROOM;
+            $item->data = [
+                'chatroomId'   => $item->chatroom_id,
                 'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT
             ];
-            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
+            $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
 
-            unset($data[$key]['chatroom_id']);
+            unset($item->chatroom_id);
         }
 
-        return Result::success($data);
+        return Result::success($data->toArray());
     }
 
     /**

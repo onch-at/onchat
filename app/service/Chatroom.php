@@ -11,10 +11,12 @@ use Identicon\Identicon;
 use app\constant\MessageType;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\constant\TipsType;
 use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
 use app\entity\ImageMessage;
+use app\entity\JoinRoomTipsMessage;
 use app\entity\Message;
 use app\entity\VoiceMessage;
 use app\facade\FdTable;
@@ -307,31 +309,38 @@ class Chatroom
             'update_time' => $timestamp
         ]);
 
+        $websocket = Container::getInstance()->make(Websocket::class);
+
+        // 添加入群消息
+        $msg = new Message(MessageType::TIPS);
+        $msg->userId     = $userId;
+        $msg->chatroomId = $id;
+        $msg->data       = new JoinRoomTipsMessage();
+
+        $result = $this->addMessage($msg);
+
+        if ($result->isSuccess()) {
+            $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
+        }
+
         return Result::success($data->toArray());
     }
 
     /**
      * 添加消息
      *
-     * @param array $msg 消息体
+     * @param Message $message 消息体
      * @return Result
      */
-    public function addMessage(array $msg): Result
+    public function addMessage(Message $message): Result
     {
-        ['userId' => $userId, 'chatroomId' => $chatroomId] = $msg;
+        $userId     = $message->userId;
+        $chatroomId = $message->chatroomId;
 
         $nickname = UserService::getNicknameInChatroom($userId, $chatroomId);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
-
-        $result = MessageService::handle($msg);
-
-        if (!$result->isSuccess()) {
-            return $result;
-        }
-
-        $message = $result->data;
 
         // 启动事务
         Db::startTrans();
@@ -413,7 +422,7 @@ class Chatroom
 
         $query = ChatRecordModel::opt($id)
             ->alias('chat_record')
-            ->join('user_info', 'user_info.user_id = chat_record.user_id')
+            ->leftJoin('user_info', 'user_info.user_id = chat_record.user_id')
             ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $id)
             ->where('chat_record.chatroom_id', '=', $id)
             ->field([
@@ -422,17 +431,14 @@ class Chatroom
                 'user_info.avatar AS avatarThumbnail',
                 'chat_record.*',
             ])
-            // ->json(['data']) cursor() 生成器模式下无效
             ->order('chat_record.id', 'DESC')
             ->limit(self::MSG_ROWS);
 
         // 如果msgId为0，则代表初次查询
-        $query = $msgId === 0 ? $query : $query->where('chat_record.id', '<', $msgId);
-
+        $data    = ($msgId === 0 ? $query : $query->where('chat_record.id', '<', $msgId))->select();
         $storage = Storage::getInstance();
 
-        $records = [];
-        foreach ($query->cursor() as $item) {
+        foreach ($data as $item) {
             // 如果是用户发的消息
             if ($item->user_id) {
                 $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
@@ -442,8 +448,6 @@ class Chatroom
                     $item->nickname = UserService::getUsernameById($item->user_id);
                 }
             }
-
-            $item->data = json_decode($item->data);
 
             switch ($item->type) {
                 case MessageType::CHAT_INVITATION:
@@ -463,12 +467,13 @@ class Chatroom
                     $url = $item->data->filename;
                     $item->data->url = $storage->getUrl($url);
                     break;
-            }
 
-            $records[] = $item->toArray();
+                case MessageType::TIPS:
+                    break;
+            }
         }
 
-        return Result::success($records);
+        return Result::success($data->toArray());
     }
 
     /**
@@ -610,16 +615,15 @@ class Chatroom
                 'chat_member.create_time',
                 'chat_member.update_time',
             ])
-            ->select()
-            ->toArray();
+            ->select();
 
         $storage = Storage::getInstance();
 
-        foreach ($data as $key => $value) {
-            $data[$key]['avatarThumbnail'] = $storage->getThumbnailUrl($value['avatarThumbnail']);
+        foreach ($data as $item) {
+            $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
         }
 
-        return Result::success($data);
+        return Result::success($data->toArray());
     }
 
     /**
@@ -652,7 +656,7 @@ class Chatroom
             $msg->sendTime   = +Request::param('time');
             $msg->data       = new ImageMessage($path . $file, $width, $height);
 
-            $result = $this->addMessage($msg->toArray());
+            $result = $this->addMessage($msg);
 
             if ($result->isSuccess()) {
                 $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
@@ -709,7 +713,7 @@ class Chatroom
             $msg->sendTime   = +Request::param('time');
             $msg->data       = new VoiceMessage($path . $file, $duration);
 
-            $result = $this->addMessage($msg->toArray());
+            $result = $this->addMessage($msg);
 
             if ($result->isSuccess()) {
                 $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);

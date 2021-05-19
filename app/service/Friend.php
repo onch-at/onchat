@@ -167,9 +167,9 @@ class Friend
 
         $storage = Storage::getInstance();
 
-        foreach ($requests as $key => $value) {
-            $requests[$key]->requesterAvatarThumbnail = $storage->getThumbnailUrl($value->requesterAvatarThumbnail);
-            $requests[$key]->targetUsername = $targetUsername;
+        foreach ($requests as $item) {
+            $item->requesterAvatarThumbnail = $storage->getThumbnailUrl($item->requesterAvatarThumbnail);
+            $item->targetUsername           = $targetUsername;
         }
 
         return Result::success($requests->toArray());
@@ -198,9 +198,9 @@ class Friend
 
         $storage = Storage::getInstance();
 
-        foreach ($requests as $key => $value) {
-            $requests[$key]->targetAvatarThumbnail = $storage->getThumbnailUrl($value->targetAvatarThumbnail);
-            $requests[$key]->requesterUsername = $requesterUsername;
+        foreach ($requests as $item) {
+            $item->targetAvatarThumbnail = $storage->getThumbnailUrl($item->targetAvatarThumbnail);
+            $item->requesterUsername = $requesterUsername;
         }
 
         return Result::success($requests->toArray());

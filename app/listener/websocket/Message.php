@@ -9,27 +9,33 @@ use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
 use app\core\Result;
 use app\service\Chatroom as ChatroomService;
+use app\service\Message as MessageService;
 
 class Message extends SocketEventHandler
 {
-
     /**
      * 事件监听处理
      *
      * @return mixed
      */
-    public function handle(ChatroomService $chatroomService, $event)
+    public function handle(ChatroomService $chatroomService, MessageService $messageService, $event)
     {
         ['msg' => $msg] = $event;
 
-        // 语音，图片消息只能通过HTTP API来上传并发送
-        if (in_array($msg['type'], [MessageType::VOICE, MessageType::IMAGE])) {
+        // 语音，图片消息等只能通过HTTP API来上传并发送
+        if (in_array($msg['type'], [MessageType::VOICE, MessageType::IMAGE, MessageType::TIPS])) {
             return $this->websocket
                 ->emit(SocketEvent::MESSAGE, Result::create(Result::CODE_ERROR_PARAM, '该类型的消息不允许通过WS通道发送'));
         }
 
         $msg['userId'] = $this->getUser()['id'];
-        $result = $chatroomService->addMessage($msg);
+        $result = $messageService->handle($msg);
+
+        if (!$result->isSuccess()) {
+            return $this->websocket->emit(SocketEvent::MESSAGE, $result);
+        }
+
+        $result = $chatroomService->addMessage($result->data);
 
         if (!$result->isSuccess()) {
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);

@@ -9,17 +9,16 @@ use HTMLPurifier_Config as HTMLPurifierConfig;
 use app\constant\MessageType;
 use app\core\Result;
 use app\entity\ChatInvitationMessage;
-use app\entity\ImageMessage;
 use app\entity\Message as MessageEntity;
 use app\entity\RichTextMessage;
 use app\entity\TextMessage;
-use app\entity\VoiceMessage;
 use app\util\Str as StrUtil;
 
 class Message
 {
     /**
      * 净化 $msg['data']
+     * 只有WS通道接收的消息需要净化
      *
      * @param array $msg
      * @return Result
@@ -97,26 +96,8 @@ class Message
                 $message->data = new ChatInvitationMessage($chatroomId);
                 break;
 
-            case MessageType::IMAGE:
-                [
-                    'filename' => $filename,
-                    'width'    => $width,
-                    'height'   => $height,
-                ] = $msg['data'];
-
-                $message->type = MessageType::IMAGE;
-                $message->data = new ImageMessage($filename, $width, $height);
-                break;
-
-            case MessageType::VOICE:
-                ['filename' => $filename, 'duration' => $duration] = $msg['data'];
-
-                $message->type = MessageType::VOICE;
-                $message->data = new VoiceMessage($filename, $duration);
-                break;
-
             default:
-                return Result::create(Result::CODE_ERROR_PARAM, '未知消息类型');
+                return Result::create(Result::CODE_ERROR_PARAM, '不支持处理该类消息');
         }
 
         $message->userId     = $msg['userId'];

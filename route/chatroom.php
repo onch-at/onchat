@@ -15,6 +15,7 @@ Route::group('chatroom', function () {
 
 Route::group('chatroom/<id>', function () {
     Route::get('/', 'getChatroom');
+    Route::get('members', 'getChatMembers');
 
     Route::group(function () {
         Route::post('avatar', 'avatar')->middleware(Avatar::class);
@@ -25,7 +26,6 @@ Route::group('chatroom/<id>', function () {
     Route::group(function () {
         Route::get('name', 'getName');
         Route::get('records/<msgId>', 'getChatRecords');
-        Route::get('members', 'getChatMembers');
 
         Route::post('image', 'image')->middleware(ImageFile::class);
         Route::post('voice', 'voice')->middleware(VoiceFile::class);
