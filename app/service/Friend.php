@@ -41,7 +41,7 @@ class Friend
     public function request(int $requesterId, int $targetId, ?string $reason = null, ?string $targetAlias = null): Result
     {
         // 如果两人已经是好友关系，则不允许申请了
-        if ($requesterId == $targetId || $this->isFriend($requesterId, $targetId)) {
+        if ($requesterId === $targetId || $this->isFriend($requesterId, $targetId)) {
             return Result::create(Result::CODE_ERROR_PARAM);
         }
 
@@ -96,27 +96,26 @@ class Friend
 
         $storage = Storage::getInstance();
 
-        $userInfos = UserModel::join('user_info', 'user_info.user_id = user.id')
-            ->where('user_id', 'IN', [$requesterId, $targetId])->field([
-                'user_id',
-                'avatar',
-                'username'
-            ])->limit(2)->select();
+        $userInfos = UserInfoModel::where('user_id', 'IN', [$requesterId, $targetId])->field([
+            'user_id',
+            'avatar',
+            'nickname'
+        ])->limit(2)->select();
 
         $avatarThumbnail = null;
         foreach ($userInfos as $userInfo) {
             $avatarThumbnail = $storage->getThumbnailUrl($userInfo->avatar);
 
-            if ($userInfo->user_id ===  $requesterId) {
+            if ($userInfo->user_id === $requesterId) {
                 $request->requesterAvatarThumbnail = $avatarThumbnail;
-                $request->requesterUsername = $userInfo->username;
+                $request->requesterNickname        = $userInfo->nickname;
             } else {
                 $request->targetAvatarThumbnail = $avatarThumbnail;
-                $request->targetUsername = $userInfo->username;
+                $request->targetNickname        = $userInfo->nickname;
             }
         }
 
-        return Result::success($request->toArray());
+        return Result::success($request);
     }
 
     /**
@@ -140,7 +139,7 @@ class Friend
             return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
-        return Result::success($request->toArray());
+        return Result::success($request);
     }
 
     /**
@@ -151,16 +150,15 @@ class Friend
     public function getReceiveRequests(): Result
     {
         $targetId = UserService::getId();
-        $targetUsername = UserService::getUsername();
+        $targetNickname = UserService::getInfoByKey('id', $targetId, 'nickname');
 
         // 找到自己被申请的
-        $requests = FriendRequestModel::join('user', 'friend_request.requester_id = user.id')
-            ->join('user_info', 'friend_request.requester_id = user_info.user_id')
+        $requests = FriendRequestModel::join('user_info', 'friend_request.requester_id = user_info.user_id')
             ->where('friend_request.target_id', '=', $targetId)
             ->field([
                 'friend_request.*',
                 'user_info.avatar AS requesterAvatarThumbnail',
-                'user.username AS requesterUsername',
+                'user_info.nickname AS requesterNickname',
             ])
             ->order('friend_request.update_time', 'DESC')
             ->select();
@@ -169,10 +167,10 @@ class Friend
 
         foreach ($requests as $item) {
             $item->requesterAvatarThumbnail = $storage->getThumbnailUrl($item->requesterAvatarThumbnail);
-            $item->targetUsername           = $targetUsername;
+            $item->targetNickname           = $targetNickname;
         }
 
-        return Result::success($requests->toArray());
+        return Result::success($requests);
     }
 
     /**
@@ -183,15 +181,14 @@ class Friend
     public function getSendRequests(): Result
     {
         $requesterId = UserService::getId();
-        $requesterUsername = UserService::getUsername();
+        $requesterNickname = UserService::getInfoByKey('id', $requesterId, 'nickname');
 
-        $requests = FriendRequestModel::join('user', 'friend_request.target_id = user.id')
-            ->join('user_info', 'friend_request.target_id = user_info.user_id')
+        $requests = FriendRequestModel::join('user_info', 'friend_request.target_id = user_info.user_id')
             ->where('friend_request.requester_id', '=', $requesterId)
             ->field([
                 'friend_request.*',
                 'user_info.avatar AS targetAvatarThumbnail',
-                'user.username AS targetUsername',
+                'user_info.nickname AS targetNickname',
             ])
             ->order('update_time', 'DESC')
             ->select();
@@ -200,10 +197,10 @@ class Friend
 
         foreach ($requests as $item) {
             $item->targetAvatarThumbnail = $storage->getThumbnailUrl($item->targetAvatarThumbnail);
-            $item->requesterUsername = $requesterUsername;
+            $item->requesterNickname     = $requesterNickname;
         }
 
-        return Result::success($requests->toArray());
+        return Result::success($requests);
     }
 
     /**
@@ -225,7 +222,7 @@ class Friend
             return Result::create(Result::CODE_ERROR_PARAM);
         }
 
-        return Result::success($request->toArray());
+        return Result::success($request);
     }
 
     /**
@@ -247,7 +244,7 @@ class Friend
             return Result::create(Result::CODE_ERROR_PARAM);
         }
 
-        return Result::success($request->toArray());
+        return Result::success($request);
     }
 
     /**
@@ -323,7 +320,7 @@ class Friend
             Db::commit();
 
             $userInfo = UserService::getInfoByKey('id', $request->target_id, [
-                'username',
+                'nickname',
                 'avatar'
             ]);
 
@@ -334,8 +331,8 @@ class Friend
                 'chatroomId'            => $chatroomId,
                 'requesterId'           => $request->requester_id,
                 'targetId'              => $request->target_id,
-                'targetUsername'        => $userInfo['username'],
-                'targetAvatarThumbnail' => $storage->getThumbnailUrl($userInfo['avatar'])
+                'targetNickname'        => $userInfo->nickname,
+                'targetAvatarThumbnail' => $storage->getThumbnailUrl($userInfo->avatar)
             ]);
         } catch (\Exception $e) {
             // 回滚事务
@@ -398,28 +395,27 @@ class Friend
 
             $storage = Storage::getInstance();
 
-            $userInfos = UserModel::join('user_info', 'user_info.user_id = user.id')
-                ->where('user_id', 'IN', [$request->requester_id, $targetId])->field([
-                    'user_id',
-                    'avatar',
-                    'username'
-                ])->limit(2)->select();
+            $userInfos = UserInfoModel::where('user_id', 'IN', [$request->requester_id, $targetId])->field([
+                'user_id',
+                'avatar',
+                'nickname'
+            ])->limit(2)->select();
 
             $avatarThumbnail = null;
             foreach ($userInfos as $userInfo) {
                 $avatarThumbnail = $storage->getThumbnailUrl($userInfo->avatar);
 
                 if ($userInfo->user_id === $targetId) {
-                    $request->targetUsername = $userInfo->username;
+                    $request->targetNickname = $userInfo->nickname;
                     $request->targetAvatarThumbnail = $avatarThumbnail;
                 } else {
-                    $request->requesterUsername = $userInfo->username;
+                    $request->requesterNickname = $userInfo->nickname;
                     $request->requesterAvatarThumbnail = $avatarThumbnail;
                 }
             }
 
             Db::commit();
-            return Result::success($request->toArray());
+            return Result::success($request);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();

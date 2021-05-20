@@ -188,7 +188,7 @@ class Chatroom
         $chatroom->avatar          = $storage->getUrl($avatar);
         $chatroom->avatarThumbnail = $storage->getThumbnailUrl($avatar);
 
-        return Result::success($chatroom->toArray());
+        return Result::success($chatroom);
     }
 
     /**
@@ -261,7 +261,7 @@ class Chatroom
             $chatroom->avatarThumbnail = $storage->getThumbnailUrl($filename);
         }
 
-        return Result::success($chatroom->toArray());
+        return Result::success($chatroom);
     }
 
     /**
@@ -323,7 +323,7 @@ class Chatroom
             $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 
     /**
@@ -368,7 +368,7 @@ class Chatroom
             ]);
 
             $storage = Storage::getInstance();
-            $avatar = UserService::getInfoByKey('id', $userId, 'avatar')['avatar'];
+            $avatar = UserService::getInfoByKey('id', $userId, 'avatar');
 
             $message->id              = $id;
             $message->nickname        = $nickname;
@@ -473,7 +473,7 @@ class Chatroom
             }
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 
     /**
@@ -623,7 +623,7 @@ class Chatroom
             $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 
     /**

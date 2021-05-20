@@ -37,11 +37,10 @@ class InviteJoinChatroom extends SocketEventHandler
         $message = new MessageEntity(MessageType::CHAT_INVITATION);
         $message->userId = $user['id'];
         $message->data   = new ChatInvitationMessage($chatroomId);
-        $message = $message->toArray();
 
         // 给每个受邀者发消息
         foreach ($result->data as $chatroomId) {
-            $message['chatroomId'] = $chatroomId;
+            $message->chatroomId = $chatroomId;
             $this->websocket
                 ->to(SocketRoomPrefix::CHATROOM . $chatroomId)
                 ->emit('message', $chatroomService->addMessage($message));

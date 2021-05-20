@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace app\core;
 
 use app\util\Arr as ArrUtil;
+use think\Collection;
+use think\Model;
 use think\response\Json;
 
 class Result
@@ -40,7 +42,14 @@ class Result
     {
         $this->code = $code;
         $this->msg  = $msg ?? self::MSG[$code];
-        $this->data = is_array($data) ? ArrUtil::keyToCamel($data) : $data;
+
+        if ($data instanceof Collection || $data instanceof Model) {
+            $this->data = ArrUtil::keyToCamel($data->toArray());
+        } else if (is_array($data)) {
+            $this->data = ArrUtil::keyToCamel($data);
+        } else {
+            $this->data = $data;
+        }
     }
 
     public static function create(int $code, ?string $msg = null, $data = null): self

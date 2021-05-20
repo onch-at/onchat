@@ -89,12 +89,7 @@ class Message
                 $message->data = new RichTextMessage($html, $text);
                 break;
 
-            case MessageType::CHAT_INVITATION:
-                $chatroomId = $msg['data']['chatroomId'];
 
-                $message->type = MessageType::CHAT_INVITATION;
-                $message->data = new ChatInvitationMessage($chatroomId);
-                break;
 
             default:
                 return Result::create(Result::CODE_ERROR_PARAM, '不支持处理该类消息');

@@ -172,20 +172,19 @@ class Chat
                 'user_info.nickname AS requesterNickname',
                 'user_info.avatar AS requesterAvatarThumbnail'
             ])
-            ->find()
-            ->toArray();
-        $info['requesterAvatarThumbnail'] = $storage->getThumbnailUrl($info['requesterAvatarThumbnail']);
+            ->find();
+        $info->requesterAvatarThumbnail = $storage->getThumbnailUrl($info->requesterAvatarThumbnail);
 
         $chatroom = ChatroomModel::field([
             'chatroom.name AS chatroomName',
             'chatroom.avatar AS chatroomAvatar',
-        ])->find($chatroomId)->toArray();
+        ])->find($chatroomId);
 
-        $avatar = $chatroom['chatroomAvatar'];
-        $chatroom['chatroomAvatar'] = $storage->getUrl($avatar);
-        $chatroom['chatroomAvatarThumbnail'] = $storage->getThumbnailUrl($avatar);
+        $avatar = $chatroom->chatroomAvatar;
+        $chatroom->chatroomAvatar          = $storage->getUrl($avatar);
+        $chatroom->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
 
-        return Result::success($request->toArray() + $info + $chatroom);
+        return Result::success($request->toArray() + $info->toArray() + $chatroom->toArray());
     }
 
     /**
@@ -274,12 +273,10 @@ class Chat
             $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
             $request->chatroomAvatar = $storage->getUrl($avatar);
             $request->chatroomAvatarThumbnail = $chatSession['avatarThumbnail'];
-            $request->handlerNickname = UserTable::getByUserId($handler, 'username');
-            $request = $request->toArray();
-
+            $request->handlerNickname = UserService::getInfoByKey('id', $handler, 'nickname');
 
             Db::commit();
-            return Result::success([$request, $chatSession]);
+            return Result::success([$request->toArray(), $chatSession]);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
@@ -362,9 +359,9 @@ class Chat
         $request->chatroomAvatar = $storage->getUrl($avatar);
         $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
-        $request->handlerNickname = UserTable::getByUserId($handler, 'username');
+        $request->handlerNickname = UserService::getInfoByKey('id', $handler, 'nickname');
 
-        return Result::success($request->toArray());
+        return Result::success($request);
     }
 
     /**
@@ -428,7 +425,7 @@ class Chat
         $storage = Storage::getInstance();
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
 
-        return Result::success($request->toArray());
+        return Result::success($request);
     }
 
     /**
@@ -465,7 +462,7 @@ class Chat
             $item->requesterAvatarThumbnail = $storage->getThumbnailUrl($item->requesterAvatarThumbnail);
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 
     /**
@@ -503,7 +500,7 @@ class Chat
         $request->chatroomAvatar = $storage->getUrl($avatar);
         $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
 
-        return Result::success($request->toArray());
+        return Result::success($request);
     }
 
     /**
@@ -537,6 +534,6 @@ class Chat
             $item->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 }

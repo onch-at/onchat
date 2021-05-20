@@ -21,6 +21,7 @@ use app\model\UserInfo as UserInfoModel;
 use app\util\Date as DateUtil;
 use app\util\File as FileUtil;
 use app\util\Str as StrUtil;
+use think\Collection;
 use think\facade\Db;
 use think\facade\Request;
 
@@ -227,19 +228,19 @@ class User
             return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
-        if (!password_verify($password, $user['password'])) { // 如果密码错误
+        if (!password_verify($password, $user->password)) { // 如果密码错误
             return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_PASSWORD_ERROR]);
         }
 
-        $this->saveLoginStatus($user['id'], $user['username'], $user['password']); // 保存登录状态
+        $this->saveLoginStatus($user->id, $user->username, $user->password); // 保存登录状态
 
-        unset($user['password']);
+        unset($user->password);
 
         $storage = Storage::getInstance();
-        $object = $user['avatar'];
+        $avatar  = $user->avatar;
 
-        $user['avatar'] = $storage->getUrl($object);
-        $user['avatarThumbnail'] = $storage->getThumbnailUrl($object);
+        $user->avatar = $storage->getUrl($avatar);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($avatar);
 
         return Result::success($user);
     }
@@ -367,19 +368,23 @@ class User
 
     /**
      * 通过用户标识获取用户信息
+     * $field为数组时，返回数据集对象；为单个字段时只返回该字段的数据
      *
      * @param string $key 用户标识名
      * @param mixed $value 用户标识值
      * @param string|array $field 需要获取的字段名
-     * @return array
+     * @return mixed
      */
-    public function getInfoByKey(string $key, $value, $field): array
+    public function getInfoByKey(string $key, $value, $field)
     {
-        return UserModel::where($key === 'id' ? 'user.id' : $key, '=', $value)
-            ->join('user_info', 'user_info.user_id = user.id')
-            ->field($field)
-            ->findOrEmpty()
-            ->toArray();
+        $query = UserModel::join('user_info', 'user_info.user_id = user.id')
+            ->where($key === 'id' ? 'user.id' : $key, '=', $value);
+
+        if (is_array($field)) {
+            return $query->field($field)->find();
+        }
+
+        return $query->value($field);
     }
 
     /**
@@ -405,7 +410,7 @@ class User
         $user->avatar = $storage->getUrl($object);
         $user->avatarThumbnail = $storage->getThumbnailUrl($object);
 
-        return Result::success($user->toArray());
+        return Result::success($user);
     }
 
     /**
@@ -429,7 +434,7 @@ class User
         $user->avatar = $storage->getUrl($object);
         $user->avatarThumbnail = $storage->getThumbnailUrl($object);
 
-        return Result::success($user->toArray());
+        return Result::success($user);
     }
 
     /**
@@ -491,12 +496,12 @@ class User
         }
 
         $storage = Storage::getInstance();
-        $object = $user['avatar'];
+        $avatar  = $user->avatar;
 
-        $user['avatar'] = $storage->getUrl($object);
-        $user['avatarThumbnail'] = $storage->getThumbnailUrl($object);
+        $user->avatar = $storage->getUrl($avatar);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($avatar);
 
-        unset($user['password']);
+        unset($user->password);
 
         return Result::success($user);
     }
@@ -575,15 +580,14 @@ class User
     /**
      * 查询该用户下所有的聊天室
      *
-     * @return array
+     * @return Collection
      */
-    public function getChatrooms($userId = null): array
+    public function getChatrooms($userId = null): Collection
     {
         return ChatMemberModel::join('chatroom', 'chat_member.chatroom_id = chatroom.id')
             ->where('chat_member.user_id', '=', $userId ?: $this->getId())
             ->field('chatroom.*')
-            ->select()
-            ->toArray();
+            ->select();
     }
 
     /**
@@ -722,7 +726,7 @@ class User
             }
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 
     /**
@@ -769,7 +773,7 @@ class User
             unset($item->friendId, $item->chatroom_id);
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 
     /**
@@ -810,7 +814,7 @@ class User
             unset($item->chatroom_id);
         }
 
-        return Result::success($data->toArray());
+        return Result::success($data);
     }
 
     /**
@@ -936,7 +940,7 @@ class User
             'user_id' => $userId
         ]);
 
-        return Result::success($userInfo->toArray());
+        return Result::success($userInfo);
     }
 
     /**

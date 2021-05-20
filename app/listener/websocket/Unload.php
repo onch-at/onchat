@@ -30,7 +30,7 @@ class Unload extends SocketEventHandler
 
         // 退出房间
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->leave(SocketRoomPrefix::CHATROOM . $chatroom['id']);
+            $this->websocket->leave(SocketRoomPrefix::CHATROOM . $chatroom->id);
         }
 
         $this->websocket->leave(SocketRoomPrefix::FRIEND_REQUEST . $userId);

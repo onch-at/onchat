@@ -33,7 +33,7 @@ class Init extends SocketEventHandler
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroom['id']);
+            $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroom->id);
         }
 
         // 加入好友请求房间
