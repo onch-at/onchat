@@ -284,7 +284,7 @@ class Friend
             $request->status           = FriendRequestModel::STATUS_AGREE;
             $request->requester_alias  = $requesterAlias;
             $request->target_readed    = true;
-            $request->requester_readed = false;
+            $request->requester_readed = true;
             $request->update_time      = time() * 1000;
             $request->save();
 
@@ -371,7 +371,7 @@ class Friend
         }
 
         // 确认被申请人的身份
-        if ($request->target_id != $targetId) {
+        if ($request->target_id !== $targetId) {
             return Result::create(Result::CODE_ERROR_NO_PERMISSION);
         }
 
@@ -406,10 +406,10 @@ class Friend
                 $avatarThumbnail = $storage->getThumbnailUrl($userInfo->avatar);
 
                 if ($userInfo->user_id === $targetId) {
-                    $request->targetNickname = $userInfo->nickname;
+                    $request->targetNickname        = $userInfo->nickname;
                     $request->targetAvatarThumbnail = $avatarThumbnail;
                 } else {
-                    $request->requesterNickname = $userInfo->nickname;
+                    $request->requesterNickname        = $userInfo->nickname;
                     $request->requesterAvatarThumbnail = $avatarThumbnail;
                 }
             }

@@ -276,10 +276,10 @@ class Chatroom
     public function addMember(int $id, int $userId, string $nickname = null, int $role = ChatMemberModel::ROLE_NORMAL): Result
     {
         $username = UserService::getUsernameById($userId);
+        $chatroom = ChatroomModel::find($id);
         // 如果没有这个房间，或者没有这个用户，或者这个用户已经加入了这个房间
         if (
-            empty(ChatroomModel::find($id)) ||
-            empty($username) ||
+            !$chatroom || !$username ||
             $this->isMember($id, $userId)
         ) {
             return Result::create(Result::CODE_ERROR_PARAM);
@@ -309,18 +309,21 @@ class Chatroom
             'update_time' => $timestamp
         ]);
 
-        $websocket = Container::getInstance()->make(Websocket::class);
+        // 非私聊则发送入群消息
+        if ($chatroom->type !== ChatroomModel::TYPE_PRIVATE_CHAT) {
+            $websocket = Container::getInstance()->make(Websocket::class);
 
-        // 添加入群消息
-        $msg = new Message(MessageType::TIPS);
-        $msg->userId     = $userId;
-        $msg->chatroomId = $id;
-        $msg->data       = new JoinRoomTipsMessage();
+            // 添加入群消息
+            $msg = new Message(MessageType::TIPS);
+            $msg->userId     = $userId;
+            $msg->chatroomId = $id;
+            $msg->data       = new JoinRoomTipsMessage();
 
-        $result = $this->addMessage($msg);
+            $result = $this->addMessage($msg);
 
-        if ($result->isSuccess()) {
-            $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
+            if ($result->isSuccess()) {
+                $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
+            }
         }
 
         return Result::success($data);
