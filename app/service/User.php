@@ -24,6 +24,7 @@ use app\util\Str as StrUtil;
 use think\Collection;
 use think\facade\Db;
 use think\facade\Request;
+use think\facade\Session;
 
 class User
 {
@@ -74,7 +75,7 @@ class User
      */
     public function getId(): ?int
     {
-        return session(SessionKey::USER_LOGIN . '.id');
+        return Session::get(SessionKey::USER_LOGIN . '.id');
     }
 
     /**
@@ -84,7 +85,7 @@ class User
      */
     public function getUsername(): ?string
     {
-        return session(SessionKey::USER_LOGIN . '.username');
+        return Session::get(SessionKey::USER_LOGIN . '.username');
     }
 
     /**
@@ -252,7 +253,7 @@ class User
      */
     public function logout(): void
     {
-        session(SessionKey::USER_LOGIN, null);
+        Session::set(SessionKey::USER_LOGIN, null);
     }
 
     /**
@@ -359,7 +360,7 @@ class User
      */
     public function saveLoginStatus(int $id, string $username, string $hashPassword): void
     {
-        session(SessionKey::USER_LOGIN, [
+        Session::set(SessionKey::USER_LOGIN, [
             'id'       => $id,
             'username' => $username,
             'password' => $hashPassword,
@@ -405,10 +406,10 @@ class User
         }
 
         $storage = Storage::getInstance();
-        $object = $user->avatar;
+        $avatar = $user->avatar;
 
-        $user->avatar = $storage->getUrl($object);
-        $user->avatarThumbnail = $storage->getThumbnailUrl($object);
+        $user->avatar          = $storage->getUrl($avatar);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($avatar);
 
         return Result::success($user);
     }
@@ -482,7 +483,7 @@ class User
      */
     public function checkLogin(): Result
     {
-        $session = session(SessionKey::USER_LOGIN);
+        $session = Session::get(SessionKey::USER_LOGIN);
         if (empty($session)) { // 如果没有登录的Session
             return Result::success(false);
         }
@@ -900,11 +901,11 @@ class User
     {
         $userId = $this->getId();
 
-        $nickname      = input('put.nickname/s') ?: $this->getUsername();
-        $signature     = input('put.signature/s');
-        $mood          = input('put.mood/d');
-        $birthday      = input('put.birthday/d');
-        $gender        = input('put.gender/d');
+        $nickname      = Request::param('put.nickname/s') ?: $this->getUsername();
+        $signature     = Request::param('put.signature/s');
+        $mood          = Request::param('put.mood/d');
+        $birthday      = Request::param('put.birthday/d');
+        $gender        = Request::param('put.gender/d');
         $age           = isset($birthday) ? DateUtil::getAge((int) $birthday / 1000) : null;
         $constellation = isset($birthday) ? DateUtil::getConstellation((int) $birthday / 1000) : null;
 
