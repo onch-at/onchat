@@ -116,14 +116,14 @@ class Chatroom
     public function setNickname(int $id, ?string $nickname): Result
     {
         // 如果有传入昵称
-        if ($nickname && StrUtil::isEmpty($nickname)) {
-            $nickname = trim($nickname);
+        if ($nickname && !StrUtil::isEmpty($nickname)) {
+            $nickname = StrUtil::trimAll($nickname);
             // 如果昵称长度超出
             if (StrUtil::length($nickname) > ONCHAT_NICKNAME_MAX_LENGTH) {
                 return Result::create(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符');
             }
         } else {
-            $nickname = null;
+            $nickname = UserService::getUsername();
         }
 
         $userId = UserService::getId();
@@ -132,10 +132,6 @@ class Chatroom
             'chatroom_id' => $id,
             'user_id'     => $userId
         ])->find();
-
-        if (!$nickname) {
-            $nickname = UserService::getUsernameById($userId);
-        }
 
         $chatMember->nickname = $nickname;
         $chatMember->save();

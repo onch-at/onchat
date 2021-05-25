@@ -901,11 +901,11 @@ class User
     {
         $userId = $this->getId();
 
-        $nickname      = Request::param('put.nickname/s') ?: $this->getUsername();
-        $signature     = Request::param('put.signature/s');
-        $mood          = Request::param('put.mood/d');
-        $birthday      = Request::param('put.birthday/d');
-        $gender        = Request::param('put.gender/d');
+        $nickname      = Request::param('nickname/s') ?: $this->getUsername();
+        $signature     = Request::param('signature/s');
+        $mood          = Request::param('mood/d');
+        $birthday      = Request::param('birthday/d');
+        $gender        = Request::param('gender/d');
         $age           = isset($birthday) ? DateUtil::getAge((int) $birthday / 1000) : null;
         $constellation = isset($birthday) ? DateUtil::getConstellation((int) $birthday / 1000) : null;
 
