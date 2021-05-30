@@ -36,8 +36,8 @@ return [
             'password'   => env('redis.password', ''),
             // 长连接
             'persistent' => true,
-            'select'     => 0,
-            'timeout'    => 0,
+            // 数据库号
+            'select'     => env('redis.database', 0),
         ],
         // 更多的缓存连接
     ],
