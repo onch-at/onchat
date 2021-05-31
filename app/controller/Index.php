@@ -11,6 +11,7 @@ use app\service\Index as IndexService;
 use think\App;
 use think\Response;
 use think\captcha\facade\Captcha;
+use think\facade\Config;
 
 class Index extends BaseController
 {

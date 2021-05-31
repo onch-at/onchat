@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace app\command;
 
-use app\core\Result;
 use app\facade\ChatroomService;
 use app\util\Str as StrUtil;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 use think\console\input\Argument;
+use think\facade\Config;
 use think\facade\Console;
-use think\facade\Db;
 
 class OnChat extends Command
 {
@@ -20,7 +19,7 @@ class OnChat extends Command
     const ACTION_STOP    = 'stop';
     const ACTION_RESTART = 'restart';
     const ACTION_RELOAD  = 'reload';
-    const ACTION_INSTALL = 'install';
+    const ACTION_INIT    = 'init';
 
     protected function configure()
     {
@@ -47,8 +46,8 @@ class OnChat extends Command
                 Console::call('swoole', [$action]);
                 break;
 
-            case self::ACTION_INSTALL:
-                $this->install($output);
+            case self::ACTION_INIT:
+                $this->init($output);
                 break;
 
             default:
@@ -58,36 +57,55 @@ class OnChat extends Command
         $output->info('OnChat: Execution finished!');
     }
 
-    protected function install($output)
+    protected function init($output)
     {
+        $default  = Config::get('database.default');
+        $config   = Config::get('database.connections.' . $default);
+        $host     = $config['hostname'];
+        $port     = $config['hostport'];
+        $username = $config['username'];
+        $password = $config['password'];
+        $database = $config['database'];
+
+        $sql = file_get_contents(resource_path('sql') . 'database.sql'); // 创建数据库的SQL
+
+        $output->comment('Connecting to database…');
+
+        $dbh = new \PDO("mysql:host={$host};port={$port}", $username, $password);
+
+        $output->comment('Attempting to create database: ' . $database);
+        $dbh->exec(StrUtil::assign($sql, ['database' => $database]));
+
         $path = resource_path('sql/table');
+        $dir  = scandir($path);
+        $dir  = array_filter($dir, function ($file) {
+            return preg_match('/(.sql)$/', $file);
+        });
 
-        $dir = scandir($path);
+        // 对文件列表进行排序，将user，chatroom数据表排到前面，因为这些数据表被其他表所依赖
+        usort($dir, function ($a, $b) {
+            return in_array($b, ['user.sql', 'chatroom.sql']) ? 1 : 0;
+        });
 
-        $output->comment('Execute SQL statement…');
         foreach ($dir as $file) {
-            $filename = $path . $file;
-            if (preg_match('/(.sql)$/', $file) && is_file($filename)) {
-                $sql = file_get_contents($filename);
+            $sql = file_get_contents($path . $file);
 
-                switch ($file) {
-                    case 'chat-record.sql': // 如果是消息记录表，则需要生成分表
-                        for ($i = 0; $i < 10; $i++) {
-                            Db::execute(StrUtil::assign($sql, ['index' => $i]));
-                        }
-                        break;
+            switch ($file) {
+                case 'chat-record.sql': // 如果是消息记录表，则需要生成分表
+                    for ($i = 0; $i < 10; $i++) {
+                        $dbh->exec(StrUtil::assign($sql, ['index' => $i]));
+                    }
+                    break;
 
-                    default:
-                        Db::execute($sql);
-                }
-
-                $output->comment(' > ' . $file);
+                default:
+                    $dbh->exec($sql);
             }
+
+            $output->comment('Execute SQL statement > ' . $file);
         }
 
-        $result = ChatroomService::getChatroom(1);
         // 如果没有第一个聊天室，那么就创建一个吧！
-        if (!$result->isSuccess()) {
+        if (!ChatroomService::getChatroom(1)->isSuccess()) {
             ChatroomService::creatChatroom('OnChat');
         }
     }

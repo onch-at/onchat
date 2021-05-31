@@ -9,7 +9,7 @@ return [
     'host'     => env('smtp.host', ''),
     // SMTP端口
     'port'     => env('smtp.port', 465),
-    // SMTP开启安全连接
+    // SMTP安全连接
     'secure'   => env('smtp.secure', true),
     // SMTP用户名
     'username' => env('smtp.username', ''),

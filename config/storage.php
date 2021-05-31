@@ -8,7 +8,7 @@ use app\core\storage\driver\Oss;
 // +----------------------------------------------------------------------
 
 return [
-    'default' => 'oss',
+    'default' => env('storage.driver', 'oss'),
     'stores'  => [
         'oss' => [
             'driver'                  => Oss::class,
