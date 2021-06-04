@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
-use Swoole\Server;
 use app\table\Fd as FdTable;
 use app\table\Throttle as ThrottleTable;
 use app\table\User as UserTable;
@@ -15,8 +14,6 @@ use think\swoole\Websocket;
  */
 abstract class SocketEventHandler
 {
-    /** Server */
-    protected $server;
     /** WebSocket */
     protected $websocket;
     /** 当前用户的FD */
@@ -28,14 +25,12 @@ abstract class SocketEventHandler
 
     public function __construct(
         Websocket     $websocket,
-        Server        $server,
         UserTable     $userTable,
         FdTable       $fdTable,
         ThrottleTable $throttleTable
     ) {
-        $this->server        = $server;
         $this->websocket     = $websocket;
-        $this->fd            = $websocket->getSender();
+        $this->fd            = (string) $websocket->getSender();
         $this->userTable     = $userTable;
         $this->fdTable       = $fdTable;
         $this->throttleTable = $throttleTable;

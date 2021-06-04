@@ -232,15 +232,15 @@ class Chatroom
             'update_time'    => $timestamp,
         ]);
 
-        if ($type == ChatroomModel::TYPE_GROUP_CHAT) {
+        if ($type === ChatroomModel::TYPE_GROUP_CHAT) {
             $storage = Storage::getInstance();
             $identicon = new Identicon(new ImageMagickGenerator());
 
             // 根据用户ID创建哈希头像
             $imageData = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
-            $path = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
-            $file = md5((string) DateUtil::now()) . '.png';
-            $result = $storage->save($path, $file, $imageData);
+            $path      = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
+            $file      = md5((string) DateUtil::now()) . '.png';
+            $result    = $storage->save($path, $file, $imageData);
 
             if (!$result->isSuccess()) {
                 return $result;

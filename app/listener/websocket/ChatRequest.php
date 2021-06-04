@@ -17,7 +17,7 @@ class ChatRequest extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatService $chatService, ChatroomService $chatroomService, $event)
+    public function handle(ChatService $chatService, ChatroomService $chatroomService,  array $event)
     {
         ['chatroomId' => $chatroomId, 'reason' => $reason] = $event;
 

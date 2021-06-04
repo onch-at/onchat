@@ -13,7 +13,7 @@ class User extends Table
 {
     protected $name = 'user';
 
-    public function set(int $fd, string $sessId): bool
+    public function set(string $fd, string $sessId): bool
     {
         $redis = Redis::getRedis();
         $sessPrefix = Config::get('session.prefix');
@@ -26,7 +26,7 @@ class User extends Table
         $session = unserialize(unserialize($data));
         $userInfo = $session[SessionKey::USER_LOGIN];
 
-        return $this->table->set((string) $fd, [
+        return $this->table->set($fd, [
             'id'       => $userInfo['id'],
             'username' => $userInfo['username']
         ]);

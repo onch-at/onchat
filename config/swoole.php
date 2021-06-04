@@ -3,26 +3,13 @@
 use Swoole\Table;
 use think\swoole\websocket\socketio\Handler;
 
+
 return [
-    'server'     => [
-        'host'      => env('server.host', '127.0.0.1'), // 监听地址
-        'port'      => env('server.port', 9501), // 监听端口
-        'mode'      => SWOOLE_PROCESS, // 运行模式 默认为SWOOLE_PROCESS
-        'sock_type' => SWOOLE_SOCK_TCP, // sock type 默认为SWOOLE_SOCK_TCP
-        'options'   => [
-            'pid_file'              => runtime_path() . 'swoole.pid',
-            'log_file'              => runtime_path() . 'swoole.log',
-            'daemonize'             => true,
-            // Normally this value should be 1~4 times larger according to your cpu cores.
-            'reactor_num'           => swoole_cpu_num() * 2,
-            'worker_num'            => swoole_cpu_num() * 2,
-            'task_worker_num'       => swoole_cpu_num(),
-            'enable_static_handler' => true,
-            'document_root'         => public_path(),
-            'package_max_length'    => 128 * 1024 * 1024,
-            'buffer_output_size'    => 128 * 1024 * 1024,
-            'socket_buffer_size'    => 128 * 1024 * 1024
-        ],
+    'http'       => [
+        'enable'     => true,
+        'host'       => env('server.host', '127.0.0.1'),
+        'port'       => env('server.port', 9501),
+        'worker_num' => swoole_cpu_num() * 2,
     ],
     'websocket'  => [
         'enable'        => true,
@@ -42,21 +29,27 @@ return [
                 'port'          => env('redis.port', 6379),
                 'password'      => env('redis.password', ''),
                 'select'        => env('redis.database', 0),
-                'max_active'    => 10,
+                'max_active'    => 3,
                 'max_wait_time' => 5,
             ],
         ],
         'listen'        => [],
         'subscribe'     => [],
-        'middleware'    => []
     ],
     'rpc'        => [
         'server' => [
-            'enable'   => false,
-            'port'     => 9000,
-            'services' => [],
+            'enable'     => false,
+            'host'       => '0.0.0.0',
+            'port'       => 9000,
+            'worker_num' => swoole_cpu_num() * 2,
+            'services'   => [],
         ],
         'client' => [],
+    ],
+    //队列
+    'queue'      => [
+        'enable'  => false,
+        'workers' => [],
     ],
     'hot_update' => [
         'enable'  => env('APP_DEBUG', false),
@@ -77,10 +70,6 @@ return [
             'max_wait_time' => 5,
         ],
         //自定义连接池
-    ],
-    'coroutine'  => [
-        'enable' => true,
-        'flags'  => SWOOLE_HOOK_ALL ^ SWOOLE_HOOK_CURL,
     ],
     'tables'     => [
         'user' => [
@@ -103,8 +92,8 @@ return [
             'columns' => [
                 [
                     'name' => 'fd',
-                    'type' => Table::TYPE_INT,
-                    'size' => 4
+                    'type' => Table::TYPE_STRING,
+                    'size' => 1024
                 ],
             ]
         ],

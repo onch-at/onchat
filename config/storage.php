@@ -20,8 +20,7 @@ return [
             'endpoint'                => env('oss.endpoint', 'https://oss-cn-shanghai.aliyuncs.com'),
             // Bucket
             'bucket'                  => env('oss.bucket', 'onchat'),
-            // 包括自定义分隔符
-            // 图片样式名：缩略图
+            // 包括自定义分隔符，图片样式名：缩略图
             'img_stylename_thumbnail' => env('oss.img_stylename_thumbnail', 'thumbnail'),
         ],
 

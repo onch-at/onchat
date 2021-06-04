@@ -8,7 +8,7 @@ class Fd extends Table
 {
     protected $name = 'fd';
 
-    public function set(int $userId, int $fd): bool
+    public function set(int $userId, string $fd): bool
     {
         return $this->table->set((string) $userId, [
             'fd' => $fd,
