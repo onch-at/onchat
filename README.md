@@ -5,7 +5,7 @@ You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the On
 
 ## Command
 
-Run `php think` to see all commands. You can also use `php think onchat start|restart|reload|stop|init` .
+Run `php think` to see all commands. You can also use `php think onchat start|init` .
 
 ## How to deploy?
 

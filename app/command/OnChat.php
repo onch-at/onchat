@@ -6,58 +6,47 @@ namespace app\command;
 
 use app\facade\ChatroomService;
 use app\util\Str as StrUtil;
-use think\console\Command;
-use think\console\Input;
-use think\console\Output;
 use think\console\input\Argument;
 use think\facade\Config;
-use think\facade\Console;
+use think\swoole\Manager;
+use think\swoole\command\Server as ServerCommand;
 
-class OnChat extends Command
+class OnChat extends ServerCommand
 {
     const ACTION_START   = 'start';
-    const ACTION_STOP    = 'stop';
-    const ACTION_RESTART = 'restart';
-    const ACTION_RELOAD  = 'reload';
     const ACTION_INIT    = 'init';
 
-    protected function configure()
+    public function configure()
     {
         // 指令配置
         $this->setName('onchat')
-            ->addArgument('action', Argument::OPTIONAL, 'start|stop|restart|reload|install', self::ACTION_START)
+            ->addArgument('action', Argument::OPTIONAL, 'start|init', self::ACTION_START)
             ->setDescription('OnChat Application');
     }
 
-    protected function execute(Input $input, Output $output)
+    public function handle(Manager $manager)
     {
-        $output->info('OnChat: Starting execution…');
+        $this->output->info('OnChat: Starting execution…');
 
-        $action = trim($input->getArgument('action'));
+        $action = trim($this->input->getArgument('action'));
 
         switch ($action) {
             case self::ACTION_START:
-            case self::ACTION_STOP:
-            case self::ACTION_RESTART:
-                Console::call('swoole', [$action]);
-                break;
-
-            case self::ACTION_RELOAD:
-                Console::call('swoole', [$action]);
+                parent::handle($manager);
                 break;
 
             case self::ACTION_INIT:
-                $this->init($output);
+                $this->init($this->output);
                 break;
 
             default:
-                $output->error('OnChat: Unknown action!');
+                $this->output->error('OnChat: Unknown action!');
         }
 
-        $output->info('OnChat: Execution finished!');
+        $this->output->info('OnChat: Execution finished!');
     }
 
-    protected function init($output)
+    protected function init()
     {
         $default  = Config::get('database.default');
         $config   = Config::get('database.connections.' . $default);
@@ -69,11 +58,11 @@ class OnChat extends Command
 
         $sql = file_get_contents(resource_path('sql') . 'database.sql'); // 创建数据库的SQL
 
-        $output->comment('Connecting to database…');
+        $this->output->comment('Connecting to database…');
 
         $dbh = new \PDO("mysql:host={$host};port={$port}", $username, $password);
 
-        $output->comment('Attempting to create database: ' . $database);
+        $this->output->comment('Attempting to create database: ' . $database);
         $dbh->exec(StrUtil::assign($sql, ['database' => $database]));
 
         $path = resource_path('sql/table');
@@ -101,7 +90,7 @@ class OnChat extends Command
                     $dbh->exec($sql);
             }
 
-            $output->comment('Execute SQL statement > ' . $file);
+            $this->output->comment('Execute SQL statement > ' . $file);
         }
 
         // 如果没有第一个聊天室，那么就创建一个吧！
