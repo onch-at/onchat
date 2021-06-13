@@ -80,16 +80,16 @@
         },
         {
             "name": "aliyuncs/oss-sdk-php",
-            "version": "v2.4.1",
+            "version": "v2.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aliyun/aliyun-oss-php-sdk.git",
-                "reference": "492866331b7bafaac09506cf42f351b7e9e63766"
+                "reference": "0c9d902c33847c07efc66c4cdf823deaea8fc2b6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aliyun/aliyun-oss-php-sdk/zipball/492866331b7bafaac09506cf42f351b7e9e63766",
-                "reference": "492866331b7bafaac09506cf42f351b7e9e63766",
+                "url": "https://api.github.com/repos/aliyun/aliyun-oss-php-sdk/zipball/0c9d902c33847c07efc66c4cdf823deaea8fc2b6",
+                "reference": "0c9d902c33847c07efc66c4cdf823deaea8fc2b6",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -102,8 +102,8 @@
                 "php": ">=5.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.0",
-                "satooshi/php-coveralls": "~1.0"
+                "phpunit/phpunit": "*",
+                "satooshi/php-coveralls": "*"
             },
             "type": "library",
             "autoload": {
@@ -125,9 +125,9 @@
             "homepage": "http://www.aliyun.com/product/oss/",
             "support": {
                 "issues": "https://github.com/aliyun/aliyun-oss-php-sdk/issues",
-                "source": "https://github.com/aliyun/aliyun-oss-php-sdk/tree/v2.4.1"
+                "source": "https://github.com/aliyun/aliyun-oss-php-sdk/tree/v2.4.2"
             },
-            "time": "2020-09-29T06:23:57+00:00"
+            "time": "2021-06-04T06:55:06+00:00"
         },
         {
             "name": "doctrine/cache",
@@ -2068,16 +2068,16 @@
         },
         {
             "name": "topthink/think-swoole",
-            "version": "v4.0.1",
+            "version": "v4.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/think-swoole.git",
-                "reference": "915ce6efe9cb36949d06a285554a11ab56ca7c44"
+                "reference": "c23239e26da99dcf389582b581055746d16500dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/915ce6efe9cb36949d06a285554a11ab56ca7c44",
-                "reference": "915ce6efe9cb36949d06a285554a11ab56ca7c44",
+                "url": "https://api.github.com/repos/top-think/think-swoole/zipball/c23239e26da99dcf389582b581055746d16500dd",
+                "reference": "c23239e26da99dcf389582b581055746d16500dd",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -2088,7 +2088,7 @@
             },
             "require": {
                 "ext-json": "*",
-                "ext-swoole": ">=4.4.8",
+                "ext-swoole": ">=4.6",
                 "nette/php-generator": "^3.2",
                 "open-smf/connection-pool": "~1.0",
                 "php": ">=7.4",
@@ -2135,9 +2135,9 @@
             "description": "Swoole extend for thinkphp",
             "support": {
                 "issues": "https://github.com/top-think/think-swoole/issues",
-                "source": "https://github.com/top-think/think-swoole/tree/v4.0.1"
+                "source": "https://github.com/top-think/think-swoole/tree/v4.0.2"
             },
-            "time": "2021-06-04T04:49:08+00:00"
+            "time": "2021-06-09T07:42:28+00:00"
         },
         {
             "name": "yzalis/identicon",

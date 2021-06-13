@@ -6,6 +6,7 @@ namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\core\Result;
 use app\model\UserInfo as UserInfoModel;
 use app\service\User as UserService;
 use think\Config;
@@ -18,9 +19,13 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(UserService $userService, Cookie $cookie, Config $config, $event)
+    public function handle(UserService $userService, Cookie $cookie, Config $config)
     {
         $sessId = $cookie->get($config->get('session.name'));
+
+        if (!$sessId) {
+            return $this->websocket->emit(SocketEvent::INIT, Result::create(Result::CODE_ERROR_NO_PERMISSION));
+        }
 
         $this->userTable->set($this->fd, $sessId);
 
@@ -41,7 +46,7 @@ class Init extends SocketEventHandler
         // 加入群聊申请房间
         $this->websocket->join(SocketRoomPrefix::CHAT_REQUEST . $userId);
 
-        $this->websocket->emit(SocketEvent::INIT);
+        $this->websocket->emit(SocketEvent::INIT, Result::success());
 
         UserInfoModel::update([
             'login_time' => time() * 1000,
