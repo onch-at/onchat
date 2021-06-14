@@ -7,6 +7,7 @@ namespace app\command;
 use app\facade\ChatroomService;
 use app\util\Str as StrUtil;
 use think\console\input\Argument;
+use think\console\input\Option;
 use think\facade\Config;
 use think\swoole\Manager;
 use think\swoole\command\Server as ServerCommand;
@@ -21,6 +22,13 @@ class OnChat extends ServerCommand
         // 指令配置
         $this->setName('onchat')
             ->addArgument('action', Argument::OPTIONAL, 'start|init', self::ACTION_START)
+            ->addOption(
+                'env',
+                'E',
+                Option::VALUE_OPTIONAL,
+                'Environment name',
+                ''
+            )
             ->setDescription('OnChat Application');
     }
 

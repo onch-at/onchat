@@ -8,18 +8,16 @@ use app\model\ChatRequest;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
 use app\service\Index as IndexService;
-use think\App;
 use think\Response;
 use think\captcha\facade\Captcha;
 use think\facade\Config;
 
-class Index extends BaseController
+class Index
 {
     protected $service;
 
-    public function __construct(App $app, IndexService $service)
+    public function __construct(IndexService $service)
     {
-        parent::__construct($app);
         $this->service = $service;
     }
 

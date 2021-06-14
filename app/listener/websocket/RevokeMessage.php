@@ -6,7 +6,7 @@ namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
-use app\service\Chatroom as ChatroomService;
+use app\service\ChatRecord as ChatRecordService;
 
 class RevokeMessage extends SocketEventHandler
 {
@@ -16,12 +16,12 @@ class RevokeMessage extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatroomService $chatroomService, $event)
+    public function handle(ChatRecordService $chatRecordService, $event)
     {
-        ['chatroomId' => $chatroomId, 'msgId' => $msgId] = $event;
+        ['chatroomId' => $chatroomId, 'id' => $id] = $event;
 
         $user = $this->getUser();
-        $result = $chatroomService->revokeMessage($chatroomId, $user['id'], $msgId);
+        $result = $chatRecordService->revokeRecord($id, $user['id'], $chatroomId);
 
         $this->websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)
             ->emit(SocketEvent::REVOKE_MESSAGE, $result);

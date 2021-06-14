@@ -6,15 +6,13 @@ namespace app\controller;
 
 use app\core\Result;
 use app\service\Chat as ChatService;
-use think\App;
 
-class Chat extends BaseController
+class Chat
 {
     protected $service;
 
-    public function __construct(App $app, ChatService $service)
+    public function __construct(ChatService $service)
     {
-        parent::__construct($app);
         $this->service = $service;
     }
 

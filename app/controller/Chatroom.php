@@ -6,15 +6,13 @@ namespace app\controller;
 
 use app\core\Result;
 use app\service\Chatroom as ChatroomService;
-use think\App;
 
-class Chatroom extends BaseController
+class Chatroom
 {
     protected $service;
 
-    public function __construct(App $app, ChatroomService $service)
+    public function __construct(ChatroomService $service)
     {
-        parent::__construct($app);
         $this->service = $service;
     }
 
@@ -65,18 +63,6 @@ class Chatroom extends BaseController
     }
 
     /**
-     * 获取聊天室消息记录
-     *
-     * @param integer $id 聊天室ID
-     * @param integer $msgId 消息ID
-     * @return Result
-     */
-    public function getChatRecords(int $id, int $msgId): Result
-    {
-        return $this->service->getChatRecords($id, $msgId);
-    }
-
-    /**
      * 获取群聊所有成员
      *
      * @param integer $id 聊天室ID
@@ -96,27 +82,5 @@ class Chatroom extends BaseController
     public function avatar(int $id): Result
     {
         return $this->service->avatar($id);
-    }
-
-    /**
-     * 上传图片
-     *
-     * @param integer $id 聊天室ID
-     * @return Result
-     */
-    public function image(int $id): Result
-    {
-        return $this->service->image($id);
-    }
-
-    /**
-     * 上传语音
-     *
-     * @param integer $id 聊天室ID
-     * @return Result
-     */
-    public function voice(int $id): Result
-    {
-        return $this->service->voice($id);
     }
 }

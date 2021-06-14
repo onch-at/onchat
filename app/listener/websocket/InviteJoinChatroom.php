@@ -10,7 +10,7 @@ use app\constant\SocketRoomPrefix;
 use app\entity\ChatInvitationMessage;
 use app\entity\Message as MessageEntity;
 use app\service\Chat as ChatService;
-use app\service\Chatroom as ChatroomService;
+use app\service\ChatRecord as ChatRecordService;
 
 class InviteJoinChatroom extends SocketEventHandler
 {
@@ -20,7 +20,7 @@ class InviteJoinChatroom extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatService $chatService, ChatroomService $chatroomService, $event)
+    public function handle(ChatService $chatService, ChatRecordService $chatRecordService, $event)
     {
         ['chatroomId' => $chatroomId, 'chatroomIdList' => $chatroomIdList] = $event;
 
@@ -43,7 +43,7 @@ class InviteJoinChatroom extends SocketEventHandler
             $message->chatroomId = $chatroomId;
             $this->websocket
                 ->to(SocketRoomPrefix::CHATROOM . $chatroomId)
-                ->emit('message', $chatroomService->addMessage($message));
+                ->emit('message', $chatRecordService->addRecord($message));
         }
     }
 }

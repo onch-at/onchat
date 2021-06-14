@@ -15,7 +15,7 @@ class User extends Table
 
     public function set(string $fd, string $sessId): bool
     {
-        $redis = Redis::getRedis();
+        $redis = Redis::getHandler();
         $sessPrefix = Config::get('session.prefix');
         $data = $redis->get($sessPrefix . $sessId);
 

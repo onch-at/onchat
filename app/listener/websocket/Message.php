@@ -8,7 +8,7 @@ use app\constant\MessageType;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
 use app\core\Result;
-use app\service\Chatroom as ChatroomService;
+use app\service\ChatRecord as ChatRecordService;
 use app\service\Message as MessageService;
 
 class Message extends SocketEventHandler
@@ -18,7 +18,7 @@ class Message extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatroomService $chatroomService, MessageService $messageService, $event)
+    public function handle(ChatRecordService $chatRecordService, MessageService $messageService, $event)
     {
         ['msg' => $msg] = $event;
 
@@ -35,7 +35,7 @@ class Message extends SocketEventHandler
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);
         }
 
-        $result = $chatroomService->addMessage($result->data);
+        $result = $chatRecordService->addRecord($result->data);
 
         if (!$result->isSuccess()) {
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);

@@ -17,9 +17,11 @@ class Unload extends SocketEventHandler
      */
     public function handle(UserService $userService)
     {
-        $userId = $this->getUser()['id'];
+        $user = $this->getUser();
 
-        if (!$userId) return false;
+        if (!$user) return false;
+
+        $userId = $user['id'];
 
         $this->userTable->del($this->fd);
         $this->fdTable->del($userId);

@@ -6,15 +6,13 @@ namespace app\controller;
 
 use app\core\Result;
 use app\service\User as UserService;
-use think\App;
 
-class User extends BaseController
+class User
 {
     protected $service;
 
-    public function __construct(App $app, UserService $service)
+    public function __construct(UserService $service)
     {
-        parent::__construct($app);
         $this->service = $service;
     }
 

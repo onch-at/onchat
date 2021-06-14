@@ -4,5 +4,5 @@
 /runtime
 *.log
 .env
-prod.env
+.env.prod
 OnChat.zip
