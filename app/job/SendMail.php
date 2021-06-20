@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace app\listener\task;
+namespace app\job;
 
 use app\core\mail\Mailer;
+use think\queue\Job;
 
 class SendMail
 {
-    public function handle($event)
+    public function fire(Job $job, $data)
     {
         [
             'from'      => $from,
@@ -17,7 +18,7 @@ class SendMail
             'subject'   => $subject,
             'body'      => $body,
             'altBody'   => $altBody,
-        ] = $event;
+        ] = $data;
 
         $mailer = Mailer::create()
             ->setFrom(...$from)
@@ -30,6 +31,9 @@ class SendMail
             $mailer->addAddress($address);
         }
 
-        $mailer->send();
+        // 如果发送成功 或 重试达到3次
+        if ($mailer->send() || $job->attempts() > 3) {
+            $job->delete();
+        }
     }
 }

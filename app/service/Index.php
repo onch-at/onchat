@@ -5,23 +5,24 @@ declare(strict_types=1);
 namespace app\service;
 
 use app\constant\SessionKey;
-use app\core\Job;
 use app\core\Result;
-use app\listener\task\SendMail;
+use app\job\SendMail as JobSendMail;
 use app\util\Str as StrUtil;
 use think\Config;
+use think\Queue;
 use think\Session;
-use think\swoole\facade\Server;
 
 class Index
 {
     private $session;
     private $config;
+    private $queue;
 
-    public function __construct(Session $session, Config $config)
+    public function __construct(Session $session, Config $config, Queue $queue)
     {
         $this->session = $session;
         $this->config  = $config;
+        $this->queue   = $queue;
     }
 
     /**
@@ -58,14 +59,14 @@ class Index
 
         $path = resource_path('tpl/mail') . 'captcha.html';
 
-        $result = Server::task(new Job(SendMail::class, [
+        $result = $this->queue->push(JobSendMail::class, [
             'from'      => [$this->config->get('smtp.username'), 'OnChat'],
             'addresses' => [$email],
             'isHTML'    => true,
             'subject'   => 'OnChat：电子邮箱验证',
             'body'      => StrUtil::assign(file_get_contents($path), ['captcha' => $captcha]),
             'altBody'   => null
-        ]));
+        ]);
 
         return Result::create($result !== false ? Result::CODE_SUCCESS : Result::CODE_ERROR_UNKNOWN);
     }

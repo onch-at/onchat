@@ -25,7 +25,7 @@ class OnChat extends ServerCommand
             ->addOption(
                 'env',
                 'E',
-                Option::VALUE_OPTIONAL,
+                Option::VALUE_REQUIRED,
                 'Environment name',
                 ''
             )
@@ -35,6 +35,7 @@ class OnChat extends ServerCommand
     public function handle(Manager $manager)
     {
         $this->output->info('OnChat: Starting execution…');
+        $this->output->info($this->input->getOption('env'));
 
         $action = trim($this->input->getArgument('action'));
 

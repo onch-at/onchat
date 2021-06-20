@@ -3,7 +3,6 @@
 use Swoole\Table;
 use think\swoole\websocket\socketio\Handler;
 
-
 return [
     'http'       => [
         'enable'     => true,
@@ -48,8 +47,16 @@ return [
     ],
     //队列
     'queue'      => [
-        'enable'  => false,
-        'workers' => [],
+        'enable'  => true,
+        'workers' => [
+            'default' => [
+                'worker_num' => 1,
+                'delay'      => 0,
+                'sleep'      => 3,
+                'tries'      => 1,
+                'timeout'    => 60
+            ]
+        ],
     ],
     'hot_update' => [
         'enable'  => env('APP_DEBUG', false),

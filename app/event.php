@@ -2,8 +2,6 @@
 
 use app\listener\task\ClearChatRequest;
 use app\listener\task\ClearFriendRequest;
-use app\listener\task\SendMail;
-use app\listener\task\TaskDispatcher;
 use app\listener\websocket\ChatRequest;
 use app\listener\websocket\ChatRequestAgree;
 use app\listener\websocket\ChatRequestReject;
@@ -45,8 +43,6 @@ return [
         'swoole.websocket.Event.Unload'              => [Unload::class],
         'swoole.websocket.Disconnect'                => [Unload::class],
         'swoole.websocket.Close'                     => [Unload::class],
-        'swoole.task'                                => [TaskDispatcher::class],
-        'swoole.task.SendMail'                       => [SendMail::class],
     ],
 
     'subscribe' => [],
