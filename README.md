@@ -3,7 +3,7 @@
 A simple, beautiful, mobile-first instant messaging progressive web application build with [ThinkPHP6](https://github.com/top-think/framework) and [Swoole](https://github.com/swoole/swoole-src).
 You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the OnChat front-end code repository.
 
-## Feature
+## Features
 
 - ⚡️ **Lightning fast** - The server adopts [Swoole](https://www.swoole.co.uk/) programmatic server with asynchronous IO, coroutine and Fibers, with excellent performance.
 - ⛰ **Stable as Mount Tai** - The client is built using [Angular](https://angular.io/), which has better scalability, maintainability and stability.
@@ -14,6 +14,10 @@ You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the On
 ## Quick experience
 
 Visit the official [OnChat](https://chat.hypergo.net) site to quickly start your online social chat journey.
+
+## Documentation
+
+For the full OnChat documentation, please visit [https://docs.chat.hypergo.net/docs/intro](https://docs.chat.hypergo.net/docs/intro).
 
 ## Suport
 

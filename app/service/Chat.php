@@ -8,7 +8,6 @@ use app\core\Result;
 use app\core\storage\Storage;
 use app\facade\ChatroomService;
 use app\facade\UserService;
-use app\facade\UserTable;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
 use app\model\ChatSession as ChatSessionModel;

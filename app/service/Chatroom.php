@@ -304,7 +304,7 @@ class Chatroom
             $msg->chatroomId = $id;
             $msg->data       = new JoinRoomTipsMessage();
 
-            $result = ChatRecordService::addMessage($msg);
+            $result = ChatRecordService::addRecord($msg);
 
             if ($result->isSuccess()) {
                 $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);

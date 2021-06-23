@@ -19,6 +19,7 @@ use app\facade\UserService;
 use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
+use app\model\UserInfo as UserInfoModel;
 use app\util\File as FileUtil;
 use think\Container;
 use think\facade\Db;
@@ -56,7 +57,7 @@ class ChatRecord
         $query = ChatRecordModel::opt($chatroomId)
             ->alias('chat_record')
             ->leftJoin('user_info', 'user_info.user_id = chat_record.user_id')
-            ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $id)
+            ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $chatroomId)
             ->where('chat_record.chatroom_id', '=', $chatroomId)
             ->field([
                 'chat_member.role',
@@ -151,11 +152,21 @@ class ChatRecord
             ]);
 
             $storage = Storage::getInstance();
-            $avatar = UserService::getInfoByKey('id', $userId, 'avatar');
+
+            $memberInfo = UserInfoModel::join('chat_member', 'user_info.user_id = chat_member.user_id AND chat_member.chatroom_id = ' . $chatroomId)
+                ->where('user_info.user_id', '=', $userId)
+                ->field([
+                    'user_info.avatar',
+                    'chat_member.role'
+                ])
+                ->find();
+
+            trace(gettype($userId));
 
             $message->id              = $id;
             $message->nickname        = $nickname;
-            $message->avatarThumbnail = $storage->getThumbnailUrl($avatar);
+            $message->avatarThumbnail = $storage->getThumbnailUrl($memberInfo->avatar);
+            $message->role            = $memberInfo->role;
             $message->createTime      = $timestamp;
 
             switch ($message->type) {
