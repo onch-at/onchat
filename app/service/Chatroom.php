@@ -516,4 +516,35 @@ class Chatroom
             })
             ->column('user_id');
     }
+
+    /**
+     * 模糊搜索聊天室
+     *
+     * @param string $keyword
+     * @param integer $page
+     * @return Result
+     */
+    public function search(string $keyword, int $page): Result
+    {
+        $storage = Storage::getInstance();
+
+        $expression = "%{$keyword}%";
+        $data = ChatroomModel::where('type', '=', ChatroomModel::TYPE_GROUP_CHAT)
+            ->where(function ($query) use ($expression) {
+                $query->whereOr([
+                    ['name', 'LIKE', $expression],
+                    ['description', 'LIKE', $expression],
+                    ['id', 'LIKE', $expression],
+                ]);
+            })
+            ->page($page, 15)
+            ->select();
+
+        foreach ($data as $item) {
+            $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatar);
+            $item->avatar          = $storage->getUrl($item->avatar);
+        }
+
+        return Result::success($data);
+    }
 }

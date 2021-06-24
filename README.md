@@ -3,6 +3,8 @@
 A simple, beautiful, mobile-first instant messaging progressive web application build with [ThinkPHP6](https://github.com/top-think/framework) and [Swoole](https://github.com/swoole/swoole-src).
 You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the OnChat front-end code repository.
 
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+
 ## Features
 
 - ⚡️ **Lightning fast** - The server adopts [Swoole](https://www.swoole.co.uk/) programmatic server with asynchronous IO, coroutine and Fibers, with excellent performance.

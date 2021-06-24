@@ -50,7 +50,7 @@ return [
         'enable'  => true,
         'workers' => [
             'default' => [
-                'worker_num' => 1,
+                'worker_num' => swoole_cpu_num(),
                 'delay'      => 0,
                 'sleep'      => 3,
                 'tries'      => 1,

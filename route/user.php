@@ -20,6 +20,7 @@ Route::group('user', function () {
         Route::get('logout', 'logout');
 
         Route::post('avatar', 'avatar')->middleware(Avatar::class);
+        Route::post('search', 'search');
 
         Route::put('info', 'saveUserInfo');
         Route::put('bindemail', 'bindEmail');

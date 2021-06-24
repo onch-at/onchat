@@ -225,4 +225,16 @@ class User
     {
         return $this->service->unreadChatSession($id);
     }
+
+    /**
+     * 模糊搜索用户
+     *
+     * @param string $keyword
+     * @param integer $page
+     * @return Result
+     */
+    public function search(string $keyword, int $page): Result
+    {
+        return $this->service->search($keyword, $page);
+    }
 }

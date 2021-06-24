@@ -8,8 +8,8 @@ use think\facade\Route;
 
 // 聊天室模块路由
 Route::group('chatroom', function () {
-    // Route::post('create', 'create');
-})->prefix('Chatroom/');
+    Route::post('search', 'search');
+})->prefix('Chatroom/')->middleware(Auth::class);
 
 Route::group('chatroom/<id>', function () {
     Route::get('/', 'getChatroom');

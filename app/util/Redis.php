@@ -8,7 +8,7 @@ use think\facade\Cache;
 
 class Redis
 {
-    public static function getHandler()
+    public static function getHandler(): \Redis
     {
         return Cache::store('redis')->handler();
     }

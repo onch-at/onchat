@@ -973,4 +973,32 @@ class User
 
         return Result::success($email);
     }
+
+    /**
+     * 模糊搜索用户
+     *
+     * @param string $keyword
+     * @param integer $page
+     * @return Result
+     */
+    public function search(string $keyword, int $page): Result
+    {
+        $storage = Storage::getInstance();
+
+        $expression = "%{$keyword}%";
+        $data = UserModel::join('user_info', 'user.id = user_info.user_id')->whereOr([
+            ['user_info.nickname', 'LIKE', $expression],
+            ['user.username', 'LIKE', $expression],
+            ['user.id', 'LIKE', $expression],
+        ])->page($page, 15)
+            ->field(self::USER_FIELDS)
+            ->select();
+
+        foreach ($data as $item) {
+            $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatar);
+            $item->avatar          = $storage->getUrl($item->avatar);
+        }
+
+        return Result::success($data);
+    }
 }

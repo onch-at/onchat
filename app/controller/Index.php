@@ -11,6 +11,7 @@ use app\service\Index as IndexService;
 use think\Response;
 use think\captcha\facade\Captcha;
 use think\facade\Config;
+use think\facade\Db;
 use think\facade\Queue;
 
 class Index
@@ -24,6 +25,13 @@ class Index
 
     public function index()
     {
+        dump(UserModel::join('user_info', 'user.id = user_info.user_id')->whereOr([
+            ['user_info.nickname', 'LIKE', '%hyperLife%'],
+            ['user.username', 'LIKE', '%hyperLife%'],
+            ['user.id', 'LIKE', '%hyperLife%'],
+        ])->page(2, 5)->select()->toArray());
+
+        dump(Db::getLastSql());
     }
 
     /**

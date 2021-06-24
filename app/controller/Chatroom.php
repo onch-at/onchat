@@ -83,4 +83,16 @@ class Chatroom
     {
         return $this->service->avatar($id);
     }
+
+    /**
+     * 模糊搜索聊天室
+     *
+     * @param string $keyword
+     * @param integer $page
+     * @return Result
+     */
+    public function search(string $keyword, int $page): Result
+    {
+        return $this->service->search($keyword, $page);
+    }
 }
