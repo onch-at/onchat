@@ -238,10 +238,9 @@ class User
         unset($user->password);
 
         $storage = Storage::getInstance();
-        $avatar  = $user->avatar;
 
-        $user->avatar = $storage->getUrl($avatar);
-        $user->avatarThumbnail = $storage->getThumbnailUrl($avatar);
+        $user->avatar = $storage->getUrl($user->avatar);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
 
         return Result::success($user);
     }
@@ -406,10 +405,9 @@ class User
         }
 
         $storage = Storage::getInstance();
-        $avatar = $user->avatar;
 
-        $user->avatar          = $storage->getUrl($avatar);
-        $user->avatarThumbnail = $storage->getThumbnailUrl($avatar);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
@@ -430,10 +428,9 @@ class User
         }
 
         $storage = Storage::getInstance();
-        $object = $user->avatar;
 
-        $user->avatar = $storage->getUrl($object);
-        $user->avatarThumbnail = $storage->getThumbnailUrl($object);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
@@ -497,10 +494,9 @@ class User
         }
 
         $storage = Storage::getInstance();
-        $avatar  = $user->avatar;
 
-        $user->avatar = $storage->getUrl($avatar);
-        $user->avatarThumbnail = $storage->getThumbnailUrl($avatar);
+        $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
         unset($user->password);
 

@@ -168,10 +168,9 @@ class Chatroom
         }
 
         $storage = Storage::getInstance();
-        $avatar  = $chatroom->avatar;
 
-        $chatroom->avatar          = $storage->getUrl($avatar);
-        $chatroom->avatarThumbnail = $storage->getThumbnailUrl($avatar);
+        $chatroom->avatarThumbnail = $storage->getThumbnailUrl($chatroom->avatar);
+        $chatroom->avatar          = $storage->getUrl($chatroom->avatar);
 
         return Result::success($chatroom);
     }

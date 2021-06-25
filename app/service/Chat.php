@@ -179,9 +179,8 @@ class Chat
             'chatroom.avatar AS chatroomAvatar',
         ])->find($chatroomId);
 
-        $avatar = $chatroom->chatroomAvatar;
-        $chatroom->chatroomAvatar          = $storage->getUrl($avatar);
-        $chatroom->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
+        $chatroom->chatroomAvatarThumbnail = $storage->getThumbnailUrl($chatroom->chatroomAvatar);
+        $chatroom->chatroomAvatar          = $storage->getUrl($chatroom->chatroomAvatar);
 
         return Result::success($request->toArray() + $info->toArray() + $chatroom->toArray());
     }
@@ -343,7 +342,7 @@ class Chat
             $readedList[] = $handler;
         }
 
-        $request->readed_list = array_values($readedList);
+        $request->readed_list   = array_values($readedList);
         $request->reject_reason = $reason;
         $request->status        = ChatRequestModel::STATUS_REJECT;
         $request->handler_id    = $handler;
@@ -353,12 +352,11 @@ class Chat
         $this->showChatroomNoticeChatSession($request->chatroom_id, $request->requester_id);
 
         $storage = Storage::getInstance();
-        $avatar = $request->chatroomAvatar;
 
-        $request->chatroomAvatar = $storage->getUrl($avatar);
-        $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
-        $request->handlerNickname = UserService::getInfoByKey('id', $handler, 'nickname');
+        $request->chatroomAvatarThumbnail  = $storage->getThumbnailUrl($request->chatroomAvatar);
+        $request->chatroomAvatar           = $storage->getUrl($request->chatroomAvatar);
+        $request->handlerNickname          = UserService::getInfoByKey('id', $handler, 'nickname');
 
         return Result::success($request);
     }
@@ -494,10 +492,10 @@ class Chat
             return Result::create(Result::CODE_ERROR_PARAM);
         }
 
-        $avatar = $request->chatroomAvatar;
         $storage = Storage::getInstance();
-        $request->chatroomAvatar = $storage->getUrl($avatar);
-        $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
+
+        $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($request->chatroomAvatar);
+        $request->chatroomAvatar          = $storage->getUrl($request->chatroomAvatar);
 
         return Result::success($request);
     }
@@ -525,12 +523,10 @@ class Chat
             ->select();
 
         $storage = Storage::getInstance();
-        $avatar = null;
 
         foreach ($data as $item) {
-            $avatar = $item->chatroomAvatar;
-            $item->chatroomAvatar          = $storage->getUrl($avatar);
-            $item->chatroomAvatarThumbnail = $storage->getThumbnailUrl($avatar);
+            $item->chatroomAvatarThumbnail = $storage->getThumbnailUrl($item->chatroomAvatar);
+            $item->chatroomAvatar          = $storage->getUrl($item->chatroomAvatar);
         }
 
         return Result::success($data);
