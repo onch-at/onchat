@@ -21,8 +21,8 @@ class Message
   public $data;
   /** 回复消息的消息记录ID */
   public $replyId;
-  /** 消息在客户端发送的时间 */
-  public $sendTime;
+  /** 消息在客户端的临时ID */
+  public $tempId;
   /** 消息创建时间 */
   public $createTime;
 

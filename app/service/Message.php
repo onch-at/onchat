@@ -89,8 +89,6 @@ class Message
                 $message->data = new RichTextMessage($html, $text);
                 break;
 
-
-
             default:
                 return Result::create(Result::CODE_ERROR_PARAM, '不支持处理该类消息');
         }
@@ -98,7 +96,7 @@ class Message
         $message->userId     = $msg['userId'];
         $message->chatroomId = $msg['chatroomId'];
         $message->replyId    = $msg['replyId'] ?? null;
-        $message->sendTime   = $msg['sendTime'];
+        $message->tempId     = $msg['tempId'];
 
         return Result::success($message);
     }

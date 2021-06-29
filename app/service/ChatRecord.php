@@ -275,7 +275,7 @@ class ChatRecord
             $msg = new Message(MessageType::IMAGE);
             $msg->userId     = $userId;
             $msg->chatroomId = $chatroomId;
-            $msg->sendTime   = +Request::param('time');
+            $msg->tempId     = Request::param('tempId');
             $msg->data       = new ImageMessage($path . $file, $width, $height);
 
             $result = $this->addRecord($msg);
@@ -332,7 +332,7 @@ class ChatRecord
             $msg = new Message(MessageType::VOICE);
             $msg->userId     = $userId;
             $msg->chatroomId = $chatroomId;
-            $msg->sendTime   = +Request::param('time');
+            $msg->tempId     = Request::param('tempId');
             $msg->data       = new VoiceMessage($path . $file, $duration);
 
             $result = $this->addRecord($msg);
