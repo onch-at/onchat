@@ -23,7 +23,6 @@
         "aliyuncs/oss-sdk-php": "^2.3",
         "yzalis/identicon": "^2.0",
         "ezyang/htmlpurifier": "^4.13",
-        "reasno/swoole-aliyunoss-addon": "^1.0",
         "phpmailer/phpmailer": "^6.2",
         "ralouphie/mimey": "^2.1",
         "php-ffmpeg/php-ffmpeg": "^0.18.0",

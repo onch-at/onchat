@@ -9,6 +9,9 @@ return [
         'host'       => env('server.host', '127.0.0.1'),
         'port'       => env('server.port', 9501),
         'worker_num' => swoole_cpu_num() * 2,
+        'options'    => [
+            'package_max_length' => 1024 * 1024 * 50
+        ]
     ],
     'websocket'  => [
         'enable'        => true,
@@ -45,7 +48,6 @@ return [
         ],
         'client' => [],
     ],
-    //队列
     'queue'      => [
         'enable'  => true,
         'workers' => [

@@ -25,13 +25,7 @@ class Index
 
     public function index()
     {
-        dump(UserModel::join('user_info', 'user.id = user_info.user_id')->whereOr([
-            ['user_info.nickname', 'LIKE', '%hyperLife%'],
-            ['user.username', 'LIKE', '%hyperLife%'],
-            ['user.id', 'LIKE', '%hyperLife%'],
-        ])->page(2, 5)->select()->toArray());
-
-        dump(Db::getLastSql());
+        dump(UserModel::where('id', '<', 10)->cache(true)->select());
     }
 
     /**

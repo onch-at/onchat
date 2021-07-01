@@ -239,8 +239,8 @@ class User
 
         $storage = Storage::getInstance();
 
-        $user->avatar = $storage->getUrl($user->avatar);
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
