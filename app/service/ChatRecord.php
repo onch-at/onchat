@@ -131,7 +131,7 @@ class ChatRecord
         try {
             $timestamp = time() * 1000;
 
-            $id = +ChatRecordModel::opt($chatroomId)->insertGetId([
+            $id = (int) ChatRecordModel::opt($chatroomId)->insertGetId([
                 'chatroom_id' => $message->chatroomId,
                 'user_id'     => $message->userId,
                 'type'        => $message->type,
@@ -160,8 +160,6 @@ class ChatRecord
                     'chat_member.role'
                 ])
                 ->find();
-
-            trace(gettype($userId));
 
             $message->id              = $id;
             $message->nickname        = $nickname;

@@ -30,7 +30,7 @@ abstract class SocketEventHandler
         ThrottleTable $throttleTable
     ) {
         $this->websocket     = $websocket;
-        $this->fd            = (string) $websocket->getSender();
+        $this->fd            = $websocket->getSender();
         $this->userTable     = $userTable;
         $this->fdTable       = $fdTable;
         $this->throttleTable = $throttleTable;

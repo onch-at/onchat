@@ -29,15 +29,6 @@ Route::group('user', function () {
             Route::get('private', 'getPrivateChatrooms');
             Route::get('group', 'getGroupChatrooms');
         });
-
-        Route::group('chatsession', function () {
-            Route::get('/', 'getChatSessions');
-
-            Route::put('sticky/<id>', 'stickyChatSession');
-            Route::put('unsticky/<id>', 'unstickyChatSession');
-            Route::put('readed/<id>', 'readedChatSession');
-            Route::put('unread/<id>', 'unreadChatSession');
-        });
     })->middleware(Auth::class);
 })->prefix('User/');
 

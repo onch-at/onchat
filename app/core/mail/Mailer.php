@@ -8,6 +8,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use think\facade\Config;
 
+/**
+ * 对 PHPMailer 的进一步封装，支持链式调用
+ */
 class Mailer extends PHPMailer
 {
     public static function create(): self

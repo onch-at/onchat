@@ -153,16 +153,6 @@ class User
     }
 
     /**
-     * 获取用户的聊天列表
-     *
-     * @return Result
-     */
-    public function getChatSessions(): Result
-    {
-        return $this->service->getChatSessions();
-    }
-
-    /**
      * 获取私聊聊天室列表
      *
      * @return Result
@@ -180,50 +170,6 @@ class User
     public function getGroupChatrooms(): Result
     {
         return $this->service->getGroupChatrooms();
-    }
-
-    /**
-     * 置顶聊天列表子项
-     *
-     * @param integer $id 聊天室成员表ID
-     * @return Result
-     */
-    public function stickyChatSession(int $id): Result
-    {
-        return $this->service->stickyChatSession($id);
-    }
-
-    /**
-     * 取消置顶聊天列表子项
-     *
-     * @param integer $id 聊天室成员表ID
-     * @return Result
-     */
-    public function unstickyChatSession(int $id): Result
-    {
-        return $this->service->unstickyChatSession($id);
-    }
-
-    /**
-     * 将聊天列表子项设置为已读
-     *
-     * @param integer $id 聊天室成员表ID
-     * @return Result
-     */
-    public function readedChatSession(int $id): Result
-    {
-        return $this->service->readedChatSession($id);
-    }
-
-    /**
-     * 将聊天列表子项设置为未读
-     *
-     * @param integer $id 聊天室成员表ID
-     * @return Result
-     */
-    public function unreadChatSession(int $id): Result
-    {
-        return $this->service->unreadChatSession($id);
     }
 
     /**
