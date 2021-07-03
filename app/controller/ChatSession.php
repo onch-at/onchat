@@ -27,9 +27,9 @@ class ChatSession
     }
 
     /**
-     * 置顶聊天列表子项
+     * 置顶聊天会话
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $id
      * @return Result
      */
     public function stickyChatSession(int $id): Result
@@ -38,9 +38,9 @@ class ChatSession
     }
 
     /**
-     * 取消置顶聊天列表子项
+     * 取消置顶聊天会话
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $id
      * @return Result
      */
     public function unstickyChatSession(int $id): Result
@@ -49,9 +49,9 @@ class ChatSession
     }
 
     /**
-     * 将聊天列表子项设置为已读
+     * 将聊天会话设置为已读
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $id
      * @return Result
      */
     public function readedChatSession(int $id): Result
@@ -60,13 +60,24 @@ class ChatSession
     }
 
     /**
-     * 将聊天列表子项设置为未读
+     * 将聊天会话设置为未读
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $id
      * @return Result
      */
     public function unreadChatSession(int $id): Result
     {
         return $this->service->unreadChatSession($id);
+    }
+
+    /**
+     * 隐藏会话
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public function hideChatSession(int $id): Result
+    {
+        return $this->service->hideChatSession($id);
     }
 }

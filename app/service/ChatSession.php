@@ -155,7 +155,7 @@ class ChatSession
     }
 
     /**
-     * 置顶聊天列表子项
+     * 置顶聊天会话
      *
      * @param integer $id 会话ID
      * @param boolean $sticky
@@ -165,25 +165,18 @@ class ChatSession
     {
         $userId = UserService::getId();
 
-        $chatSession = ChatSessionModel::where([
+        ChatSessionModel::update(['sticky' => $sticky], [
             'id'      => $id,
             'user_id' => $userId
-        ])->find();
-
-        if (!$chatSession) {
-            return Result::create(Result::CODE_ERROR_PARAM);
-        }
-
-        $chatSession->sticky = $sticky;
-        $chatSession->save();
+        ]);
 
         return Result::success();
     }
 
     /**
-     * 取消置顶聊天列表子项
+     * 取消置顶聊天会话
      *
-     * @param integer $id 聊天室成员表ID
+     * @param integer $id
      * @return Result
      */
     public function unstickyChatSession(int $id): Result
@@ -192,7 +185,7 @@ class ChatSession
     }
 
     /**
-     * 将聊天列表子项设置为已读
+     * 将聊天会话设置为已读
      *
      * @param integer $id
      * @param integer $unread
@@ -202,23 +195,16 @@ class ChatSession
     {
         $userId = UserService::getId();
 
-        $chatSession = ChatSessionModel::where([
+        ChatSessionModel::update(['unread' => $unread], [
             'id'      => $id,
             'user_id' => $userId
-        ])->find();
-
-        if (!$chatSession) {
-            return Result::create(Result::CODE_ERROR_PARAM);
-        }
-
-        $chatSession->unread = $unread;
-        $chatSession->save();
+        ]);
 
         return Result::success();
     }
 
     /**
-     * 将聊天列表子项设置为未读
+     * 将聊天会话设置为未读
      *
      * @param integer $id
      * @return Result
@@ -226,5 +212,23 @@ class ChatSession
     public function unreadChatSession(int $id): Result
     {
         return $this->readedChatSession($id, 1);
+    }
+
+    /**
+     * 隐藏会话
+     *
+     * @param integer $id
+     * @return Result
+     */
+    public function hideChatSession(int $id): Result
+    {
+        $userId = UserService::getId();
+
+        ChatSessionModel::update(['visible' => false], [
+            'id'      => $id,
+            'user_id' => $userId
+        ]);
+
+        return Result::success();
     }
 }

@@ -10,4 +10,5 @@ Route::group('chatsession', function () {
   Route::put('unsticky/<id>', 'unstickyChatSession');
   Route::put('readed/<id>', 'readedChatSession');
   Route::put('unread/<id>', 'unreadChatSession');
+  Route::put('hide/<id>', 'hideChatSession');
 })->prefix('ChatSession/')->middleware(Auth::class);
