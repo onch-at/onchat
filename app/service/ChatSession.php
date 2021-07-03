@@ -49,6 +49,10 @@ class ChatSession
             ])
             ->select();
 
+        if ($data->count() === 0) {
+            return Result::success([]);
+        }
+
         $query = null;
         $field = [
             'chat_record.*',
@@ -111,8 +115,6 @@ class ChatSession
 
         // 最新消息的数据集
         $latestMsgList = $query->select();
-        // 聊天室最新消息
-        $latestMsg = null;
         // 好友信息
         $friendInfo = null;
 
@@ -224,7 +226,11 @@ class ChatSession
     {
         $userId = UserService::getId();
 
-        ChatSessionModel::update(['visible' => false], [
+        ChatSessionModel::update([
+            'visible' => false,
+            'sticky' => false,
+            'unread' => 0,
+        ], [
             'id'      => $id,
             'user_id' => $userId
         ]);
