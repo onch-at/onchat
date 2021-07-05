@@ -1,6 +1,19 @@
 <?php
 
 use Swoole\Table;
+use app\listener\websocket\ChatRequest;
+use app\listener\websocket\ChatRequestAgree;
+use app\listener\websocket\ChatRequestReject;
+use app\listener\websocket\CreateChatroom;
+use app\listener\websocket\FriendRequest;
+use app\listener\websocket\FriendRequestAgree;
+use app\listener\websocket\FriendRequestReject;
+use app\listener\websocket\Init;
+use app\listener\websocket\InviteJoinChatroom;
+use app\listener\websocket\Message;
+use app\listener\websocket\RevokeMessage;
+use app\listener\websocket\SocketEventDispatcher;
+use app\listener\websocket\Unload;
 use think\swoole\websocket\socketio\Handler;
 
 return [
@@ -35,7 +48,23 @@ return [
                 'max_wait_time' => 5,
             ],
         ],
-        'listen'        => [],
+        'listen' => [
+            'Disconnect'                => Unload::class,
+            'Close'                     => Unload::class,
+            'Event'                     => SocketEventDispatcher::class,
+            'Event:Init'                => Init::class,
+            'Event:Message'             => Message::class,
+            'Event:RevokeMessage'       => RevokeMessage::class,
+            'Event:FriendRequest'       => FriendRequest::class,
+            'Event:FriendRequestAgree'  => FriendRequestAgree::class,
+            'Event:FriendRequestReject' => FriendRequestReject::class,
+            'Event:CreateChatroom'      => CreateChatroom::class,
+            'Event:InviteJoinChatroom'  => InviteJoinChatroom::class,
+            'Event:ChatRequest'         => ChatRequest::class,
+            'Event:ChatRequestAgree'    => ChatRequestAgree::class,
+            'Event:ChatRequestReject'   => ChatRequestReject::class,
+            'Event:Unload'              => Unload::class,
+        ],
         'subscribe'     => [],
     ],
     'rpc'        => [

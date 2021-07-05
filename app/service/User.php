@@ -330,6 +330,10 @@ class User
 
         $user = UserModel::where('username', '=', $username)->find();
 
+        if (!$user) {
+            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
+        }
+
         if (!IndexService::checkEmailCaptcha($user->email, $captcha)) {
             return Result::create(Result::CODE_ERROR_PARAM, '验证码错误！');
         }

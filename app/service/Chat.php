@@ -6,6 +6,7 @@ namespace app\service;
 
 use app\core\Result;
 use app\core\storage\Storage;
+use app\facade\ChatSessionService;
 use app\facade\ChatroomService;
 use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
@@ -72,36 +73,6 @@ class Chat
         return Result::success($chatroomIdList);
     }
 
-    /**
-     * 显示群主/管理员/某用户的聊天室通知会话
-     *
-     * @param integer $chatroomId 聊天室ID
-     * @param integer $userId 用户ID
-     * @return void
-     */
-    public function showChatroomNoticeChatSession(int $chatroomId, ?int $userId = null)
-    {
-        $userIdList = ChatMemberModel::where('chatroom_id', '=', $chatroomId)
-            ->where(function ($query) {
-                $query->whereOr([
-                    ['role', '=', ChatMemberModel::ROLE_HOST],
-                    ['role', '=', ChatMemberModel::ROLE_MANAGE],
-                ]);
-            })
-            ->column('user_id');
-
-        if ($userId) {
-            $userIdList[] = $userId;
-        }
-
-        ChatSessionModel::where('type', '=', ChatSessionModel::TYPE_CHATROOM_NOTICE)
-            ->where('user_id', 'IN', $userIdList)
-            ->update([
-                'chat_session.update_time' => time() * 1000,
-                'chat_session.visible' => true
-            ]);
-    }
-
 
     /**
      * 申请加入聊天室
@@ -162,7 +133,7 @@ class Chat
             ]);
         }
 
-        $this->showChatroomNoticeChatSession($chatroomId, $requester);
+        ChatSessionService::showChatroomNotice($chatroomId, $requester);
 
         $storage = Storage::getInstance();
 
@@ -256,7 +227,7 @@ class Chat
                 return $result;
             }
 
-            $this->showChatroomNoticeChatSession($request->chatroom_id, $request->requester_id);
+            ChatSessionService::showChatroomNotice($request->chatroom_id, $request->requester_id);
 
             $storage = Storage::getInstance();
 
@@ -349,7 +320,7 @@ class Chat
         $request->update_time   = time() * 1000;
         $request->save();
 
-        $this->showChatroomNoticeChatSession($request->chatroom_id, $request->requester_id);
+        ChatSessionService::showChatroomNotice($request->chatroom_id, $request->requester_id);
 
         $storage = Storage::getInstance();
 

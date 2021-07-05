@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace app\util;
 
+use think\helper\Arr as ArrHelper;
 use think\helper\Str;
 
-class Arr
+class Arr extends ArrHelper
 {
     /**
      * 将数组的KEY转为小写驼峰形式

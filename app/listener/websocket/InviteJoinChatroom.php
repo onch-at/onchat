@@ -7,13 +7,23 @@ namespace app\listener\websocket;
 use app\constant\MessageType;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\contract\SocketEventHandler;
 use app\entity\ChatInvitationMessage;
 use app\entity\Message as MessageEntity;
 use app\service\Chat as ChatService;
 use app\service\ChatRecord as ChatRecordService;
+use think\facade\Validate;
+use think\validate\ValidateRule;
 
 class InviteJoinChatroom extends SocketEventHandler
 {
+    public function verify(array $data): bool
+    {
+        return Validate::rule([
+            'chatroomId'     => ValidateRule::must()->integer(),
+            'chatroomIdList' => ValidateRule::must()->array(),
+        ])->check($data);
+    }
 
     /**
      * 事件监听处理

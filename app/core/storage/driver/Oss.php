@@ -150,7 +150,7 @@ class Oss implements StorageDriver
      * @param string|null $stylename
      * @return string
      */
-    private function signImageUrl(string $object, ?string $stylename = null): string
+    private function signImageUrl(string $object, string $stylename = null): string
     {
         $options = null;
         if ($stylename) {

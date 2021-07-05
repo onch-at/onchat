@@ -6,10 +6,21 @@ namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\contract\SocketEventHandler;
 use app\service\Friend as FriendService;
+use think\facade\Validate;
+use think\validate\ValidateRule;
 
 class FriendRequest extends SocketEventHandler
 {
+    public function verify(array $data): bool
+    {
+        return Validate::rule([
+            'targetId'    => ValidateRule::must()->integer(),
+            'targetAlias' => ValidateRule::has(),
+            'reason'      => ValidateRule::has(),
+        ])->check($data);
+    }
 
     /**
      * 事件监听处理
@@ -18,11 +29,7 @@ class FriendRequest extends SocketEventHandler
      */
     public function handle(FriendService $friendService, $event)
     {
-        [
-            'targetId'    => $targetId,
-            'targetAlias' => $targetAlias,
-            'reason'      => $reason,
-        ] = $event;
+        ['targetId' => $targetId, 'targetAlias' => $targetAlias, 'reason' => $reason] = $event;
 
         $user = $this->getUser();
 

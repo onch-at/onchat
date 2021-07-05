@@ -183,7 +183,7 @@ class Chatroom
      * @param integer $description 聊天室描述、简介
      * @return Result
      */
-    public function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT, ?string $description = null): Result
+    public function creatChatroom(string $name = null, int $type = ChatroomModel::TYPE_GROUP_CHAT, string $description = null): Result
     {
         if ($name) {
             $name = trim($name);

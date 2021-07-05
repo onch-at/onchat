@@ -6,10 +6,19 @@ namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\contract\SocketEventHandler;
 use app\service\Chat as ChatService;
+use think\facade\Validate;
+use think\validate\ValidateRule;
 
 class ChatRequestAgree extends SocketEventHandler
 {
+    public function verify(array $data): bool
+    {
+        return Validate::rule([
+            'requestId' => ValidateRule::must()->integer(),
+        ])->check($data);
+    }
 
     /**
      * 事件监听处理

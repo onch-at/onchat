@@ -6,10 +6,20 @@ namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\contract\SocketEventHandler;
 use app\service\Friend as FriendService;
+use think\facade\Validate;
+use think\validate\ValidateRule;
 
 class FriendRequestAgree extends SocketEventHandler
 {
+    public function verify(array $data): bool
+    {
+        return Validate::rule([
+            'requestId'      => ValidateRule::must()->integer(),
+            'requesterAlias' => ValidateRule::has(),
+        ])->check($data);
+    }
 
     /**
      * 事件监听处理

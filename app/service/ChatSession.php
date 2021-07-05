@@ -163,7 +163,7 @@ class ChatSession
      * @param boolean $sticky
      * @return Result
      */
-    public function stickyChatSession(int $id, $sticky = true): Result
+    public function sticky(int $id, $sticky = true): Result
     {
         $userId = UserService::getId();
 
@@ -181,9 +181,9 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function unstickyChatSession(int $id): Result
+    public function unsticky(int $id): Result
     {
-        return $this->stickyChatSession($id, false);
+        return $this->sticky($id, false);
     }
 
     /**
@@ -193,7 +193,7 @@ class ChatSession
      * @param integer $unread
      * @return Result
      */
-    public function readedChatSession(int $id, int $unread = 0): Result
+    public function readed(int $id, int $unread = 0): Result
     {
         $userId = UserService::getId();
 
@@ -211,9 +211,9 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function unreadChatSession(int $id): Result
+    public function unread(int $id): Result
     {
-        return $this->readedChatSession($id, 1);
+        return $this->readed($id, 1);
     }
 
     /**
@@ -222,7 +222,7 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function hideChatSession(int $id): Result
+    public function hide(int $id): Result
     {
         $userId = UserService::getId();
 
@@ -236,5 +236,35 @@ class ChatSession
         ]);
 
         return Result::success();
+    }
+
+    /**
+     * 显示群主/管理员/某用户的聊天室通知会话
+     *
+     * @param integer $chatroomId 聊天室ID
+     * @param integer $userId 用户ID
+     * @return void
+     */
+    public function showChatroomNotice(int $chatroomId, int $userId = null)
+    {
+        $userIdList = ChatMemberModel::where('chatroom_id', '=', $chatroomId)
+            ->where(function ($query) {
+                $query->whereOr([
+                    ['role', '=', ChatMemberModel::ROLE_HOST],
+                    ['role', '=', ChatMemberModel::ROLE_MANAGE],
+                ]);
+            })
+            ->column('user_id');
+
+        if ($userId) {
+            $userIdList[] = $userId;
+        }
+
+        ChatSessionModel::where('type', '=', ChatSessionModel::TYPE_CHATROOM_NOTICE)
+            ->where('user_id', 'IN', $userIdList)
+            ->update([
+                'chat_session.update_time' => time() * 1000,
+                'chat_session.visible' => true
+            ]);
     }
 }

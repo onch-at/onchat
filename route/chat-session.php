@@ -6,9 +6,9 @@ use think\facade\Route;
 Route::group('chatsession', function () {
   Route::get('/', 'getChatSessions');
 
-  Route::put('sticky/<id>', 'stickyChatSession');
-  Route::put('unsticky/<id>', 'unstickyChatSession');
-  Route::put('readed/<id>', 'readedChatSession');
-  Route::put('unread/<id>', 'unreadChatSession');
-  Route::put('hide/<id>', 'hideChatSession');
+  Route::put('sticky/<id>', 'sticky');
+  Route::put('unsticky/<id>', 'unsticky');
+  Route::put('readed/<id>', 'readed');
+  Route::put('unread/<id>', 'unread');
+  Route::put('hide/<id>', 'hide');
 })->prefix('ChatSession/')->middleware(Auth::class);

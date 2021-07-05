@@ -38,7 +38,7 @@ class Friend
      * @param string $targetAlias 被申请人的别名
      * @return Result
      */
-    public function request(int $requesterId, int $targetId, ?string $reason = null, ?string $targetAlias = null): Result
+    public function request(int $requesterId, int $targetId, string $reason = null, string $targetAlias = null): Result
     {
         // 如果两人已经是好友关系，则不允许申请了
         if ($requesterId === $targetId || $this->isFriend($requesterId, $targetId)) {

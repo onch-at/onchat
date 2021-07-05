@@ -6,10 +6,20 @@ namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\contract\SocketEventHandler;
 use app\service\Chatroom as ChatroomService;
+use think\facade\Validate;
+use think\validate\ValidateRule;
 
 class CreateChatroom extends SocketEventHandler
 {
+    public function verify(array $data): bool
+    {
+        return Validate::rule([
+            'name'        => ValidateRule::must(),
+            'description' => ValidateRule::has(),
+        ])->check($data);
+    }
 
     /**
      * 事件监听处理

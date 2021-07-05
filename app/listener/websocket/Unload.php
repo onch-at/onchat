@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\constant\SocketRoomPrefix;
+use app\contract\SocketEventHandler;
 use app\service\User as UserService;
 
 class Unload extends SocketEventHandler
 {
+    public function verify(array $data): bool
+    {
+        return true;
+    }
 
     /**
      * 事件监听处理

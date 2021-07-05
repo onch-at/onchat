@@ -38,7 +38,7 @@ class Result
         self::CODE_ERROR_HIGH_FREQUENCY => '访问频率过高',
     ];
 
-    private function __construct(int $code, ?string $msg = null, $data = null)
+    private function __construct(int $code, string $msg = null, $data = null)
     {
         $this->code = $code;
         $this->msg  = $msg ?? self::MSG[$code];
@@ -52,12 +52,12 @@ class Result
         }
     }
 
-    public static function create(int $code, ?string $msg = null, $data = null): self
+    public static function create(int $code, string $msg = null, $data = null): self
     {
         return new self($code, $msg, $data);
     }
 
-    public static function success($data = null, ?string $msg = null): self
+    public static function success($data = null, string $msg = null): self
     {
         return new self(self::CODE_SUCCESS, $msg, $data);
     }

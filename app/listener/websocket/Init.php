@@ -6,6 +6,7 @@ namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
+use app\contract\SocketEventHandler;
 use app\core\Result;
 use app\model\UserInfo as UserInfoModel;
 use app\service\User as UserService;
@@ -14,6 +15,11 @@ use think\Cookie;
 
 class Init extends SocketEventHandler
 {
+    public function verify(array $data): bool
+    {
+        return true;
+    }
+
     /**
      * 事件监听处理
      *

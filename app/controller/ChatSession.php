@@ -32,9 +32,9 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function stickyChatSession(int $id): Result
+    public function sticky(int $id): Result
     {
-        return $this->service->stickyChatSession($id);
+        return $this->service->sticky($id);
     }
 
     /**
@@ -43,9 +43,9 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function unstickyChatSession(int $id): Result
+    public function unsticky(int $id): Result
     {
-        return $this->service->unstickyChatSession($id);
+        return $this->service->unsticky($id);
     }
 
     /**
@@ -54,9 +54,9 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function readedChatSession(int $id): Result
+    public function readed(int $id): Result
     {
-        return $this->service->readedChatSession($id);
+        return $this->service->readed($id);
     }
 
     /**
@@ -65,9 +65,9 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function unreadChatSession(int $id): Result
+    public function unread(int $id): Result
     {
-        return $this->service->unreadChatSession($id);
+        return $this->service->unread($id);
     }
 
     /**
@@ -76,8 +76,8 @@ class ChatSession
      * @param integer $id
      * @return Result
      */
-    public function hideChatSession(int $id): Result
+    public function hide(int $id): Result
     {
-        return $this->service->hideChatSession($id);
+        return $this->service->hide($id);
     }
 }

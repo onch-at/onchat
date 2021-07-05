@@ -13,6 +13,8 @@ use think\captcha\facade\Captcha;
 use think\facade\Config;
 use think\facade\Db;
 use think\facade\Queue;
+use think\facade\Validate;
+use think\validate\ValidateRule;
 
 class Index
 {
@@ -25,7 +27,10 @@ class Index
 
     public function index()
     {
-        dump(UserModel::where('id', '<', 10)->cache(true)->select());
+        dump(Validate::rule([
+            'name'     => ValidateRule::must()->array(),
+        ])->check(['name' => [false]]));
+        dump(7777);
     }
 
     /**
