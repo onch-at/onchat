@@ -7,7 +7,6 @@ use think\facade\Route;
 // 用户模块路由
 Route::group('user', function () {
     Route::get('checklogin', 'checkLogin');
-    Route::get('checkemail', 'checkEmail');
 
     Route::post('login', 'login');
     Route::post('register', 'register');

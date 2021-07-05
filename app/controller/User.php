@@ -100,17 +100,6 @@ class User
     }
 
     /**
-     * 验证邮箱是否可用
-     *
-     * @param string $email
-     * @return Result
-     */
-    public function checkEmail(string $email): Result
-    {
-        return $this->service->checkEmail($email);
-    }
-
-    /**
      * 上传用户头像
      *
      * @return Result

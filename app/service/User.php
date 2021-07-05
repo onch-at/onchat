@@ -102,7 +102,7 @@ class User
             return Result::create(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
         }
 
-        if (!$this->checkEmail($email)->data) { // 如果邮箱不可用
+        if (!IndexService::checkEmail($email)->data) { // 如果邮箱不可用
             return Result::create(Result::CODE_ERROR_PARAM);
         }
 
@@ -122,7 +122,7 @@ class User
             return Result::create(Result::CODE_ERROR_PARAM, self::MSG[$result]);
         }
 
-        if (!empty($this->getIdByUsername($username))) { // 如果已经有这个用户了
+        if (!IndexService::checkUsername($username)->data) { // 如果已经有这个用户了
             return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_EXIST]);
         }
 
@@ -524,22 +524,6 @@ class User
     }
 
     /**
-     * 检测邮箱是否可用
-     *
-     * @param string $email
-     * @return Result
-     */
-    public function checkEmail(string $email): Result
-    {
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return Result::success(false);
-        }
-
-        return Result::success(UserModel::where('email', '=', $email)->field('id')->find() === null);
-    }
-
-    /**
      * 上传头像
      *
      * @return Result
@@ -741,7 +725,7 @@ class User
     {
         $userId = $this->getId();
 
-        if (!$this->checkEmail($email)->data) { // 如果邮箱不可用
+        if (!IndexService::checkEmail($email)->data) { // 如果邮箱不可用
             return Result::create(Result::CODE_ERROR_PARAM);
         }
 

@@ -19,6 +19,8 @@ Route::get('/', function () {
 Route::group('index', function () {
     Route::get('/', 'index');
     Route::get('imagecaptcha', 'imageCaptcha');
+    Route::get('checkemail', 'checkEmail');
+    Route::get('checkusername', 'checkUsername');
 
     Route::post('emailcaptcha', 'sendEmailCaptcha');
 })->prefix('Index/');

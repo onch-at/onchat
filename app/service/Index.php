@@ -7,6 +7,7 @@ namespace app\service;
 use app\constant\SessionKey;
 use app\core\Result;
 use app\job\SendMail as JobSendMail;
+use app\model\User as UserModel;
 use app\util\Str as StrUtil;
 use think\Config;
 use think\Queue;
@@ -23,6 +24,32 @@ class Index
         $this->session = $session;
         $this->config  = $config;
         $this->queue   = $queue;
+    }
+
+    /**
+     * 检测用户名是否可用
+     *
+     * @param string $username
+     * @return Result
+     */
+    public function checkUsername(string $username): Result
+    {
+        return Result::success(UserModel::where('username', '=', $username)->field('id')->find() === null);
+    }
+
+    /**
+     * 检测邮箱是否可用
+     *
+     * @param string $email
+     * @return Result
+     */
+    public function checkEmail(string $email): Result
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return Result::success(false);
+        }
+
+        return Result::success(UserModel::where('email', '=', $email)->field('id')->find() === null);
     }
 
     /**
