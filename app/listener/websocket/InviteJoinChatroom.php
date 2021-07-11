@@ -53,7 +53,7 @@ class InviteJoinChatroom extends SocketEventHandler
             $message->chatroomId = $chatroomId;
             $this->websocket
                 ->to(SocketRoomPrefix::CHATROOM . $chatroomId)
-                ->emit('message', $chatRecordService->addRecord($message));
+                ->emit(SocketEvent::MESSAGE, $chatRecordService->addRecord($message));
         }
     }
 }

@@ -168,6 +168,13 @@ class ChatRecord
             $message->createTime      = $timestamp;
 
             switch ($message->type) {
+                case MessageType::CHAT_INVITATION:
+                    $chatroom = ChatroomModel::find($message->data->chatroomId);
+                    $message->data->name            = $chatroom ? $chatroom->name : '聊天室已解散';
+                    $message->data->description     = $chatroom ? $chatroom->description : null;
+                    $message->data->avatarThumbnail = $chatroom ? $storage->getThumbnailUrl($chatroom->avatar) : null;
+                    break;
+
                 case MessageType::IMAGE:
                     $url = $message->data->filename;
                     $message->data->url          = $storage->getUrl($url);
@@ -281,7 +288,7 @@ class ChatRecord
             if ($result->isSuccess()) {
                 $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->setSender(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;
@@ -338,7 +345,7 @@ class ChatRecord
             if ($result->isSuccess()) {
                 $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->setSender(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;

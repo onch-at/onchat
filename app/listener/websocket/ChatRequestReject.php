@@ -42,6 +42,6 @@ class ChatRequestReject extends SocketEventHandler
 
         // 拿到申请人的FD
         $requesterFd = $this->fdTable->getFd($result->data['requesterId']);
-        $requesterFd && $this->websocket->setSender($requesterFd)->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
+        $requesterFd && $this->websocket->to($requesterFd)->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
     }
 }

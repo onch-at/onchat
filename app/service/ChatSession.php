@@ -140,8 +140,13 @@ class ChatSession
                     // 将最新消息填入
                     $item->content = $latestMsgList->where('chatroom_id', '=', $item->data->chatroomId)->shift();
 
+                    // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
+                    if (!isset($item->content->nickname)) {
+                        $item->content->nickname = UserService::getUsernameById($item->content->user_id);
+                    }
+
                     // 将私聊聊天室的头像，好友昵称填入
-                    if ($item->data->chatroomType == ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
+                    if ($item->data->chatroomType === ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
                         $info = $friendInfo->where('chatroom_id', '=', $item->data->chatroomId)->shift();
                         if ($info) {
                             $item->data->userId = $info->user_id;
