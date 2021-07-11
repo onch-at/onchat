@@ -46,9 +46,10 @@ class ChatRequestAgree extends SocketEventHandler
         $requesterFd = $this->fdTable->getFd($chatSession['userId']);
         if ($requesterFd) {
             // 加入新的聊天室
-            $this->websocket->to($requesterFd)
+            $this->websocket->setSender($requesterFd)
                 ->join(SocketRoomPrefix::CHATROOM . $chatSession['data']['chatroomId'])
                 ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
+            $this->websocket->setSender($this->fd);
         }
     }
 }

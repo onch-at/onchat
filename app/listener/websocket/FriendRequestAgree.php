@@ -47,9 +47,10 @@ class FriendRequestAgree extends SocketEventHandler
         $requesterFd = $this->fdTable->getFd($result->data['requesterId']);
         if ($requesterFd) {
             // 加入新的聊天室
-            $this->websocket->to($requesterFd)
+            $this->websocket->setSender($requesterFd)
                 ->join(SocketRoomPrefix::CHATROOM . $chatroomId)
                 ->emit(SocketEvent::FRIEND_REQUEST_AGREE, $result);
+            $this->websocket->setSender($this->fd);
         }
     }
 }
