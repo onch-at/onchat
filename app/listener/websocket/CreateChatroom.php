@@ -17,7 +17,7 @@ class CreateChatroom extends SocketEventHandler
     {
         return Validate::rule([
             'name'        => ValidateRule::must(),
-            'description' => ValidateRule::has(),
+            'description' => ValidateRule::has(true),
         ])->check($data);
     }
 

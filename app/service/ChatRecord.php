@@ -94,7 +94,7 @@ class ChatRecord
                 case MessageType::IMAGE:
                     $url = $item->data->filename;
                     $item->data->url          = $storage->getUrl($url);
-                    $item->data->thumbnailUrl = FileUtil::isAnimation($url) ? $item->data->url : $storage->getThumbnailUrl($url);
+                    $item->data->thumbnailUrl = $storage->getThumbnailUrl($url);
                     break;
 
                 case MessageType::VOICE:
@@ -170,8 +170,8 @@ class ChatRecord
             switch ($message->type) {
                 case MessageType::IMAGE:
                     $url = $message->data->filename;
-                    $message->data->url = $storage->getUrl($url);
-                    $message->data->thumbnailUrl = FileUtil::isAnimation($url) ? $message->data->url : $storage->getThumbnailUrl($url);
+                    $message->data->url          = $storage->getUrl($url);
+                    $message->data->thumbnailUrl = $storage->getThumbnailUrl($url);
                     break;
 
                 case MessageType::VOICE:

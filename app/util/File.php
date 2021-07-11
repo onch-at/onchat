@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\util;
 
 use Mimey\MimeTypes;
+use finfo as Finfo;
 use think\Container;
 
 class File
@@ -28,19 +29,8 @@ class File
      */
     public static function getMime(string $filename): string
     {
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        return finfo_file($finfo, $filename);
-    }
-
-    /**
-     * 是否为动图
-     *
-     * @param string $filename
-     * @return boolean
-     */
-    public static function isAnimation(string $filename): bool
-    {
-        return !!preg_match('/.(gif|apng)$/i', $filename);
+        $finfo = new Finfo(FILEINFO_MIME_TYPE);
+        return $finfo->file($filename);
     }
 
     // /**

@@ -16,7 +16,7 @@ class ChatRequestReject extends SocketEventHandler
     {
         return Validate::rule([
             'requestId' => ValidateRule::must()->integer(),
-            'reason'    => ValidateRule::has(),
+            'reason'    => ValidateRule::has(true),
         ])->check($data);
     }
 

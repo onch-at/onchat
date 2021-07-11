@@ -17,8 +17,8 @@ class FriendRequest extends SocketEventHandler
     {
         return Validate::rule([
             'targetId'    => ValidateRule::must()->integer(),
-            'targetAlias' => ValidateRule::has(),
-            'reason'      => ValidateRule::has(),
+            'targetAlias' => ValidateRule::has(true),
+            'reason'      => ValidateRule::has(true),
         ])->check($data);
     }
 

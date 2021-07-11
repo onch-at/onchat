@@ -152,10 +152,7 @@ class Oss implements StorageDriver
      */
     private function signImageUrl(string $object, string $stylename = null): string
     {
-        $options = null;
-        if ($stylename) {
-            $options = [OssClient::OSS_PROCESS => 'style/' . $stylename];
-        }
+        $options = $stylename ? [OssClient::OSS_PROCESS => 'style/' . $stylename] : null;
 
         return $this->signUrl($this->getBucket(), $object, 86400, 'GET', $options);
     }
