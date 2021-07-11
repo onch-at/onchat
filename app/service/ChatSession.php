@@ -141,7 +141,7 @@ class ChatSession
                     $item->content = $latestMsgList->where('chatroom_id', '=', $item->data->chatroomId)->shift();
 
                     // 如果在聊天室成员表找不到这名用户了（退群了）但是她的消息还在，直接去用户表找
-                    if (!isset($item->content->nickname)) {
+                    if ($item->content && !$item->content->nickname) {
                         $item->content->nickname = UserService::getUsernameById($item->content->user_id);
                     }
 
