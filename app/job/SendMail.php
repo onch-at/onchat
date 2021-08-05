@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\job;
 
-use app\core\mail\Mailer;
+use app\core\Mailer;
 use think\queue\Job;
 
 class SendMail

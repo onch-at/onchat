@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\core\mail;
+namespace app\core;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;

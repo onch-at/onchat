@@ -63,7 +63,6 @@ return [
             'Event:ChatRequest'         => ChatRequest::class,
             'Event:ChatRequestAgree'    => ChatRequestAgree::class,
             'Event:ChatRequestReject'   => ChatRequestReject::class,
-            'Event:Unload'              => Unload::class,
         ],
         'subscribe'     => [],
     ],

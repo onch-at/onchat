@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\command;
 
 use app\facade\ChatroomService;
+use app\util\File as FileUtil;
 use app\util\Str as StrUtil;
 use think\console\input\Argument;
 use think\console\input\Option;
@@ -64,7 +65,7 @@ class OnChat extends ServerCommand
         $password = $config['password'];
         $database = $config['database'];
 
-        $sql = file_get_contents(resource_path('sql') . 'database.sql'); // 创建数据库的SQL
+        $sql = FileUtil::read(resource_path('sql') . 'database.sql'); // 创建数据库的SQL
 
         $this->output->comment('Connecting to database…');
 
@@ -85,7 +86,7 @@ class OnChat extends ServerCommand
         });
 
         foreach ($dir as $file) {
-            $sql = file_get_contents($path . $file);
+            $sql = FileUtil::read($path . $file);
 
             switch ($file) {
                 case 'chat-record.sql': // 如果是消息记录表，则需要生成分表

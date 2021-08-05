@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\util;
 
 use Mimey\MimeTypes;
+use Swoole\Coroutine\System;
 use finfo as Finfo;
 use think\Container;
 
@@ -31,6 +32,17 @@ class File
     {
         $finfo = new Finfo(FILEINFO_MIME_TYPE);
         return $finfo->file($filename);
+    }
+
+    /**
+     * 协程读取文件
+     *
+     * @param string $filename
+     * @return string|false
+     */
+    public static function read(string $filename)
+    {
+        return System::readFile($filename);
     }
 
     // /**

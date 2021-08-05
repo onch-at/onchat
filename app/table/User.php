@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace app\table;
 
 use app\constant\SessionKey;
+use app\core\Redis;
 use app\facade\FdTable;
-use app\util\Redis;
 use think\facade\Config;
 
 class User extends Table
@@ -15,7 +15,7 @@ class User extends Table
 
     public function set(string $fd, string $sessId): bool
     {
-        $redis = Redis::getHandler();
+        $redis = Redis::create();
         $sessPrefix = Config::get('session.prefix');
         $data = $redis->get($sessPrefix . $sessId);
 

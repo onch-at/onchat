@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace app\controller;
 
+use Firebase\JWT\JWT;
 use app\core\Result;
 use app\model\ChatRequest;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
 use app\service\Index as IndexService;
+use app\service\Token;
 use think\Response;
 use think\captcha\facade\Captcha;
 use think\facade\Config;
+use think\facade\Cookie;
 use think\facade\Db;
 use think\facade\Queue;
 use think\facade\Validate;
@@ -28,10 +31,12 @@ class Index
 
     public function index()
     {
-        dump(Validate::rule([
-            'name'     => ValidateRule::must()->array(),
-        ])->check(['name' => [false]]));
-        dump(7777);
+        $tokenService = app(Token::class);
+        $jwt = $tokenService->issue(1);
+
+        dump($jwt, $tokenService->parse($jwt));
+        // $jwt = Cookie::get('access_token');
+        // dump($tokenService->parse($jwt));
     }
 
     /**

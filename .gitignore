@@ -3,6 +3,7 @@
 /vendor
 /runtime
 *.log
-.env
-.env.prod
-OnChat.zip
+/.env
+/.env.prod
+/OnChat.zip
+/*.pem

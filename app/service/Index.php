@@ -8,6 +8,7 @@ use app\constant\SessionKey;
 use app\core\Result;
 use app\job\SendMail as JobSendMail;
 use app\model\User as UserModel;
+use app\util\File as FileUtil;
 use app\util\Str as StrUtil;
 use think\Config;
 use think\Queue;
@@ -91,7 +92,7 @@ class Index
             'addresses' => [$email],
             'isHTML'    => true,
             'subject'   => 'OnChat：电子邮箱验证',
-            'body'      => StrUtil::assign(file_get_contents($path), ['captcha' => $captcha]),
+            'body'      => StrUtil::assign(FileUtil::read($path), ['captcha' => $captcha]),
             'altBody'   => null
         ]);
 

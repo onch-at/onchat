@@ -55,8 +55,9 @@ class Init extends SocketEventHandler
         $this->websocket->emit(SocketEvent::INIT, Result::success());
 
         UserInfoModel::update([
-            'login_time' => time() * 1000,
-            'id' => $userId
+            'login_time' => time() * 1000
+        ], [
+            'user_id' => $userId
         ]);
     }
 }
