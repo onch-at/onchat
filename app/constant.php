@@ -49,3 +49,8 @@ define('ONCHAT_REASON_MAX_LENGTH', 50);
 
 /** 用户创建群聊最大数量 */
 define('ONCHAT_USER_MAX_GROUP_CHAT_COUNT', 10);
+
+/** 访问令牌存活时间 */
+define('ONCHAT_ACCESS_TOKEN_TTL', 3600);
+/** 续签令牌存活时间 */
+define('ONCHAT_REFRESH_TOKEN_TTL', 86400 * 15);

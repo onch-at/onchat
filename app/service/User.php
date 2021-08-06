@@ -10,13 +10,16 @@ use app\constant\SessionKey;
 use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
+use app\entity\TokenFolder;
 use app\facade\ChatroomService;
 use app\facade\IndexService;
+use app\facade\TokenService;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
+use app\service\Token;
 use app\util\Date as DateUtil;
 use app\util\File as FileUtil;
 use app\util\Str as StrUtil;
@@ -190,6 +193,10 @@ class User
                 'update_time' => $timestamp
             ]);
 
+            $tokenFolder = $this->issueTokens($user->id, $username);
+            $user->access  = $tokenFolder->access;
+            $user->refresh = $tokenFolder->refresh;
+
             // 提交事务
             Db::commit();
 
@@ -222,7 +229,7 @@ class User
         $fields = self::USER_FIELDS;
         $fields[] = 'user.password';
 
-        $user = $this->getInfoByKey('username', $username, $fields);
+        $user = $this->getByKey('username', $username, $fields);
 
         if (empty($user)) { // 如果用户不存在
             return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
@@ -240,6 +247,10 @@ class User
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
         $user->avatar          = $storage->getUrl($user->avatar);
+
+        $tokenFolder = $this->issueTokens($user->id, $username);
+        $user->access  = $tokenFolder->access;
+        $user->refresh = $tokenFolder->refresh;
 
         return Result::success($user);
     }
@@ -370,6 +381,28 @@ class User
     }
 
     /**
+     * 颁发令牌
+     *
+     * @param integer $id
+     * @param string $username
+     * @return TokenFolder
+     */
+    private function issueTokens(int $id, string $username): TokenFolder
+    {
+        /** @var Token */
+        $tokenService = TokenService::instance();
+
+        $payload = $tokenService->generate($id, ONCHAT_ACCESS_TOKEN_TTL);
+        $payload->usr = ['username' => $username];
+        $accessToken = $tokenService->issue($payload);
+
+        $payload = $tokenService->generate($id, ONCHAT_REFRESH_TOKEN_TTL);
+        $refreshToken = $tokenService->issue($payload);
+
+        return new TokenFolder($accessToken, $refreshToken);
+    }
+
+    /**
      * 通过用户标识获取用户信息
      * $field为数组时，返回数据集对象；为单个字段时只返回该字段的数据
      *
@@ -378,7 +411,7 @@ class User
      * @param string|array $field 需要获取的字段名
      * @return mixed
      */
-    public function getInfoByKey(string $key, $value, $field)
+    public function getByKey(string $key, $value, $field)
     {
         $query = UserModel::join('user_info', 'user_info.user_id = user.id')
             ->where($key === 'id' ? 'user.id' : $key, '=', $value);
@@ -490,7 +523,7 @@ class User
 
         $fields = self::USER_FIELDS;
         $fields[] = 'user.password';
-        $user = $this->getInfoByKey('id', $session['id'], $fields);
+        $user = $this->getByKey('id', $session['id'], $fields);
 
         if ($session['password'] !== $user['password']) { // 如果密码错误
             return Result::success(false);

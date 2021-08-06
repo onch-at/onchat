@@ -26,28 +26,28 @@ class TokenPayload
   /**
    * Subject 拥有者
    *
-   * @var int
+   * @var integer
    */
   public $sub;
 
   /**
    * Issued At 签发时间
    *
-   * @var int
+   * @var integer
    */
   public $iat;
 
   /**
    * Not Before 开始时间
    *
-   * @var int
+   * @var integer
    */
   public $nbf;
 
   /**
    * Expire 过期时间
    *
-   * @var int
+   * @var integer
    */
   public $exp;
 
@@ -58,18 +58,39 @@ class TokenPayload
    */
   public $jti;
 
-  public static function create(int $subject, int $ttl)
+  /**
+   * 存活时间
+   *
+   * @var integer
+   */
+  public $ttl;
+
+  /**
+   * 用户数据
+   *
+   * @var object|null
+   */
+  public $usr;
+
+  public static function create(int $subject, int $ttl): self
   {
-    $time = time();
+    $redis = Redis::create();
+    $key   = RedisPrefix::JWT_ID . $subject;
+    $jti   = $redis->get($key);
+    $time  = time();
+
+    if (!$jti) {
+      $jti = md5(uniqid((string) $subject, true));
+      $redis->set($key, $jti, $ttl);
+    }
 
     $payload = new self();
     $payload->sub = $subject;
     $payload->iat = $time;
     $payload->nbf = $time;
     $payload->exp = $time + $ttl;
-    $payload->jti = md5(uniqid((string) $subject, true));
-
-    Redis::create()->set(RedisPrefix::ACCESS_TOKEN . $subject, $payload->jti, $ttl);
+    $payload->ttl = $ttl;
+    $payload->jti = $jti;
 
     return $payload;
   }

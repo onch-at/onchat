@@ -242,7 +242,7 @@ class Chat
             $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
             $request->chatroomAvatar = $storage->getUrl($avatar);
             $request->chatroomAvatarThumbnail = $chatSession['avatarThumbnail'];
-            $request->handlerNickname = UserService::getInfoByKey('id', $handler, 'nickname');
+            $request->handlerNickname = UserService::getByKey('id', $handler, 'nickname');
 
             Db::commit();
             return Result::success([$request->toArray(), $chatSession]);
@@ -327,7 +327,7 @@ class Chat
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
         $request->chatroomAvatarThumbnail  = $storage->getThumbnailUrl($request->chatroomAvatar);
         $request->chatroomAvatar           = $storage->getUrl($request->chatroomAvatar);
-        $request->handlerNickname          = UserService::getInfoByKey('id', $handler, 'nickname');
+        $request->handlerNickname          = UserService::getByKey('id', $handler, 'nickname');
 
         return Result::success($request);
     }

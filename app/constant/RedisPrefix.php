@@ -6,5 +6,5 @@ namespace app\constant;
 
 class RedisPrefix
 {
-  const ACCESS_TOKEN = 'ACCESS_TOKEN:';
+  const JWT_ID = 'JWT_ID:';
 }

@@ -8,48 +8,53 @@ use Firebase\JWT\JWT;
 use Swoole\Coroutine\System;
 use app\entity\TokenPayload;
 use think\Config;
-use think\Cookie;
 
 class Token
 {
   /** 令牌加密算法 */
   private $alg = 'RS256';
-  /** 令牌有效时间 */
-  private $ttl = 86400 * 3;
 
   private $privateKey;
   private $publicKey;
 
   private $config;
-  private $cookie;
 
-  public function __construct(Config $config, Cookie $cookie)
+  public function __construct(Config $config)
   {
     $this->privateKey = System::readFile(root_path() . 'private-key.pem');
     $this->publicKey  = System::readFile(root_path() . 'public-key.pem');
 
     $this->config = $config;
-    $this->cookie = $cookie;
+  }
+
+  /**
+   * 生成 TokenPayload
+   *
+   * @param string $name
+   * @param integer $subject
+   * @param integer $ttl 存活时间
+   * @return TokenPayload
+   */
+  public function generate(int $subject, int $ttl): TokenPayload
+  {
+    ['iss' => $issuer, 'aud' => $audience] = $this->config->get('jwt');
+
+    $payload = TokenPayload::create($subject, $ttl);
+    $payload->iss = $issuer;
+    $payload->aud = $audience;
+
+    return $payload;
   }
 
   /**
    * 颁发令牌
    *
-   * @param integer $userId
+   * @param TokenPayload $payload
    * @return string
    */
-  public function issue(int $userId): string
+  public function issue(TokenPayload $payload): string
   {
-    ['name' => $name, 'iss' => $issuer, 'aud' => $audience] = $this->config->get('jwt');
-
-    $payload = TokenPayload::create($userId, $this->ttl);
-    $payload->iss = $issuer;
-    $payload->aud = $audience;
-
-    $jwt = JWT::encode($payload, $this->privateKey, $this->alg);
-    $this->cookie->set($name, $jwt, $this->ttl);
-
-    return $jwt;
+    return JWT::encode($payload, $this->privateKey, $this->alg);
   }
 
   /**

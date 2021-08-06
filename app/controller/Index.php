@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace app\controller;
 
 use Firebase\JWT\JWT;
+use app\core\Redis;
 use app\core\Result;
+use app\facade\TokenService;
 use app\model\ChatRequest;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
@@ -31,12 +33,15 @@ class Index
 
     public function index()
     {
-        $tokenService = app(Token::class);
-        $jwt = $tokenService->issue(1);
-
-        dump($jwt, $tokenService->parse($jwt));
-        // $jwt = Cookie::get('access_token');
-        // dump($tokenService->parse($jwt));
+        dump(TokenService::instance()->cookie->get());
+        // /** @var Token */
+        // $tokenService = app(Token::class);
+        // $payload = $tokenService->generate(1, ONCHAT_ACCESS_TOKEN_TTL);
+        // $payload->usr = [
+        //     'username' => 'HyperLife1119',
+        // ];
+        // $tokenService->issue(ONCHAT_ACCESS_TOKEN, $payload);
+        // $tokenService->issue(ONCHAT_REFRESH_TOKEN, $tokenService->generate(1, ONCHAT_REFRESH_TOKEN_TTL));
     }
 
     /**

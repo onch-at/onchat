@@ -150,7 +150,7 @@ class Friend
     public function getReceiveRequests(): Result
     {
         $targetId = UserService::getId();
-        $targetNickname = UserService::getInfoByKey('id', $targetId, 'nickname');
+        $targetNickname = UserService::getByKey('id', $targetId, 'nickname');
 
         // 找到自己被申请的
         $requests = FriendRequestModel::join('user_info', 'friend_request.requester_id = user_info.user_id')
@@ -181,7 +181,7 @@ class Friend
     public function getSendRequests(): Result
     {
         $requesterId = UserService::getId();
-        $requesterNickname = UserService::getInfoByKey('id', $requesterId, 'nickname');
+        $requesterNickname = UserService::getByKey('id', $requesterId, 'nickname');
 
         $requests = FriendRequestModel::join('user_info', 'friend_request.target_id = user_info.user_id')
             ->where('friend_request.requester_id', '=', $requesterId)
@@ -319,7 +319,7 @@ class Friend
 
             Db::commit();
 
-            $userInfo = UserService::getInfoByKey('id', $request->target_id, [
+            $userInfo = UserService::getByKey('id', $request->target_id, [
                 'nickname',
                 'avatar'
             ]);

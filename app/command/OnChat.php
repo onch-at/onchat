@@ -45,7 +45,7 @@ class OnChat extends ServerCommand
                 break;
 
             case self::ACTION_INIT:
-                $this->init($this->output);
+                $this->init();
                 break;
 
             default:
