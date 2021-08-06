@@ -35,14 +35,15 @@ class File
     }
 
     /**
-     * 协程读取文件
+     * 读取文件
      *
      * @param string $filename
+     * @param boolean $coroutine 协程
      * @return string|false
      */
-    public static function read(string $filename)
+    public static function read(string $filename, bool $coroutine = true)
     {
-        return System::readFile($filename);
+        return $coroutine ? System::readFile($filename) : file_get_contents($filename);
     }
 
     // /**

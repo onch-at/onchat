@@ -65,7 +65,7 @@ class OnChat extends ServerCommand
         $password = $config['password'];
         $database = $config['database'];
 
-        $sql = FileUtil::read(resource_path('sql') . 'database.sql'); // 创建数据库的SQL
+        $sql = FileUtil::read(resource_path('sql') . 'database.sql', false); // 创建数据库的SQL
 
         $this->output->comment('Connecting to database…');
 
@@ -86,7 +86,7 @@ class OnChat extends ServerCommand
         });
 
         foreach ($dir as $file) {
-            $sql = FileUtil::read($path . $file);
+            $sql = FileUtil::read($path . $file, false);
 
             switch ($file) {
                 case 'chat-record.sql': // 如果是消息记录表，则需要生成分表
