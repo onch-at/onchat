@@ -25,7 +25,7 @@ class Auth
     public function handle(Request $request, \Closure $next): Response
     {
         if (!Session::has(SessionKey::USER_LOGIN)) {
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION)->toJson();
+            return Result::unauth()->toJson();
         }
 
         return $next($request);

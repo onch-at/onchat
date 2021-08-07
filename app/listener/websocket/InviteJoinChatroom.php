@@ -40,7 +40,7 @@ class InviteJoinChatroom extends SocketEventHandler
 
         $this->websocket->emit(SocketEvent::INVITE_JOIN_CHATROOM, $result);
 
-        if (!$result->isSuccess()) {
+        if ($result->isError()) {
             return false;
         }
 

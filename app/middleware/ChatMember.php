@@ -34,7 +34,7 @@ class ChatMember
         ])->find();
 
         if (!$chatMember) {
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION)->toJson();
+            return Result::create(Result::CODE_NO_PERMISSION)->toJson();
         }
 
         return $next($request);

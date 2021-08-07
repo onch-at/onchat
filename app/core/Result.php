@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\core;
 
+use Swoole\Http\Status;
 use app\util\Arr as ArrUtil;
 use think\Collection;
 use think\Model;
@@ -21,27 +22,30 @@ class Result
     /** 成功 */
     const CODE_SUCCESS = 0;
     /** 未知错误 */
-    const CODE_ERROR_UNKNOWN = -1;
+    const CODE_UNKNOWN_ERROR = -1;
     /** 参数错误 */
-    const CODE_ERROR_PARAM = -2;
+    const CODE_PARAM_ERROR = -2;
+    /** 未认证 */
+    const CODE_UNAUTHORIZED = -3;
     /** 权限不足 */
-    const CODE_ERROR_NO_PERMISSION = -3;
+    const CODE_NO_PERMISSION = -4;
     /** 访问频率过高 */
-    const CODE_ERROR_HIGH_FREQUENCY = -4;
+    const CODE_ACCESS_OVERCLOCK = -5;
 
     /** 响应信息预定义 */
-    const MSG = [
-        self::CODE_SUCCESS              => null,
-        self::CODE_ERROR_UNKNOWN        => '未知错误',
-        self::CODE_ERROR_PARAM          => '参数错误',
-        self::CODE_ERROR_NO_PERMISSION  => '权限不足',
-        self::CODE_ERROR_HIGH_FREQUENCY => '访问频率过高',
+    const CODE_PHRASES = [
+        self::CODE_SUCCESS          => null,
+        self::CODE_UNKNOWN_ERROR    => 'Unknown Error',
+        self::CODE_PARAM_ERROR      => 'Parameter Error',
+        self::CODE_UNAUTHORIZED     => 'Unauthorized',
+        self::CODE_NO_PERMISSION    => 'No Permission',
+        self::CODE_ACCESS_OVERCLOCK => 'Access Overclock',
     ];
 
     private function __construct(int $code, string $msg = null, $data = null)
     {
         $this->code = $code;
-        $this->msg  = $msg ?? self::MSG[$code];
+        $this->msg  = $msg ?? self::CODE_PHRASES[$code];
 
         if ($data instanceof Collection || $data instanceof Model) {
             $this->data = ArrUtil::keyToCamel($data->toArray());
@@ -55,6 +59,16 @@ class Result
     public static function create(int $code, string $msg = null, $data = null): self
     {
         return new self($code, $msg, $data);
+    }
+
+    public static function unknown(string $msg = null): self
+    {
+        return new self(self::CODE_UNKNOWN_ERROR, $msg);
+    }
+
+    public static function unauth(string $msg = null): self
+    {
+        return new self(self::CODE_UNAUTHORIZED, $msg);
     }
 
     public static function success($data = null, string $msg = null): self
@@ -79,8 +93,33 @@ class Result
         return $this->code === self::CODE_SUCCESS;
     }
 
+    public function isError(): bool
+    {
+        return $this->code !== self::CODE_SUCCESS;
+    }
+
     public function toJson(): Json
     {
-        return Json::create($this, 'json');
+        $code = null;
+
+        switch ($this->code) {
+            case self::CODE_SUCCESS:
+                $code = Status::OK;
+                break;
+
+            case self::CODE_UNAUTHORIZED:
+                $code = Status::UNAUTHORIZED;
+                break;
+
+            case self::CODE_NO_PERMISSION:
+            case self::CODE_ACCESS_OVERCLOCK:
+                $code = Status::FORBIDDEN;
+                break;
+
+            default:
+                $code = Status::BAD_REQUEST;
+        }
+
+        return Json::create($this, 'json', $code);
     }
 }

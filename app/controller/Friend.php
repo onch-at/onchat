@@ -6,11 +6,14 @@ namespace app\controller;
 
 use app\core\Result;
 use app\facade\UserService;
+use app\middleware\Jsonify;
 use app\service\Friend as FriendService;
 
 class Friend
 {
     protected $service;
+
+    protected $middleware = [Jsonify::class];
 
     public function __construct(FriendService $service)
     {

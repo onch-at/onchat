@@ -102,36 +102,36 @@ class User
     public function register(string $username, string $password, string $email, string $captcha): Result
     {
         if (!ONCHAT_CAN_REGISTER) {
-            return Result::create(Result::CODE_ERROR_UNKNOWN, '暂不开放注册！');
+            return Result::unknown('暂不开放注册！');
         }
 
         if (!IndexService::checkEmail($email)->data) { // 如果邮箱不可用
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         if (!IndexService::checkEmailCaptcha($email, $captcha)) {
-            return Result::create(Result::CODE_ERROR_PARAM, '验证码错误！');
+            return Result::create(Result::CODE_PARAM_ERROR, '验证码错误！');
         }
 
         $username = StrUtil::trimAll($username);
         $password = StrUtil::trimAll($password);
 
         if (!preg_match(ONCHAT_USERNAME_PATTERN, $username)) {
-            return Result::create(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
+            return Result::create(Result::CODE_PARAM_ERROR, '用户名格式不规范！');
         }
 
         $result = $this->checkPassword($password);
         if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[$result]);
         }
 
         if (!IndexService::checkUsername($username)->data) { // 如果已经有这个用户了
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_EXIST]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_USER_EXIST]);
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
         if (!$hash) { // 如果密码散列创建失败
-            return Result::create(Result::CODE_ERROR_UNKNOWN, '密码散列创建失败');
+            return Result::unknown('密码散列创建失败');
         }
 
         $timestamp = time() * 1000;
@@ -157,7 +157,7 @@ class User
 
             $result = $storage->save($path, $file, $imageData);
 
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 return $result;
             }
 
@@ -204,7 +204,7 @@ class User
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 
@@ -218,12 +218,12 @@ class User
     public function login(string $username, string $password): Result
     {
         if (!preg_match(ONCHAT_USERNAME_PATTERN, $username)) {
-            return Result::create(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
+            return Result::create(Result::CODE_PARAM_ERROR, '用户名格式不规范！');
         }
 
         $result = $this->checkPassword($password);
         if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[$result]);
         }
 
         $fields = self::USER_FIELDS;
@@ -232,11 +232,11 @@ class User
         $user = $this->getByKey('username', $username, $fields);
 
         if (empty($user)) { // 如果用户不存在
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
         if (!password_verify($password, $user->password)) { // 如果密码错误
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_PASSWORD_ERROR]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_PASSWORD_ERROR]);
         }
 
         $this->saveLoginStatus($user->id, $user->username, $user->password); // 保存登录状态
@@ -276,7 +276,7 @@ class User
     {
         $result = $this->checkPassword($newPassword);
         if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[$result]);
         }
 
         $id = $this->getId();
@@ -284,14 +284,14 @@ class User
         $user = UserModel::find($id);
 
         if (!password_verify($oldPassword, $user->password)) { // 如果密码错误
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_PASSWORD_ERROR]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_PASSWORD_ERROR]);
         }
 
         $newPassword = StrUtil::trimAll($newPassword);
         $hash = password_hash($newPassword, PASSWORD_DEFAULT);
 
         if (!$hash) { // 如果密码散列创建失败
-            return Result::create(Result::CODE_ERROR_UNKNOWN, '密码散列创建失败');
+            return Result::unknown('密码散列创建失败');
         }
 
         $user->password = $hash;
@@ -314,7 +314,7 @@ class User
         $email = UserModel::where('username', '=', $username)->value('email');
 
         if (!$email) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         return IndexService::sendEmailCaptcha($email);
@@ -331,29 +331,29 @@ class User
     public function resetPassword(string $username, string $password, string $captcha): Result
     {
         if (!preg_match(ONCHAT_USERNAME_PATTERN, $username)) {
-            return Result::create(Result::CODE_ERROR_PARAM, '用户名格式不规范！');
+            return Result::create(Result::CODE_PARAM_ERROR, '用户名格式不规范！');
         }
 
         $result = $this->checkPassword($password);
         if ($result !== Result::CODE_SUCCESS) { // 如果用户密码不符合规范
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[$result]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[$result]);
         }
 
         $user = UserModel::where('username', '=', $username)->find();
 
         if (!$user) {
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
         if (!IndexService::checkEmailCaptcha($user->email, $captcha)) {
-            return Result::create(Result::CODE_ERROR_PARAM, '验证码错误！');
+            return Result::create(Result::CODE_PARAM_ERROR, '验证码错误！');
         }
 
         $password = StrUtil::trimAll($password);
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
         if (!$hash) { // 如果密码散列创建失败
-            return Result::create(Result::CODE_ERROR_UNKNOWN, '密码散列创建失败');
+            return Result::unknown('密码散列创建失败');
         }
 
         $user->password = $hash;
@@ -437,7 +437,7 @@ class User
             ->find();
 
         if (!$user) {
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
         $storage = Storage::getInstance();
@@ -460,7 +460,7 @@ class User
             ->field(self::USER_FIELDS)->find();
 
         if (!$user) {
-            return Result::create(Result::CODE_ERROR_PARAM, self::MSG[self::CODE_USER_NOT_EXIST]);
+            return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
         $storage = Storage::getInstance();
@@ -574,7 +574,7 @@ class User
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
 
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 return $result;
             }
 
@@ -590,7 +590,7 @@ class User
                 'avatarThumbnail' => $storage->getThumbnailUrl($filename)
             ]);
         } catch (\Exception $e) {
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 
@@ -759,11 +759,11 @@ class User
         $userId = $this->getId();
 
         if (!IndexService::checkEmail($email)->data) { // 如果邮箱不可用
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         if (!IndexService::checkEmailCaptcha($email, $captcha)) {
-            return Result::create(Result::CODE_ERROR_PARAM, '验证码错误！');
+            return Result::create(Result::CODE_PARAM_ERROR, '验证码错误！');
         }
 
         $email = strtolower($email);

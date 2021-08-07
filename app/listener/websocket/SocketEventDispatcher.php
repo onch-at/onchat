@@ -67,7 +67,7 @@ class SocketEventDispatcher
 
         // 检测频率
         if ($user && !$this->throttleTable->try($user['id'])) {
-            return $this->websocket->emit($event->type, Result::create(Result::CODE_ERROR_HIGH_FREQUENCY));
+            return $this->websocket->emit($event->type, Result::create(Result::CODE_ACCESS_OVERCLOCK));
         }
 
         $eventName    = StrUtil::studly($event->type);
@@ -76,7 +76,7 @@ class SocketEventDispatcher
 
         // 如果没有这个事件处理类
         if (!$handlerClass) {
-            return $this->websocket->emit($event->type, Result::create(Result::CODE_ERROR_PARAM));
+            return $this->websocket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
         }
 
         /** @var SocketEventHandler */
@@ -84,7 +84,7 @@ class SocketEventDispatcher
 
         // 数据校验失败
         if (!$handler->verify($eventData ?? [])) {
-            return $this->websocket->emit($event->type, Result::create(Result::CODE_ERROR_PARAM));
+            return $this->websocket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
         }
 
         Event::trigger('swoole.websocket.Event:' . $eventName,  $eventData);

@@ -103,7 +103,7 @@ class OnChat extends ServerCommand
         }
 
         // 如果没有第一个聊天室，那么就创建一个吧！
-        if (!ChatroomService::getChatroom(1)->isSuccess()) {
+        if (ChatroomService::getChatroom(1)->isError()) {
             ChatroomService::creatChatroom('OnChat');
         }
     }

@@ -37,20 +37,20 @@ class Message extends SocketEventHandler
     {
         // 语音，图片消息等只能通过HTTP API来上传并发送
         if (in_array($event['type'], [MessageType::VOICE, MessageType::IMAGE, MessageType::TIPS])) {
-            $result = Result::create(Result::CODE_ERROR_PARAM, '该类型的消息不允许通过WS通道发送');
+            $result = Result::create(Result::CODE_PARAM_ERROR, '该类型的消息不允许通过WS通道发送');
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);
         }
 
         $event['userId'] = $this->getUser()['id'];
         $result = $messageService->handle($event);
 
-        if (!$result->isSuccess()) {
+        if ($result->isError()) {
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);
         }
 
         $result = $chatRecordService->addRecord($result->data);
 
-        if (!$result->isSuccess()) {
+        if ($result->isError()) {
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);
         }
 

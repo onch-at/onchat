@@ -30,7 +30,7 @@ class Init extends SocketEventHandler
         $sessId = $cookie->get($config->get('session.name'));
 
         if (!$sessId) {
-            return $this->websocket->emit(SocketEvent::INIT, Result::create(Result::CODE_ERROR_NO_PERMISSION));
+            return $this->websocket->emit(SocketEvent::INIT, Result::unauth());
         }
 
         $this->userTable->set($this->fd, $sessId);

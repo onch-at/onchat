@@ -41,7 +41,7 @@ class Local implements StorageDriver
                 $result = $this->filesystem->putFileAs($path, $data, $file);
 
                 if ($result === false) {
-                    return Result::create(Result::CODE_ERROR_UNKNOWN);
+                    return Result::unknown();
                 }
                 break;
 
@@ -49,7 +49,7 @@ class Local implements StorageDriver
                 $result = file_put_contents($this->getRoot() . $filename, $data);
 
                 if ($result === false) {
-                    return Result::create(Result::CODE_ERROR_UNKNOWN);
+                    return Result::unknown();
                 }
                 break;
 
@@ -57,7 +57,7 @@ class Local implements StorageDriver
                 $result = $this->filesystem->putFileAs($path, $data, $file);
 
                 if ($result === false) {
-                    return Result::create(Result::CODE_ERROR_UNKNOWN);
+                    return Result::unknown();
                 }
                 break;
 
@@ -65,7 +65,7 @@ class Local implements StorageDriver
                 $result = file_put_contents($this->getRoot() . $filename, $data);
 
                 if ($result === false) {
-                    return Result::create(Result::CODE_ERROR_UNKNOWN);
+                    return Result::unknown();
                 }
                 break;
         }
@@ -102,7 +102,7 @@ class Local implements StorageDriver
 
     function delete(string $filename): Result
     {
-        return Result::create(unlink($filename) ? Result::CODE_SUCCESS : Result::CODE_ERROR_UNKNOWN);
+        return Result::create(unlink($filename) ? Result::CODE_SUCCESS : Result::CODE_UNKNOWN_ERROR);
     }
 
     public function exist(string $filename): Result

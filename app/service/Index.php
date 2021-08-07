@@ -96,7 +96,7 @@ class Index
             'altBody'   => null
         ]);
 
-        return Result::create($result !== false ? Result::CODE_SUCCESS : Result::CODE_ERROR_UNKNOWN);
+        return Result::create($result !== false ? Result::CODE_SUCCESS : Result::CODE_UNKNOWN_ERROR);
     }
 
     /**

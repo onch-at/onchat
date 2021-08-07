@@ -123,7 +123,7 @@ class ChatRecord
 
         $nickname = UserService::getNicknameInChatroom($userId, $chatroomId);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_NO_PERMISSION);
         }
 
         // 启动事务
@@ -193,7 +193,7 @@ class ChatRecord
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 
@@ -211,12 +211,12 @@ class ChatRecord
         $msg = $query->find();
         // 如果没找到这条消息
         if (!$msg) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         // 如果消息不是它本人发的 或者 已经超时了
         if ($msg->user_id !== $userId || time() > $msg->create_time + 120000) {
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION);
+            return Result::create(Result::CODE_NO_PERMISSION);
         }
 
         // 启动事务
@@ -225,7 +225,7 @@ class ChatRecord
             // 如果消息删除失败
             if ($query->delete() === 0) {
                 Db::rollback();
-                return Result::create(Result::CODE_ERROR_UNKNOWN);
+                return Result::unknown();
             }
 
             // 如果是语音消息，则删除语音文件
@@ -249,7 +249,7 @@ class ChatRecord
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 
@@ -271,7 +271,7 @@ class ChatRecord
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
             $result  = $storage->save($path, $file, $image);
 
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 return $result;
             }
 
@@ -293,7 +293,7 @@ class ChatRecord
 
             return $result;
         } catch (\Exception $e) {
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 
@@ -323,14 +323,14 @@ class ChatRecord
                 ->get('duration');
 
             if ($duration > 61) {
-                return Result::create(Result::CODE_ERROR_PARAM, '语音消息时长过长');
+                return Result::create(Result::CODE_PARAM_ERROR, '语音消息时长过长');
             }
 
             $storage = Storage::getInstance();
             $path    = $storage->getRootPath() . "voice/chatroom/{$chatroomId}/";
             $result  = $storage->save($path, $file, $temp);
 
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 return $result;
             }
 
@@ -350,7 +350,7 @@ class ChatRecord
 
             return $result;
         } catch (\Exception $e) {
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 }

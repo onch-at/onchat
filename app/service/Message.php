@@ -32,11 +32,11 @@ class Message
                 $content = $msg['data']['content'];
 
                 if (StrUtil::isEmpty($content)) {
-                    return Result::create(Result::CODE_ERROR_PARAM);
+                    return Result::create(Result::CODE_PARAM_ERROR);
                 }
 
                 if (StrUtil::length($content) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
-                    return Result::create(Result::CODE_ERROR_PARAM, '文本消息长度过长');
+                    return Result::create(Result::CODE_PARAM_ERROR, '文本消息长度过长');
                 }
 
                 $message->type = MessageType::TEXT;
@@ -47,11 +47,11 @@ class Message
                 ['html' => $html, 'text' => $text] = $msg['data'];
 
                 if (StrUtil::isEmpty($text)) {
-                    return Result::create(Result::CODE_ERROR_PARAM);
+                    return Result::create(Result::CODE_PARAM_ERROR);
                 }
 
                 if (StrUtil::length($text) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
-                    return Result::create(Result::CODE_ERROR_PARAM, '文本消息长度过长');
+                    return Result::create(Result::CODE_PARAM_ERROR, '文本消息长度过长');
                 }
 
                 $config = HTMLPurifierConfig::createDefault();
@@ -90,7 +90,7 @@ class Message
                 break;
 
             default:
-                return Result::create(Result::CODE_ERROR_PARAM, '不支持处理该类消息');
+                return Result::create(Result::CODE_PARAM_ERROR, '不支持处理该类消息');
         }
 
         $message->userId     = $msg['userId'];

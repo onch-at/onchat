@@ -35,7 +35,7 @@ class ChatManager
 
         // 如果不是管理员或者室主
         if (!$chatMember || !in_array($chatMember->role, [ChatMemberModel::ROLE_HOST, ChatMemberModel::ROLE_MANAGE])) {
-            return Result::create(Result::CODE_ERROR_NO_PERMISSION)->toJson();
+            return Result::create(Result::CODE_NO_PERMISSION)->toJson();
         }
 
         return $next($request);

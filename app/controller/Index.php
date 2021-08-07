@@ -8,6 +8,7 @@ use Firebase\JWT\JWT;
 use app\core\Redis;
 use app\core\Result;
 use app\facade\TokenService;
+use app\middleware\Jsonify;
 use app\model\ChatRequest;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
@@ -26,6 +27,8 @@ class Index
 {
     protected $service;
 
+    protected $middleware = [Jsonify::class];
+
     public function __construct(IndexService $service)
     {
         $this->service = $service;
@@ -33,7 +36,8 @@ class Index
 
     public function index()
     {
-        dump(TokenService::instance()->cookie->get());
+        return 66666;
+        // dump(TokenService::instance()->cookie->get());
         // /** @var Token */
         // $tokenService = app(Token::class);
         // $payload = $tokenService->generate(1, ONCHAT_ACCESS_TOKEN_TTL);

@@ -55,7 +55,7 @@ class Chat
             ])->field('chatroom.*')->find();
 
         if (!$chatroom) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         // 人数超出上限
@@ -86,7 +86,7 @@ class Chat
     {
         // 如果已经是聊天室成员了
         if (ChatroomService::isMember($chatroomId, $requester)) {
-            return Result::create(Result::CODE_ERROR_PARAM, '你已加入该聊天室！');
+            return Result::create(Result::CODE_PARAM_ERROR, '你已加入该聊天室！');
         }
 
         // 如果人数已满
@@ -188,7 +188,7 @@ class Chat
             ->find();
 
         if (!$request) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         // 已被处理
@@ -222,7 +222,7 @@ class Chat
             $request->save();
 
             $result = ChatroomService::addMember($chatroomId, $request->requester_id, $request->requesterNickname);
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 Db::rollback();
                 return $result;
             }
@@ -249,7 +249,7 @@ class Chat
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 
@@ -296,7 +296,7 @@ class Chat
             ->find();
 
         if (!$request) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         // 已被处理
@@ -387,7 +387,7 @@ class Chat
             ->find();
 
         if (!$request) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         $storage = Storage::getInstance();
@@ -460,7 +460,7 @@ class Chat
             ->find();
 
         if (!$request) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         $storage = Storage::getInstance();

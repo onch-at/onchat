@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\core\Result;
+use app\middleware\Jsonify;
 use app\service\User as UserService;
 
 class User
 {
     protected $service;
+
+    protected $middleware = [Jsonify::class];
 
     public function __construct(UserService $service)
     {

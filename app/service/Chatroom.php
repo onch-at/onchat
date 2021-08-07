@@ -139,7 +139,7 @@ class Chatroom
         $chatroom = ChatroomModel::find($id);
 
         if (!$chatroom) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         // 如果聊天室类型是私聊的，则聊天室的名称需要返回私聊好友的Nickname
@@ -154,7 +154,7 @@ class Chatroom
 
             // 如果找不到，则代表自己没有进这个群
             if (!$self) {
-                return Result::create(Result::CODE_ERROR_NO_PERMISSION);
+                return Result::create(Result::CODE_NO_PERMISSION);
             }
 
             // 查找加入了这个房间的另一个好友的信息
@@ -230,7 +230,7 @@ class Chatroom
             $file      = md5((string) DateUtil::now()) . '.png';
             $result    = $storage->save($path, $file, $imageData);
 
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 return $result;
             }
 
@@ -266,7 +266,7 @@ class Chatroom
             !$chatroom || !$username ||
             $this->isMember($id, $userId)
         ) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         if ($this->isPeopleNumFull($id)) {
@@ -325,7 +325,7 @@ class Chatroom
     public function create(string $name, ?string $description, int $userId, string $username): Result
     {
         if (!$name) {
-            return Result::create(Result::CODE_ERROR_PARAM);
+            return Result::create(Result::CODE_PARAM_ERROR);
         }
 
         $count = ChatMemberModel::where([
@@ -341,7 +341,7 @@ class Chatroom
         Db::startTrans();
         try {
             $result = $this->creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 Db::rollback();
                 return $result;
             }
@@ -350,7 +350,7 @@ class Chatroom
 
             // 将自己添加到聊天室，角色为主人
             $result = $this->addMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 Db::rollback();
                 return $result;
             }
@@ -369,7 +369,7 @@ class Chatroom
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 
@@ -424,7 +424,7 @@ class Chatroom
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
 
-            if (!$result->isSuccess()) {
+            if ($result->isError()) {
                 return $result;
             }
 
@@ -440,7 +440,7 @@ class Chatroom
                 'avatarThumbnail' => $storage->getThumbnailUrl($filename)
             ]);
         } catch (\Exception $e) {
-            return Result::create(Result::CODE_ERROR_UNKNOWN, $e->getMessage());
+            return Result::unknown($e->getMessage());
         }
     }
 

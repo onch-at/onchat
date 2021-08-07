@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace app\controller;
 
 use app\core\Result;
+use app\middleware\Jsonify;
 use app\service\ChatRecord as ChatRecordService;
 
 class ChatRecord
 {
     protected $service;
+
+    protected $middleware = [Jsonify::class];
 
     public function __construct(ChatRecordService $service)
     {

@@ -36,7 +36,7 @@ class FriendRequestReject extends SocketEventHandler
         $this->websocket->emit(SocketEvent::FRIEND_REQUEST_REJECT, $result);
 
         // 如果成功拒绝申请，则尝试给申请人推送消息
-        if (!$result->isSuccess()) {
+        if ($result->isError()) {
             return false;
         }
 
