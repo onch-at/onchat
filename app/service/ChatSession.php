@@ -24,7 +24,7 @@ class ChatSession
     {
         $userId = UserService::getId();
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         // 存放私聊聊天室ID列表
         $privateChatroomIdList = [];

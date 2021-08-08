@@ -6,11 +6,11 @@ namespace app\service;
 
 use Identicon\Identicon;
 use app\constant\SessionKey;
-
 use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
 use app\entity\TokenFolder;
+use app\facade\AuthService;
 use app\facade\ChatroomService;
 use app\facade\IndexService;
 use app\facade\TokenService;
@@ -19,7 +19,6 @@ use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
-use app\service\Token;
 use app\util\Date as DateUtil;
 use app\util\File as FileUtil;
 use app\util\Str as StrUtil;
@@ -148,7 +147,7 @@ class User
                 'update_time' => $timestamp,
             ]);
 
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
             // 根据用户ID创建哈希头像
             $imageData = $identicon->getImageData($user->id, 256, null, '#f5f5f5');
 
@@ -243,7 +242,7 @@ class User
 
         unset($user->password);
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
         $user->avatar          = $storage->getUrl($user->avatar);
@@ -253,16 +252,6 @@ class User
         $user->refresh = $tokenFolder->refresh;
 
         return Result::success($user);
-    }
-
-    /**
-     * 清除登录Session，退出登录
-     *
-     * @return void
-     */
-    public function logout(): void
-    {
-        Session::set(SessionKey::USER_LOGIN, null);
     }
 
     /**
@@ -298,7 +287,7 @@ class User
         $user->update_time = time() * 1000;
         $user->save();
 
-        $this->logout();
+        AuthService::logout();
 
         return Result::success();
     }
@@ -392,12 +381,14 @@ class User
         /** @var Token */
         $tokenService = TokenService::instance();
 
+        // 首先生成续签令牌，保证JTI的缓存时间
+        $payload = $tokenService->generate($id, ONCHAT_REFRESH_TOKEN_TTL);
+        $payload->usr = ['username' => $username];
+        $refreshToken = $tokenService->issue($payload);
+
         $payload = $tokenService->generate($id, ONCHAT_ACCESS_TOKEN_TTL);
         $payload->usr = ['username' => $username];
         $accessToken = $tokenService->issue($payload);
-
-        $payload = $tokenService->generate($id, ONCHAT_REFRESH_TOKEN_TTL);
-        $refreshToken = $tokenService->issue($payload);
 
         return new TokenFolder($accessToken, $refreshToken);
     }
@@ -440,7 +431,7 @@ class User
             return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
         $user->avatar          = $storage->getUrl($user->avatar);
@@ -463,7 +454,7 @@ class User
             return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_USER_NOT_EXIST]);
         }
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
         $user->avatar          = $storage->getUrl($user->avatar);
@@ -509,37 +500,6 @@ class User
     }
 
     /**
-     * 检查用户是否已经登录/处于登录状态
-     * 如果已登录，则返回User, 否则返回false
-     *
-     * @return Result
-     */
-    public function checkLogin(): Result
-    {
-        $session = Session::get(SessionKey::USER_LOGIN);
-        if (empty($session)) { // 如果没有登录的Session
-            return Result::success(false);
-        }
-
-        $fields = self::USER_FIELDS;
-        $fields[] = 'user.password';
-        $user = $this->getByKey('id', $session['id'], $fields);
-
-        if ($session['password'] !== $user['password']) { // 如果密码错误
-            return Result::success(false);
-        }
-
-        $storage = Storage::getInstance();
-
-        $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar          = $storage->getUrl($user->avatar);
-
-        unset($user->password);
-
-        return Result::success($user);
-    }
-
-    /**
      * 检查用户密码是否符合规范
      *
      * @param string $password
@@ -566,7 +526,7 @@ class User
         $userId = $this->getId();
 
         try {
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
             $image   = Request::file('image');
             $path    = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
@@ -615,7 +575,7 @@ class User
     public function getPrivateChatrooms(): Result
     {
         $userId = $this->getId();
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $data = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')
             ->where('chat_member.chatroom_id', 'IN', function ($query)  use ($userId) {
@@ -662,7 +622,7 @@ class User
     public function getGroupChatrooms(): Result
     {
         $userId = $this->getId();
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $data = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
             ->where([
@@ -786,7 +746,7 @@ class User
      */
     public function search(string $keyword, int $page): Result
     {
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $expression = "%{$keyword}%";
         $data = UserModel::join('user_info', 'user.id = user_info.user_id')->whereOr([

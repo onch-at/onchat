@@ -135,7 +135,7 @@ class Chat
 
         ChatSessionService::showChatroomNotice($chatroomId, $requester);
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $info = UserInfoModel::where('user_info.user_id', '=', $requester)
             ->field([
@@ -229,7 +229,7 @@ class Chat
 
             ChatSessionService::showChatroomNotice($request->chatroom_id, $request->requester_id);
 
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
 
             $chatSession = $result->data;
             $avatar = $request->chatroomAvatar;
@@ -322,7 +322,7 @@ class Chat
 
         ChatSessionService::showChatroomNotice($request->chatroom_id, $request->requester_id);
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
         $request->chatroomAvatarThumbnail  = $storage->getThumbnailUrl($request->chatroomAvatar);
@@ -390,7 +390,7 @@ class Chat
             return Result::create(Result::CODE_PARAM_ERROR);
         }
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
 
         return Result::success($request);
@@ -404,7 +404,7 @@ class Chat
     public function getReceiveRequests(): Result
     {
         $userId = UserService::getId();
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $data = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
             ->join('user_info requester', 'chat_request.requester_id = requester.user_id')
@@ -463,7 +463,7 @@ class Chat
             return Result::create(Result::CODE_PARAM_ERROR);
         }
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($request->chatroomAvatar);
         $request->chatroomAvatar          = $storage->getUrl($request->chatroomAvatar);
@@ -493,7 +493,7 @@ class Chat
             ])
             ->select();
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         foreach ($data as $item) {
             $item->chatroomAvatarThumbnail = $storage->getThumbnailUrl($item->chatroomAvatar);

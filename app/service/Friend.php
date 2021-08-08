@@ -94,7 +94,7 @@ class Friend
             ]);
         }
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $userInfos = UserInfoModel::where('user_id', 'IN', [$requesterId, $targetId])->field([
             'user_id',
@@ -163,7 +163,7 @@ class Friend
             ->order('friend_request.update_time', 'DESC')
             ->select();
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         foreach ($requests as $item) {
             $item->requesterAvatarThumbnail = $storage->getThumbnailUrl($item->requesterAvatarThumbnail);
@@ -193,7 +193,7 @@ class Friend
             ->order('update_time', 'DESC')
             ->select();
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         foreach ($requests as $item) {
             $item->targetAvatarThumbnail = $storage->getThumbnailUrl($item->targetAvatarThumbnail);
@@ -324,7 +324,7 @@ class Friend
                 'avatar'
             ]);
 
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
 
             return Result::success([
                 'friendRequestId'       => $request->id,
@@ -393,7 +393,7 @@ class Friend
                 'target_id' => $request->requester_id
             ])->delete();
 
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
 
             $userInfos = UserInfoModel::where('user_id', 'IN', [$request->requester_id, $targetId])->field([
                 'user_id',

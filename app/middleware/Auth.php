@@ -4,17 +4,25 @@ declare(strict_types=1);
 
 namespace app\middleware;
 
-use app\constant\SessionKey;
+use app\constant\RedisPrefix;
+use app\core\Redis;
 use app\core\Result;
+use app\entity\TokenPayload;
+use app\service\Token as TokenService;
 use think\Request;
 use think\Response;
-use think\facade\Session;
 
 /**
  * 登录认证中间件
  */
 class Auth
 {
+    private $tokenService;
+
+    public function __construct(TokenService $tokenService)
+    {
+        $this->tokenService = $tokenService;
+    }
     /**
      * 处理请求
      *
@@ -24,10 +32,22 @@ class Auth
      */
     public function handle(Request $request, \Closure $next): Response
     {
-        if (!Session::has(SessionKey::USER_LOGIN)) {
+        $token = $request->header('Authorization');
+
+        if (!$token) {
             return Result::unauth()->toJson();
         }
 
-        return $next($request);
+        try {
+            $payload = $this->tokenService->parse($token);
+
+            if (!$this->tokenService->isAvailable($payload)) {
+                return Result::unauth()->toJson();
+            }
+
+            return $next($request);
+        } catch (\Exception $e) {
+            return Result::unauth($e->getMessage())->toJson();
+        }
     }
 }

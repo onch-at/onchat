@@ -32,16 +32,6 @@ class User
     }
 
     /**
-     * 退出登录
-     *
-     * @return void
-     */
-    public function logout(): void
-    {
-        $this->service->logout();
-    }
-
-    /**
      * 修改密码
      *
      * @param string $oldPassword 原密码
@@ -75,17 +65,6 @@ class User
     public function resetPassword(string $username, string $password, string $captcha): Result
     {
         return $this->service->resetPassword($username,  $password,  $captcha);
-    }
-
-    /**
-     * 检测用户是否已经登录
-     * 如果已登录，则返回User；否则返回false
-     *
-     * @return Result
-     */
-    public function checkLogin(): Result
-    {
-        return $this->service->checkLogin();
     }
 
     /**

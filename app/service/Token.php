@@ -6,13 +6,15 @@ namespace app\service;
 
 use Firebase\JWT\JWT;
 use Swoole\Coroutine\System;
+use app\constant\RedisPrefix;
+use app\core\Redis;
 use app\entity\TokenPayload;
 use think\Config;
 
 class Token
 {
   /** 令牌加密算法 */
-  private $alg = 'RS256';
+  private const ALG = 'RS256';
 
   private $privateKey;
   private $publicKey;
@@ -54,7 +56,7 @@ class Token
    */
   public function issue(TokenPayload $payload): string
   {
-    return JWT::encode($payload, $this->privateKey, $this->alg);
+    return JWT::encode($payload, $this->privateKey, self::ALG);
   }
 
   /**
@@ -65,7 +67,29 @@ class Token
    */
   public function parse(string $jwt): TokenPayload
   {
-    $payload = JWT::decode($jwt, $this->publicKey, [$this->alg]);
+    $payload = JWT::decode($jwt, $this->publicKey, [self::ALG]);
     return TokenPayload::from($payload);
+  }
+
+  /**
+   * 是否被废弃了
+   * 如果 JTI 变了，说明被其他客户端更新了令牌
+   *
+   * @return boolean
+   */
+  public function isAvailable(TokenPayload $payload)
+  {
+    return $payload->jti === Redis::create()->get(RedisPrefix::JWT_ID . $payload->sub);
+  }
+
+  /**
+   * 废弃令牌
+   *
+   * @param TokenPayload $payload
+   * @return void
+   */
+  public function disuse(TokenPayload $payload)
+  {
+    Redis::create()->del(RedisPrefix::JWT_ID . $payload->sub);
   }
 }

@@ -167,7 +167,7 @@ class Chatroom
             $chatroom->avatar = $friendInfo->avatar;
         }
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $chatroom->avatarThumbnail = $storage->getThumbnailUrl($chatroom->avatar);
         $chatroom->avatar          = $storage->getUrl($chatroom->avatar);
@@ -221,7 +221,7 @@ class Chatroom
         ]);
 
         if ($type === ChatroomModel::TYPE_GROUP_CHAT) {
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
             $identicon = new Identicon(new ImageMagickGenerator());
 
             // 根据用户ID创建哈希头像
@@ -398,7 +398,7 @@ class Chatroom
             ])
             ->select();
 
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         foreach ($data as $item) {
             $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
@@ -416,7 +416,7 @@ class Chatroom
     public function avatar(int $id): Result
     {
         try {
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
             $image   = Request::file('image');
             $path    = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
@@ -525,7 +525,7 @@ class Chatroom
      */
     public function search(string $keyword, int $page): Result
     {
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         $expression = "%{$keyword}%";
         $data = ChatroomModel::where('type', '=', ChatroomModel::TYPE_GROUP_CHAT)

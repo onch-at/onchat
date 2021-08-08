@@ -70,7 +70,7 @@ class ChatRecord
 
         // 如果msgId为0，则代表初次查询
         $data    = ($id === 0 ? $query : $query->where('chat_record.id', '<', $id))->select();
-        $storage = Storage::getInstance();
+        $storage = Storage::create();
 
         foreach ($data as $item) {
             // 如果是用户发的消息
@@ -151,7 +151,7 @@ class ChatRecord
                 'data->chatroomId' => $chatroomId
             ]);
 
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
 
             $memberInfo = UserInfoModel::join('chat_member', 'user_info.user_id = chat_member.user_id AND chat_member.chatroom_id = ' . $chatroomId)
                 ->where('user_info.user_id', '=', $userId)
@@ -230,7 +230,7 @@ class ChatRecord
 
             // 如果是语音消息，则删除语音文件
             if ($msg->type === MessageType::VOICE) {
-                $storage = Storage::getInstance();
+                $storage = Storage::create();
                 $storage->delete($msg->data->filename);
             }
 
@@ -266,7 +266,7 @@ class ChatRecord
         $image     = Request::file('image');
 
         try {
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
             $path    = $storage->getRootPath() . 'image/';
             $file    = $image->md5() . '.' . FileUtil::getExtension($image);
             $result  = $storage->save($path, $file, $image);
@@ -326,7 +326,7 @@ class ChatRecord
                 return Result::create(Result::CODE_PARAM_ERROR, '语音消息时长过长');
             }
 
-            $storage = Storage::getInstance();
+            $storage = Storage::create();
             $path    = $storage->getRootPath() . "voice/chatroom/{$chatroomId}/";
             $result  = $storage->save($path, $file, $temp);
 

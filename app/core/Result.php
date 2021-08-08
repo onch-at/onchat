@@ -25,12 +25,14 @@ class Result
     const CODE_UNKNOWN_ERROR = -1;
     /** 参数错误 */
     const CODE_PARAM_ERROR = -2;
-    /** 未认证 */
+    /** 未授权 */
     const CODE_UNAUTHORIZED = -3;
+    /** 授权过期 */
+    const CODE_AUTH_EXPIRES = -4;
     /** 权限不足 */
-    const CODE_NO_PERMISSION = -4;
+    const CODE_NO_PERMISSION = -5;
     /** 访问频率过高 */
-    const CODE_ACCESS_OVERCLOCK = -5;
+    const CODE_ACCESS_OVERCLOCK = -6;
 
     /** 响应信息预定义 */
     const CODE_PHRASES = [
@@ -38,6 +40,7 @@ class Result
         self::CODE_UNKNOWN_ERROR    => 'Unknown Error',
         self::CODE_PARAM_ERROR      => 'Parameter Error',
         self::CODE_UNAUTHORIZED     => 'Unauthorized',
+        self::CODE_AUTH_EXPIRES     => 'Authorization Expires',
         self::CODE_NO_PERMISSION    => 'No Permission',
         self::CODE_ACCESS_OVERCLOCK => 'Access Overclock',
     ];
@@ -111,6 +114,7 @@ class Result
                 $code = Status::UNAUTHORIZED;
                 break;
 
+            case self::CODE_AUTH_EXPIRES:
             case self::CODE_NO_PERMISSION:
             case self::CODE_ACCESS_OVERCLOCK:
                 $code = Status::FORBIDDEN;

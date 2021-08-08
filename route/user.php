@@ -6,8 +6,6 @@ use think\facade\Route;
 
 // 用户模块路由
 Route::group('user', function () {
-    Route::get('checklogin', 'checkLogin');
-
     Route::post('login', 'login');
     Route::post('register', 'register');
     Route::post('emailcaptcha', 'sendEmailCaptcha');
@@ -16,8 +14,6 @@ Route::group('user', function () {
     Route::put('password/reset', 'resetPassword');
 
     Route::group(function () {
-        Route::get('logout', 'logout');
-
         Route::post('avatar', 'avatar')->middleware(Avatar::class);
         Route::post('search', 'search');
 
