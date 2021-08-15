@@ -366,7 +366,7 @@ class User
         $payload->usr = ['username' => $username];
         $refreshToken = $tokenService->issue($payload);
 
-        $payload = $tokenService->generate($id, 10);
+        $payload = $tokenService->generate($id, ONCHAT_ACCESS_TOKEN_TTL);
         $payload->usr = ['username' => $username];
         $accessToken = $tokenService->issue($payload);
 

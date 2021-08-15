@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace app\table;
 
+use app\contract\Table;
+
 /**
  * 频率限制器
  */

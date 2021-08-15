@@ -72,7 +72,7 @@ class Token
   }
 
   /**
-   * 是否被废弃了
+   * 是否可用
    * 如果 JTI 变了，说明被其他客户端更新了令牌
    *
    * @return boolean

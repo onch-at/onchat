@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\table;
 
+use app\contract\Table;
 use app\entity\TokenPayload;
 
 class User extends Table

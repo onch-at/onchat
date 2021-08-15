@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\table;
+namespace app\contract;
 
 use think\Container;
 

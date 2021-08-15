@@ -7,6 +7,7 @@ namespace app\listener\websocket;
 use app\contract\SocketEventHandler;
 use app\core\Result;
 use app\table\Throttle as ThrottleTable;
+use app\table\TokenExpire as TokenExpireTable;
 use app\table\User as UserTable;
 use app\util\Str as StrUtil;
 use think\Config;
@@ -60,13 +61,20 @@ class SocketEventDispatcher
      *
      * @return mixed
      */
-    public function handle(WebsocketEvent $event)
+    public function handle(TokenExpireTable $tokenExpireTable, WebsocketEvent $event)
     {
         $user = $this->getUser();
 
-        // 检测频率
-        if ($user && !$this->throttleTable->try($user['id'])) {
-            return $this->websocket->emit($event->type, Result::create(Result::CODE_ACCESS_OVERCLOCK));
+        if ($user) {
+            // 检测频率
+            if (!$this->throttleTable->try($user['id'])) {
+                return $this->websocket->emit($event->type, Result::create(Result::CODE_ACCESS_OVERCLOCK));
+            }
+
+            // 如果令牌过期
+            if (time() > $tokenExpireTable->get($this->fd, 'expire')) {
+                return $this->websocket->emit($event->type, Result::unauth());
+            }
         }
 
         $eventName    = StrUtil::studly($event->type);

@@ -11,6 +11,7 @@ use app\listener\websocket\FriendRequestReject;
 use app\listener\websocket\Init;
 use app\listener\websocket\InviteJoinChatroom;
 use app\listener\websocket\Message;
+use app\listener\websocket\RefreshToken;
 use app\listener\websocket\RevokeMessage;
 use app\listener\websocket\SocketEventDispatcher;
 use app\listener\websocket\Unload;
@@ -53,6 +54,7 @@ return [
             'Close'                     => Unload::class,
             'Event'                     => SocketEventDispatcher::class,
             'Event:Init'                => Init::class,
+            'Event:RefreshToken'        => RefreshToken::class,
             'Event:Message'             => Message::class,
             'Event:RevokeMessage'       => RevokeMessage::class,
             'Event:FriendRequest'       => FriendRequest::class,
@@ -124,13 +126,13 @@ return [
                 ]
             ]
         ],
-        'fd' => [
+        'token-expire' => [
             'size'    => 8192,
             'columns' => [
                 [
-                    'name' => 'fd',
-                    'type' => Table::TYPE_STRING,
-                    'size' => 1024
+                    'name' => 'expire',
+                    'type' => Table::TYPE_INT,
+                    'size' => 8
                 ],
             ]
         ],

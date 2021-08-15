@@ -11,6 +11,7 @@ use app\core\Result;
 use app\model\UserInfo as UserInfoModel;
 use app\service\Token as TokenService;
 use app\service\User as UserService;
+use app\table\TokenExpire as TokenExpireTable;
 use think\facade\Validate;
 use think\validate\ValidateRule;
 
@@ -19,7 +20,7 @@ class Init extends SocketEventHandler
     public function verify(array $data): bool
     {
         return Validate::rule([
-            'accessToken' => ValidateRule::has(true),
+            'accessToken' => ValidateRule::must(),
         ])->check($data);
     }
 
@@ -28,7 +29,7 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(UserService $userService, TokenService $tokenService, array $event)
+    public function handle(UserService $userService, TokenService $tokenService, TokenExpireTable $tokenExpireTable, array $event)
     {
         ['accessToken' => $token] = $event;
 
@@ -44,8 +45,10 @@ class Init extends SocketEventHandler
         }
 
         $userId    = $payload->sub;
-        $tokenTime = ($payload->exp - time()) * 1000; // token 有效期
+        $tokenTime = $payload->exp - time(); // token 有效期
         $chatrooms = $userService->getChatrooms($userId);
+
+        $tokenExpireTable->set($this->fd, $payload->exp);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
@@ -56,7 +59,7 @@ class Init extends SocketEventHandler
         $this->websocket->join(SocketRoomPrefix::USER . $userId);
 
         $this->websocket->emit(SocketEvent::INIT, Result::success([
-            'tokenTime' => $tokenTime,
+            'tokenTime' => $tokenTime * 1000,
         ]));
 
         UserInfoModel::update([
