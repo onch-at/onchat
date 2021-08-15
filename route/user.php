@@ -10,7 +10,6 @@ Route::group('user', function () {
     Route::post('register', 'register');
     Route::post('emailcaptcha', 'sendEmailCaptcha');
 
-    Route::put('password', 'changePassword');
     Route::put('password/reset', 'resetPassword');
 
     Route::group(function () {
@@ -19,6 +18,7 @@ Route::group('user', function () {
 
         Route::put('info', 'saveUserInfo');
         Route::put('bindemail', 'bindEmail');
+        Route::put('password', 'changePassword');
 
         Route::group('chatrooms', function () {
             Route::get('private', 'getPrivateChatrooms');

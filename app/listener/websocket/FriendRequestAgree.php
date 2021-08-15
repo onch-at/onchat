@@ -44,13 +44,15 @@ class FriendRequestAgree extends SocketEventHandler
         }
 
         // 拿到申请人的FD
-        $requesterFd = $this->fdTable->getFd($result->data['requesterId']);
-        if ($requesterFd) {
-            // 加入新的聊天室
-            $this->websocket->setSender($requesterFd)
-                ->join(SocketRoomPrefix::CHATROOM . $chatroomId)
-                ->emit(SocketEvent::FRIEND_REQUEST_AGREE, $result);
-            $this->websocket->setSender($this->fd);
+        $requestId    = $result->data['requesterId'];
+        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $requestId);
+
+        // 加入新的聊天室
+        foreach ($requesterFds as $fd) {
+            $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatroomId);
         }
+
+        $this->websocket->to(SocketRoomPrefix::USER . $requestId)
+            ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
     }
 }

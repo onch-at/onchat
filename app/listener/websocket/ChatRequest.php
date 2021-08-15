@@ -9,8 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Chat as ChatService;
 use app\service\Chatroom as ChatroomService;
-use app\util\Arr as ArrUtil;
-use think\facade\Validate as Validate;
+use think\facade\Validate;
 use think\validate\ValidateRule;
 
 class ChatRequest extends SocketEventHandler
@@ -43,7 +42,7 @@ class ChatRequest extends SocketEventHandler
             $userIdList = $chatroomService->getHostAndManagerIdList($chatroomId);
 
             foreach ($userIdList as $userId) {
-                $this->websocket->to(SocketRoomPrefix::CHAT_REQUEST . $userId)->emit(SocketEvent::CHAT_REQUEST, $result);
+                $this->websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::CHAT_REQUEST, $result);
             }
         }
     }

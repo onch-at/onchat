@@ -45,7 +45,7 @@ class Auth
 
       return Result::success($token);
     } catch (\Exception $e) {
-      return Result::unknown($e->getMessage());
+      return Result::create(Result::CODE_AUTH_EXPIRES);
     }
   }
 

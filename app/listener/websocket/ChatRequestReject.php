@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\listener\websocket;
 
 use app\constant\SocketEvent;
+use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Chat as ChatService;
 use think\facade\Validate;
@@ -40,8 +41,7 @@ class ChatRequestReject extends SocketEventHandler
             return false;
         }
 
-        // 拿到申请人的FD
-        $requesterFd = $this->fdTable->getFd($result->data['requesterId']);
-        $requesterFd && $this->websocket->to($requesterFd)->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
+        $this->websocket->to(SocketRoomPrefix::USER . $result->data['requesterId'])
+            ->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
     }
 }

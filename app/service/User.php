@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\service;
 
 use Identicon\Identicon;
-use app\constant\SessionKey;
 use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
@@ -76,7 +75,8 @@ class User
      */
     public function getId(): ?int
     {
-        return Session::get(SessionKey::USER_LOGIN . '.id');
+        $token = Request::header('Authorization');
+        return TokenService::parse($token)->sub;
     }
 
     /**
@@ -86,7 +86,8 @@ class User
      */
     public function getUsername(): ?string
     {
-        return Session::get(SessionKey::USER_LOGIN . '.username');
+        $token = Request::header('Authorization');
+        return TokenService::parse($token)->usr->username;
     }
 
     /**
@@ -173,8 +174,6 @@ class User
 
             UserInfoModel::create($userInfo);
 
-            $this->saveLoginStatus($user->id, $username, $hash); // 保存登录状态
-
             ChatroomService::addMember(1, $user->id); // 添加新用户到默认聊天室
 
             unset($user->password); // 删掉密码
@@ -237,8 +236,6 @@ class User
         if (!password_verify($password, $user->password)) { // 如果密码错误
             return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_PASSWORD_ERROR]);
         }
-
-        $this->saveLoginStatus($user->id, $user->username, $user->password); // 保存登录状态
 
         unset($user->password);
 
@@ -353,23 +350,6 @@ class User
     }
 
     /**
-     * 设置用户登录Session，用于保存登录状态
-     *
-     * @param integer $id 用户ID
-     * @param string $username 用户名
-     * @param string $hashPassword 密码密文
-     * @return void
-     */
-    public function saveLoginStatus(int $id, string $username, string $hashPassword): void
-    {
-        Session::set(SessionKey::USER_LOGIN, [
-            'id'       => $id,
-            'username' => $username,
-            'password' => $hashPassword,
-        ]);
-    }
-
-    /**
      * 颁发令牌
      *
      * @param integer $id
@@ -386,7 +366,7 @@ class User
         $payload->usr = ['username' => $username];
         $refreshToken = $tokenService->issue($payload);
 
-        $payload = $tokenService->generate($id, ONCHAT_ACCESS_TOKEN_TTL);
+        $payload = $tokenService->generate($id, 10);
         $payload->usr = ['username' => $username];
         $accessToken = $tokenService->issue($payload);
 

@@ -11,7 +11,6 @@ use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\FriendRequest as FriendRequestModel;
-use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
 use app\util\Str as StrUtil;
 use think\facade\Db;
@@ -215,12 +214,8 @@ class Friend
 
         $request = FriendRequestModel::where([
             'requester_id'   => $userId,
-            'target_id' => $targetId
+            'target_id'      => $targetId
         ])->find();
-
-        if (!$request) {
-            return Result::create(Result::CODE_PARAM_ERROR);
-        }
 
         return Result::success($request);
     }
@@ -239,10 +234,6 @@ class Friend
             'requester_id'   => $requesterId,
             'target_id' => $userId
         ])->find();
-
-        if (!$request) {
-            return Result::create(Result::CODE_PARAM_ERROR);
-        }
 
         return Result::success($request);
     }

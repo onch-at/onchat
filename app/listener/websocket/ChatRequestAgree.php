@@ -25,7 +25,7 @@ class ChatRequestAgree extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatService $chatService, $event)
+    public function handle(ChatService $chatService, array $event)
     {
         ['requestId' => $requestId] = $event;
 
@@ -40,16 +40,14 @@ class ChatRequestAgree extends SocketEventHandler
             return false;
         }
 
-        $chatSession = $result->data[1];
+        $chatSession  = $result->data[1];
+        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $chatSession['userId']);
 
-        // 拿到申请人的FD
-        $requesterFd = $this->fdTable->getFd($chatSession['userId']);
-        if ($requesterFd) {
-            // 加入新的聊天室
-            $this->websocket->setSender($requesterFd)
-                ->join(SocketRoomPrefix::CHATROOM . $chatSession['data']['chatroomId'])
-                ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
-            $this->websocket->setSender($this->fd);
+        foreach ($requesterFds as $fd) {
+            $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatSession['data']['chatroomId']);
         }
+
+        $this->websocket->to(SocketRoomPrefix::USER . $chatSession['userId'])
+            ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
     }
 }

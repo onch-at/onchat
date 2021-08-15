@@ -26,7 +26,6 @@ class SocketEventDispatcher
     protected $websocket;
     protected $fd;
     protected $userTable;
-    protected $fdTable;
     protected $throttleTable;
     protected $container;
     protected $config;

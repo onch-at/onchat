@@ -9,15 +9,18 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\core\Result;
 use app\model\UserInfo as UserInfoModel;
+use app\service\Token as TokenService;
 use app\service\User as UserService;
-use think\Config;
-use think\Cookie;
+use think\facade\Validate;
+use think\validate\ValidateRule;
 
 class Init extends SocketEventHandler
 {
     public function verify(array $data): bool
     {
-        return true;
+        return Validate::rule([
+            'accessToken' => ValidateRule::has(true),
+        ])->check($data);
     }
 
     /**
@@ -25,34 +28,36 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(UserService $userService, Cookie $cookie, Config $config)
+    public function handle(UserService $userService, TokenService $tokenService, array $event)
     {
-        $sessId = $cookie->get($config->get('session.name'));
+        ['accessToken' => $token] = $event;
 
-        if (!$sessId) {
+        if (!$token) {
             return $this->websocket->emit(SocketEvent::INIT, Result::unauth());
         }
 
-        $this->userTable->set($this->fd, $sessId);
+        try {
+            $payload = $tokenService->parse($token);
+            $this->userTable->set($this->fd, $payload);
+        } catch (\Exception $e) {
+            return $this->websocket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
+        }
 
-        $userId = $this->getUser()['id'];
-
+        $userId    = $payload->sub;
+        $tokenTime = ($payload->exp - time()) * 1000; // token 有效期
         $chatrooms = $userService->getChatrooms($userId);
-
-        // 储存uid - fd
-        $this->fdTable->set($userId, $this->fd);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
             $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroom->id);
         }
 
-        // 加入好友请求房间
-        $this->websocket->join(SocketRoomPrefix::FRIEND_REQUEST . $userId);
-        // 加入群聊申请房间
-        $this->websocket->join(SocketRoomPrefix::CHAT_REQUEST . $userId);
+        // 加入用户房间
+        $this->websocket->join(SocketRoomPrefix::USER . $userId);
 
-        $this->websocket->emit(SocketEvent::INIT, Result::success());
+        $this->websocket->emit(SocketEvent::INIT, Result::success([
+            'tokenTime' => $tokenTime,
+        ]));
 
         UserInfoModel::update([
             'login_time' => time() * 1000

@@ -14,7 +14,6 @@ use app\core\storage\Storage;
 use app\entity\ImageMessage;
 use app\entity\Message;
 use app\entity\VoiceMessage;
-use app\facade\FdTable;
 use app\facade\UserService;
 use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatSession as ChatSessionModel;
@@ -288,7 +287,7 @@ class ChatRecord
             if ($result->isSuccess()) {
                 $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->to(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;
@@ -345,7 +344,7 @@ class ChatRecord
             if ($result->isSuccess()) {
                 $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->to(FdTable::getFd($userId))->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;

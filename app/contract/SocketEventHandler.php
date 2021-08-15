@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace app\contract;
 
-use app\table\Fd as FdTable;
 use app\table\Throttle as ThrottleTable;
 use app\table\User as UserTable;
 use think\swoole\Websocket;
+use think\swoole\websocket\Room;
 
 /**
  * Socket 事件处理程序
@@ -15,21 +15,21 @@ use think\swoole\Websocket;
 abstract class SocketEventHandler
 {
     protected $websocket;
+    protected $room;
     protected $fd;
     protected $userTable;
-    protected $fdTable;
     protected $throttleTable;
 
     public function __construct(
         Websocket     $websocket,
+        Room          $room,
         UserTable     $userTable,
-        FdTable       $fdTable,
         ThrottleTable $throttleTable
     ) {
         $this->websocket     = $websocket;
+        $this->room          = $room;
         $this->fd            = $websocket->getSender();
         $this->userTable     = $userTable;
-        $this->fdTable       = $fdTable;
         $this->throttleTable = $throttleTable;
     }
 

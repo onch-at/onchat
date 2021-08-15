@@ -29,8 +29,6 @@ class Unload extends SocketEventHandler
         $userId = $user['id'];
 
         $this->userTable->del($this->fd);
-        $this->fdTable->del($userId);
-
         $this->throttleTable->del($userId);
 
         $chatrooms = $userService->getChatrooms($userId);
@@ -40,7 +38,6 @@ class Unload extends SocketEventHandler
             $this->websocket->leave(SocketRoomPrefix::CHATROOM . $chatroom->id);
         }
 
-        $this->websocket->leave(SocketRoomPrefix::FRIEND_REQUEST . $userId);
-        $this->websocket->leave(SocketRoomPrefix::CHAT_REQUEST . $userId);
+        $this->websocket->leave(SocketRoomPrefix::USER . $userId);
     }
 }
