@@ -49,6 +49,25 @@ class Token
   }
 
   /**
+   * 续签访问令牌
+   *
+   * @param TokenPayload $payload 续签令牌体
+   * @return TokenPayload
+   */
+  public function refresh(TokenPayload $payload): TokenPayload
+  {
+    $time = time();
+
+    // 直接沿用续签令牌，只是修改一下时间
+    $payload->iat = $time;
+    $payload->nbf = $time;
+    $payload->exp = $time + ONCHAT_ACCESS_TOKEN_TTL;
+    $payload->ttl = ONCHAT_ACCESS_TOKEN_TTL;
+
+    return $payload;
+  }
+
+  /**
    * 颁发令牌
    *
    * @param TokenPayload $payload

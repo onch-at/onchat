@@ -33,15 +33,8 @@ class Auth
         return Result::create(Result::CODE_AUTH_EXPIRES);
       }
 
-      $time = time();
-
-      // 直接沿用续签令牌，只是修改一下时间
-      $payload->iat = $time;
-      $payload->nbf = $time;
-      $payload->exp = $time + ONCHAT_ACCESS_TOKEN_TTL;
-      $payload->ttl = ONCHAT_ACCESS_TOKEN_TTL;
-
-      $token = $this->tokenService->issue($payload);
+      $payload = $this->tokenService->refresh($payload);
+      $token   = $this->tokenService->issue($payload);
 
       return Result::success($token);
     } catch (\Exception $e) {

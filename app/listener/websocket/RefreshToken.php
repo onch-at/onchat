@@ -33,22 +33,12 @@ class RefreshToken extends SocketEventHandler
                 return $this->websocket->emit(SocketEvent::REFRESH_TOKEN, Result::create(Result::CODE_AUTH_EXPIRES));
             }
 
-            $time = time();
-
-            // 直接沿用续签令牌，只是修改一下时间
-            $payload->iat = $time;
-            $payload->nbf = $time;
-            $payload->exp = $time + ONCHAT_ACCESS_TOKEN_TTL;
-            $payload->ttl = ONCHAT_ACCESS_TOKEN_TTL;
+            $payload = $tokenService->refresh($payload);
+            $token   = $tokenService->issue($payload);
 
             $tokenExpireTable->set($this->fd, $payload->exp);
 
-            $token = $tokenService->issue($payload);
-
-            return $this->websocket->emit(SocketEvent::REFRESH_TOKEN, Result::success([
-                'accessToken' => $token,
-                'tokenTime'   => ONCHAT_ACCESS_TOKEN_TTL * 1000
-            ]));
+            return $this->websocket->emit(SocketEvent::REFRESH_TOKEN, Result::success($token));
         } catch (\Exception $e) {
             return $this->websocket->emit(SocketEvent::REFRESH_TOKEN, Result::create(Result::CODE_AUTH_EXPIRES));
         }

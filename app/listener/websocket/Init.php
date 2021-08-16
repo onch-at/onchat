@@ -33,10 +33,6 @@ class Init extends SocketEventHandler
     {
         ['accessToken' => $token] = $event;
 
-        if (!$token) {
-            return $this->websocket->emit(SocketEvent::INIT, Result::unauth());
-        }
-
         try {
             $payload = $tokenService->parse($token);
             $this->userTable->set($this->fd, $payload);
@@ -45,7 +41,6 @@ class Init extends SocketEventHandler
         }
 
         $userId    = $payload->sub;
-        $tokenTime = $payload->exp - time(); // token 有效期
         $chatrooms = $userService->getChatrooms($userId);
 
         $tokenExpireTable->set($this->fd, $payload->exp);
@@ -58,9 +53,7 @@ class Init extends SocketEventHandler
         // 加入用户房间
         $this->websocket->join(SocketRoomPrefix::USER . $userId);
 
-        $this->websocket->emit(SocketEvent::INIT, Result::success([
-            'tokenTime' => $tokenTime * 1000,
-        ]));
+        $this->websocket->emit(SocketEvent::INIT, Result::success());
 
         UserInfoModel::update([
             'login_time' => time() * 1000
