@@ -8,8 +8,6 @@ class SocketEvent
 {
   /** 初始化 */
   const INIT = 'init';
-  /** 刷新令牌 */
-  const REFRESH_TOKEN = 'refresh_token';
   /** 卸载时 */
   const UNLOAD = 'unload';
   /** 接收到消息时 */

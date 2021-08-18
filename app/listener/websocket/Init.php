@@ -11,17 +11,13 @@ use app\core\Result;
 use app\model\UserInfo as UserInfoModel;
 use app\service\Token as TokenService;
 use app\service\User as UserService;
-use app\table\TokenExpire as TokenExpireTable;
-use think\facade\Validate;
-use think\validate\ValidateRule;
+use think\Request;
 
 class Init extends SocketEventHandler
 {
     public function verify(array $data): bool
     {
-        return Validate::rule([
-            'accessToken' => ValidateRule::must(),
-        ])->check($data);
+        return true;
     }
 
     /**
@@ -29,21 +25,19 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(UserService $userService, TokenService $tokenService, TokenExpireTable $tokenExpireTable, array $event)
+    public function handle(UserService $userService, TokenService $tokenService, Request $request)
     {
-        ['accessToken' => $token] = $event;
-
         try {
-            $payload = $tokenService->parse($token);
-            $this->userTable->set($this->fd, $payload);
+            $payload = $tokenService->parse($request->param('token'));
         } catch (\Exception $e) {
-            return $this->websocket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
+            $this->websocket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
+            return $this->websocket->close();
         }
 
         $userId    = $payload->sub;
         $chatrooms = $userService->getChatrooms($userId);
 
-        $tokenExpireTable->set($this->fd, $payload->exp);
+        $this->userTable->set($this->fd, $payload);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {

@@ -11,7 +11,6 @@ use app\listener\websocket\FriendRequestReject;
 use app\listener\websocket\Init;
 use app\listener\websocket\InviteJoinChatroom;
 use app\listener\websocket\Message;
-use app\listener\websocket\RefreshToken;
 use app\listener\websocket\RevokeMessage;
 use app\listener\websocket\SocketEventDispatcher;
 use app\listener\websocket\Unload;
@@ -30,7 +29,7 @@ return [
     'websocket'  => [
         'enable'        => true,
         'handler'       => Handler::class,
-        'ping_interval' => 25000,
+        'ping_interval' => 30000,
         'ping_timeout'  => 60000,
         'room'          => [
             'type'  => 'table',
@@ -50,11 +49,11 @@ return [
             ],
         ],
         'listen' => [
+            'Connect'                   => Init::class,
             'Disconnect'                => Unload::class,
             'Close'                     => Unload::class,
             'Event'                     => SocketEventDispatcher::class,
             'Event:Init'                => Init::class,
-            'Event:RefreshToken'        => RefreshToken::class,
             'Event:Message'             => Message::class,
             'Event:RevokeMessage'       => RevokeMessage::class,
             'Event:FriendRequest'       => FriendRequest::class,
@@ -124,16 +123,6 @@ return [
                     'type' => Table::TYPE_STRING,
                     'size' => 30
                 ]
-            ]
-        ],
-        'token-expire' => [
-            'size'    => 8192,
-            'columns' => [
-                [
-                    'name' => 'expire',
-                    'type' => Table::TYPE_INT,
-                    'size' => 8
-                ],
             ]
         ],
         'throttle' => [
