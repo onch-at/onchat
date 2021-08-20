@@ -24,7 +24,6 @@ use app\util\Str as StrUtil;
 use think\Collection;
 use think\facade\Db;
 use think\facade\Request;
-use think\facade\Session;
 
 class User
 {
@@ -649,7 +648,6 @@ class User
         $mood          = Request::param('mood/d');
         $birthday      = Request::param('birthday/d');
         $gender        = Request::param('gender/d');
-        $age           = isset($birthday) ? DateUtil::getAge((int) $birthday / 1000) : null;
         $constellation = isset($birthday) ? DateUtil::getConstellation((int) $birthday / 1000) : null;
 
         if ($signature) {
@@ -678,7 +676,6 @@ class User
             'mood'          => $mood,
             'birthday'      => $birthday,
             'gender'        => $gender,
-            'age'           => $age,
             'constellation' => $constellation,
         ], [
             'user_id' => $userId

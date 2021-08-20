@@ -27,8 +27,14 @@ class Init extends SocketEventHandler
      */
     public function handle(UserService $userService, TokenService $tokenService, Request $request)
     {
+        $token = $request->param('token');
+
+        if (!$token) {
+            return $this->websocket->close();
+        }
+
         try {
-            $payload = $tokenService->parse($request->param('token'));
+            $payload = $tokenService->parse($token);
         } catch (\Exception $e) {
             $this->websocket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
             return $this->websocket->close();

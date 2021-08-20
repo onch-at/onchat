@@ -17,30 +17,6 @@ class Date
     }
 
     /**
-     * 通过生日获得年龄
-     *
-     * @param integer $birthday 生日时间戳
-     * @return integer
-     */
-    public static function getAge(int $birthday): int
-    {
-        $birthday = getdate($birthday);
-        $bYear = $birthday['year'];
-        $bMonth = $birthday['mon'];
-        $bDay = $birthday['mday'];
-
-        $today = getdate();
-        $tYear = $today['year'];
-        $tMonth = $today['mon'];
-        $tDay = $today['mday'];
-
-        $age = $tYear - $bYear; // 获得岁数(未考虑月，日)
-
-        // 如果当月还没到生日月 or 如果当月就是生日月，且当天仍未到生日
-        return ($tMonth < $bMonth) || ($tMonth == $bMonth && $tDay < $bDay) ? --$age : $age;
-    }
-
-    /**
      * 通过生日获得星座编号
      *
      * @param integer $birthday 生日时间戳

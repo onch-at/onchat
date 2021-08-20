@@ -24,20 +24,20 @@ class Unload extends SocketEventHandler
     {
         $user = $this->getUser();
 
-        if (!$user) return false;
+        if ($user) {
+            $userId = $user['id'];
 
-        $userId = $user['id'];
+            $this->userTable->del($this->fd);
+            $this->throttleTable->del($userId);
 
-        $this->userTable->del($this->fd);
-        $this->throttleTable->del($userId);
+            $chatrooms = $userService->getChatrooms($userId);
 
-        $chatrooms = $userService->getChatrooms($userId);
+            // 退出房间
+            foreach ($chatrooms as $chatroom) {
+                $this->websocket->leave(SocketRoomPrefix::CHATROOM . $chatroom->id);
+            }
 
-        // 退出房间
-        foreach ($chatrooms as $chatroom) {
-            $this->websocket->leave(SocketRoomPrefix::CHATROOM . $chatroom->id);
-        }
-
-        $this->websocket->leave(SocketRoomPrefix::USER . $userId);
+            $this->websocket->leave(SocketRoomPrefix::USER . $userId);
+        };
     }
 }

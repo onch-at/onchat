@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS user_info (
     login_time       BIGINT       UNSIGNED NOT NULL COMMENT '登录时间',
     birthday         BIGINT                    NULL COMMENT '生日',
     gender           TINYINT(1)   UNSIGNED     NULL COMMENT '性别',
-    age              TINYINT(1)   UNSIGNED     NULL COMMENT '年龄',
     constellation    TINYINT(1)   UNSIGNED     NULL COMMENT '星座',
     avatar           VARCHAR(256)          NOT NULL COMMENT '头像',
     background_image VARCHAR(256)          NOT NULL COMMENT '背景图',
