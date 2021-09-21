@@ -80,6 +80,18 @@ class ChatRecord
                 if (!isset($item->nickname)) {
                     $item->nickname = UserService::getUsernameById($item->user_id);
                 }
+
+                if ($item->reply_id) {
+                    $item->reply = ChatRecordModel::opt($chatroomId)
+                        ->alias('chat_record')
+                        ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $chatroomId)
+                        ->field([
+                            'chat_member.role',
+                            'chat_member.nickname',
+                            'chat_record.*',
+                        ])
+                        ->find($item->reply_id);
+                }
             }
 
             switch ($item->type) {
@@ -123,6 +135,25 @@ class ChatRecord
         $nickname = UserService::getNicknameInChatroom($userId, $chatroomId);
         if (!$nickname) { // 如果拿不到就说明当前用户不在这个聊天室
             return Result::create(Result::CODE_NO_PERMISSION);
+        }
+
+        // 如果找不到回复的消息
+        if ($message->replyId) {
+            $reply = ChatRecordModel::opt($chatroomId)
+                ->alias('chat_record')
+                ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $chatroomId)
+                ->field([
+                    'chat_member.role',
+                    'chat_member.nickname',
+                    'chat_record.*',
+                ])
+                ->find($message->replyId);
+
+            if (!$reply) {
+                return Result::create(Result::CODE_PARAM_ERROR);
+            }
+
+            $message->reply = $reply;
         }
 
         // 启动事务

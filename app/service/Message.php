@@ -8,7 +8,6 @@ use HTMLPurifier;
 use HTMLPurifier_Config as HTMLPurifierConfig;
 use app\constant\MessageType;
 use app\core\Result;
-use app\entity\ChatInvitationMessage;
 use app\entity\Message as MessageEntity;
 use app\entity\RichTextMessage;
 use app\entity\TextMessage;
@@ -95,7 +94,7 @@ class Message
 
         $message->userId     = $msg['userId'];
         $message->chatroomId = $msg['chatroomId'];
-        $message->replyId    = $msg['replyId'] ?? null;
+        $message->replyId    = isset($msg['replyId']) && is_int($msg['replyId']) ? $msg['replyId'] : null;
         $message->tempId     = $msg['tempId'];
 
         return Result::success($message);

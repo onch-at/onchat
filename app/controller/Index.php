@@ -36,16 +36,7 @@ class Index
 
     public function index()
     {
-        return 66666;
-        // dump(TokenService::instance()->cookie->get());
-        // /** @var Token */
-        // $tokenService = app(Token::class);
-        // $payload = $tokenService->generate(1, ONCHAT_ACCESS_TOKEN_TTL);
-        // $payload->usr = [
-        //     'username' => 'HyperLife1119',
-        // ];
-        // $tokenService->issue(ONCHAT_ACCESS_TOKEN, $payload);
-        // $tokenService->issue(ONCHAT_REFRESH_TOKEN, $tokenService->generate(1, ONCHAT_REFRESH_TOKEN_TTL));
+        dump(null ?? 666);
     }
 
     /**
