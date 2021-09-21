@@ -25,7 +25,7 @@ class ImageFile
     {
 
         $image = $request->file('image');
-        $mine = $image->getOriginalMime();
+        $mine = $image->getMime();
 
         if (!stristr($mine, 'image/')) {
             return Result::create(Result::CODE_PARAM_ERROR, '文件格式错误，仅接受图片文件')->toJson();

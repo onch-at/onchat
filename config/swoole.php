@@ -50,7 +50,6 @@ return [
         ],
         'listen' => [
             'Connect'                   => Init::class,
-            'Disconnect'                => Unload::class,
             'Close'                     => Unload::class,
             'Event'                     => SocketEventDispatcher::class,
             'Event:Init'                => Init::class,

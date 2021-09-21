@@ -25,7 +25,7 @@ class VoiceFile
     {
 
         $voice = $request->file('voice');
-        $mine = $voice->getOriginalMime();
+        $mine = $voice->getMime();
 
         if (!stristr($mine, 'audio/')) {
             return Result::create(Result::CODE_PARAM_ERROR, '文件格式错误，仅接受音频文件')->toJson();

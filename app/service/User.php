@@ -61,7 +61,6 @@ class User
         'user_info.login_time',
         'user_info.birthday',
         'user_info.gender',
-        'user_info.age',
         'user_info.constellation',
         'user_info.avatar',
         'user_info.background_image',
