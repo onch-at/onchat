@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\middleware;
 
+use Swoole\StringObject;
 use app\core\Result;
 use think\Request;
 use think\Response;
@@ -27,7 +28,7 @@ class VoiceFile
         $voice = $request->file('voice');
         $mine = $voice->getMime();
 
-        if (!stristr($mine, 'audio/')) {
+        if (!stristr($mine, 'video/webm') && !stristr($mine, 'audio/')) {
             return Result::create(Result::CODE_PARAM_ERROR, '文件格式错误，仅接受音频文件')->toJson();
         }
 
