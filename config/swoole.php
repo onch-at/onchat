@@ -12,6 +12,9 @@ use app\listener\websocket\Init;
 use app\listener\websocket\InviteJoinChatroom;
 use app\listener\websocket\Message;
 use app\listener\websocket\RevokeMessage;
+use app\listener\websocket\RtcCall;
+use app\listener\websocket\RtcData;
+use app\listener\websocket\RtcHangUp;
 use app\listener\websocket\SocketEventDispatcher;
 use app\listener\websocket\Unload;
 use think\swoole\websocket\socketio\Handler;
@@ -63,6 +66,9 @@ return [
             'Event:ChatRequest'         => ChatRequest::class,
             'Event:ChatRequestAgree'    => ChatRequestAgree::class,
             'Event:ChatRequestReject'   => ChatRequestReject::class,
+            'Event:RtcCall'             => RtcCall::class,
+            'Event:RtcHangUp'           => RtcHangUp::class,
+            'Event:RtcData'             => RtcData::class,
         ],
         'subscribe'     => [],
     ],

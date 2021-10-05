@@ -30,4 +30,10 @@ class SocketEvent
   const CHAT_REQUEST_AGREE = 'chat_request_agree';
   /** 拒绝加群申请 */
   const CHAT_REQUEST_REJECT = 'chat_request_reject';
+  /** RTC 相关数据 */
+  const RTC_DATA = 'rtc_data';
+  /** RTC 呼叫 */
+  const RTC_CALL = 'rtc_call';
+  /** RTC 挂断 */
+  const RTC_HANG_UP = 'rtc_hang_up';
 }
