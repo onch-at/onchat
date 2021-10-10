@@ -36,4 +36,6 @@ class SocketEvent
   const RTC_CALL = 'rtc_call';
   /** RTC 挂断 */
   const RTC_HANG_UP = 'rtc_hang_up';
+  /** RTC 繁忙 */
+  const RTC_BUSY = 'rtc_busy';
 }

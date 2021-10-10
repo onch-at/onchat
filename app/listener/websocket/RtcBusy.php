@@ -11,7 +11,7 @@ use app\core\Result;
 use think\facade\Validate;
 use think\validate\ValidateRule;
 
-class RtcHangUp extends SocketEventHandler
+class RtcBusy extends SocketEventHandler
 {
 
     public function verify(array $data): bool
@@ -32,6 +32,6 @@ class RtcHangUp extends SocketEventHandler
 
         $this->websocket
             ->to(SocketRoomPrefix::USER . $event['targetId'])
-            ->emit(SocketEvent::RTC_HANG_UP, Result::success($event));
+            ->emit(SocketEvent::RTC_BUSY, Result::success($event));
     }
 }
