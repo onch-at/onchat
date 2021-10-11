@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\listener\websocket;
 
+use app\constant\SocketEvent;
 use app\contract\SocketEventHandler;
 use app\core\Result;
 use app\table\Throttle as ThrottleTable;
@@ -65,8 +66,8 @@ class SocketEventDispatcher
         $user = $this->getUser();
 
         if ($user) {
-            // 检测频率
-            if (!$this->throttleTable->try($user['id'])) {
+            // 检测频率，排除 RTC 传输数据的情况
+            if ($event->type !== SocketEvent::RTC_DATA && !$this->throttleTable->try($user['id'])) {
                 return $this->websocket->emit($event->type, Result::create(Result::CODE_ACCESS_OVERCLOCK));
             }
 

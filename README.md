@@ -6,6 +6,7 @@ You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the On
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
 OnChat currently supports the following chat modes:
+
 - Text Message
 - Rich text message
 - Picture message
