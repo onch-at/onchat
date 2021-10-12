@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\core;
 
 use Swoole\Http\Status;
-use app\util\Arr as ArrUtil;
+use app\utils\Arr as ArrUtils;
 use think\Collection;
 use think\Model;
 use think\response\Json;
@@ -51,9 +51,9 @@ class Result
         $this->msg  = $msg ?? self::CODE_PHRASES[$code];
 
         if ($data instanceof Collection || $data instanceof Model) {
-            $this->data = ArrUtil::keyToCamel($data->toArray());
+            $this->data = ArrUtils::keyToCamel($data->toArray());
         } else if (is_array($data)) {
-            $this->data = ArrUtil::keyToCamel($data);
+            $this->data = ArrUtils::keyToCamel($data);
         } else {
             $this->data = $data;
         }

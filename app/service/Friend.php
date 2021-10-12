@@ -12,7 +12,7 @@ use app\model\ChatMember as ChatMemberModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\FriendRequest as FriendRequestModel;
 use app\model\UserInfo as UserInfoModel;
-use app\util\Str as StrUtil;
+use app\utils\Str as StrUtils;
 use think\facade\Db;
 
 class Friend
@@ -45,22 +45,22 @@ class Friend
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::isEmpty($reason)) {
+        if ($reason && StrUtils::isEmpty($reason)) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && StrUtil::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
+        if ($reason && StrUtils::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
             return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($targetAlias && StrUtil::isEmpty($targetAlias)) {
+        if ($targetAlias && StrUtils::isEmpty($targetAlias)) {
             $targetAlias = null;
         }
 
         // 如果别名长度超出
-        if ($targetAlias && StrUtil::length($targetAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
+        if ($targetAlias && StrUtils::length($targetAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
             return Result::create(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
@@ -249,12 +249,12 @@ class Friend
     public function agree(int $requestId, int $targetId, string $requesterAlias = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($requesterAlias && StrUtil::isEmpty($requesterAlias)) {
+        if ($requesterAlias && StrUtils::isEmpty($requesterAlias)) {
             $requesterAlias = null;
         }
 
         // 如果别名长度超出
-        if ($requesterAlias && StrUtil::length($requesterAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
+        if ($requesterAlias && StrUtils::length($requesterAlias) > ONCHAT_NICKNAME_MAX_LENGTH) {
             return Result::create(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
         }
 
@@ -343,12 +343,12 @@ class Friend
     public function reject(int $requestId, int $targetId, string $reason = null): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::isEmpty($reason)) {
+        if ($reason && StrUtils::isEmpty($reason)) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && StrUtil::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
+        if ($reason && StrUtils::length($reason) > ONCHAT_REASON_MAX_LENGTH) {
             return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
@@ -452,10 +452,10 @@ class Friend
         $userId = UserService::getId();
 
         // 如果有传入别名
-        if ($alias && !StrUtil::isEmpty($alias)) {
+        if ($alias && !StrUtils::isEmpty($alias)) {
             $alias = trim($alias);
             // 如果别名长度超出
-            if (StrUtil::length($alias) > ONCHAT_NICKNAME_MAX_LENGTH) {
+            if (StrUtils::length($alias) > ONCHAT_NICKNAME_MAX_LENGTH) {
                 return Result::create(self::CODE_ALIAS_LONG, self::MSG[self::CODE_ALIAS_LONG]);
             }
         } else {

@@ -11,7 +11,7 @@ use app\core\Result;
 use app\entity\Message as MessageEntity;
 use app\entity\RichTextMessage;
 use app\entity\TextMessage;
-use app\util\Str as StrUtil;
+use app\utils\Str as StrUtils;
 
 class Message
 {
@@ -30,11 +30,11 @@ class Message
             case MessageType::TEXT:
                 $content = $msg['data']['content'];
 
-                if (StrUtil::isEmpty($content)) {
+                if (StrUtils::isEmpty($content)) {
                     return Result::create(Result::CODE_PARAM_ERROR);
                 }
 
-                if (StrUtil::length($content) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
+                if (StrUtils::length($content) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
                     return Result::create(Result::CODE_PARAM_ERROR, '文本消息长度过长');
                 }
 
@@ -45,11 +45,11 @@ class Message
             case MessageType::RICH_TEXT:
                 ['html' => $html, 'text' => $text] = $msg['data'];
 
-                if (StrUtil::isEmpty($text)) {
+                if (StrUtils::isEmpty($text)) {
                     return Result::create(Result::CODE_PARAM_ERROR);
                 }
 
-                if (StrUtil::length($text) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
+                if (StrUtils::length($text) > ONCHAT_TEXT_MSG_MAX_LENGTH) {
                     return Result::create(Result::CODE_PARAM_ERROR, '文本消息长度过长');
                 }
 

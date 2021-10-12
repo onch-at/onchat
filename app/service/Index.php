@@ -8,8 +8,8 @@ use app\constant\SessionKey;
 use app\core\Result;
 use app\job\SendMail as JobSendMail;
 use app\model\User as UserModel;
-use app\util\File as FileUtil;
-use app\util\Str as StrUtil;
+use app\utils\File as FileUtils;
+use app\utils\Str as StrUtils;
 use think\Config;
 use think\Queue;
 use think\Session;
@@ -66,7 +66,7 @@ class Index
             return Result::success(false);
         }
 
-        if (StrUtil::length($email) > ONCHAT_EMAIL_MAX_LENGTH) {
+        if (StrUtils::length($email) > ONCHAT_EMAIL_MAX_LENGTH) {
             return Result::success(false);
         }
 
@@ -77,7 +77,7 @@ class Index
             return Result::success(false);
         }
 
-        $captcha = StrUtil::captcha(6);
+        $captcha = StrUtils::captcha(6);
 
         $this->session->set(SessionKey::EMAIL_CAPTCHA, [
             'captcha' => password_hash(strtolower($captcha), PASSWORD_DEFAULT),
@@ -92,7 +92,7 @@ class Index
             'addresses' => [$email],
             'isHTML'    => true,
             'subject'   => 'OnChat：电子邮箱验证',
-            'body'      => StrUtil::assign(FileUtil::read($path), ['captcha' => $captcha]),
+            'body'      => StrUtils::assign(FileUtils::read($path), ['captcha' => $captcha]),
             'altBody'   => null
         ]);
 

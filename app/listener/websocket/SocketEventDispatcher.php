@@ -9,7 +9,7 @@ use app\contract\SocketEventHandler;
 use app\core\Result;
 use app\table\Throttle as ThrottleTable;
 use app\table\User as UserTable;
-use app\util\Str as StrUtil;
+use app\utils\Str as StrUtils;
 use think\Config;
 use think\Container;
 use think\facade\Event;
@@ -74,7 +74,7 @@ class SocketEventDispatcher
             // do something...
         }
 
-        $eventName    = StrUtil::studly($event->type);
+        $eventName    = StrUtils::studly($event->type);
         $eventData    = $event->data[0];
         $handlerClass = $this->config->get('swoole.websocket.listen.Event:' . $eventName);
 

@@ -18,9 +18,9 @@ use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
-use app\util\Date as DateUtil;
-use app\util\File as FileUtil;
-use app\util\Str as StrUtil;
+use app\utils\Date as DateUtils;
+use app\utils\File as FileUtils;
+use app\utils\Str as StrUtils;
 use think\Container;
 use think\facade\Db;
 use think\facade\Request;
@@ -83,7 +83,7 @@ class Chatroom
     {
         $name = trim($name);
         // 如果长度超出
-        if (StrUtil::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
+        if (StrUtils::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
             return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
         }
 
@@ -105,10 +105,10 @@ class Chatroom
     public function setNickname(int $id, ?string $nickname): Result
     {
         // 如果有传入昵称
-        if ($nickname && !StrUtil::isEmpty($nickname)) {
-            $nickname = StrUtil::trimAll($nickname);
+        if ($nickname && !StrUtils::isEmpty($nickname)) {
+            $nickname = StrUtils::trimAll($nickname);
             // 如果昵称长度超出
-            if (StrUtil::length($nickname) > ONCHAT_NICKNAME_MAX_LENGTH) {
+            if (StrUtils::length($nickname) > ONCHAT_NICKNAME_MAX_LENGTH) {
                 return Result::create(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符');
             }
         } else {
@@ -188,14 +188,14 @@ class Chatroom
         if ($name) {
             $name = trim($name);
             // 如果长度超出
-            if (StrUtil::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
+            if (StrUtils::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
                 return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
             }
         }
 
         if ($description) {
             $description = trim($description);
-            $length = StrUtil::length($description);
+            $length = StrUtils::length($description);
             // 如果长度超出
             if ($length < ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH || $length > ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH) {
                 return Result::create(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH  . '~' . ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH  . '位字符之间');
@@ -227,7 +227,7 @@ class Chatroom
             // 根据用户ID创建哈希头像
             $imageData = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
             $path      = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
-            $file      = md5((string) DateUtil::now()) . '.png';
+            $file      = md5((string) DateUtils::now()) . '.png';
             $result    = $storage->save($path, $file, $imageData);
 
             if ($result->isError()) {
@@ -419,7 +419,7 @@ class Chatroom
             $storage = Storage::create();
             $image   = Request::file('image');
             $path    = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
-            $file    = $image->md5() . '.' . FileUtil::getExtension($image);
+            $file    = $image->md5() . '.' . FileUtils::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);

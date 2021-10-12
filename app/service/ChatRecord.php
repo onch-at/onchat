@@ -19,7 +19,7 @@ use app\model\ChatRecord as ChatRecordModel;
 use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
-use app\util\File as FileUtil;
+use app\utils\File as FileUtils;
 use think\Container;
 use think\facade\Db;
 use think\facade\Request;
@@ -298,7 +298,7 @@ class ChatRecord
         try {
             $storage = Storage::create();
             $path    = $storage->getRootPath() . 'image/';
-            $file    = $image->md5() . '.' . FileUtil::getExtension($image);
+            $file    = $image->md5() . '.' . FileUtils::getExtension($image);
             $result  = $storage->save($path, $file, $image);
 
             if ($result->isError()) {

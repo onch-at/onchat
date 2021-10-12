@@ -14,7 +14,7 @@ use app\model\ChatRequest as ChatRequestModel;
 use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
-use app\util\Str as StrUtil;
+use app\utils\Str as StrUtils;
 use think\facade\Db;
 
 class Chat
@@ -95,12 +95,12 @@ class Chat
         }
 
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::isEmpty($reason)) {
+        if ($reason && StrUtils::isEmpty($reason)) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && StrUtil::length($reason) > self::REASON_MAX_LENGTH) {
+        if ($reason && StrUtils::length($reason) > self::REASON_MAX_LENGTH) {
             return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 
@@ -264,12 +264,12 @@ class Chat
     public function reject(int $id, int $handler, ?string $reason): Result
     {
         // 如果剔除空格后长度为零，则直接置空
-        if ($reason && StrUtil::isEmpty($reason)) {
+        if ($reason && StrUtils::isEmpty($reason)) {
             $reason = null;
         }
 
         // 如果附加消息长度超出
-        if ($reason && StrUtil::length($reason) > self::REASON_MAX_LENGTH) {
+        if ($reason && StrUtils::length($reason) > self::REASON_MAX_LENGTH) {
             return Result::create(self::CODE_REASON_LONG, self::MSG[self::CODE_REASON_LONG]);
         }
 

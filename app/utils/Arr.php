@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\util;
+namespace app\utils;
 
 use think\helper\Arr as ArrHelper;
 use think\helper\Str;

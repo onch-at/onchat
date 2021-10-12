@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace app\command;
 
 use app\facade\ChatroomService;
-use app\util\File as FileUtil;
-use app\util\Str as StrUtil;
+use app\utils\File as FileUtils;
+use app\utils\Str as StrUtils;
 use think\console\input\Argument;
 use think\console\input\Option;
 use think\facade\Config;
@@ -65,14 +65,14 @@ class OnChat extends ServerCommand
         $password = $config['password'];
         $database = $config['database'];
 
-        $sql = FileUtil::read(resource_path('sql') . 'database.sql', false); // 创建数据库的SQL
+        $sql = FileUtils::read(resource_path('sql') . 'database.sql', false); // 创建数据库的SQL
 
         $this->output->comment('Connecting to database…');
 
         $dbh = new \PDO("mysql:host={$host};port={$port}", $username, $password);
 
         $this->output->comment('Attempting to create database: ' . $database);
-        $dbh->exec(StrUtil::assign($sql, ['database' => $database]));
+        $dbh->exec(StrUtils::assign($sql, ['database' => $database]));
 
         $path = resource_path('sql/table');
         $dir  = scandir($path);
@@ -86,12 +86,12 @@ class OnChat extends ServerCommand
         });
 
         foreach ($dir as $file) {
-            $sql = FileUtil::read($path . $file, false);
+            $sql = FileUtils::read($path . $file, false);
 
             switch ($file) {
                 case 'chat-record.sql': // 如果是消息记录表，则需要生成分表
                     for ($i = 0; $i < 10; $i++) {
-                        $dbh->exec(StrUtil::assign($sql, ['index' => $i]));
+                        $dbh->exec(StrUtils::assign($sql, ['index' => $i]));
                     }
                     break;
 

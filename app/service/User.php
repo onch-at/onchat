@@ -18,9 +18,9 @@ use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
-use app\util\Date as DateUtil;
-use app\util\File as FileUtil;
-use app\util\Str as StrUtil;
+use app\utils\Date as DateUtils;
+use app\utils\File as FileUtils;
+use app\utils\Str as StrUtils;
 use think\Collection;
 use think\facade\Db;
 use think\facade\Request;
@@ -111,8 +111,8 @@ class User
             return Result::create(Result::CODE_PARAM_ERROR, '验证码错误！');
         }
 
-        $username = StrUtil::trimAll($username);
-        $password = StrUtil::trimAll($password);
+        $username = StrUtils::trimAll($username);
+        $password = StrUtils::trimAll($password);
 
         if (!preg_match(ONCHAT_USERNAME_PATTERN, $username)) {
             return Result::create(Result::CODE_PARAM_ERROR, '用户名格式不规范！');
@@ -151,7 +151,7 @@ class User
             $imageData = $identicon->getImageData($user->id, 256, null, '#f5f5f5');
 
             $path = $storage->getRootPath() . 'avatar/user/' . $user->id . '/';
-            $file = md5((string) DateUtil::now()) . '.png';
+            $file = md5((string) DateUtils::now()) . '.png';
 
             $result = $storage->save($path, $file, $imageData);
 
@@ -271,7 +271,7 @@ class User
             return Result::create(Result::CODE_PARAM_ERROR, self::MSG[self::CODE_PASSWORD_ERROR]);
         }
 
-        $newPassword = StrUtil::trimAll($newPassword);
+        $newPassword = StrUtils::trimAll($newPassword);
         $hash = password_hash($newPassword, PASSWORD_DEFAULT);
 
         if (!$hash) { // 如果密码散列创建失败
@@ -333,7 +333,7 @@ class User
             return Result::create(Result::CODE_PARAM_ERROR, '验证码错误！');
         }
 
-        $password = StrUtil::trimAll($password);
+        $password = StrUtils::trimAll($password);
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
         if (!$hash) { // 如果密码散列创建失败
@@ -485,7 +485,7 @@ class User
      */
     public function checkPassword(string $password): int
     {
-        $length = StrUtil::length($password);
+        $length = StrUtils::length($password);
 
         if ($length < ONCHAT_PASSWORD_MIN_LENGTH || $length > ONCHAT_PASSWORD_MAX_LENGTH) {
             return self::CODE_PASSWORD_IRREGULAR;
@@ -507,7 +507,7 @@ class User
             $storage = Storage::create();
             $image   = Request::file('image');
             $path    = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
-            $file    = $image->md5() . '.' . FileUtil::getExtension($image);
+            $file    = $image->md5() . '.' . FileUtils::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
@@ -647,15 +647,15 @@ class User
         $mood          = Request::param('mood/d');
         $birthday      = Request::param('birthday/d');
         $gender        = Request::param('gender/d');
-        $constellation = isset($birthday) ? DateUtil::getConstellation((int) $birthday / 1000) : null;
+        $constellation = isset($birthday) ? DateUtils::getConstellation((int) $birthday / 1000) : null;
 
         if ($signature) {
-            if (StrUtil::isEmpty($signature)) {
+            if (StrUtils::isEmpty($signature)) {
                 $signature = null;
             } else {
                 $signature = trim($signature);
 
-                if (StrUtil::length($signature) > ONCHAT_SIGNATURE_MAX_LENGTH) {
+                if (StrUtils::length($signature) > ONCHAT_SIGNATURE_MAX_LENGTH) {
                     return Result::create(self::CODE_SIGNATURE_IRREGULAR, self::MSG[self::CODE_SIGNATURE_IRREGULAR]);
                 }
             }

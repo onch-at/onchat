@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\util;
+namespace app\utils;
 
 use Mimey\MimeTypes;
 use Swoole\Coroutine\System;
