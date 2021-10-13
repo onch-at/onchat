@@ -21,12 +21,6 @@ class Local implements StorageDriver
         $this->filesystem = $filesystem;
     }
 
-    private function getRoot()
-    {
-        $type = $this->filesystem->getDefaultDriver();
-        return $this->filesystem->getDiskConfig($type, 'root') . DIRECTORY_SEPARATOR;
-    }
-
     public function getRootPath(): string
     {
         return '';
@@ -46,7 +40,7 @@ class Local implements StorageDriver
                 break;
 
             case !ctype_print($data): // 如果是二进制数据
-                $result = file_put_contents($this->getRoot() . $filename, $data);
+                $result = $this->filesystem->put($filename, $data);
 
                 if ($result === false) {
                     return Result::unknown();
@@ -62,7 +56,7 @@ class Local implements StorageDriver
                 break;
 
             case is_string($data):
-                $result = file_put_contents($this->getRoot() . $filename, $data);
+                $result = $this->filesystem->put($filename, $data);
 
                 if ($result === false) {
                     return Result::unknown();
@@ -75,14 +69,8 @@ class Local implements StorageDriver
 
     public function clear(string $path, int $count): void
     {
-        $path = $this->getRoot() . $path;
-
-        $dir = array_map(function ($o) use ($path) {
-            return $path . $o;
-        }, scandir($path));
-
-        $dir = array_filter($dir, function ($o) {
-            return is_file($o);
+        $dir = array_filter($this->filesystem->listContents($path), function ($o) {
+            return $o['type'] === 'file';
         });
 
         $num = count($dir);
@@ -90,33 +78,34 @@ class Local implements StorageDriver
         if ($num > $count) {
             // 按照时间进行升序
             usort($dir, function ($a, $b) {
-                return filemtime($a) - filemtime($b);
+                return $a['timestamp'] - $b['timestamp'];
             });
 
             $num -= $count;
             for ($i = 0; $i < $num; $i++) {
-                unlink($dir[$i]);
+                $this->filesystem->delete($dir[$i]['path']);
             }
         }
     }
 
     function delete(string $filename): Result
     {
-        return Result::create(unlink($filename) ? Result::CODE_SUCCESS : Result::CODE_UNKNOWN_ERROR);
+        $result = $this->filesystem->delete($filename);
+        return Result::create($result ? Result::CODE_SUCCESS : Result::CODE_UNKNOWN_ERROR);
     }
 
     public function exist(string $filename): Result
     {
-        return Result::success(file_exists($filename));
+        return Result::success($this->filesystem->has($filename));
     }
 
-    function getUrl(string $filename): string
+    public function getUrl(string $filename): string
     {
         $type = $this->filesystem->getDefaultDriver();
         return '/onchat' . $this->filesystem->getDiskConfig($type, 'url') . '/' . $filename;
     }
 
-    function getThumbnailUrl(string $filename): string
+    public function getThumbnailUrl(string $filename): string
     {
         $type = $this->filesystem->getDefaultDriver();
         return '/onchat' . $this->filesystem->getDiskConfig($type, 'url') . '/' . $filename;
