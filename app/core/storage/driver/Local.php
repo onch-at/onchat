@@ -102,12 +102,11 @@ class Local implements StorageDriver
     public function getUrl(string $filename): string
     {
         $type = $this->filesystem->getDefaultDriver();
-        return '/onchat' . $this->filesystem->getDiskConfig($type, 'url') . '/' . $filename;
+        return $this->filesystem->getDiskConfig($type, 'url') . '/' . $filename;
     }
 
     public function getThumbnailUrl(string $filename): string
     {
-        $type = $this->filesystem->getDefaultDriver();
-        return '/onchat' . $this->filesystem->getDiskConfig($type, 'url') . '/' . $filename;
+        return $this->getUrl($filename);
     }
 }
