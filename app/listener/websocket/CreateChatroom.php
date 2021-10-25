@@ -22,7 +22,7 @@ class CreateChatroom extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -37,7 +37,7 @@ class CreateChatroom extends SocketEventHandler
         $this->websocket->emit(SocketEvent::CREATE_CHATROOM, $result);
 
         if ($result->isSuccess()) {
-            $this->websocket->join(SocketRoomPrefix::CHATROOM . $result->data['data']['chatroomId']);
+            $this->websocket->join(SocketRoomPrefix::CHATROOM.$result->data['data']['chatroomId']);
         }
     }
 }

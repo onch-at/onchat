@@ -20,7 +20,7 @@ use think\swoole\websocket\Event as WebsocketEvent;
  * Socket.io 事件分发器
  * 由于think-swoole v3.1.0更新了socket.io，
  * 所有socket event集中发射到swoole.websocket.Event，
- * 因此我们需要自行分发事件
+ * 因此我们需要自行分发事件.
  */
 class SocketEventDispatcher
 {
@@ -32,22 +32,22 @@ class SocketEventDispatcher
     protected $config;
 
     public function __construct(
-        Websocket     $websocket,
-        UserTable     $userTable,
+        Websocket $websocket,
+        UserTable $userTable,
         ThrottleTable $throttleTable,
-        Container     $container,
-        Config        $config
+        Container $container,
+        Config $config
     ) {
-        $this->websocket     = $websocket;
-        $this->fd            = $websocket->getSender();
-        $this->userTable     = $userTable;
+        $this->websocket = $websocket;
+        $this->fd = $websocket->getSender();
+        $this->userTable = $userTable;
         $this->throttleTable = $throttleTable;
-        $this->container     = $container;
-        $this->config        = $config;
+        $this->container = $container;
+        $this->config = $config;
     }
 
     /**
-     * 获取当前user
+     * 获取当前user.
      *
      * @return array|false
      */
@@ -57,7 +57,7 @@ class SocketEventDispatcher
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -74,9 +74,9 @@ class SocketEventDispatcher
             // do something...
         }
 
-        $eventName    = StrUtils::studly($event->type);
-        $eventData    = $event->data[0];
-        $handlerClass = $this->config->get('swoole.websocket.listen.Event:' . $eventName);
+        $eventName = StrUtils::studly($event->type);
+        $eventData = $event->data[0];
+        $handlerClass = $this->config->get('swoole.websocket.listen.Event:'.$eventName);
 
         // 如果没有这个事件处理类
         if (!$handlerClass) {
@@ -91,6 +91,6 @@ class SocketEventDispatcher
             return $this->websocket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
         }
 
-        Event::trigger('swoole.websocket.Event:' . $eventName,  $eventData);
+        Event::trigger('swoole.websocket.Event:'.$eventName, $eventData);
     }
 }

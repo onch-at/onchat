@@ -9,14 +9,13 @@ use app\core\storage\Storage;
 use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRecord as ChatRecordModel;
-use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
+use app\model\ChatSession as ChatSessionModel;
 
 class ChatSession
 {
-
     /**
-     * 获取该用户的聊天会话
+     * 获取该用户的聊天会话.
      *
      * @return Result
      */
@@ -32,7 +31,7 @@ class ChatSession
         $data = ChatSessionModel::leftJoin('chatroom', 'chat_session.data->chatroomId = chatroom.id')
             ->where([
                 'chat_session.user_id' => $userId,
-                'chat_session.visible' => true
+                'chat_session.visible' => true,
             ])
             ->field([
                 'chat_session.id',
@@ -80,7 +79,7 @@ class ChatSession
                     }
 
                     $table = ChatRecordModel::getTableNameById($chatroomId);
-                    $on = 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id = ' . $chatroomId;
+                    $on = 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id = '.$chatroomId;
 
                     if (!$query) {
                         $query = ChatRecordModel::opt($chatroomId)
@@ -123,7 +122,7 @@ class ChatSession
             $friendInfo = ChatMemberModel::join('user_info', 'chat_member.user_id = user_info.user_id')
                 ->where([
                     ['chat_member.chatroom_id', 'IN', $privateChatroomIdList],
-                    ['chat_member.user_id', '<>', $userId]
+                    ['chat_member.user_id', '<>', $userId],
                 ])
                 ->field([
                     'chat_member.chatroom_id',
@@ -162,10 +161,11 @@ class ChatSession
     }
 
     /**
-     * 置顶聊天会话
+     * 置顶聊天会话.
      *
-     * @param integer $id 会话ID
-     * @param boolean $sticky
+     * @param int  $id     会话ID
+     * @param bool $sticky
+     *
      * @return Result
      */
     public function sticky(int $id, $sticky = true): Result
@@ -174,16 +174,17 @@ class ChatSession
 
         ChatSessionModel::update(['sticky' => $sticky], [
             'id'      => $id,
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
 
         return Result::success();
     }
 
     /**
-     * 取消置顶聊天会话
+     * 取消置顶聊天会话.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function unsticky(int $id): Result
@@ -192,10 +193,11 @@ class ChatSession
     }
 
     /**
-     * 将聊天会话设置为已读
+     * 将聊天会话设置为已读.
      *
-     * @param integer $id
-     * @param integer $unread
+     * @param int $id
+     * @param int $unread
+     *
      * @return Result
      */
     public function readed(int $id, int $unread = 0): Result
@@ -204,16 +206,17 @@ class ChatSession
 
         ChatSessionModel::update(['unread' => $unread], [
             'id'      => $id,
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
 
         return Result::success();
     }
 
     /**
-     * 将聊天会话设置为未读
+     * 将聊天会话设置为未读.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function unread(int $id): Result
@@ -222,9 +225,10 @@ class ChatSession
     }
 
     /**
-     * 隐藏会话
+     * 隐藏会话.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function hide(int $id): Result
@@ -233,21 +237,22 @@ class ChatSession
 
         ChatSessionModel::update([
             'visible' => false,
-            'sticky' => false,
-            'unread' => 0,
+            'sticky'  => false,
+            'unread'  => 0,
         ], [
             'id'      => $id,
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
 
         return Result::success();
     }
 
     /**
-     * 显示群主/管理员/某用户的聊天室通知会话
+     * 显示群主/管理员/某用户的聊天室通知会话.
      *
-     * @param integer $chatroomId 聊天室ID
-     * @param integer $userId 用户ID
+     * @param int $chatroomId 聊天室ID
+     * @param int $userId     用户ID
+     *
      * @return void
      */
     public function showChatroomNotice(int $chatroomId, int $userId = null)
@@ -269,7 +274,7 @@ class ChatSession
             ->where('user_id', 'IN', $userIdList)
             ->update([
                 'chat_session.update_time' => time() * 1000,
-                'chat_session.visible' => true
+                'chat_session.visible'     => true,
             ]);
     }
 }

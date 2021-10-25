@@ -13,16 +13,15 @@ use think\validate\ValidateRule;
 
 class RtcCall extends SocketEventHandler
 {
-
     public function verify(array $data): bool
     {
         return Validate::rule([
-            'chatroomId' => ValidateRule::must()->integer()
+            'chatroomId' => ValidateRule::must()->integer(),
         ])->check($data);
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -35,7 +34,7 @@ class RtcCall extends SocketEventHandler
         }
 
         $this->websocket
-            ->to(SocketRoomPrefix::CHATROOM . $event['chatroomId'])
+            ->to(SocketRoomPrefix::CHATROOM.$event['chatroomId'])
             ->emit(SocketEvent::RTC_CALL, $result);
     }
 }

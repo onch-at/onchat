@@ -8,19 +8,19 @@ use think\response\Json;
 
 class Jsonify
 {
-  public function handle($request, \Closure $next)
-  {
-    /** @var Response */
-    $response = $next($request);
+    public function handle($request, \Closure $next)
+    {
+        /** @var Response */
+        $response = $next($request);
 
-    if ($response->getData() instanceof Result) {
-      return $response->getData()->toJson();
+        if ($response->getData() instanceof Result) {
+            return $response->getData()->toJson();
+        }
+
+        if (!$response instanceof Json) {
+            return Json::create($response->getData(), 'json', $response->getCode());
+        }
+
+        return $response;
     }
-
-    if (!$response instanceof Json) {
-      return Json::create($response->getData(), 'json', $response->getCode());
-    }
-
-    return $response;
-  }
 }

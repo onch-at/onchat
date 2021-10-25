@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace app\listener\task;
 
-use Swoole\Timer;
 use app\model\FriendRequest;
+use Swoole\Timer;
 use think\swoole\Manager;
 
 class ClearFriendRequest
 {
-
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */

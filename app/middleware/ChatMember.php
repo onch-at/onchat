@@ -11,16 +11,17 @@ use think\Request;
 use think\Response;
 
 /**
- * 聊天室成员中间件
+ * 聊天室成员中间件.
  */
 class ChatMember
 {
     /**
      * 处理请求
      *
-     * @param Request $request
+     * @param Request  $request
      * @param \Closure $next
-     * @param string $field Request中聊天室的字段名
+     * @param string   $field   Request中聊天室的字段名
+     *
      * @return Response
      */
     public function handle(Request $request, \Closure $next, string $field = 'id'): Response
@@ -30,7 +31,7 @@ class ChatMember
 
         $chatMember = ChatMemberModel::where([
             'user_id'     => $userId,
-            'chatroom_id' => $chatroomId
+            'chatroom_id' => $chatroomId,
         ])->find();
 
         if (!$chatMember) {

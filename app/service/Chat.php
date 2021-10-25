@@ -6,13 +6,13 @@ namespace app\service;
 
 use app\core\Result;
 use app\core\storage\Storage;
-use app\facade\ChatSessionService;
 use app\facade\ChatroomService;
+use app\facade\ChatSessionService;
 use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\ChatRequest as ChatRequestModel;
-use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
+use app\model\ChatSession as ChatSessionModel;
 use app\model\UserInfo as UserInfoModel;
 use app\utils\Str as StrUtils;
 use think\facade\Db;
@@ -32,16 +32,17 @@ class Chat
     /** 响应消息预定义 */
     const MSG = [
         self::CODE_PEOPLE_NUM_FULL => '聊天室人数已满！',
-        self::CODE_REASON_LONG     => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符',
-        self::CODE_REQUEST_HANDLED => '该请求已被处理！'
+        self::CODE_REASON_LONG     => '附加消息长度不能大于'.self::REASON_MAX_LENGTH.'位字符',
+        self::CODE_REQUEST_HANDLED => '该请求已被处理！',
     ];
 
     /**
-     * 邀请好友入群
+     * 邀请好友入群.
      *
-     * @param integer $inviter 邀请人ID
-     * @param integer $chatroomId 邀请进入的群聊ID
+     * @param int   $inviter        邀请人ID
+     * @param int   $chatroomId     邀请进入的群聊ID
      * @param array $chatroomIdList 受邀人的私聊聊天室ID列表
+     *
      * @return Result
      */
     public function invite(int $inviter, int $chatroomId, array $chatroomIdList): Result
@@ -51,7 +52,7 @@ class Chat
             ->where([
                 ['chatroom.id', '=', $chatroomId],
                 ['chatroom.type', '=', ChatroomModel::TYPE_GROUP_CHAT],
-                ['chat_member.user_id', '=', $inviter]
+                ['chat_member.user_id', '=', $inviter],
             ])->field('chatroom.*')->find();
 
         if (!$chatroom) {
@@ -73,13 +74,13 @@ class Chat
         return Result::success($chatroomIdList);
     }
 
-
     /**
-     * 申请加入聊天室
+     * 申请加入聊天室.
      *
-     * @param integer $requester 申请人ID
-     * @param integer $chatroomId 聊天室ID
-     * @param string $reason 申请原因
+     * @param int    $requester  申请人ID
+     * @param int    $chatroomId 聊天室ID
+     * @param string $reason     申请原因
+     *
      * @return Result
      */
     public function request(int $requester, int $chatroomId, string $reason = null): Result
@@ -108,7 +109,7 @@ class Chat
         $request = ChatRequestModel::where([
             ['requester_id', '=', $requester],
             ['chatroom_id', '=', $chatroomId],
-            ['status', '<>', ChatRequestModel::STATUS_AGREE]
+            ['status', '<>', ChatRequestModel::STATUS_AGREE],
         ])->find();
 
         $timestamp = time() * 1000;
@@ -116,10 +117,10 @@ class Chat
         if ($request) {
             $request->status = ChatRequestModel::STATUS_WAIT;
             $request->request_reason = $reason;
-            $request->reject_reason  = null;
-            $request->readed_list    = [$requester];
-            $request->handler_id     = null;
-            $request->update_time    = $timestamp;
+            $request->reject_reason = null;
+            $request->readed_list = [$requester];
+            $request->handler_id = null;
+            $request->update_time = $timestamp;
             $request->save();
         } else {
             $request = ChatRequestModel::create([
@@ -140,7 +141,7 @@ class Chat
         $info = UserInfoModel::where('user_info.user_id', '=', $requester)
             ->field([
                 'user_info.nickname AS requesterNickname',
-                'user_info.avatar AS requesterAvatarThumbnail'
+                'user_info.avatar AS requesterAvatarThumbnail',
             ])
             ->find();
         $info->requesterAvatarThumbnail = $storage->getThumbnailUrl($info->requesterAvatarThumbnail);
@@ -151,16 +152,17 @@ class Chat
         ])->find($chatroomId);
 
         $chatroom->chatroomAvatarThumbnail = $storage->getThumbnailUrl($chatroom->chatroomAvatar);
-        $chatroom->chatroomAvatar          = $storage->getUrl($chatroom->chatroomAvatar);
+        $chatroom->chatroomAvatar = $storage->getUrl($chatroom->chatroomAvatar);
 
         return Result::success($request->toArray() + $info->toArray() + $chatroom->toArray());
     }
 
     /**
-     * 同意入群申请
+     * 同意入群申请.
      *
-     * @param integer $id 请求ID
-     * @param integer $handler 处理人ID
+     * @param int $id      请求ID
+     * @param int $handler 处理人ID
+     *
      * @return Result
      */
     public function agree(int $id, int $handler): Result
@@ -169,8 +171,8 @@ class Chat
             ->join('user_info requester', 'chat_request.requester_id = requester.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where([
-                'chat_request.id' => $id,
-                'chat_member.user_id' => $handler
+                'chat_request.id'     => $id,
+                'chat_member.user_id' => $handler,
             ])
             ->where(function ($query) {
                 $query->whereOr([
@@ -183,7 +185,7 @@ class Chat
                 'requester.avatar AS requesterAvatarThumbnail',
                 'chatroom.name AS chatroomName',
                 'chatroom.avatar AS chatroomAvatar',
-                'chat_request.*'
+                'chat_request.*',
             ])
             ->find();
 
@@ -205,6 +207,7 @@ class Chat
 
         // 启动事务
         Db::startTrans();
+
         try {
             $readedList = array_filter($request->readed_list, function ($o) use ($request) {
                 return $o !== $request->requester_id;
@@ -216,14 +219,15 @@ class Chat
             }
 
             $request->readed_list = array_values($readedList);
-            $request->handler_id  = $handler;
-            $request->status      = ChatRequestModel::STATUS_AGREE;
+            $request->handler_id = $handler;
+            $request->status = ChatRequestModel::STATUS_AGREE;
             $request->update_time = time() * 1000;
             $request->save();
 
             $result = ChatroomService::addMember($chatroomId, $request->requester_id, $request->requesterNickname);
             if ($result->isError()) {
                 Db::rollback();
+
                 return $result;
             }
 
@@ -245,20 +249,23 @@ class Chat
             $request->handlerNickname = UserService::getByKey('id', $handler, 'nickname');
 
             Db::commit();
+
             return Result::success([$request->toArray(), $chatSession]);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
+
             return Result::unknown($e->getMessage());
         }
     }
 
     /**
-     * 拒绝入群申请
+     * 拒绝入群申请.
      *
-     * @param integer $id 请求ID
-     * @param integer $handler 处理人ID
-     * @param string $reason 拒绝原因
+     * @param int    $id      请求ID
+     * @param int    $handler 处理人ID
+     * @param string $reason  拒绝原因
+     *
      * @return Result
      */
     public function reject(int $id, int $handler, ?string $reason): Result
@@ -277,8 +284,8 @@ class Chat
             ->join('user_info requester', 'chat_request.requester_id = requester.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where([
-                'chat_request.id' => $id,
-                'chat_member.user_id' => $handler
+                'chat_request.id'     => $id,
+                'chat_member.user_id' => $handler,
             ])
             ->where(function ($query) {
                 $query->whereOr([
@@ -291,7 +298,7 @@ class Chat
                 'requester.avatar AS requesterAvatarThumbnail',
                 'chatroom.name AS chatroomName',
                 'chatroom.avatar AS chatroomAvatar',
-                'chat_request.*'
+                'chat_request.*',
             ])
             ->find();
 
@@ -313,11 +320,11 @@ class Chat
             $readedList[] = $handler;
         }
 
-        $request->readed_list   = array_values($readedList);
+        $request->readed_list = array_values($readedList);
         $request->reject_reason = $reason;
-        $request->status        = ChatRequestModel::STATUS_REJECT;
-        $request->handler_id    = $handler;
-        $request->update_time   = time() * 1000;
+        $request->status = ChatRequestModel::STATUS_REJECT;
+        $request->handler_id = $handler;
+        $request->update_time = time() * 1000;
         $request->save();
 
         ChatSessionService::showChatroomNotice($request->chatroom_id, $request->requester_id);
@@ -325,9 +332,9 @@ class Chat
         $storage = Storage::create();
 
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
-        $request->chatroomAvatarThumbnail  = $storage->getThumbnailUrl($request->chatroomAvatar);
-        $request->chatroomAvatar           = $storage->getUrl($request->chatroomAvatar);
-        $request->handlerNickname          = UserService::getByKey('id', $handler, 'nickname');
+        $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($request->chatroomAvatar);
+        $request->chatroomAvatar = $storage->getUrl($request->chatroomAvatar);
+        $request->handlerNickname = UserService::getByKey('id', $handler, 'nickname');
 
         return Result::success($request);
     }
@@ -342,12 +349,12 @@ class Chat
         $userId = UserService::getId();
         ChatRequestModel::whereRaw("!JSON_CONTAINS(readed_list, JSON_ARRAY({$userId}))")
             ->update([
-                'readed_list' => Db::raw("JSON_ARRAY_APPEND(readed_list, '$', {$userId})")
+                'readed_list' => Db::raw("JSON_ARRAY_APPEND(readed_list, '$', {$userId})"),
             ]);
 
         ChatSessionModel::update(['unread' => 0], [
             'user_id' => $userId,
-            'type' => ChatSessionModel::TYPE_CHATROOM_NOTICE
+            'type'    => ChatSessionModel::TYPE_CHATROOM_NOTICE,
         ]);
 
         return Result::success();
@@ -356,7 +363,8 @@ class Chat
     /**
      * 通过请求ID获取我收到的入群请求
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function getReceiveRequestById(int $id): Result
@@ -368,8 +376,8 @@ class Chat
             ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where([
-                'chat_request.id' => $id,
-                'chat_member.user_id' => $userId
+                'chat_request.id'     => $id,
+                'chat_member.user_id' => $userId,
             ])
             ->where(function ($query) {
                 $query->whereOr([
@@ -382,7 +390,7 @@ class Chat
                 'requester.avatar AS requesterAvatarThumbnail',
                 'handler.nickname AS handlerNickname',
                 'chatroom.name AS chatroomName',
-                'chat_request.*'
+                'chat_request.*',
             ])
             ->find();
 
@@ -397,7 +405,7 @@ class Chat
     }
 
     /**
-     * 获取我收到的入群申请
+     * 获取我收到的入群申请.
      *
      * @return Result
      */
@@ -422,7 +430,7 @@ class Chat
                 'requester.avatar AS requesterAvatarThumbnail',
                 'handler.nickname AS handlerNickname',
                 'chatroom.name AS chatroomName',
-                'chat_request.*'
+                'chat_request.*',
             ])
             ->select();
 
@@ -436,7 +444,8 @@ class Chat
     /**
      * 通过请求ID获取我发送的入群请求
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function getSendRequestById(int $id): Result
@@ -447,15 +456,15 @@ class Chat
             ->leftJoin('user_info handler', 'chat_request.handler_id = handler.user_id')
             ->join('chatroom', 'chatroom.id = chat_request.chatroom_id')
             ->where([
-                'chat_request.id' => $id,
-                'chat_request.requester_id' => $userId
+                'chat_request.id'           => $id,
+                'chat_request.requester_id' => $userId,
             ])
             ->field([
                 'requester.nickname AS requesterNickname',
                 'handler.nickname AS handlerNickname',
                 'chatroom.name AS chatroomName',
                 'chatroom.avatar AS chatroomAvatar',
-                'chat_request.*'
+                'chat_request.*',
             ])
             ->find();
 
@@ -466,13 +475,13 @@ class Chat
         $storage = Storage::create();
 
         $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($request->chatroomAvatar);
-        $request->chatroomAvatar          = $storage->getUrl($request->chatroomAvatar);
+        $request->chatroomAvatar = $storage->getUrl($request->chatroomAvatar);
 
         return Result::success($request);
     }
 
     /**
-     * 获取我发送的所有入群申请
+     * 获取我发送的所有入群申请.
      *
      * @return Result
      */
@@ -489,7 +498,7 @@ class Chat
                 'handler.nickname AS handlerNickname',
                 'chatroom.name AS chatroomName',
                 'chatroom.avatar AS chatroomAvatar',
-                'chat_request.*'
+                'chat_request.*',
             ])
             ->select();
 
@@ -497,7 +506,7 @@ class Chat
 
         foreach ($data as $item) {
             $item->chatroomAvatarThumbnail = $storage->getThumbnailUrl($item->chatroomAvatar);
-            $item->chatroomAvatar          = $storage->getUrl($item->chatroomAvatar);
+            $item->chatroomAvatar = $storage->getUrl($item->chatroomAvatar);
         }
 
         return Result::success($data);

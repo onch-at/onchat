@@ -7,7 +7,7 @@ use ImagickDraw;
 use ImagickPixel;
 
 /**
- * 重写OriginImageMagickGenerator的部分方法
+ * 重写OriginImageMagickGenerator的部分方法.
  */
 class ImageMagickGenerator extends OriginImageMagickGenerator
 {

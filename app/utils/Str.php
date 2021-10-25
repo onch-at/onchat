@@ -12,6 +12,7 @@ class Str extends StrHelper
      * 删除字符串中所有空格
      *
      * @param string $str
+     *
      * @return string
      */
     public static function trimAll(string $str): string
@@ -20,10 +21,11 @@ class Str extends StrHelper
     }
 
     /**
-     * 判断字符串是否为空（剔除空格，回车）
+     * 判断字符串是否为空（剔除空格，回车）.
      *
      * @param string $str
-     * @return boolean
+     *
+     * @return bool
      */
     public static function isEmpty(string $str): bool
     {
@@ -31,22 +33,25 @@ class Str extends StrHelper
     }
 
     /**
-     * 打乱字符串字符顺序，支持中文
+     * 打乱字符串字符顺序，支持中文.
      *
      * @param string $str
+     *
      * @return string
      */
     public static function shuffle(string $str): string
     {
         $arr = mb_str_split($str, 1, 'utf-8');
         shuffle($arr);
+
         return implode('', $arr);
     }
 
     /**
      * 获取随机验证码
      *
-     * @param integer $length 验证码长度
+     * @param int $length 验证码长度
+     *
      * @return string
      */
     public static function captcha(int $length): string
@@ -55,10 +60,11 @@ class Str extends StrHelper
     }
 
     /**
-     * 插值替换
+     * 插值替换.
      *
      * @param string $tpl 模板
-     * @param array $kv 键值对
+     * @param array  $kv  键值对
+     *
      * @return string
      */
     public static function assign(string $tpl, array $kv): string
@@ -66,6 +72,7 @@ class Str extends StrHelper
         foreach ($kv as $key => $value) {
             $tpl = preg_replace("/\{\{\s*({$key})\s*\}\}/", $value, $tpl);
         }
+
         return $tpl;
     }
 }

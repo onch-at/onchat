@@ -10,7 +10,7 @@ use think\swoole\Websocket;
 use think\swoole\websocket\Room;
 
 /**
- * Socket 事件处理程序
+ * Socket 事件处理程序.
  */
 abstract class SocketEventHandler
 {
@@ -21,20 +21,20 @@ abstract class SocketEventHandler
     protected $throttleTable;
 
     public function __construct(
-        Websocket     $websocket,
-        Room          $room,
-        UserTable     $userTable,
+        Websocket $websocket,
+        Room $room,
+        UserTable $userTable,
         ThrottleTable $throttleTable
     ) {
-        $this->websocket     = $websocket;
-        $this->room          = $room;
-        $this->fd            = $websocket->getSender();
-        $this->userTable     = $userTable;
+        $this->websocket = $websocket;
+        $this->room = $room;
+        $this->fd = $websocket->getSender();
+        $this->userTable = $userTable;
         $this->throttleTable = $throttleTable;
     }
 
     /**
-     * 获取当前user
+     * 获取当前user.
      *
      * @return array|false
      */
@@ -44,10 +44,11 @@ abstract class SocketEventHandler
     }
 
     /**
-     * 验证 event data
+     * 验证 event data.
      *
      * @param array $data
-     * @return boolean
+     *
+     * @return bool
      */
     abstract public function verify(array $data): bool;
 }

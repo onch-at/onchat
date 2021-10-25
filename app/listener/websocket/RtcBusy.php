@@ -13,7 +13,6 @@ use think\validate\ValidateRule;
 
 class RtcBusy extends SocketEventHandler
 {
-
     public function verify(array $data): bool
     {
         return Validate::rule([
@@ -22,7 +21,7 @@ class RtcBusy extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -31,7 +30,7 @@ class RtcBusy extends SocketEventHandler
         $event['senderId'] = $this->getUser()['id'];
 
         $this->websocket
-            ->to(SocketRoomPrefix::USER . $event['targetId'])
+            ->to(SocketRoomPrefix::USER.$event['targetId'])
             ->emit(SocketEvent::RTC_BUSY, Result::success($event));
     }
 }

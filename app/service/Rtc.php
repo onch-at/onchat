@@ -12,10 +12,11 @@ use app\model\Chatroom as ChatroomModel;
 class Rtc
 {
     /**
-     * 获取对方与自己的信息，用于请求 RTC
+     * 获取对方与自己的信息，用于请求 RTC.
      *
-     * @param integer $requesterId
-     * @param integer $chatroomId
+     * @param int $requesterId
+     * @param int $chatroomId
+     *
      * @return Result
      */
     public function call(int $requesterId, int $chatroomId): Result
@@ -38,7 +39,7 @@ class Rtc
 
         foreach ($data as $user) {
             $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-            $user->avatar          = $storage->getUrl($user->avatar);
+            $user->avatar = $storage->getUrl($user->avatar);
         }
 
         // [requester, target]

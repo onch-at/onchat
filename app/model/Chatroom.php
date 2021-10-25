@@ -7,7 +7,7 @@ namespace app\model;
 use think\Model;
 
 /**
- * 聊天室
+ * 聊天室.
  */
 class Chatroom extends Model
 {
@@ -31,10 +31,11 @@ class Chatroom extends Model
     }
 
     /**
-     * ID字段获取器
+     * ID字段获取器.
      *
-     * @param string|integer $value
-     * @return integer
+     * @param string|int $value
+     *
+     * @return int
      */
     public function getIdAttr($value): int
     {

@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace app\utils;
 
+use finfo as Finfo;
 use Mimey\MimeTypes;
 use Swoole\Coroutine\System;
-use finfo as Finfo;
 use think\Container;
 
 class File
 {
     /**
-     * 获取文件拓展名
+     * 获取文件拓展名.
      *
      * @param \think\File $file
+     *
      * @return string
      */
     public static function getExtension(\think\File $file): string
@@ -23,22 +24,25 @@ class File
     }
 
     /**
-     * 获取文件MIME
+     * 获取文件MIME.
      *
      * @param string $filename
+     *
      * @return string
      */
     public static function getMime(string $filename): string
     {
         $finfo = new Finfo(FILEINFO_MIME_TYPE);
+
         return $finfo->file($filename);
     }
 
     /**
-     * 读取文件
+     * 读取文件.
      *
      * @param string $filename
-     * @param boolean $coroutine 协程
+     * @param bool   $coroutine 协程
+     *
      * @return string|false
      */
     public static function read(string $filename, bool $coroutine = true)

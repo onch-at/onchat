@@ -10,43 +10,44 @@ use app\service\Auth as AuthService;
 
 class Auth
 {
-  protected $service;
+    protected $service;
 
-  protected $middleware = [Jsonify::class];
+    protected $middleware = [Jsonify::class];
 
-  public function __construct(AuthService $service)
-  {
-    $this->service = $service;
-  }
+    public function __construct(AuthService $service)
+    {
+        $this->service = $service;
+    }
 
-  /**
-   * 通过续签令牌来刷新访问令牌
-   *
-   * @param string $token
-   * @return Result
-   */
-  public function refresh(string $token): Result
-  {
-    return $this->service->refresh($token);
-  }
+    /**
+     * 通过续签令牌来刷新访问令牌.
+     *
+     * @param string $token
+     *
+     * @return Result
+     */
+    public function refresh(string $token): Result
+    {
+        return $this->service->refresh($token);
+    }
 
-  /**
-   * 获取令牌主人信息
-   *
-   * @return Result
-   */
-  public function info(): Result
-  {
-    return $this->service->info();
-  }
+    /**
+     * 获取令牌主人信息.
+     *
+     * @return Result
+     */
+    public function info(): Result
+    {
+        return $this->service->info();
+    }
 
-  /**
-   * 退出认证，废弃令牌
-   *
-   * @return void
-   */
-  public function logout()
-  {
-    return $this->service->logout();
-  }
+    /**
+     * 退出认证，废弃令牌.
+     *
+     * @return void
+     */
+    public function logout()
+    {
+        return $this->service->logout();
+    }
 }

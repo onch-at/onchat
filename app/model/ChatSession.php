@@ -7,13 +7,13 @@ namespace app\model;
 use think\Model;
 
 /**
- * 聊天会话
+ * 聊天会话.
  */
 class ChatSession extends Model
 {
     protected $json = ['data'];
     protected $jsonType = [
-        'data->chatroomId' => 'int'
+        'data->chatroomId' => 'int',
     ];
 
     /** 聊天室会话 */
@@ -27,10 +27,11 @@ class ChatSession extends Model
     }
 
     /**
-     * ID字段获取器
+     * ID字段获取器.
      *
-     * @param string|integer $value
-     * @return integer
+     * @param string|int $value
+     *
+     * @return int
      */
     public function getIdAttr($value): int
     {

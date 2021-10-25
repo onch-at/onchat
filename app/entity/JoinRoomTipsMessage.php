@@ -9,5 +9,5 @@ use app\contract\TipsMessage;
 
 class JoinRoomTipsMessage extends TipsMessage
 {
-  public $type = TipsType::JOIN_ROOM;
+    public $type = TipsType::JOIN_ROOM;
 }

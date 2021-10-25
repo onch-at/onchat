@@ -13,4 +13,4 @@ Route::group('chat-record', function () {
         Route::post('image/<chatroomId>', 'image')->middleware(ImageFile::class);
         Route::post('voice/<chatroomId>', 'voice')->middleware(VoiceFile::class);
     })->middleware(ChatMember::class, 'chatroomId');
-})->prefix('ChatRecord/')->middleware(Auth::class);;
+})->prefix('ChatRecord/')->middleware(Auth::class);

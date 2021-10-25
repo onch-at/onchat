@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace app\service;
 
-use Identicon\Identicon;
-use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
+use app\core\Result;
 use app\core\storage\Storage;
 use app\entity\TokenFolder;
 use app\facade\AuthService;
@@ -14,13 +13,14 @@ use app\facade\ChatroomService;
 use app\facade\IndexService;
 use app\facade\TokenService;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
+use app\model\ChatSession as ChatSessionModel;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
 use app\utils\Date as DateUtils;
 use app\utils\File as FileUtils;
 use app\utils\Str as StrUtils;
+use Identicon\Identicon;
 use think\Collection;
 use think\facade\Db;
 use think\facade\Request;
@@ -34,17 +34,17 @@ class User
     /** 用户密码错误 */
     const CODE_PASSWORD_ERROR = 3;
     /** 用户密码过短/过长 */
-    const CODE_PASSWORD_IRREGULAR  = 4;
+    const CODE_PASSWORD_IRREGULAR = 4;
     /** 个性签名过短/过长 */
-    const CODE_SIGNATURE_IRREGULAR  = 5;
+    const CODE_SIGNATURE_IRREGULAR = 5;
 
     /** 响应消息预定义 */
     const MSG = [
         self::CODE_USER_EXIST          => '用户已存在',
         self::CODE_USER_NOT_EXIST      => '用户不存在',
         self::CODE_PASSWORD_ERROR      => '密码错误',
-        self::CODE_PASSWORD_IRREGULAR  => '密码长度必须在' . ONCHAT_PASSWORD_MIN_LENGTH . '~' . ONCHAT_PASSWORD_MAX_LENGTH . '位字符之间',
-        self::CODE_SIGNATURE_IRREGULAR => '个性签名长度必须在' . ONCHAT_SIGNATURE_MIN_LENGTH . '~' . ONCHAT_SIGNATURE_MAX_LENGTH . '位字符之间',
+        self::CODE_PASSWORD_IRREGULAR  => '密码长度必须在'.ONCHAT_PASSWORD_MIN_LENGTH.'~'.ONCHAT_PASSWORD_MAX_LENGTH.'位字符之间',
+        self::CODE_SIGNATURE_IRREGULAR => '个性签名长度必须在'.ONCHAT_SIGNATURE_MIN_LENGTH.'~'.ONCHAT_SIGNATURE_MAX_LENGTH.'位字符之间',
     ];
 
     /** User 字段 */
@@ -67,34 +67,37 @@ class User
     ];
 
     /**
-     * 获取储存在SESSION中的用户ID
+     * 获取储存在SESSION中的用户ID.
      *
-     * @return integer|null
+     * @return int|null
      */
     public function getId(): ?int
     {
         $token = Request::header('Authorization');
+
         return TokenService::parse($token)->sub;
     }
 
     /**
-     * 获取储存在SESSION中的用户名
+     * 获取储存在SESSION中的用户名.
      *
      * @return string|null
      */
     public function getUsername(): ?string
     {
         $token = Request::header('Authorization');
+
         return TokenService::parse($token)->usr->username;
     }
 
     /**
-     * 注册账户
+     * 注册账户.
      *
      * @param string $username 用户名
      * @param string $password 密码
-     * @param string $email 邮箱
-     * @param string $captcha 验证码
+     * @param string $email    邮箱
+     * @param string $captcha  验证码
+     *
      * @return Result
      */
     public function register(string $username, string $password, string $email, string $captcha): Result
@@ -137,6 +140,7 @@ class User
 
         // 启动事务
         Db::startTrans();
+
         try {
             $user = UserModel::create([
                 'username'    => $username,
@@ -150,8 +154,8 @@ class User
             // 根据用户ID创建哈希头像
             $imageData = $identicon->getImageData($user->id, 256, null, '#f5f5f5');
 
-            $path = $storage->getRootPath() . 'avatar/user/' . $user->id . '/';
-            $file = md5((string) DateUtils::now()) . '.png';
+            $path = $storage->getRootPath().'avatar/user/'.$user->id.'/';
+            $file = md5((string) DateUtils::now()).'.png';
 
             $result = $storage->save($path, $file, $imageData);
 
@@ -159,7 +163,7 @@ class User
                 return $result;
             }
 
-            $filename = $path . $file;
+            $filename = $path.$file;
 
             // 暂存一下用户信息，便于最后直接返回给前端
             $userInfo = [
@@ -181,16 +185,16 @@ class User
 
             // 创建一个聊天室通知会话
             ChatSessionModel::create([
-                'user_id' => $user->id,
-                'type'    => ChatSessionModel::TYPE_CHATROOM_NOTICE,
-                'data'    => [],
-                'visible' => false,
+                'user_id'     => $user->id,
+                'type'        => ChatSessionModel::TYPE_CHATROOM_NOTICE,
+                'data'        => [],
+                'visible'     => false,
                 'create_time' => $timestamp,
-                'update_time' => $timestamp
+                'update_time' => $timestamp,
             ]);
 
             $tokenFolder = $this->issueTokens($user->id, $username);
-            $user->access  = $tokenFolder->access;
+            $user->access = $tokenFolder->access;
             $user->refresh = $tokenFolder->refresh;
 
             // 提交事务
@@ -200,15 +204,17 @@ class User
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
+
             return Result::unknown($e->getMessage());
         }
     }
 
     /**
-     * 用户登录
+     * 用户登录.
      *
      * @param string $username 用户名
      * @param string $password 密码
+     *
      * @return Result
      */
     public function login(string $username, string $password): Result
@@ -240,10 +246,10 @@ class User
         $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar          = $storage->getUrl($user->avatar);
+        $user->avatar = $storage->getUrl($user->avatar);
 
         $tokenFolder = $this->issueTokens($user->id, $username);
-        $user->access  = $tokenFolder->access;
+        $user->access = $tokenFolder->access;
         $user->refresh = $tokenFolder->refresh;
 
         return Result::success($user);
@@ -254,6 +260,7 @@ class User
      *
      * @param string $oldPassword 原密码
      * @param string $newPassword 新密码
+     *
      * @return Result
      */
     public function changePassword(string $oldPassword, string $newPassword): Result
@@ -288,9 +295,10 @@ class User
     }
 
     /**
-     * 通过用户名发送邮件
+     * 通过用户名发送邮件.
      *
      * @param string $username
+     *
      * @return Result
      */
     public function sendEmailCaptcha(string $username): Result
@@ -309,7 +317,8 @@ class User
      *
      * @param string $username 用户名
      * @param string $password 密码
-     * @param string $captcha 验证码
+     * @param string $captcha  验证码
+     *
      * @return Result
      */
     public function resetPassword(string $username, string $password, string $captcha): Result
@@ -348,10 +357,11 @@ class User
     }
 
     /**
-     * 颁发令牌
+     * 颁发令牌.
      *
-     * @param integer $id
+     * @param int    $id
      * @param string $username
+     *
      * @return TokenFolder
      */
     private function issueTokens(int $id, string $username): TokenFolder
@@ -373,11 +383,12 @@ class User
 
     /**
      * 通过用户标识获取用户信息
-     * $field为数组时，返回数据集对象；为单个字段时只返回该字段的数据
+     * $field为数组时，返回数据集对象；为单个字段时只返回该字段的数据.
      *
-     * @param string $key 用户标识名
-     * @param mixed $value 用户标识值
+     * @param string       $key   用户标识名
+     * @param mixed        $value 用户标识值
      * @param string|array $field 需要获取的字段名
+     *
      * @return mixed
      */
     public function getByKey(string $key, $value, $field)
@@ -393,9 +404,10 @@ class User
     }
 
     /**
-     * 通过用户ID获取User
+     * 通过用户ID获取User.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function getUserById(int $id): Result
@@ -412,15 +424,16 @@ class User
         $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar          = $storage->getUrl($user->avatar);
+        $user->avatar = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
 
     /**
-     * 通过用户名获取User
+     * 通过用户名获取User.
      *
      * @param string $username
+     *
      * @return Result
      */
     public function getUserByUsername(string $username): Result
@@ -435,30 +448,32 @@ class User
         $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar          = $storage->getUrl($user->avatar);
+        $user->avatar = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
 
     /**
-     * 获得用户在聊天室中的昵称
+     * 获得用户在聊天室中的昵称.
      *
-     * @param integer $id 用户ID
-     * @param integer $chatroomId
+     * @param int $id         用户ID
+     * @param int $chatroomId
+     *
      * @return string|null
      */
     public function getNicknameInChatroom(int $id, int $chatroomId): ?string
     {
         return ChatMemberModel::where([
             'user_id'     => $id,
-            'chatroom_id' => $chatroomId
+            'chatroom_id' => $chatroomId,
         ])->value('nickname');
     }
 
     /**
-     * 通过用户ID获取用户名
+     * 通过用户ID获取用户名.
      *
-     * @param integer $id 用户ID
+     * @param int $id 用户ID
+     *
      * @return string|null
      */
     public function getUsernameById(int $id): ?string
@@ -467,10 +482,11 @@ class User
     }
 
     /**
-     * 通过用户名获取用户ID
+     * 通过用户名获取用户ID.
      *
      * @param string $username 用户名
-     * @return integer
+     *
+     * @return int
      */
     public function getIdByUsername(string $username): ?int
     {
@@ -478,10 +494,11 @@ class User
     }
 
     /**
-     * 检查用户密码是否符合规范
+     * 检查用户密码是否符合规范.
      *
      * @param string $password
-     * @return integer
+     *
+     * @return int
      */
     public function checkPassword(string $password): int
     {
@@ -495,7 +512,7 @@ class User
     }
 
     /**
-     * 上传头像
+     * 上传头像.
      *
      * @return Result
      */
@@ -505,9 +522,9 @@ class User
 
         try {
             $storage = Storage::create();
-            $image   = Request::file('image');
-            $path    = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
-            $file    = $image->md5() . '.' . FileUtils::getExtension($image);
+            $image = Request::file('image');
+            $path = $storage->getRootPath().'avatar/user/'.$userId.'/';
+            $file = $image->md5().'.'.FileUtils::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
@@ -516,16 +533,16 @@ class User
                 return $result;
             }
 
-            $filename = $path . $file;
+            $filename = $path.$file;
 
             // 更新新头像
             UserInfoModel::update(['avatar' => $filename], [
-                'user_id' => $userId
+                'user_id' => $userId,
             ]);
 
             return Result::success([
                 'avatar'          => $storage->getUrl($filename),
-                'avatarThumbnail' => $storage->getThumbnailUrl($filename)
+                'avatarThumbnail' => $storage->getThumbnailUrl($filename),
             ]);
         } catch (\Exception $e) {
             return Result::unknown($e->getMessage());
@@ -533,7 +550,7 @@ class User
     }
 
     /**
-     * 查询该用户下所有的聊天室
+     * 查询该用户下所有的聊天室.
      *
      * @return Collection
      */
@@ -546,7 +563,7 @@ class User
     }
 
     /**
-     * 获取私聊聊天室列表
+     * 获取私聊聊天室列表.
      *
      * @return Result
      */
@@ -556,11 +573,11 @@ class User
         $storage = Storage::create();
 
         $data = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')
-            ->where('chat_member.chatroom_id', 'IN', function ($query)  use ($userId) {
+            ->where('chat_member.chatroom_id', 'IN', function ($query) use ($userId) {
                 // 私聊聊天室ID列表
                 $query->table('chatroom')->join('chat_member', 'chatroom.id = chat_member.chatroom_id')->where([
-                    'chatroom.type' =>  ChatroomModel::TYPE_PRIVATE_CHAT,
-                    'chat_member.user_id' => $userId
+                    'chatroom.type'       => ChatroomModel::TYPE_PRIVATE_CHAT,
+                    'chat_member.user_id' => $userId,
                 ])->field('chatroom.id');
             })
             ->where('chat_member.user_id', '<>', $userId)
@@ -582,7 +599,7 @@ class User
             $item->data = [
                 'chatroomId'   => $item->chatroom_id,
                 'chatroomType' => ChatroomModel::TYPE_PRIVATE_CHAT,
-                'userId'       => $item->friendId
+                'userId'       => $item->friendId,
             ];
             $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
 
@@ -593,7 +610,7 @@ class User
     }
 
     /**
-     * 获取群聊聊天室列表
+     * 获取群聊聊天室列表.
      *
      * @return Result
      */
@@ -605,7 +622,7 @@ class User
         $data = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
             ->where([
                 'chat_member.user_id' => $userId,
-                'chatroom.type' => ChatroomModel::TYPE_GROUP_CHAT
+                'chatroom.type'       => ChatroomModel::TYPE_GROUP_CHAT,
             ])
             ->field([
                 'chat_member.id',
@@ -623,7 +640,7 @@ class User
             $item->type = ChatSessionModel::TYPE_CHATROOM;
             $item->data = [
                 'chatroomId'   => $item->chatroom_id,
-                'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT
+                'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT,
             ];
             $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatarThumbnail);
 
@@ -634,7 +651,7 @@ class User
     }
 
     /**
-     * 保存用户信息
+     * 保存用户信息.
      *
      * @return Result
      */
@@ -642,11 +659,11 @@ class User
     {
         $userId = $this->getId();
 
-        $nickname      = Request::param('nickname/s') ?: $this->getUsername();
-        $signature     = Request::param('signature/s');
-        $mood          = Request::param('mood/d');
-        $birthday      = Request::param('birthday/d');
-        $gender        = Request::param('gender/d');
+        $nickname = Request::param('nickname/s') ?: $this->getUsername();
+        $signature = Request::param('signature/s');
+        $mood = Request::param('mood/d');
+        $birthday = Request::param('birthday/d');
+        $gender = Request::param('gender/d');
         $constellation = isset($birthday) ? DateUtils::getConstellation((int) $birthday / 1000) : null;
 
         if ($signature) {
@@ -677,17 +694,18 @@ class User
             'gender'        => $gender,
             'constellation' => $constellation,
         ], [
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
 
         return Result::success($userInfo);
     }
 
     /**
-     * 绑定电子邮箱
+     * 绑定电子邮箱.
      *
-     * @param string $email 邮箱
+     * @param string $email   邮箱
      * @param string $captcha 验证码
+     *
      * @return Result
      */
     public function bindEmail(string $email, string $captcha): Result
@@ -707,17 +725,18 @@ class User
         UserModel::update([
             'id'          => $userId,
             'email'       => $email,
-            'update_time' => time() * 1000
+            'update_time' => time() * 1000,
         ]);
 
         return Result::success($email);
     }
 
     /**
-     * 模糊搜索用户
+     * 模糊搜索用户.
      *
      * @param string $keyword
-     * @param integer $page
+     * @param int    $page
+     *
      * @return Result
      */
     public function search(string $keyword, int $page): Result
@@ -735,7 +754,7 @@ class User
 
         foreach ($data as $item) {
             $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatar);
-            $item->avatar          = $storage->getUrl($item->avatar);
+            $item->avatar = $storage->getUrl($item->avatar);
         }
 
         return Result::success($data);

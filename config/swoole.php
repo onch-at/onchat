@@ -1,6 +1,5 @@
 <?php
 
-use Swoole\Table;
 use app\listener\websocket\ChatRequest;
 use app\listener\websocket\ChatRequestAgree;
 use app\listener\websocket\ChatRequestReject;
@@ -18,6 +17,7 @@ use app\listener\websocket\RtcData;
 use app\listener\websocket\RtcHangUp;
 use app\listener\websocket\SocketEventDispatcher;
 use app\listener\websocket\Unload;
+use Swoole\Table;
 use think\swoole\websocket\socketio\Handler;
 
 return [
@@ -27,8 +27,8 @@ return [
         'port'       => env('server.port', 9501),
         'worker_num' => swoole_cpu_num() * 2,
         'options'    => [
-            'package_max_length' => 1024 * 1024 * 50
-        ]
+            'package_max_length' => 1024 * 1024 * 50,
+        ],
     ],
     'websocket'  => [
         'enable'        => true,
@@ -92,8 +92,8 @@ return [
                 'delay'      => 0,
                 'sleep'      => 3,
                 'tries'      => 1,
-                'timeout'    => 60
-            ]
+                'timeout'    => 60,
+            ],
         ],
     ],
     'hot_update' => [
@@ -123,14 +123,14 @@ return [
                 [
                     'name' => 'id',
                     'type' => Table::TYPE_INT,
-                    'size' => 4
+                    'size' => 4,
                 ],
                 [
                     'name' => 'username',
                     'type' => Table::TYPE_STRING,
-                    'size' => 30
-                ]
-            ]
+                    'size' => 30,
+                ],
+            ],
         ],
         'throttle' => [
             'size'    => 8192,
@@ -138,15 +138,15 @@ return [
                 [
                     'name' => 'time',
                     'type' => Table::TYPE_INT,
-                    'size' => 8
+                    'size' => 8,
                 ],
                 [
                     'name' => 'count',
                     'type' => Table::TYPE_INT,
-                    'size' => 1
+                    'size' => 1,
                 ],
-            ]
-        ]
+            ],
+        ],
     ],
     //每个worker里需要预加载以共用的实例
     'concretes'  => [],

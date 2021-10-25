@@ -6,11 +6,11 @@ namespace app\entity;
 
 class TextMessage
 {
-  /** 内容 */
-  public $content;
+    /** 内容 */
+    public $content;
 
-  public function __construct(string $content)
-  {
-    $this->content = $content;
-  }
+    public function __construct(string $content)
+    {
+        $this->content = $content;
+    }
 }

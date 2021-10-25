@@ -7,7 +7,7 @@ namespace app\model;
 use think\Model;
 
 /**
- * 用户
+ * 用户.
  */
 class User extends Model
 {
@@ -29,10 +29,11 @@ class User extends Model
     }
 
     /**
-     * ID字段获取器
+     * ID字段获取器.
      *
-     * @param string|integer $value
-     * @return integer
+     * @param string|int $value
+     *
+     * @return int
      */
     public function getIdAttr($value): int
     {

@@ -20,10 +20,11 @@ class ChatRecord
     }
 
     /**
-     * 获取聊天室消息记录
+     * 获取聊天室消息记录.
      *
-     * @param integer $id 消息ID
-     * @param integer $chatroomId 聊天室ID
+     * @param int $id         消息ID
+     * @param int $chatroomId 聊天室ID
+     *
      * @return Result
      */
     public function getRecords(int $id, int $chatroomId): Result
@@ -32,9 +33,10 @@ class ChatRecord
     }
 
     /**
-     * 上传图片
+     * 上传图片.
      *
-     * @param integer $chatroomId 聊天室ID
+     * @param int $chatroomId 聊天室ID
+     *
      * @return Result
      */
     public function image(int $chatroomId): Result
@@ -43,9 +45,10 @@ class ChatRecord
     }
 
     /**
-     * 上传语音
+     * 上传语音.
      *
-     * @param integer $chatroomId 聊天室ID
+     * @param int $chatroomId 聊天室ID
+     *
      * @return Result
      */
     public function voice(int $chatroomId): Result

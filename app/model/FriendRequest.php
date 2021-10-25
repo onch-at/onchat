@@ -7,7 +7,7 @@ namespace app\model;
 use think\Model;
 
 /**
- * 好友申请
+ * 好友申请.
  */
 class FriendRequest extends Model
 {
@@ -33,10 +33,11 @@ class FriendRequest extends Model
     }
 
     /**
-     * ID字段获取器
+     * ID字段获取器.
      *
-     * @param string|integer $value
-     * @return integer
+     * @param string|int $value
+     *
+     * @return int
      */
     public function getIdAttr($value): int
     {

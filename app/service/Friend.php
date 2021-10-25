@@ -24,17 +24,18 @@ class Friend
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_ALIAS_LONG => '好友别名长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符',
-        self::CODE_REASON_LONG  => '附加消息长度不能大于' . ONCHAT_REASON_MAX_LENGTH . '位字符'
+        self::CODE_ALIAS_LONG   => '好友别名长度不能大于'.ONCHAT_NICKNAME_MAX_LENGTH.'位字符',
+        self::CODE_REASON_LONG  => '附加消息长度不能大于'.ONCHAT_REASON_MAX_LENGTH.'位字符',
     ];
 
     /**
-     * 申请添加好友
+     * 申请添加好友.
      *
-     * @param integer $requesterId 申请人的UserID
-     * @param integer $targetId 被申请人的UserID
-     * @param string $reason 申请原因
+     * @param int    $requesterId 申请人的UserID
+     * @param int    $targetId    被申请人的UserID
+     * @param string $reason      申请原因
      * @param string $targetAlias 被申请人的别名
+     *
      * @return Result
      */
     public function request(int $requesterId, int $targetId, string $reason = null, string $targetAlias = null): Result
@@ -69,7 +70,7 @@ class Friend
         $request = FriendRequestModel::where([
             ['requester_id', '=',  $requesterId],
             ['target_id',    '=',  $targetId],
-            ['status',       '<>', FriendRequestModel::STATUS_AGREE]
+            ['status',       '<>', FriendRequestModel::STATUS_AGREE],
         ])->find();
 
         // 如果之前已经申请过，但对方没有同意，就把对方的状态设置成等待验证
@@ -98,7 +99,7 @@ class Friend
         $userInfos = UserInfoModel::where('user_id', 'IN', [$requesterId, $targetId])->field([
             'user_id',
             'avatar',
-            'nickname'
+            'nickname',
         ])->limit(2)->select();
 
         $avatarThumbnail = null;
@@ -107,10 +108,10 @@ class Friend
 
             if ($userInfo->user_id === $requesterId) {
                 $request->requesterAvatarThumbnail = $avatarThumbnail;
-                $request->requesterNickname        = $userInfo->nickname;
+                $request->requesterNickname = $userInfo->nickname;
             } else {
                 $request->targetAvatarThumbnail = $avatarThumbnail;
-                $request->targetNickname        = $userInfo->nickname;
+                $request->targetNickname = $userInfo->nickname;
             }
         }
 
@@ -118,9 +119,10 @@ class Friend
     }
 
     /**
-     * 通过ID获取FriendRequest
+     * 通过ID获取FriendRequest.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function getRequestById(int $id): Result
@@ -142,7 +144,7 @@ class Friend
     }
 
     /**
-     * 获取我的收到好友申请
+     * 获取我的收到好友申请.
      *
      * @return Result
      */
@@ -166,14 +168,14 @@ class Friend
 
         foreach ($requests as $item) {
             $item->requesterAvatarThumbnail = $storage->getThumbnailUrl($item->requesterAvatarThumbnail);
-            $item->targetNickname           = $targetNickname;
+            $item->targetNickname = $targetNickname;
         }
 
         return Result::success($requests);
     }
 
     /**
-     * 获取我的发起的好友申请
+     * 获取我的发起的好友申请.
      *
      * @return Result
      */
@@ -196,16 +198,17 @@ class Friend
 
         foreach ($requests as $item) {
             $item->targetAvatarThumbnail = $storage->getThumbnailUrl($item->targetAvatarThumbnail);
-            $item->requesterNickname     = $requesterNickname;
+            $item->requesterNickname = $requesterNickname;
         }
 
         return Result::success($requests);
     }
 
     /**
-     * 根据被申请人ID来获取FriendRequest
+     * 根据被申请人ID来获取FriendRequest.
      *
-     * @param integer $targetId
+     * @param int $targetId
+     *
      * @return Result
      */
     public function getRequestByTargetId(int $targetId): Result
@@ -214,16 +217,17 @@ class Friend
 
         $request = FriendRequestModel::where([
             'requester_id'   => $userId,
-            'target_id'      => $targetId
+            'target_id'      => $targetId,
         ])->find();
 
         return Result::success($request);
     }
 
     /**
-     * 根据申请人ID来获取FriendRequest
+     * 根据申请人ID来获取FriendRequest.
      *
-     * @param integer $requesterId
+     * @param int $requesterId
+     *
      * @return Result
      */
     public function getRequestByRequesterId(int $requesterId): Result
@@ -232,18 +236,19 @@ class Friend
 
         $request = FriendRequestModel::where([
             'requester_id'   => $requesterId,
-            'target_id' => $userId
+            'target_id'      => $userId,
         ])->find();
 
         return Result::success($request);
     }
 
     /**
-     * 同意好友申请
+     * 同意好友申请.
      *
-     * @param integer $requestId 好友申请表的ID
-     * @param integer $targetId 被申请人的ID
+     * @param int    $requestId      好友申请表的ID
+     * @param int    $targetId       被申请人的ID
      * @param string $requesterAlias 申请人的别名
+     *
      * @return Result
      */
     public function agree(int $requestId, int $targetId, string $requesterAlias = null): Result
@@ -271,12 +276,13 @@ class Friend
 
         // 启动事务
         Db::startTrans();
+
         try {
-            $request->status           = FriendRequestModel::STATUS_AGREE;
-            $request->requester_alias  = $requesterAlias;
-            $request->target_readed    = true;
+            $request->status = FriendRequestModel::STATUS_AGREE;
+            $request->requester_alias = $requesterAlias;
+            $request->target_readed = true;
             $request->requester_readed = true;
-            $request->update_time      = time() * 1000;
+            $request->update_time = time() * 1000;
             $request->save();
 
             // 去找一下有没有自己申请加对方的申请记录
@@ -284,13 +290,14 @@ class Friend
             // 找到就直接删除吧，省点空间
             FriendRequestModel::where([
                 'requester_id' => $targetId,
-                'target_id' => $request->requester_id
+                'target_id'    => $request->requester_id,
             ])->delete();
 
             // 创建一个类型为私聊的聊天室
             $result = ChatroomService::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
             if ($result->isError()) {
                 Db::rollback();
+
                 return $result;
             }
 
@@ -299,12 +306,14 @@ class Friend
             $result = ChatroomService::addMember($chatroomId, $request->requester_id, $requesterAlias);
             if ($result->isError()) {
                 Db::rollback();
+
                 return $result;
             }
 
             $result = ChatroomService::addMember($chatroomId, $request->target_id, $request->target_alias);
             if ($result->isError()) {
                 Db::rollback();
+
                 return $result;
             }
 
@@ -312,7 +321,7 @@ class Friend
 
             $userInfo = UserService::getByKey('id', $request->target_id, [
                 'nickname',
-                'avatar'
+                'avatar',
             ]);
 
             $storage = Storage::create();
@@ -323,21 +332,23 @@ class Friend
                 'requesterId'           => $request->requester_id,
                 'targetId'              => $request->target_id,
                 'targetNickname'        => $userInfo->nickname,
-                'targetAvatarThumbnail' => $storage->getThumbnailUrl($userInfo->avatar)
+                'targetAvatarThumbnail' => $storage->getThumbnailUrl($userInfo->avatar),
             ]);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
+
             return Result::unknown($e->getMessage());
         }
     }
 
     /**
-     * 拒绝好友申请
+     * 拒绝好友申请.
      *
-     * @param integer $requestId 好友申请表的ID
-     * @param integer $targetId 被申请人的ID
-     * @param string $reason 拒绝原因
+     * @param int    $requestId 好友申请表的ID
+     * @param int    $targetId  被申请人的ID
+     * @param string $reason    拒绝原因
+     *
      * @return Result
      */
     public function reject(int $requestId, int $targetId, string $reason = null): Result
@@ -353,8 +364,8 @@ class Friend
         }
 
         $request = FriendRequestModel::where([
-            'id' => $requestId,
-            'status' => FriendRequestModel::STATUS_WAIT
+            'id'     => $requestId,
+            'status' => FriendRequestModel::STATUS_WAIT,
         ])->find();
 
         if (!$request) {
@@ -368,12 +379,13 @@ class Friend
 
         // 启动事务
         Db::startTrans();
+
         try {
-            $request->status           = FriendRequestModel::STATUS_REJECT;
-            $request->target_readed    = true;
+            $request->status = FriendRequestModel::STATUS_REJECT;
+            $request->target_readed = true;
             $request->requester_readed = false;
-            $request->reject_reason    = $reason;
-            $request->update_time      = time() * 1000;
+            $request->reject_reason = $reason;
+            $request->update_time = time() * 1000;
             $request->save();
 
             // 去找一下有没有自己申请加对方的申请记录
@@ -381,7 +393,7 @@ class Friend
             // 找到就直接删除吧，省点空间
             FriendRequestModel::where([
                 'requester_id' => $targetId,
-                'target_id' => $request->requester_id
+                'target_id'    => $request->requester_id,
             ])->delete();
 
             $storage = Storage::create();
@@ -389,7 +401,7 @@ class Friend
             $userInfos = UserInfoModel::where('user_id', 'IN', [$request->requester_id, $targetId])->field([
                 'user_id',
                 'avatar',
-                'nickname'
+                'nickname',
             ])->limit(2)->select();
 
             $avatarThumbnail = null;
@@ -397,30 +409,33 @@ class Friend
                 $avatarThumbnail = $storage->getThumbnailUrl($userInfo->avatar);
 
                 if ($userInfo->user_id === $targetId) {
-                    $request->targetNickname        = $userInfo->nickname;
+                    $request->targetNickname = $userInfo->nickname;
                     $request->targetAvatarThumbnail = $avatarThumbnail;
                 } else {
-                    $request->requesterNickname        = $userInfo->nickname;
+                    $request->requesterNickname = $userInfo->nickname;
                     $request->requesterAvatarThumbnail = $avatarThumbnail;
                 }
             }
 
             Db::commit();
+
             return Result::success($request);
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
+
             return Result::unknown($e->getMessage());
         }
     }
 
     /**
      * 判断二人是否为好友关系
-     * 如果是好友关系，则返回私聊房间号；否则返回零
+     * 如果是好友关系，则返回私聊房间号；否则返回零.
      *
-     * @param integer $requesterId
-     * @param integer $targetId
-     * @return integer
+     * @param int $requesterId
+     * @param int $targetId
+     *
+     * @return int
      */
     public function isFriend(int $requesterId, int $targetId): int
     {
@@ -441,10 +456,11 @@ class Friend
     }
 
     /**
-     * 设置好友别名
+     * 设置好友别名.
      *
-     * @param integer $chatroomId 私聊房间号
-     * @param string $alias 好友别名
+     * @param int    $chatroomId 私聊房间号
+     * @param string $alias      好友别名
+     *
      * @return Result
      */
     public function setFriendAlias(int $chatroomId, ?string $alias): Result
@@ -471,7 +487,7 @@ class Friend
 
         $chatMember = ChatMemberModel::where([
             ['chatroom_id', '=', $chatroomId],
-            ['user_id', '<>', $userId]
+            ['user_id', '<>', $userId],
         ])->find();
 
         if (!$chatMember) {
@@ -490,7 +506,8 @@ class Friend
 
     /**
      * 已读收到的好友请求
-     * @param integer $id
+     *
+     * @param int $id
      *
      * @return Result
      */
@@ -501,9 +518,9 @@ class Friend
         FriendRequestModel::where([
             'id'            => $id,
             'target_id'     => $userId,
-            'target_readed' => false
+            'target_readed' => false,
         ])->update([
-            'target_readed' => true
+            'target_readed' => true,
         ]);
 
         return Result::success();
@@ -511,7 +528,8 @@ class Friend
 
     /**
      * 已读发送的好友请求
-     * @param integer $id
+     *
+     * @param int $id
      *
      * @return Result
      */
@@ -522,9 +540,9 @@ class Friend
         FriendRequestModel::where([
             'id'               => $id,
             'requester_id'     => $userId,
-            'requester_readed' => false
+            'requester_readed' => false,
         ])->update([
-            'requester_readed' => true
+            'requester_readed' => true,
         ]);
 
         return Result::success();

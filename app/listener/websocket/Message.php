@@ -16,7 +16,6 @@ use think\validate\ValidateRule;
 
 class Message extends SocketEventHandler
 {
-
     public function verify(array $data): bool
     {
         return Validate::rule([
@@ -29,7 +28,7 @@ class Message extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -38,6 +37,7 @@ class Message extends SocketEventHandler
         // 语音，图片消息等只能通过HTTP API来上传并发送
         if (in_array($event['type'], [MessageType::VOICE, MessageType::IMAGE, MessageType::TIPS])) {
             $result = Result::create(Result::CODE_PARAM_ERROR, '该类型的消息不允许通过WS通道发送');
+
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);
         }
 
@@ -56,7 +56,7 @@ class Message extends SocketEventHandler
 
         // TODO 群聊的头像
         $this->websocket
-            ->to(SocketRoomPrefix::CHATROOM . $event['chatroomId'])
+            ->to(SocketRoomPrefix::CHATROOM.$event['chatroomId'])
             ->emit(SocketEvent::MESSAGE, $result);
     }
 }

@@ -20,7 +20,7 @@ class Chat
     }
 
     /**
-     * 获取我收到的入群申请
+     * 获取我收到的入群申请.
      *
      * @return Result
      */
@@ -32,7 +32,8 @@ class Chat
     /**
      * 通过请求ID获取我收到的入群请求
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function getReceiveRequestById(int $id): Result
@@ -51,7 +52,7 @@ class Chat
     }
 
     /**
-     * 获取我发送的所有入群申请
+     * 获取我发送的所有入群申请.
      *
      * @return Result
      */
@@ -63,7 +64,8 @@ class Chat
     /**
      * 通过请求ID获取我发送的入群请求
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function getSendRequestById(int $id): Result

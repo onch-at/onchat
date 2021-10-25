@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\core;
 
-use Swoole\Http\Status;
 use app\utils\Arr as ArrUtils;
+use Swoole\Http\Status;
 use think\Collection;
 use think\Model;
 use think\response\Json;
@@ -48,11 +48,11 @@ class Result
     private function __construct(int $code, string $msg = null, $data = null)
     {
         $this->code = $code;
-        $this->msg  = $msg ?? self::CODE_PHRASES[$code];
+        $this->msg = $msg ?? self::CODE_PHRASES[$code];
 
         if ($data instanceof Collection || $data instanceof Model) {
             $this->data = ArrUtils::keyToCamel($data->toArray());
-        } else if (is_array($data)) {
+        } elseif (is_array($data)) {
             $this->data = ArrUtils::keyToCamel($data);
         } else {
             $this->data = $data;
@@ -82,12 +82,14 @@ class Result
     public function msg($msg): self
     {
         $this->msg = $msg;
+
         return $this;
     }
 
     public function data($data): self
     {
         $this->data = $data;
+
         return $this;
     }
 

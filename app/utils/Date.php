@@ -7,9 +7,9 @@ namespace app\utils;
 class Date
 {
     /**
-     * 返回当前毫秒级时间戳
+     * 返回当前毫秒级时间戳.
      *
-     * @return integer
+     * @return int
      */
     public static function now(): int
     {
@@ -17,10 +17,11 @@ class Date
     }
 
     /**
-     * 通过生日获得星座编号
+     * 通过生日获得星座编号.
      *
-     * @param integer $birthday 生日时间戳
-     * @return integer
+     * @param int $birthday 生日时间戳
+     *
+     * @return int
      */
     public static function getConstellation(int $birthday): int
     {

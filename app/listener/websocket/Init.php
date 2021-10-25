@@ -21,7 +21,7 @@ class Init extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -37,28 +37,29 @@ class Init extends SocketEventHandler
             $payload = $tokenService->parse($token);
         } catch (\Exception $e) {
             $this->websocket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
+
             return $this->websocket->close();
         }
 
-        $userId    = $payload->sub;
+        $userId = $payload->sub;
         $chatrooms = $userService->getChatrooms($userId);
 
         $this->userTable->set($this->fd, $payload);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroom->id);
+            $this->websocket->join(SocketRoomPrefix::CHATROOM.$chatroom->id);
         }
 
         // 加入用户房间
-        $this->websocket->join(SocketRoomPrefix::USER . $userId);
+        $this->websocket->join(SocketRoomPrefix::USER.$userId);
 
         $this->websocket->emit(SocketEvent::INIT, Result::success());
 
         UserInfoModel::update([
-            'login_time' => time() * 1000
+            'login_time' => time() * 1000,
         ], [
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
     }
 }

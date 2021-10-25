@@ -20,9 +20,10 @@ class Chatroom
     }
 
     /**
-     * 获取聊天室名称
+     * 获取聊天室名称.
      *
-     * @param integer $id 聊天室ID
+     * @param int $id 聊天室ID
+     *
      * @return Result
      */
     public function getName(int $id): Result
@@ -31,10 +32,11 @@ class Chatroom
     }
 
     /**
-     * 设置聊天室名称
+     * 设置聊天室名称.
      *
-     * @param integer $id 聊天室ID
+     * @param int    $id   聊天室ID
      * @param string $name 名称
+     *
      * @return Result
      */
     public function setName(int $id, string $name): Result
@@ -43,10 +45,11 @@ class Chatroom
     }
 
     /**
-     * 设置群昵称
+     * 设置群昵称.
      *
-     * @param integer $id 聊天室ID
+     * @param int    $id       聊天室ID
      * @param string $nickname 昵称
+     *
      * @return Result
      */
     public function setNickname(int $id, string $nickname): Result
@@ -55,9 +58,10 @@ class Chatroom
     }
 
     /**
-     * 获取聊天室
+     * 获取聊天室.
      *
-     * @param integer $id 聊天室ID
+     * @param int $id 聊天室ID
+     *
      * @return Result
      */
     public function getChatroom(int $id): Result
@@ -66,9 +70,10 @@ class Chatroom
     }
 
     /**
-     * 获取群聊所有成员
+     * 获取群聊所有成员.
      *
-     * @param integer $id 聊天室ID
+     * @param int $id 聊天室ID
+     *
      * @return Result
      */
     public function getChatMembers(int $id): Result
@@ -77,9 +82,10 @@ class Chatroom
     }
 
     /**
-     * 上传聊天室头像
+     * 上传聊天室头像.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function avatar(int $id): Result
@@ -88,10 +94,11 @@ class Chatroom
     }
 
     /**
-     * 模糊搜索聊天室
+     * 模糊搜索聊天室.
      *
      * @param string $keyword
-     * @param integer $page
+     * @param int    $page
+     *
      * @return Result
      */
     public function search(string $keyword, int $page): Result
