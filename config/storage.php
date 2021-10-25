@@ -26,6 +26,6 @@ return [
 
         'local' => [
             'driver' => Local::class,
-        ]
-    ]
+        ],
+    ],
 ];

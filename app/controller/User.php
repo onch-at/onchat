@@ -20,10 +20,11 @@ class User
     }
 
     /**
-     * 用户登录
+     * 用户登录.
      *
      * @param string $username 用户名
      * @param string $password 密码
+     *
      * @return Result
      */
     public function login(string $username, string $password): Result
@@ -36,6 +37,7 @@ class User
      *
      * @param string $oldPassword 原密码
      * @param string $newPassword 新密码
+     *
      * @return Result
      */
     public function changePassword(string $oldPassword, string $newPassword): Result
@@ -44,9 +46,10 @@ class User
     }
 
     /**
-     * 通过用户名发送邮件
+     * 通过用户名发送邮件.
      *
      * @param string $username
+     *
      * @return Result
      */
     public function sendEmailCaptcha(string $username): Result
@@ -59,30 +62,32 @@ class User
      *
      * @param string $username 用户名
      * @param string $password 密码
-     * @param string $captcha 验证码
+     * @param string $captcha  验证码
+     *
      * @return Result
      */
     public function resetPassword(string $username, string $password, string $captcha): Result
     {
-        return $this->service->resetPassword($username,  $password,  $captcha);
+        return $this->service->resetPassword($username, $password, $captcha);
     }
 
     /**
-     * 注册账户
+     * 注册账户.
      *
      * @param string $username 用户名
      * @param string $password 密码
-     * @param string $email 邮箱
-     * @param string $captcha 验证码
+     * @param string $email    邮箱
+     * @param string $captcha  验证码
+     *
      * @return Result
      */
     public function register(string $username, string $password, string $email, string $captcha): Result
     {
-        return $this->service->register($username,  $password,  $email,  $captcha);
+        return $this->service->register($username, $password, $email, $captcha);
     }
 
     /**
-     * 上传用户头像
+     * 上传用户头像.
      *
      * @return Result
      */
@@ -92,7 +97,7 @@ class User
     }
 
     /**
-     * 保存用户信息
+     * 保存用户信息.
      *
      * @return Result
      */
@@ -102,10 +107,11 @@ class User
     }
 
     /**
-     * 绑定电子邮箱
+     * 绑定电子邮箱.
      *
-     * @param string $email 邮箱
+     * @param string $email   邮箱
      * @param string $captcha 验证码
+     *
      * @return Result
      */
     public function bindEmail(string $email, string $captcha): Result
@@ -114,7 +120,7 @@ class User
     }
 
     /**
-     * 获取用户
+     * 获取用户.
      *
      * @return Result
      */
@@ -124,7 +130,7 @@ class User
     }
 
     /**
-     * 获取私聊聊天室列表
+     * 获取私聊聊天室列表.
      *
      * @return Result
      */
@@ -134,7 +140,7 @@ class User
     }
 
     /**
-     * 获取群聊聊天室列表
+     * 获取群聊聊天室列表.
      *
      * @return Result
      */
@@ -144,10 +150,11 @@ class User
     }
 
     /**
-     * 模糊搜索用户
+     * 模糊搜索用户.
      *
      * @param string $keyword
-     * @param integer $page
+     * @param int    $page
+     *
      * @return Result
      */
     public function search(string $keyword, int $page): Result

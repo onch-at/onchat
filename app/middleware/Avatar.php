@@ -9,21 +9,21 @@ use think\Request;
 use think\Response;
 
 /**
- * 头像文件中间件
+ * 头像文件中间件.
  */
 class Avatar
 {
     /**
      * 处理请求
      *
-     * @param Request $request
+     * @param Request  $request
      * @param \Closure $next
-     * @param integer $size 文件体积
+     * @param int      $size    文件体积
+     *
      * @return Response
      */
     public function handle(Request $request, \Closure $next, int $size = 1024 * 1024): Response
     {
-
         $image = $request->file('image');
         $mine = $image->getMime();
 
@@ -32,7 +32,7 @@ class Avatar
         }
 
         if ($image->getSize() > $size) { // 1MB
-            return Result::create(Result::CODE_PARAM_ERROR, '文件体积过大，仅接受体积为' . round($size / 1048576, 1) . 'MB以内的文件')->toJson();
+            return Result::create(Result::CODE_PARAM_ERROR, '文件体积过大，仅接受体积为'.round($size / 1048576, 1).'MB以内的文件')->toJson();
         }
 
         return $next($request);

@@ -21,7 +21,7 @@ class Friend
     }
 
     /**
-     * 获取我的收到好友申请
+     * 获取我的收到好友申请.
      *
      * @return Result
      */
@@ -31,7 +31,7 @@ class Friend
     }
 
     /**
-     * 获取我的发起的好友申请（不包含已经同意的）
+     * 获取我的发起的好友申请（不包含已经同意的）.
      *
      * @return Result
      */
@@ -41,9 +41,10 @@ class Friend
     }
 
     /**
-     * 根据被申请人UID来获取FriendRequest
+     * 根据被申请人UID来获取FriendRequest.
      *
-     * @param integer $targetId
+     * @param int $targetId
+     *
      * @return Result
      */
     public function getRequestByTargetId(int $targetId): Result
@@ -52,9 +53,10 @@ class Friend
     }
 
     /**
-     * 根据申请人UID来获取FriendRequest
+     * 根据申请人UID来获取FriendRequest.
      *
-     * @param integer $requesterId
+     * @param int $requesterId
+     *
      * @return Result
      */
     public function getRequestByRequesterId(int $requesterId): Result
@@ -63,9 +65,10 @@ class Friend
     }
 
     /**
-     * 通过ID获取FriendRequest
+     * 通过ID获取FriendRequest.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function getRequestById(int $id): Result
@@ -74,10 +77,11 @@ class Friend
     }
 
     /**
-     * 设置好友别名
+     * 设置好友别名.
      *
-     * @param integer $chatroomId 私聊聊天室ID
-     * @param string $alias 别名
+     * @param int    $chatroomId 私聊聊天室ID
+     * @param string $alias      别名
+     *
      * @return Result
      */
     public function setFriendAlias(int $chatroomId, string $alias): Result
@@ -87,21 +91,24 @@ class Friend
 
     /**
      * 判断对方与自己是否为好友关系
-     * 如果是好友关系，则返回私聊房间号；否则返回零
+     * 如果是好友关系，则返回私聊房间号；否则返回零.
      *
-     * @param integer $id 对方的用户ID
+     * @param int $id 对方的用户ID
+     *
      * @return Result
      */
     public function isFriend(int $id): Result
     {
         $userId = UserService::getId();
         $data = $this->service->isFriend($userId, $id);
+
         return Result::success($data);
     }
 
     /**
      * 已读收到的好友请求
-     * @param integer $id
+     *
+     * @param int $id
      *
      * @return Result
      */
@@ -112,7 +119,8 @@ class Friend
 
     /**
      * 已读发送的好友请求
-     * @param integer $id
+     *
+     * @param int $id
      *
      * @return Result
      */

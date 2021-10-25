@@ -22,7 +22,7 @@ class FriendRequestAgree extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -35,7 +35,7 @@ class FriendRequestAgree extends SocketEventHandler
         $result = $friendService->agree($requestId, $user['id'], $requesterAlias);
 
         $chatroomId = $result->data['chatroomId'];
-        $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroomId);
+        $this->websocket->join(SocketRoomPrefix::CHATROOM.$chatroomId);
         $this->websocket->emit(SocketEvent::FRIEND_REQUEST_AGREE, $result);
 
         // 如果成功同意申请，则尝试给申请人推送消息
@@ -44,15 +44,15 @@ class FriendRequestAgree extends SocketEventHandler
         }
 
         // 拿到申请人的FD
-        $requestId    = $result->data['requesterId'];
-        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $requestId);
+        $requestId = $result->data['requesterId'];
+        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER.$requestId);
 
         // 加入新的聊天室
         foreach ($requesterFds as $fd) {
-            $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatroomId);
+            $this->room->add($fd, SocketRoomPrefix::CHATROOM.$chatroomId);
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER . $requestId)
+        $this->websocket->to(SocketRoomPrefix::USER.$requestId)
             ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
     }
 }

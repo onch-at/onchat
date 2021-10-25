@@ -13,7 +13,6 @@ use think\validate\ValidateRule;
 
 class RtcHangUp extends SocketEventHandler
 {
-
     public function verify(array $data): bool
     {
         return Validate::rule([
@@ -22,7 +21,7 @@ class RtcHangUp extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -31,7 +30,7 @@ class RtcHangUp extends SocketEventHandler
         $event['senderId'] = $this->getUser()['id'];
 
         $this->websocket
-            ->to(SocketRoomPrefix::USER . $event['targetId'])
+            ->to(SocketRoomPrefix::USER.$event['targetId'])
             ->emit(SocketEvent::RTC_HANG_UP, Result::success($event));
     }
 }

@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace app\middleware;
 
-use app\constant\RedisPrefix;
-use app\core\Redis;
 use app\core\Result;
-use app\entity\TokenPayload;
 use app\service\Token as TokenService;
 use think\Request;
 use think\Response;
 
 /**
- * 登录认证中间件
+ * 登录认证中间件.
  */
 class Auth
 {
@@ -23,11 +20,13 @@ class Auth
     {
         $this->tokenService = $tokenService;
     }
+
     /**
      * 处理请求
      *
-     * @param Request $request
+     * @param Request  $request
      * @param \Closure $next
+     *
      * @return Response
      */
     public function handle(Request $request, \Closure $next): Response

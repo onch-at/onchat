@@ -26,7 +26,7 @@ class InviteJoinChatroom extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -46,13 +46,13 @@ class InviteJoinChatroom extends SocketEventHandler
 
         $message = new MessageEntity(MessageType::CHAT_INVITATION);
         $message->userId = $user['id'];
-        $message->data   = new ChatInvitationMessage($chatroomId);
+        $message->data = new ChatInvitationMessage($chatroomId);
 
         // 给每个受邀者发消息
         foreach ($result->data as $chatroomId) {
             $message->chatroomId = $chatroomId;
             $this->websocket
-                ->to(SocketRoomPrefix::CHATROOM . $chatroomId)
+                ->to(SocketRoomPrefix::CHATROOM.$chatroomId)
                 ->emit(SocketEvent::MESSAGE, $chatRecordService->addRecord($message));
         }
     }

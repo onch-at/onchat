@@ -18,12 +18,12 @@ class ChatRequest extends SocketEventHandler
     {
         return Validate::rule([
             'chatroomId' => ValidateRule::must()->integer(),
-            'reason'     => ValidateRule::has(true)
+            'reason'     => ValidateRule::has(true),
         ])->check($data);
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -42,7 +42,7 @@ class ChatRequest extends SocketEventHandler
             $userIdList = $chatroomService->getHostAndManagerIdList($chatroomId);
 
             foreach ($userIdList as $userId) {
-                $this->websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::CHAT_REQUEST, $result);
+                $this->websocket->to(SocketRoomPrefix::USER.$userId)->emit(SocketEvent::CHAT_REQUEST, $result);
             }
         }
     }

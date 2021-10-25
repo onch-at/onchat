@@ -7,7 +7,7 @@ namespace app\table;
 use app\contract\Table;
 
 /**
- * 频率限制器
+ * 频率限制器.
  */
 class Throttle extends Table
 {
@@ -19,26 +19,28 @@ class Throttle extends Table
     const LIMIT_COUNT = 30;
 
     /**
-     * 设置行的数据
+     * 设置行的数据.
      *
-     * @param integer $userId
-     * @param integer $time
-     * @param integer $count
-     * @return boolean
+     * @param int $userId
+     * @param int $time
+     * @param int $count
+     *
+     * @return bool
      */
     public function set(int $userId, int $time, int $count): bool
     {
         return $this->table->set((string) $userId, [
             'time'  => $time,
-            'count' => $count
+            'count' => $count,
         ]);
     }
 
     /**
-     * 根据用户ID进行尝试
+     * 根据用户ID进行尝试.
      *
      * @param int $userId
-     * @return boolean
+     *
+     * @return bool
      */
     public function try(int $userId): bool
     {
@@ -64,10 +66,11 @@ class Throttle extends Table
     }
 
     /**
-     * 重置某个IP的数据
+     * 重置某个IP的数据.
      *
      * @param int $userId
-     * @return boolean
+     *
+     * @return bool
      */
     public function reset(int $userId): bool
     {

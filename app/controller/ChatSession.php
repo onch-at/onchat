@@ -20,7 +20,7 @@ class ChatSession
     }
 
     /**
-     * 获取用户的聊天列表
+     * 获取用户的聊天列表.
      *
      * @return Result
      */
@@ -30,9 +30,10 @@ class ChatSession
     }
 
     /**
-     * 置顶聊天会话
+     * 置顶聊天会话.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function sticky(int $id): Result
@@ -41,9 +42,10 @@ class ChatSession
     }
 
     /**
-     * 取消置顶聊天会话
+     * 取消置顶聊天会话.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function unsticky(int $id): Result
@@ -52,9 +54,10 @@ class ChatSession
     }
 
     /**
-     * 将聊天会话设置为已读
+     * 将聊天会话设置为已读.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function readed(int $id): Result
@@ -63,9 +66,10 @@ class ChatSession
     }
 
     /**
-     * 将聊天会话设置为未读
+     * 将聊天会话设置为未读.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function unread(int $id): Result
@@ -74,9 +78,10 @@ class ChatSession
     }
 
     /**
-     * 隐藏会话
+     * 隐藏会话.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return Result
      */
     public function hide(int $id): Result

@@ -3,9 +3,9 @@
 namespace app\contract;
 
 /**
- * 文字提示消息
+ * 文字提示消息.
  */
 abstract class TipsMessage
 {
-  public $type;
+    public $type;
 }

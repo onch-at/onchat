@@ -8,5 +8,5 @@ return [
     // Issuer
     'iss'  => env('jwt.iss', 'api.chat.hypergo.net'),
     // Audience
-    'aud'  => env('jwt.aud', 'chat.hypergo.net')
+    'aud'  => env('jwt.aud', 'chat.hypergo.net'),
 ];

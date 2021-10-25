@@ -13,18 +13,17 @@ use think\validate\ValidateRule;
 
 class RtcData extends SocketEventHandler
 {
-
     public function verify(array $data): bool
     {
         return Validate::rule([
             'targetId' => ValidateRule::must()->integer(),
-            'type' => ValidateRule::must()->integer(),
-            'value' => ValidateRule::must()->array(),
+            'type'     => ValidateRule::must()->integer(),
+            'value'    => ValidateRule::must()->array(),
         ])->check($data);
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -33,7 +32,7 @@ class RtcData extends SocketEventHandler
         $event['senderId'] = $this->getUser()['id'];
 
         $this->websocket
-            ->to(SocketRoomPrefix::USER . $event['targetId'])
+            ->to(SocketRoomPrefix::USER.$event['targetId'])
             ->emit(SocketEvent::RTC_DATA, Result::success($event));
     }
 }

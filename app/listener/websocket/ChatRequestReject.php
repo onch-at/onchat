@@ -22,7 +22,7 @@ class ChatRequestReject extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -41,7 +41,7 @@ class ChatRequestReject extends SocketEventHandler
             return false;
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER . $result->data['requesterId'])
+        $this->websocket->to(SocketRoomPrefix::USER.$result->data['requesterId'])
             ->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
     }
 }

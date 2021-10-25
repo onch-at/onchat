@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace app\listener\task;
 
-use Swoole\Timer;
 use app\model\ChatRequest;
+use Swoole\Timer;
 use think\swoole\Manager;
 
 class ClearChatRequest
 {
-
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */

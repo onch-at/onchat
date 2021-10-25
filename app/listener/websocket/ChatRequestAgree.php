@@ -21,7 +21,7 @@ class ChatRequestAgree extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -40,14 +40,14 @@ class ChatRequestAgree extends SocketEventHandler
             return false;
         }
 
-        $chatSession  = $result->data[1];
-        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $chatSession['userId']);
+        $chatSession = $result->data[1];
+        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER.$chatSession['userId']);
 
         foreach ($requesterFds as $fd) {
-            $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatSession['data']['chatroomId']);
+            $this->room->add($fd, SocketRoomPrefix::CHATROOM.$chatSession['data']['chatroomId']);
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER . $chatSession['userId'])
+        $this->websocket->to(SocketRoomPrefix::USER.$chatSession['userId'])
             ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
     }
 }

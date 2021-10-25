@@ -15,14 +15,15 @@ abstract class Table
 
     public function __construct(Container $container)
     {
-        $this->table = $container->make('swoole.table.' . $this->name);
+        $this->table = $container->make('swoole.table.'.$this->name);
     }
 
     /**
-     * 获取一行数据
+     * 获取一行数据.
      *
-     * @param string|integer $key
-     * @param string $field
+     * @param string|int $key
+     * @param string     $field
+     *
      * @return mixed
      */
     public function get($key, string $field = null)
@@ -31,10 +32,11 @@ abstract class Table
     }
 
     /**
-     * 删除一行数据
+     * 删除一行数据.
      *
-     * @param string|integer $key
-     * @return boolean
+     * @param string|int $key
+     *
+     * @return bool
      */
     public function del($key): bool
     {

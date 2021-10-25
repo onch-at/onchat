@@ -23,14 +23,15 @@ class Index
     public function __construct(Session $session, Config $config, Queue $queue)
     {
         $this->session = $session;
-        $this->config  = $config;
-        $this->queue   = $queue;
+        $this->config = $config;
+        $this->queue = $queue;
     }
 
     /**
-     * 检测用户名是否可用
+     * 检测用户名是否可用.
      *
      * @param string $username
+     *
      * @return Result
      */
     public function checkUsername(string $username): Result
@@ -39,9 +40,10 @@ class Index
     }
 
     /**
-     * 检测邮箱是否可用
+     * 检测邮箱是否可用.
      *
      * @param string $email
+     *
      * @return Result
      */
     public function checkEmail(string $email): Result
@@ -58,6 +60,7 @@ class Index
      * 验证码10分钟内有效，1分钟内不允许重复发送
      *
      * @param string $email
+     *
      * @return Result
      */
     public function sendEmailCaptcha(string $email): Result
@@ -82,10 +85,10 @@ class Index
         $this->session->set(SessionKey::EMAIL_CAPTCHA, [
             'captcha' => password_hash(strtolower($captcha), PASSWORD_DEFAULT),
             'email'   => $email,
-            'time'    => time()
+            'time'    => time(),
         ]);
 
-        $path = resource_path('tpl/mail') . 'captcha.html';
+        $path = resource_path('tpl/mail').'captcha.html';
 
         $result = $this->queue->push(JobSendMail::class, [
             'from'      => [$this->config->get('smtp.username'), 'OnChat'],
@@ -93,18 +96,19 @@ class Index
             'isHTML'    => true,
             'subject'   => 'OnChat：电子邮箱验证',
             'body'      => StrUtils::assign(FileUtils::read($path), ['captcha' => $captcha]),
-            'altBody'   => null
+            'altBody'   => null,
         ]);
 
         return Result::create($result !== false ? Result::CODE_SUCCESS : Result::CODE_UNKNOWN_ERROR);
     }
 
     /**
-     * 验证邮箱验证码是否正确
+     * 验证邮箱验证码是否正确.
      *
      * @param string $email
      * @param string $captcha
-     * @return boolean
+     *
+     * @return bool
      */
     public function checkEmailCaptcha(string $email, string $captcha): bool
     {

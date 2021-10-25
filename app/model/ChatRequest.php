@@ -7,7 +7,7 @@ namespace app\model;
 use think\Model;
 
 /**
- * 入群申请
+ * 入群申请.
  */
 class ChatRequest extends Model
 {
@@ -24,7 +24,6 @@ class ChatRequest extends Model
     const STATUS_IGNORE = 3;
     /** 状态：删除 */
     const STATUS_DELETE = 4;
-
 
     /** 申请人 */
     public function requester()
@@ -43,10 +42,11 @@ class ChatRequest extends Model
     }
 
     /**
-     * ID字段获取器
+     * ID字段获取器.
      *
-     * @param string|integer $value
-     * @return integer
+     * @param string|int $value
+     *
+     * @return int
      */
     public function getIdAttr($value): int
     {

@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace app\model;
 
 use think\model\Pivot;
-use app\model\User;
-use app\model\Chatroom;
 
 /**
- * 聊天成员
+ * 聊天成员.
  */
 class ChatMember extends Pivot
 {
@@ -33,10 +31,11 @@ class ChatMember extends Pivot
     // }
 
     /**
-     * ID字段获取器
+     * ID字段获取器.
      *
-     * @param string|integer $value
-     * @return integer
+     * @param string|int $value
+     *
+     * @return int
      */
     public function getIdAttr($value): int
     {

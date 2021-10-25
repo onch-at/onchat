@@ -15,7 +15,7 @@ class User extends Table
     {
         return $this->table->set($fd, [
             'id'       => $payload->sub,
-            'username' => $payload->usr->username
+            'username' => $payload->usr->username,
         ]);
     }
 }

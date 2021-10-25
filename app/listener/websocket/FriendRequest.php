@@ -23,7 +23,7 @@ class FriendRequest extends SocketEventHandler
     }
 
     /**
-     * 事件监听处理
+     * 事件监听处理.
      *
      * @return mixed
      */
@@ -44,7 +44,7 @@ class FriendRequest extends SocketEventHandler
 
         // 如果成功发出申请，则尝试给被申请人推送消息
         if ($result->isSuccess()) {
-            $this->websocket->to(SocketRoomPrefix::USER . $targetId)
+            $this->websocket->to(SocketRoomPrefix::USER.$targetId)
                 ->emit(SocketEvent::FRIEND_REQUEST, $result);
         }
     }

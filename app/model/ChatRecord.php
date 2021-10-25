@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace app\model;
 
-use app\model\Chatroom;
-use app\model\User;
 use think\Model;
 
 /**
- * 聊天记录
+ * 聊天记录.
  */
 class ChatRecord extends Model
 {
@@ -20,9 +18,10 @@ class ChatRecord extends Model
     // ];
 
     /**
-     * 通过聊天室ID选择相应的聊天记录表
+     * 通过聊天室ID选择相应的聊天记录表.
      *
-     * @param integer $chatroomId 房间号
+     * @param int $chatroomId 房间号
+     *
      * @return ChatRecord
      */
     public static function opt(int $chatroomId)
@@ -34,14 +33,15 @@ class ChatRecord extends Model
     }
 
     /**
-     * 根据聊天室ID获得数据表名称
+     * 根据聊天室ID获得数据表名称.
      *
-     * @param integer $chatroomId
+     * @param int $chatroomId
+     *
      * @return string
      */
     public static function getTableNameById(int $chatroomId): string
     {
-        return 'chat_record_' . $chatroomId % 10;
+        return 'chat_record_'.$chatroomId % 10;
     }
 
     public function chatroom()
@@ -55,10 +55,11 @@ class ChatRecord extends Model
     }
 
     /**
-     * ID字段获取器
+     * ID字段获取器.
      *
-     * @param string|integer $value
-     * @return integer
+     * @param string|int $value
+     *
+     * @return int
      */
     public function getIdAttr($value): int
     {
