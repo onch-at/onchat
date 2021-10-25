@@ -4,6 +4,7 @@ A simple, beautiful, mobile-first instant messaging progressive web application 
 You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the OnChat front-end code repository.
 
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![StyleCI](https://github.styleci.io/repos/7548986/shield?style=flat&branch=6.x)
 
 OnChat currently supports the following chat modes:
 
