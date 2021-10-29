@@ -30,7 +30,7 @@
         "firebase/php-jwt": "5.4.0"
     },
     "require-dev": {
-        "symfony/var-dumper": "4.4.30",
+        "symfony/var-dumper": "4.4.33",
         "topthink/think-trace": "1.4"
     },
     "autoload": {
