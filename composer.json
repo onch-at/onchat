@@ -27,7 +27,7 @@
         "ralouphie/mimey": "2.1.0",
         "php-ffmpeg/php-ffmpeg": "0.18.0",
         "topthink/think-queue": "3.0.6",
-        "firebase/php-jwt": "5.4.0"
+        "firebase/php-jwt": "5.5.0"
     },
     "require-dev": {
         "symfony/var-dumper": "5.3.10",
