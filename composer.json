@@ -19,15 +19,15 @@
         "topthink/framework": "6.0.9",
         "topthink/think-orm": "2.0.44",
         "topthink/think-captcha": "3.0.3",
-        "topthink/think-swoole": "4.0.5",
+        "topthink/think-swoole": "4.0.x-dev",
+        "topthink/think-queue": "3.0.6",
         "aliyuncs/oss-sdk-php": "2.4.3",
         "yzalis/identicon": "2.0.0",
         "ezyang/htmlpurifier": "4.13.0",
         "phpmailer/phpmailer": "6.5.1",
         "ralouphie/mimey": "2.1.0",
         "php-ffmpeg/php-ffmpeg": "0.18.0",
-        "topthink/think-queue": "3.0.6",
-        "firebase/php-jwt": "5.4.0"
+        "firebase/php-jwt": "5.5.0"
     },
     "require-dev": {
         "symfony/var-dumper": "5.3.10",
