@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace app\utils;
 
-use finfo as Finfo;
 use Mimey\MimeTypes;
-use Swoole\Coroutine\System;
+use finfo as Finfo;
 use think\Container;
 
 class File
@@ -41,13 +40,12 @@ class File
      * 读取文件.
      *
      * @param string $filename
-     * @param bool   $coroutine 协程
      *
      * @return string|false
      */
-    public static function read(string $filename, bool $coroutine = true)
+    public static function read(string $filename)
     {
-        return $coroutine ? System::readFile($filename) : file_get_contents($filename);
+        return file_get_contents($filename);
     }
 
     // /**

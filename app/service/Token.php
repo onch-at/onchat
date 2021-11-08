@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use Firebase\JWT\JWT;
 use app\constant\RedisPrefix;
 use app\core\Redis;
 use app\entity\TokenPayload;
-use Firebase\JWT\JWT;
-use Swoole\Coroutine\System;
+use app\utils\File as FileUtils;
 use think\Config;
 
 class Token
@@ -23,8 +23,8 @@ class Token
 
     public function __construct(Config $config)
     {
-        $this->privateKey = System::readFile(root_path().'private-key.pem');
-        $this->publicKey = System::readFile(root_path().'public-key.pem');
+        $this->privateKey = FileUtils::read(root_path() . 'private-key.pem');
+        $this->publicKey = FileUtils::read(root_path() . 'public-key.pem');
 
         $this->config = $config;
     }
@@ -103,7 +103,7 @@ class Token
      */
     public function isAvailable(TokenPayload $payload)
     {
-        return $payload->jti === Redis::create()->get(RedisPrefix::JWT_ID.$payload->sub);
+        return $payload->jti === Redis::create()->get(RedisPrefix::JWT_ID . $payload->sub);
     }
 
     /**
@@ -115,6 +115,6 @@ class Token
      */
     public function disuse(TokenPayload $payload)
     {
-        Redis::create()->del(RedisPrefix::JWT_ID.$payload->sub);
+        Redis::create()->del(RedisPrefix::JWT_ID . $payload->sub);
     }
 }

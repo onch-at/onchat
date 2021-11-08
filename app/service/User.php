@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace app\service;
 
-use app\core\identicon\ImageMagickGenerator;
+use Identicon\Identicon;
 use app\core\Result;
+use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
 use app\entity\TokenFolder;
 use app\facade\AuthService;
@@ -13,14 +14,13 @@ use app\facade\ChatroomService;
 use app\facade\IndexService;
 use app\facade\TokenService;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\Chatroom as ChatroomModel;
 use app\model\ChatSession as ChatSessionModel;
+use app\model\Chatroom as ChatroomModel;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
 use app\utils\Date as DateUtils;
 use app\utils\File as FileUtils;
 use app\utils\Str as StrUtils;
-use Identicon\Identicon;
 use think\Collection;
 use think\facade\Db;
 use think\facade\Request;
@@ -43,8 +43,8 @@ class User
         self::CODE_USER_EXIST          => '用户已存在',
         self::CODE_USER_NOT_EXIST      => '用户不存在',
         self::CODE_PASSWORD_ERROR      => '密码错误',
-        self::CODE_PASSWORD_IRREGULAR  => '密码长度必须在'.ONCHAT_PASSWORD_MIN_LENGTH.'~'.ONCHAT_PASSWORD_MAX_LENGTH.'位字符之间',
-        self::CODE_SIGNATURE_IRREGULAR => '个性签名长度必须在'.ONCHAT_SIGNATURE_MIN_LENGTH.'~'.ONCHAT_SIGNATURE_MAX_LENGTH.'位字符之间',
+        self::CODE_PASSWORD_IRREGULAR  => '密码长度必须在' . ONCHAT_PASSWORD_MIN_LENGTH . '~' . ONCHAT_PASSWORD_MAX_LENGTH . '位字符之间',
+        self::CODE_SIGNATURE_IRREGULAR => '个性签名长度必须在' . ONCHAT_SIGNATURE_MIN_LENGTH . '~' . ONCHAT_SIGNATURE_MAX_LENGTH . '位字符之间',
     ];
 
     /** User 字段 */
@@ -154,8 +154,8 @@ class User
             // 根据用户ID创建哈希头像
             $imageData = $identicon->getImageData($user->id, 256, null, '#f5f5f5');
 
-            $path = $storage->getRootPath().'avatar/user/'.$user->id.'/';
-            $file = md5((string) DateUtils::now()).'.png';
+            $path = $storage->getRootPath() . 'avatar/user/' . $user->id . '/';
+            $file = md5((string) DateUtils::now()) . '.png';
 
             $result = $storage->save($path, $file, $imageData);
 
@@ -163,7 +163,7 @@ class User
                 return $result;
             }
 
-            $filename = $path.$file;
+            $filename = $path . $file;
 
             // 暂存一下用户信息，便于最后直接返回给前端
             $userInfo = [
@@ -523,8 +523,8 @@ class User
         try {
             $storage = Storage::create();
             $image = Request::file('image');
-            $path = $storage->getRootPath().'avatar/user/'.$userId.'/';
-            $file = $image->md5().'.'.FileUtils::getExtension($image);
+            $path = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
+            $file = $image->md5() . '.' . FileUtils::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
@@ -533,7 +533,7 @@ class User
                 return $result;
             }
 
-            $filename = $path.$file;
+            $filename = $path . $file;
 
             // 更新新头像
             UserInfoModel::update(['avatar' => $filename], [

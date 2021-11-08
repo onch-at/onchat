@@ -10,8 +10,8 @@ use app\utils\Str as StrUtils;
 use think\console\input\Argument;
 use think\console\input\Option;
 use think\facade\Config;
-use think\swoole\command\Server as ServerCommand;
 use think\swoole\Manager;
+use think\swoole\command\Server as ServerCommand;
 
 class OnChat extends ServerCommand
 {
@@ -58,20 +58,20 @@ class OnChat extends ServerCommand
     protected function init()
     {
         $default = Config::get('database.default');
-        $config = Config::get('database.connections.'.$default);
+        $config = Config::get('database.connections.' . $default);
         $host = $config['hostname'];
         $port = $config['hostport'];
         $username = $config['username'];
         $password = $config['password'];
         $database = $config['database'];
 
-        $sql = FileUtils::read(resource_path('sql').'database.sql', false); // 创建数据库的SQL
+        $sql = FileUtils::read(resource_path('sql') . 'database.sql'); // 创建数据库的SQL
 
         $this->output->comment('Connecting to database…');
 
         $dbh = new \PDO("mysql:host={$host};port={$port}", $username, $password);
 
-        $this->output->comment('Attempting to create database: '.$database);
+        $this->output->comment('Attempting to create database: ' . $database);
         $dbh->exec(StrUtils::assign($sql, ['database' => $database]));
 
         $path = resource_path('sql/table');
@@ -86,7 +86,7 @@ class OnChat extends ServerCommand
         });
 
         foreach ($dir as $file) {
-            $sql = FileUtils::read($path.$file, false);
+            $sql = FileUtils::read($path . $file);
 
             switch ($file) {
                 case 'chat-record.sql': // 如果是消息记录表，则需要生成分表
@@ -99,7 +99,7 @@ class OnChat extends ServerCommand
                     $dbh->exec($sql);
             }
 
-            $this->output->comment('Execute SQL statement > '.$file);
+            $this->output->comment('Execute SQL statement > ' . $file);
         }
 
         // 如果没有第一个聊天室，那么就创建一个吧！
