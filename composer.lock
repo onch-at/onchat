@@ -4,15 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-<<<<<<< HEAD
     "content-hash": "5f2095c4ebcc4135d6cda34b636dd20e",
-=======
-    "content-hash": "245aa68631be437e6b8ef4b42a94b875",
->>>>>>> a889512b06cdf1bc0968cd0eb20191179ee3141f
-=======
-    "content-hash": "245aa68631be437e6b8ef4b42a94b875",
->>>>>>> a889512b06cdf1bc0968cd0eb20191179ee3141f
     "packages": [
         {
             "name": "alchemy/binary-driver",
@@ -367,8 +359,6 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/firebase/php-jwt/zipball/cf814442ce0e9eebe5317d61b63ccda4b85de67a",
                 "reference": "cf814442ce0e9eebe5317d61b63ccda4b85de67a",
-<<<<<<< HEAD
-<<<<<<< HEAD
                 "shasum": "",
                 "mirrors": [
                     {
@@ -376,11 +366,6 @@
                         "preferred": true
                     }
                 ]
-=======
-=======
->>>>>>> a889512b06cdf1bc0968cd0eb20191179ee3141f
-                "shasum": ""
->>>>>>> a889512b06cdf1bc0968cd0eb20191179ee3141f
             },
             "require": {
                 "php": ">=5.3.0"
