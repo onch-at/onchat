@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\service;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use app\constant\RedisPrefix;
 use app\core\Redis;
 use app\entity\TokenPayload;
@@ -90,7 +91,8 @@ class Token
      */
     public function parse(string $jwt): TokenPayload
     {
-        $payload = JWT::decode($jwt, $this->publicKey, [self::ALG]);
+        $key     = new Key($this->publicKey, self::ALG);
+        $payload = JWT::decode($jwt, $key);
 
         return TokenPayload::from($payload);
     }
