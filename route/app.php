@@ -25,3 +25,8 @@ Route::group('index', function () {
 
     Route::post('emailcaptcha', 'sendEmailCaptcha');
 })->prefix('Index/');
+
+Route::get('assets/:path', function (string $path) {
+    $filename = public_path('storage') . $path;
+    return download($filename)->force(false);
+})->pattern(['path' => '.*\.\w+$']);
