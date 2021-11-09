@@ -75,7 +75,7 @@ class TokenPayload
     public static function create(int $subject, int $ttl): self
     {
         $redis = Redis::create();
-        $key = RedisPrefix::JWT_ID.$subject;
+        $key = RedisPrefix::JWT_ID . $subject;
         $jti = $redis->get($key);
         $time = time();
 

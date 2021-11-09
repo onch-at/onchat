@@ -86,7 +86,7 @@ class Chatroom
         $name = trim($name);
         // 如果长度超出
         if (StrUtils::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
-            return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于'.ONCHAT_CHATROOM_NAME_MAX_LENGTH.'位字符');
+            return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
         }
 
         ChatroomModel::update([
@@ -112,7 +112,7 @@ class Chatroom
             $nickname = StrUtils::trimAll($nickname);
             // 如果昵称长度超出
             if (StrUtils::length($nickname) > ONCHAT_NICKNAME_MAX_LENGTH) {
-                return Result::create(self::CODE_NICKNAME_LONG, '昵称长度不能大于'.ONCHAT_NICKNAME_MAX_LENGTH.'位字符');
+                return Result::create(self::CODE_NICKNAME_LONG, '昵称长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符');
             }
         } else {
             $nickname = UserService::getUsername();
@@ -194,7 +194,7 @@ class Chatroom
             $name = trim($name);
             // 如果长度超出
             if (StrUtils::length($name) > ONCHAT_CHATROOM_NAME_MAX_LENGTH) {
-                return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于'.ONCHAT_CHATROOM_NAME_MAX_LENGTH.'位字符');
+                return Result::create(self::CODE_NAME_LONG, '聊天室名字长度不能大于' . ONCHAT_CHATROOM_NAME_MAX_LENGTH . '位字符');
             }
         }
 
@@ -203,7 +203,7 @@ class Chatroom
             $length = StrUtils::length($description);
             // 如果长度超出
             if ($length < ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH || $length > ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH) {
-                return Result::create(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在'.ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH.'~'.ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH.'位字符之间');
+                return Result::create(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH . '~' . ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH . '位字符之间');
             }
         }
 
@@ -230,15 +230,15 @@ class Chatroom
 
             // 根据用户ID创建哈希头像
             $imageData = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
-            $path = $storage->getRootPath().'avatar/chatroom/'.$chatroom->id.'/';
-            $file = md5((string) DateUtils::now()).'.png';
+            $path = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
+            $file = md5((string) DateUtils::now()) . '.png';
             $result = $storage->save($path, $file, $imageData);
 
             if ($result->isError()) {
                 return $result;
             }
 
-            $filename = $path.$file;
+            $filename = $path . $file;
 
             ChatroomModel::update([
                 'id'     => $chatroom->id,
@@ -311,7 +311,7 @@ class Chatroom
             $result = ChatRecordService::addRecord($msg);
 
             if ($result->isSuccess()) {
-                $websocket->to(SocketRoomPrefix::CHATROOM.$id)->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
             }
         }
 
@@ -430,8 +430,8 @@ class Chatroom
         try {
             $storage = Storage::create();
             $image = Request::file('image');
-            $path = $storage->getRootPath().'avatar/chatroom/'.$id.'/';
-            $file = $image->md5().'.'.FileUtils::getExtension($image);
+            $path = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
+            $file = $image->md5() . '.' . FileUtils::getExtension($image);
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
@@ -440,7 +440,7 @@ class Chatroom
                 return $result;
             }
 
-            $filename = $path.$file;
+            $filename = $path . $file;
 
             // 更新新头像
             $chatroom = ChatroomModel::field('avatar')->find($id);

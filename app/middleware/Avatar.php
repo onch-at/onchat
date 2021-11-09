@@ -32,7 +32,7 @@ class Avatar
         }
 
         if ($image->getSize() > $size) { // 1MB
-            return Result::create(Result::CODE_PARAM_ERROR, '文件体积过大，仅接受体积为'.round($size / 1048576, 1).'MB以内的文件')->toJson();
+            return Result::create(Result::CODE_PARAM_ERROR, '文件体积过大，仅接受体积为' . round($size / 1048576, 1) . 'MB以内的文件')->toJson();
         }
 
         return $next($request);

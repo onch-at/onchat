@@ -15,7 +15,7 @@ abstract class Table
 
     public function __construct(Container $container)
     {
-        $this->table = $container->make('swoole.table.'.$this->name);
+        $this->table = $container->make('swoole.table.' . $this->name);
     }
 
     /**

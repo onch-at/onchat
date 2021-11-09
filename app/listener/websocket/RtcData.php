@@ -32,7 +32,7 @@ class RtcData extends SocketEventHandler
         $event['senderId'] = $this->getUser()['id'];
 
         $this->websocket
-            ->to(SocketRoomPrefix::USER.$event['targetId'])
+            ->to(SocketRoomPrefix::USER . $event['targetId'])
             ->emit(SocketEvent::RTC_DATA, Result::success($event));
     }
 }

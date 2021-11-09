@@ -56,7 +56,7 @@ class ChatRecord
         $query = ChatRecordModel::opt($chatroomId)
             ->alias('chat_record')
             ->leftJoin('user_info', 'user_info.user_id = chat_record.user_id')
-            ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id ='.$chatroomId)
+            ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $chatroomId)
             ->where('chat_record.chatroom_id', '=', $chatroomId)
             ->field([
                 'chat_member.role',
@@ -84,7 +84,7 @@ class ChatRecord
                 if ($item->reply_id) {
                     $item->reply = ChatRecordModel::opt($chatroomId)
                         ->alias('chat_record')
-                        ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id ='.$chatroomId)
+                        ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $chatroomId)
                         ->field([
                             'chat_member.role',
                             'chat_member.nickname',
@@ -142,7 +142,7 @@ class ChatRecord
         if ($message->replyId) {
             $reply = ChatRecordModel::opt($chatroomId)
                 ->alias('chat_record')
-                ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id ='.$chatroomId)
+                ->leftJoin('chat_member', 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id =' . $chatroomId)
                 ->field([
                     'chat_member.role',
                     'chat_member.nickname',
@@ -177,7 +177,7 @@ class ChatRecord
                 'update_time' => $timestamp,
                 // 如果是该用户的，则归零；
                 // 如果不是该用户的，且小于100，则递增；否则直接100
-                'unread'      => Db::raw('CASE WHEN user_id = '.$userId.' THEN 0 ELSE CASE WHEN unread < 100 THEN unread + 1 ELSE 100 END END'),
+                'unread'      => Db::raw('CASE WHEN user_id = ' . $userId . ' THEN 0 ELSE CASE WHEN unread < 100 THEN unread + 1 ELSE 100 END END'),
             ], [
                 'type'             => ChatSessionModel::TYPE_CHATROOM,
                 'data->chatroomId' => $chatroomId,
@@ -185,7 +185,7 @@ class ChatRecord
 
             $storage = Storage::create();
 
-            $memberInfo = UserInfoModel::join('chat_member', 'user_info.user_id = chat_member.user_id AND chat_member.chatroom_id = '.$chatroomId)
+            $memberInfo = UserInfoModel::join('chat_member', 'user_info.user_id = chat_member.user_id AND chat_member.chatroom_id = ' . $chatroomId)
                 ->where('user_info.user_id', '=', $userId)
                 ->field([
                     'user_info.avatar',
@@ -274,7 +274,7 @@ class ChatRecord
             ChatSessionModel::update([
                 'update_time' => time() * 1000,
                 // 如果消息不是该用户的，且未读消息数小于100，则递减（未读消息数最多储存到100，因为客户端会显示99+）
-                'unread'      => Db::raw('CASE WHEN user_id != '.$userId.' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
+                'unread'      => Db::raw('CASE WHEN user_id != ' . $userId . ' AND unread BETWEEN 1 AND 100 THEN unread-1 ELSE unread END'),
             ], [
                 'type'             => ChatSessionModel::TYPE_CHATROOM,
                 'data->chatroomId' => $chatroomId,
@@ -307,8 +307,8 @@ class ChatRecord
 
         try {
             $storage = Storage::create();
-            $path = $storage->getRootPath().'image/';
-            $file = $image->md5().'.'.FileUtils::getExtension($image);
+            $path = $storage->getRootPath() . 'image/';
+            $file = $image->md5() . '.' . FileUtils::getExtension($image);
             $result = $storage->save($path, $file, $image);
 
             if ($result->isError()) {
@@ -321,14 +321,14 @@ class ChatRecord
             $msg->userId = $userId;
             $msg->chatroomId = $chatroomId;
             $msg->tempId = Request::param('tempId');
-            $msg->data = new ImageMessage($path.$file, $width, $height);
+            $msg->data = new ImageMessage($path . $file, $width, $height);
 
             $result = $this->addRecord($msg);
 
             if ($result->isSuccess()) {
-                $websocket->to(SocketRoomPrefix::CHATROOM.$chatroomId)->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->to(SocketRoomPrefix::USER.$userId)->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;
@@ -349,8 +349,8 @@ class ChatRecord
         $userId = UserService::getId();
         $websocket = Container::getInstance()->make(Websocket::class);
         $voice = Request::file('voice');
-        $file = $voice->md5().'.mp3';
-        $temp = sys_get_temp_dir().'/'.$file; // 存到临时目录中
+        $file = $voice->md5() . '.mp3';
+        $temp = sys_get_temp_dir() . '/' . $file; // 存到临时目录中
         // 设置音频通道为1，比特率为64（比特率默认为128，这里将其减半）
         $mp3 = (new Mp3())->setAudioChannels(1)->setAudioKiloBitrate(64);
 
@@ -368,7 +368,7 @@ class ChatRecord
             }
 
             $storage = Storage::create();
-            $path = $storage->getRootPath()."voice/chatroom/{$chatroomId}/";
+            $path = $storage->getRootPath() . "voice/chatroom/{$chatroomId}/";
             $result = $storage->save($path, $file, $temp);
 
             if ($result->isError()) {
@@ -379,14 +379,14 @@ class ChatRecord
             $msg->userId = $userId;
             $msg->chatroomId = $chatroomId;
             $msg->tempId = Request::param('tempId');
-            $msg->data = new VoiceMessage($path.$file, $duration);
+            $msg->data = new VoiceMessage($path . $file, $duration);
 
             $result = $this->addRecord($msg);
 
             if ($result->isSuccess()) {
-                $websocket->to(SocketRoomPrefix::CHATROOM.$chatroomId)->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->to(SocketRoomPrefix::USER.$userId)->emit(SocketEvent::MESSAGE, $result);
+                $websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;

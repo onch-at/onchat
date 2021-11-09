@@ -41,7 +41,7 @@ class FriendRequestReject extends SocketEventHandler
             return false;
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER.$result->data['requesterId'])
+        $this->websocket->to(SocketRoomPrefix::USER . $result->data['requesterId'])
             ->emit(SocketEvent::FRIEND_REQUEST_REJECT, $result);
     }
 }

@@ -56,7 +56,7 @@ class Message extends SocketEventHandler
 
         // TODO 群聊的头像
         $this->websocket
-            ->to(SocketRoomPrefix::CHATROOM.$event['chatroomId'])
+            ->to(SocketRoomPrefix::CHATROOM . $event['chatroomId'])
             ->emit(SocketEvent::MESSAGE, $result);
     }
 }

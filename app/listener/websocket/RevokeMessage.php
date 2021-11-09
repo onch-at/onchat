@@ -33,7 +33,7 @@ class RevokeMessage extends SocketEventHandler
         $user = $this->getUser();
         $result = $chatRecordService->revokeRecord($id, $user['id'], $chatroomId);
 
-        $this->websocket->to(SocketRoomPrefix::CHATROOM.$chatroomId)
+        $this->websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)
             ->emit(SocketEvent::REVOKE_MESSAGE, $result);
     }
 }

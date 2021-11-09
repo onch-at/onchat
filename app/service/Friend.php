@@ -24,8 +24,8 @@ class Friend
 
     /** 响应消息预定义 */
     const MSG = [
-        self::CODE_ALIAS_LONG   => '好友别名长度不能大于'.ONCHAT_NICKNAME_MAX_LENGTH.'位字符',
-        self::CODE_REASON_LONG  => '附加消息长度不能大于'.ONCHAT_REASON_MAX_LENGTH.'位字符',
+        self::CODE_ALIAS_LONG   => '好友别名长度不能大于' . ONCHAT_NICKNAME_MAX_LENGTH . '位字符',
+        self::CODE_REASON_LONG  => '附加消息长度不能大于' . ONCHAT_REASON_MAX_LENGTH . '位字符',
     ];
 
     /**
