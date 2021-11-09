@@ -76,7 +76,7 @@ class SocketEventDispatcher
 
         $eventName = StrUtils::studly($event->type);
         $eventData = $event->data[0];
-        $handlerClass = $this->config->get('swoole.websocket.listen.Event:'.$eventName);
+        $handlerClass = $this->config->get('swoole.websocket.listen.Event:' . $eventName);
 
         // 如果没有这个事件处理类
         if (!$handlerClass) {
@@ -91,6 +91,6 @@ class SocketEventDispatcher
             return $this->websocket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
         }
 
-        Event::trigger('swoole.websocket.Event:'.$eventName, $eventData);
+        Event::trigger('swoole.websocket.Event:' . $eventName, $eventData);
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
-use Swoole\Table;
 use app\listener\websocket\ChatRequest;
 use app\listener\websocket\ChatRequestAgree;
 use app\listener\websocket\ChatRequestReject;
@@ -18,6 +17,7 @@ use app\listener\websocket\RtcData;
 use app\listener\websocket\RtcHangUp;
 use app\listener\websocket\SocketEventDispatcher;
 use app\listener\websocket\Unload;
+use Swoole\Table;
 use think\swoole\websocket\socketio\Handler;
 
 return [

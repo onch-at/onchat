@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace app\service;
 
-use Identicon\Identicon;
-use app\core\Result;
 use app\core\identicon\ImageMagickGenerator;
+use app\core\Result;
 use app\core\storage\Storage;
 use app\entity\TokenFolder;
 use app\facade\AuthService;
@@ -14,13 +13,14 @@ use app\facade\ChatroomService;
 use app\facade\IndexService;
 use app\facade\TokenService;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\ChatSession as ChatSessionModel;
 use app\model\Chatroom as ChatroomModel;
+use app\model\ChatSession as ChatSessionModel;
 use app\model\User as UserModel;
 use app\model\UserInfo as UserInfoModel;
 use app\utils\Date as DateUtils;
 use app\utils\File as FileUtils;
 use app\utils\Str as StrUtils;
+use Identicon\Identicon;
 use think\Collection;
 use think\facade\Db;
 use think\facade\Request;

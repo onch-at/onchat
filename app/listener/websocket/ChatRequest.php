@@ -42,7 +42,7 @@ class ChatRequest extends SocketEventHandler
             $userIdList = $chatroomService->getHostAndManagerIdList($chatroomId);
 
             foreach ($userIdList as $userId) {
-                $this->websocket->to(SocketRoomPrefix::USER.$userId)->emit(SocketEvent::CHAT_REQUEST, $result);
+                $this->websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::CHAT_REQUEST, $result);
             }
         }
     }

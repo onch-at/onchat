@@ -32,7 +32,7 @@ class Chat
     /** 响应消息预定义 */
     const MSG = [
         self::CODE_PEOPLE_NUM_FULL => '聊天室人数已满！',
-        self::CODE_REASON_LONG     => '附加消息长度不能大于'.self::REASON_MAX_LENGTH.'位字符',
+        self::CODE_REASON_LONG     => '附加消息长度不能大于' . self::REASON_MAX_LENGTH . '位字符',
         self::CODE_REQUEST_HANDLED => '该请求已被处理！',
     ];
 

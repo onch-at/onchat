@@ -48,11 +48,11 @@ class Init extends SocketEventHandler
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->join(SocketRoomPrefix::CHATROOM.$chatroom->id);
+            $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroom->id);
         }
 
         // 加入用户房间
-        $this->websocket->join(SocketRoomPrefix::USER.$userId);
+        $this->websocket->join(SocketRoomPrefix::USER . $userId);
 
         $this->websocket->emit(SocketEvent::INIT, Result::success());
 

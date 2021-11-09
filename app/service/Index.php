@@ -88,7 +88,7 @@ class Index
             'time'    => time(),
         ]);
 
-        $path = resource_path('tpl/mail').'captcha.html';
+        $path = resource_path('tpl/mail') . 'captcha.html';
 
         $result = $this->queue->push(JobSendMail::class, [
             'from'      => [$this->config->get('smtp.username'), 'OnChat'],

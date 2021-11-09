@@ -11,7 +11,7 @@ define('ONCHAT_USERNAME_MIN_LENGTH', 5);
 define('ONCHAT_USERNAME_MAX_LENGTH', 15);
 
 /** 用户名正则表达式：字母/数字/中文/下划线/横杠 */
-define('ONCHAT_USERNAME_PATTERN', "/^([a-z]|[A-Z]|[0-9]|_|-|[\x{4e00}-\x{9fa5}]){".ONCHAT_USERNAME_MIN_LENGTH.','.ONCHAT_USERNAME_MAX_LENGTH.'}$/u');
+define('ONCHAT_USERNAME_PATTERN', "/^([a-z]|[A-Z]|[0-9]|_|-|[\x{4e00}-\x{9fa5}]){" . ONCHAT_USERNAME_MIN_LENGTH . ',' . ONCHAT_USERNAME_MAX_LENGTH . '}$/u');
 
 /** 邮箱最大长度 */
 define('ONCHAT_EMAIL_MAX_LENGTH', 50);

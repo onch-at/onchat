@@ -41,7 +41,7 @@ class ChatRecord extends Model
      */
     public static function getTableNameById(int $chatroomId): string
     {
-        return 'chat_record_'.$chatroomId % 10;
+        return 'chat_record_' . $chatroomId % 10;
     }
 
     public function chatroom()

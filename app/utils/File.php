@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\utils;
 
-use Mimey\MimeTypes;
 use finfo as Finfo;
+use Mimey\MimeTypes;
 use think\Container;
 
 class File

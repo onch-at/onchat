@@ -28,5 +28,6 @@ Route::group('index', function () {
 
 Route::get('assets/:path', function (string $path) {
     $filename = public_path('storage') . $path;
+
     return download($filename)->force(false);
 })->pattern(['path' => '.*\.\w+$']);

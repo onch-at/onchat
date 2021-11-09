@@ -31,6 +31,6 @@ if (!function_exists('resource_path')) {
      */
     function resource_path(string $path = '')
     {
-        return root_path('resource'.DIRECTORY_SEPARATOR.$path);
+        return root_path('resource' . DIRECTORY_SEPARATOR . $path);
     }
 }
