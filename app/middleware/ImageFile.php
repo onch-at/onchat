@@ -25,9 +25,8 @@ class ImageFile
     public function handle(Request $request, \Closure $next, int $size = 1024 * 1024 * 50): Response
     {
         $image = $request->file('image');
-        $mine = $image->getMime();
 
-        if (!stristr($mine, 'image/')) {
+        if (!stristr($image->getMime(), 'image/')) {
             return Result::create(Result::CODE_PARAM_ERROR, '文件格式错误，仅接受图片文件')->toJson();
         }
 

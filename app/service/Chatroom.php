@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use Identicon\Identicon;
 use app\constant\MessageType;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
-use app\core\identicon\ImageMagickGenerator;
 use app\core\Result;
+use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
 use app\entity\JoinRoomTipsMessage;
 use app\entity\Message;
 use app\facade\ChatRecordService;
 use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\Chatroom as ChatroomModel;
 use app\model\ChatSession as ChatSessionModel;
+use app\model\Chatroom as ChatroomModel;
 use app\utils\Date as DateUtils;
-use app\utils\File as FileUtils;
 use app\utils\Str as StrUtils;
-use Identicon\Identicon;
 use think\Container;
 use think\facade\Db;
 use think\facade\Request;
@@ -431,7 +430,7 @@ class Chatroom
             $storage = Storage::create();
             $image = Request::file('image');
             $path = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
-            $file = $image->md5() . '.' . FileUtils::getExtension($image);
+            $file = $image->md5() . '.' . $image->getOriginalExtension();
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);

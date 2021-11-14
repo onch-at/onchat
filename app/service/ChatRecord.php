@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use FFMpeg\FFMpeg;
+use FFMpeg\Format\Audio\Mp3;
 use app\constant\MessageType;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
@@ -14,12 +16,9 @@ use app\entity\Message;
 use app\entity\VoiceMessage;
 use app\facade\UserService;
 use app\model\ChatRecord as ChatRecordModel;
-use app\model\Chatroom as ChatroomModel;
 use app\model\ChatSession as ChatSessionModel;
+use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
-use app\utils\File as FileUtils;
-use FFMpeg\FFMpeg;
-use FFMpeg\Format\Audio\Mp3;
 use think\Container;
 use think\facade\Db;
 use think\facade\Request;
@@ -308,7 +307,7 @@ class ChatRecord
         try {
             $storage = Storage::create();
             $path = $storage->getRootPath() . 'image/';
-            $file = $image->md5() . '.' . FileUtils::getExtension($image);
+            $file = $image->md5() . '.' . $image->getOriginalExtension();
             $result = $storage->save($path, $file, $image);
 
             if ($result->isError()) {

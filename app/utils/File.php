@@ -5,23 +5,9 @@ declare(strict_types=1);
 namespace app\utils;
 
 use finfo as Finfo;
-use Mimey\MimeTypes;
-use think\Container;
 
 class File
 {
-    /**
-     * 获取文件拓展名.
-     *
-     * @param \think\File $file
-     *
-     * @return string
-     */
-    public static function getExtension(\think\File $file): string
-    {
-        return Container::getInstance()->make(MimeTypes::class)->getExtension($file->getMime());
-    }
-
     /**
      * 获取文件MIME.
      *

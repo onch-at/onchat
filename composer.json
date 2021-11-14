@@ -25,7 +25,6 @@
         "yzalis/identicon": "2.0.0",
         "ezyang/htmlpurifier": "4.13.0",
         "phpmailer/phpmailer": "6.5.1",
-        "ralouphie/mimey": "2.1.0",
         "php-ffmpeg/php-ffmpeg": "0.18.0",
         "firebase/php-jwt": "5.5.1"
     },
