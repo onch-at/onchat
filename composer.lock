@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ecdb8ea81262fa7bac6a6a43af904718",
+    "content-hash": "40ed7be1fb2c819d704bca9f5d7ca3f6",
     "packages": [
         {
             "name": "alchemy/binary-driver",
@@ -1095,23 +1095,17 @@
         },
         {
             "name": "phpmailer/phpmailer",
-            "version": "v6.5.1",
+            "version": "v6.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "dd803df5ad7492e1b40637f7ebd258fee5ca7355"
+                "reference": "3984c9a0d3a042fdd7fb393c0c7899ac99c78185"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/dd803df5ad7492e1b40637f7ebd258fee5ca7355",
-                "reference": "dd803df5ad7492e1b40637f7ebd258fee5ca7355",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/3984c9a0d3a042fdd7fb393c0c7899ac99c78185",
+                "reference": "3984c9a0d3a042fdd7fb393c0c7899ac99c78185",
+                "shasum": ""
             },
             "require": {
                 "ext-ctype": "*",
@@ -1167,7 +1161,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.5.1"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v6.5.2"
             },
             "funding": [
                 {
@@ -1175,7 +1169,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-08-18T09:14:16+00:00"
+            "time": "2021-11-25T16:22:03+00:00"
         },
         {
             "name": "psr/cache",
