@@ -7,7 +7,7 @@ namespace app\listener\websocket;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
-use app\service\Rtc as RtcService;
+use app\service\Peer as PeerService;
 use think\facade\Validate;
 use think\validate\ValidateRule;
 
@@ -25,9 +25,9 @@ class RtcCall extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(RtcService $rtcService, array $event)
+    public function handle(PeerService $peerService, array $event)
     {
-        $result = $rtcService->call($this->getUser()['id'], $event['chatroomId']);
+        $result = $peerService->call($this->getUser()['id'], $event['chatroomId']);
 
         if ($result->isError()) {
             return $this->websocket->emit(SocketEvent::RTC_CALL, $result);

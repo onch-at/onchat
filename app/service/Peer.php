@@ -9,7 +9,7 @@ use app\core\storage\Storage;
 use app\model\ChatMember as ChatMemberModel;
 use app\model\Chatroom as ChatroomModel;
 
-class Rtc
+class Peer
 {
     /**
      * 获取对方与自己的信息，用于请求 RTC.
