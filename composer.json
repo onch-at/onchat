@@ -24,12 +24,12 @@
         "aliyuncs/oss-sdk-php": "2.4.3",
         "yzalis/identicon": "2.0.0",
         "ezyang/htmlpurifier": "4.13.0",
-        "phpmailer/phpmailer": "6.5.1",
+        "phpmailer/phpmailer": "6.5.3",
         "php-ffmpeg/php-ffmpeg": "0.18.0",
         "firebase/php-jwt": "5.5.1"
     },
     "require-dev": {
-        "symfony/var-dumper": "5.3.10",
+        "symfony/var-dumper": "5.3.11",
         "topthink/think-trace": "1.4"
     },
     "autoload": {
