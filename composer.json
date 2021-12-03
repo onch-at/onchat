@@ -17,7 +17,7 @@
     "require": {
         "php": ">=7.4.0",
         "topthink/framework": "6.0.9",
-        "topthink/think-orm": "2.0.44",
+        "topthink/think-orm": "2.0.45",
         "topthink/think-captcha": "3.0.3",
         "topthink/think-swoole": "4.0.x-dev",
         "topthink/think-queue": "3.0.6",
