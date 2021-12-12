@@ -310,7 +310,7 @@ class ChatRecord
             $file = $image->md5() . '.' . $image->getOriginalExtension();
             $result = $storage->save($path, $file, $image);
 
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 return $result;
             }
 
@@ -370,7 +370,7 @@ class ChatRecord
             $path = $storage->getRootPath() . "voice/chatroom/{$chatroomId}/";
             $result = $storage->save($path, $file, $temp);
 
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 return $result;
             }
 

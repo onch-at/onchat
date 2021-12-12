@@ -295,7 +295,7 @@ class Friend
 
             // 创建一个类型为私聊的聊天室
             $result = ChatroomService::creatChatroom('PRIVATE_CHATROOM', ChatroomModel::TYPE_PRIVATE_CHAT);
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 Db::rollback();
 
                 return $result;
@@ -304,14 +304,14 @@ class Friend
             $chatroomId = $result->data['id'];
 
             $result = ChatroomService::addMember($chatroomId, $request->requester_id, $requesterAlias);
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 Db::rollback();
 
                 return $result;
             }
 
             $result = ChatroomService::addMember($chatroomId, $request->target_id, $request->target_alias);
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 Db::rollback();
 
                 return $result;

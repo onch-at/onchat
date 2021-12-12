@@ -44,13 +44,13 @@ class Message extends SocketEventHandler
         $event['userId'] = $this->getUser()['id'];
         $result = $messageService->handle($event);
 
-        if ($result->isError()) {
+        if ($result->isFail()) {
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);
         }
 
         $result = $chatRecordService->addRecord($result->data);
 
-        if ($result->isError()) {
+        if ($result->isFail()) {
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);
         }
 

@@ -39,7 +39,7 @@ class FriendRequestAgree extends SocketEventHandler
         $this->websocket->emit(SocketEvent::FRIEND_REQUEST_AGREE, $result);
 
         // 如果成功同意申请，则尝试给申请人推送消息
-        if ($result->isError()) {
+        if ($result->isFail()) {
             return false;
         }
 

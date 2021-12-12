@@ -37,7 +37,7 @@ class ChatRequestReject extends SocketEventHandler
         $this->websocket->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
 
         // 如果成功拒绝申请，则尝试给申请人推送消息
-        if ($result->isError()) {
+        if ($result->isFail()) {
             return false;
         }
 

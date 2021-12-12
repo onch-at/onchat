@@ -29,7 +29,7 @@ class RtcCall extends SocketEventHandler
     {
         $result = $peerService->call($this->getUser()['id'], $event['chatroomId']);
 
-        if ($result->isError()) {
+        if ($result->isFail()) {
             return $this->websocket->emit(SocketEvent::RTC_CALL, $result);
         }
 

@@ -98,7 +98,7 @@ class Result
         return $this->code === self::CODE_SUCCESS;
     }
 
-    public function isError(): bool
+    public function isFail(): bool
     {
         return $this->code !== self::CODE_SUCCESS;
     }

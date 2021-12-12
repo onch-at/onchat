@@ -233,7 +233,7 @@ class Chatroom
             $file = md5((string) DateUtils::now()) . '.png';
             $result = $storage->save($path, $file, $imageData);
 
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 return $result;
             }
 
@@ -347,7 +347,7 @@ class Chatroom
 
         try {
             $result = $this->creatChatroom($name, ChatroomModel::TYPE_GROUP_CHAT, $description);
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 Db::rollback();
 
                 return $result;
@@ -357,7 +357,7 @@ class Chatroom
 
             // 将自己添加到聊天室，角色为主人
             $result = $this->addMember($chatroom['id'], $userId, $username, ChatMemberModel::ROLE_HOST);
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 Db::rollback();
 
                 return $result;
@@ -435,7 +435,7 @@ class Chatroom
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
 
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 return $result;
             }
 

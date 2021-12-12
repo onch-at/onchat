@@ -10,8 +10,8 @@ use app\utils\Str as StrUtils;
 use think\console\input\Argument;
 use think\console\input\Option;
 use think\facade\Config;
-use think\swoole\command\Server as ServerCommand;
 use think\swoole\Manager;
+use think\swoole\command\Server as ServerCommand;
 
 class OnChat extends ServerCommand
 {
@@ -103,7 +103,7 @@ class OnChat extends ServerCommand
         }
 
         // 如果没有第一个聊天室，那么就创建一个吧！
-        if (ChatroomService::getChatroom(1)->isError()) {
+        if (ChatroomService::getChatroom(1)->isFail()) {
             ChatroomService::creatChatroom('OnChat');
         }
     }

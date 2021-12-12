@@ -225,7 +225,7 @@ class Chat
             $request->save();
 
             $result = ChatroomService::addMember($chatroomId, $request->requester_id, $request->requesterNickname);
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 Db::rollback();
 
                 return $result;

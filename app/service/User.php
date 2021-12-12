@@ -158,7 +158,7 @@ class User
 
             $result = $storage->save($path, $file, $imageData);
 
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 return $result;
             }
 
@@ -528,7 +528,7 @@ class User
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
 
-            if ($result->isError()) {
+            if ($result->isFail()) {
                 return $result;
             }
 
