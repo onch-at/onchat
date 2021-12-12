@@ -23,8 +23,8 @@ class Index
     public function __construct(Session $session, Config $config, Queue $queue)
     {
         $this->session = $session;
-        $this->config = $config;
-        $this->queue = $queue;
+        $this->config  = $config;
+        $this->queue   = $queue;
     }
 
     /**

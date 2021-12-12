@@ -25,7 +25,7 @@ class VoiceFile
     public function handle(Request $request, \Closure $next, int $size = 1024 * 1024): Response
     {
         $voice = $request->file('voice');
-        $mine = $voice->getMime();
+        $mine  = $voice->getMime();
 
         if (!stristr($mine, 'video/webm') && !stristr($mine, 'audio/')) {
             return Result::create(Result::CODE_PARAM_ERROR, '文件格式错误，仅接受音频文件')->toJson();

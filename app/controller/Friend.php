@@ -100,7 +100,7 @@ class Friend
     public function isFriend(int $id): Result
     {
         $userId = UserService::getId();
-        $data = $this->service->isFriend($userId, $id);
+        $data   = $this->service->isFriend($userId, $id);
 
         return Result::success($data);
     }

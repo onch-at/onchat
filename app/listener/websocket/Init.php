@@ -41,7 +41,7 @@ class Init extends SocketEventHandler
             return $this->websocket->close();
         }
 
-        $userId = $payload->sub;
+        $userId    = $payload->sub;
         $chatrooms = $userService->getChatrooms($userId);
 
         $this->userTable->set($this->fd, $payload);

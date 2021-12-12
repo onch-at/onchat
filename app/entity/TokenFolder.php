@@ -22,7 +22,7 @@ class TokenFolder
 
     public function __construct(string $access, string $refresh)
     {
-        $this->access = $access;
+        $this->access  = $access;
         $this->refresh = $refresh;
     }
 }

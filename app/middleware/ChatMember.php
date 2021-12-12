@@ -27,7 +27,7 @@ class ChatMember
     public function handle(Request $request, \Closure $next, string $field = 'id'): Response
     {
         $chatroomId = (int) $request->param($field);
-        $userId = UserService::getId();
+        $userId     = UserService::getId();
 
         $chatMember = ChatMemberModel::where([
             'user_id'     => $userId,

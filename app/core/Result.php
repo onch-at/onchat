@@ -48,7 +48,7 @@ class Result
     private function __construct(int $code, string $msg = null, $data = null)
     {
         $this->code = $code;
-        $this->msg = $msg ?? self::CODE_PHRASES[$code];
+        $this->msg  = $msg ?? self::CODE_PHRASES[$code];
 
         if ($data instanceof Collection || $data instanceof Model) {
             $this->data = ArrUtils::keyToCamel($data->toArray());

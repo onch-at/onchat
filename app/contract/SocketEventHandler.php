@@ -26,10 +26,10 @@ abstract class SocketEventHandler
         UserTable $userTable,
         ThrottleTable $throttleTable
     ) {
-        $this->websocket = $websocket;
-        $this->room = $room;
-        $this->fd = $websocket->getSender();
-        $this->userTable = $userTable;
+        $this->websocket     = $websocket;
+        $this->room          = $room;
+        $this->fd            = $websocket->getSender();
+        $this->userTable     = $userTable;
         $this->throttleTable = $throttleTable;
     }
 

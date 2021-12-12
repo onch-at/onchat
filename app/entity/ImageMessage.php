@@ -20,7 +20,7 @@ class ImageMessage
     public function __construct(string $filename, int $width, int $height)
     {
         $this->filename = $filename;
-        $this->width = $width;
-        $this->height = $height;
+        $this->width    = $width;
+        $this->height   = $height;
     }
 }

@@ -17,15 +17,15 @@ class Mailer extends PHPMailer
     {
         $mailer = new self(env('app_debug', false));
         $mailer->isSMTP();
-        $mailer->CharSet = self::CHARSET_UTF8;
-        $mailer->Encoding = self::ENCODING_BASE64;
-        $mailer->Host = Config::get('smtp.host');
-        $mailer->Username = Config::get('smtp.username');
-        $mailer->Password = Config::get('smtp.password');
-        $mailer->Port = Config::get('smtp.port');
+        $mailer->CharSet    = self::CHARSET_UTF8;
+        $mailer->Encoding   = self::ENCODING_BASE64;
+        $mailer->Host       = Config::get('smtp.host');
+        $mailer->Username   = Config::get('smtp.username');
+        $mailer->Password   = Config::get('smtp.password');
+        $mailer->Port       = Config::get('smtp.port');
         $mailer->SMTPSecure = Config::get('smtp.secure') ? self::ENCRYPTION_SMTPS : self::ENCRYPTION_STARTTLS;
-        $mailer->SMTPDebug = $mailer->exceptions ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
-        $mailer->SMTPAuth = true;
+        $mailer->SMTPDebug  = $mailer->exceptions ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
+        $mailer->SMTPAuth   = true;
 
         return $mailer;
     }

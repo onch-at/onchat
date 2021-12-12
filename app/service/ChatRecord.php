@@ -67,7 +67,7 @@ class ChatRecord
             ->limit(self::MSG_ROWS);
 
         // 如果msgId为0，则代表初次查询
-        $data = ($id === 0 ? $query : $query->where('chat_record.id', '<', $id))->select();
+        $data    = ($id === 0 ? $query : $query->where('chat_record.id', '<', $id))->select();
         $storage = Storage::create();
 
         foreach ($data as $item) {
@@ -95,20 +95,20 @@ class ChatRecord
 
             switch ($item->type) {
                 case MessageType::CHAT_INVITATION:
-                    $chatroom = ChatroomModel::find($item->data->chatroomId);
-                    $item->data->name = $chatroom ? $chatroom->name : '聊天室已解散';
-                    $item->data->description = $chatroom ? $chatroom->description : null;
+                    $chatroom                    = ChatroomModel::find($item->data->chatroomId);
+                    $item->data->name            = $chatroom ? $chatroom->name : '聊天室已解散';
+                    $item->data->description     = $chatroom ? $chatroom->description : null;
                     $item->data->avatarThumbnail = $chatroom ? $storage->getThumbnailUrl($chatroom->avatar) : null;
                     break;
 
                 case MessageType::IMAGE:
-                    $url = $item->data->filename;
-                    $item->data->url = $storage->getUrl($url);
+                    $url                      = $item->data->filename;
+                    $item->data->url          = $storage->getUrl($url);
                     $item->data->thumbnailUrl = $storage->getThumbnailUrl($url);
                     break;
 
                 case MessageType::VOICE:
-                    $url = $item->data->filename;
+                    $url             = $item->data->filename;
                     $item->data->url = $storage->getUrl($url);
                     break;
 
@@ -129,7 +129,7 @@ class ChatRecord
      */
     public function addRecord(Message $message): Result
     {
-        $userId = $message->userId;
+        $userId     = $message->userId;
         $chatroomId = $message->chatroomId;
 
         $nickname = UserService::getNicknameInChatroom($userId, $chatroomId);
@@ -192,28 +192,28 @@ class ChatRecord
                 ])
                 ->find();
 
-            $message->id = $id;
-            $message->nickname = $nickname;
+            $message->id              = $id;
+            $message->nickname        = $nickname;
             $message->avatarThumbnail = $storage->getThumbnailUrl($memberInfo->avatar);
-            $message->role = $memberInfo->role;
-            $message->createTime = $timestamp;
+            $message->role            = $memberInfo->role;
+            $message->createTime      = $timestamp;
 
             switch ($message->type) {
                 case MessageType::CHAT_INVITATION:
-                    $chatroom = ChatroomModel::find($message->data->chatroomId);
-                    $message->data->name = $chatroom ? $chatroom->name : '聊天室已解散';
-                    $message->data->description = $chatroom ? $chatroom->description : null;
+                    $chatroom                       = ChatroomModel::find($message->data->chatroomId);
+                    $message->data->name            = $chatroom ? $chatroom->name : '聊天室已解散';
+                    $message->data->description     = $chatroom ? $chatroom->description : null;
                     $message->data->avatarThumbnail = $chatroom ? $storage->getThumbnailUrl($chatroom->avatar) : null;
                     break;
 
                 case MessageType::IMAGE:
-                    $url = $message->data->filename;
-                    $message->data->url = $storage->getUrl($url);
+                    $url                         = $message->data->filename;
+                    $message->data->url          = $storage->getUrl($url);
                     $message->data->thumbnailUrl = $storage->getThumbnailUrl($url);
                     break;
 
                 case MessageType::VOICE:
-                    $url = $message->data->filename;
+                    $url                = $message->data->filename;
                     $message->data->url = $storage->getUrl($url);
                     break;
             }
@@ -242,7 +242,7 @@ class ChatRecord
     public function revokeRecord(int $id, int $userId, int $chatroomId): Result
     {
         $query = ChatRecordModel::opt($chatroomId)->where('id', '=', $id);
-        $msg = $query->find();
+        $msg   = $query->find();
         // 如果没找到这条消息
         if (!$msg) {
             return Result::create(Result::CODE_PARAM_ERROR);
@@ -300,15 +300,15 @@ class ChatRecord
      */
     public function image(int $chatroomId): Result
     {
-        $userId = UserService::getId();
+        $userId    = UserService::getId();
         $websocket = Container::getInstance()->make(Websocket::class);
-        $image = Request::file('image');
+        $image     = Request::file('image');
 
         try {
             $storage = Storage::create();
-            $path = $storage->getRootPath() . 'image/';
-            $file = $image->md5() . '.' . $image->getOriginalExtension();
-            $result = $storage->save($path, $file, $image);
+            $path    = $storage->getRootPath() . 'image/';
+            $file    = $image->md5() . '.' . $image->getOriginalExtension();
+            $result  = $storage->save($path, $file, $image);
 
             if ($result->isFail()) {
                 return $result;
@@ -316,11 +316,11 @@ class ChatRecord
 
             [$width, $height] = getimagesize($image->getPathname());
 
-            $msg = new Message(MessageType::IMAGE);
-            $msg->userId = $userId;
+            $msg             = new Message(MessageType::IMAGE);
+            $msg->userId     = $userId;
             $msg->chatroomId = $chatroomId;
-            $msg->tempId = Request::param('tempId');
-            $msg->data = new ImageMessage($path . $file, $width, $height);
+            $msg->tempId     = Request::param('tempId');
+            $msg->data       = new ImageMessage($path . $file, $width, $height);
 
             $result = $this->addRecord($msg);
 
@@ -345,11 +345,11 @@ class ChatRecord
      */
     public function voice(int $chatroomId): Result
     {
-        $userId = UserService::getId();
+        $userId    = UserService::getId();
         $websocket = Container::getInstance()->make(Websocket::class);
-        $voice = Request::file('voice');
-        $file = $voice->md5() . '.mp3';
-        $temp = sys_get_temp_dir() . '/' . $file; // 存到临时目录中
+        $voice     = Request::file('voice');
+        $file      = $voice->md5() . '.mp3';
+        $temp      = sys_get_temp_dir() . '/' . $file; // 存到临时目录中
         // 设置音频通道为1，比特率为64（比特率默认为128，这里将其减半）
         $mp3 = (new Mp3())->setAudioChannels(1)->setAudioKiloBitrate(64);
 
@@ -367,18 +367,18 @@ class ChatRecord
             }
 
             $storage = Storage::create();
-            $path = $storage->getRootPath() . "voice/chatroom/{$chatroomId}/";
-            $result = $storage->save($path, $file, $temp);
+            $path    = $storage->getRootPath() . "voice/chatroom/{$chatroomId}/";
+            $result  = $storage->save($path, $file, $temp);
 
             if ($result->isFail()) {
                 return $result;
             }
 
-            $msg = new Message(MessageType::VOICE);
-            $msg->userId = $userId;
+            $msg             = new Message(MessageType::VOICE);
+            $msg->userId     = $userId;
             $msg->chatroomId = $chatroomId;
-            $msg->tempId = Request::param('tempId');
-            $msg->data = new VoiceMessage($path . $file, $duration);
+            $msg->tempId     = Request::param('tempId');
+            $msg->data       = new VoiceMessage($path . $file, $duration);
 
             $result = $this->addRecord($msg);
 

@@ -17,7 +17,7 @@ class ImageMagickGenerator extends OriginImageMagickGenerator
     private function generateImage()
     {
         $this->generatedImage = new \Imagick();
-        $rgbBackgroundColor = $this->getBackgroundColor();
+        $rgbBackgroundColor   = $this->getBackgroundColor();
 
         if (null === $rgbBackgroundColor) {
             $background = 'none';
@@ -30,7 +30,7 @@ class ImageMagickGenerator extends OriginImageMagickGenerator
 
         // prepare color
         $rgbColor = $this->getColor();
-        $color = new ImagickPixel("rgb($rgbColor[0],$rgbColor[1],$rgbColor[2])");
+        $color    = new ImagickPixel("rgb($rgbColor[0],$rgbColor[1],$rgbColor[2])");
 
         $draw = new ImagickDraw();
         $draw->setFillColor($color);
@@ -96,7 +96,7 @@ class ImageMagickGenerator extends OriginImageMagickGenerator
             return $this;
         }
 
-        $this->size = $size;
+        $this->size       = $size;
         $this->pixelRatio = (int) round($size / 6);
 
         return $this;

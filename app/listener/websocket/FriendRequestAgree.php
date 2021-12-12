@@ -44,7 +44,7 @@ class FriendRequestAgree extends SocketEventHandler
         }
 
         // 拿到申请人的FD
-        $requestId = $result->data['requesterId'];
+        $requestId    = $result->data['requesterId'];
         $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $requestId);
 
         // 加入新的聊天室

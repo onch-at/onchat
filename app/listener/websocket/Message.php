@@ -42,7 +42,7 @@ class Message extends SocketEventHandler
         }
 
         $event['userId'] = $this->getUser()['id'];
-        $result = $messageService->handle($event);
+        $result          = $messageService->handle($event);
 
         if ($result->isFail()) {
             return $this->websocket->emit(SocketEvent::MESSAGE, $result);

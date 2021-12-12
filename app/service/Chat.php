@@ -115,12 +115,12 @@ class Chat
         $timestamp = time() * 1000;
 
         if ($request) {
-            $request->status = ChatRequestModel::STATUS_WAIT;
+            $request->status         = ChatRequestModel::STATUS_WAIT;
             $request->request_reason = $reason;
-            $request->reject_reason = null;
-            $request->readed_list = [$requester];
-            $request->handler_id = null;
-            $request->update_time = $timestamp;
+            $request->reject_reason  = null;
+            $request->readed_list    = [$requester];
+            $request->handler_id     = null;
+            $request->update_time    = $timestamp;
             $request->save();
         } else {
             $request = ChatRequestModel::create([
@@ -152,7 +152,7 @@ class Chat
         ])->find($chatroomId);
 
         $chatroom->chatroomAvatarThumbnail = $storage->getThumbnailUrl($chatroom->chatroomAvatar);
-        $chatroom->chatroomAvatar = $storage->getUrl($chatroom->chatroomAvatar);
+        $chatroom->chatroomAvatar          = $storage->getUrl($chatroom->chatroomAvatar);
 
         return Result::success($request->toArray() + $info->toArray() + $chatroom->toArray());
     }
@@ -219,8 +219,8 @@ class Chat
             }
 
             $request->readed_list = array_values($readedList);
-            $request->handler_id = $handler;
-            $request->status = ChatRequestModel::STATUS_AGREE;
+            $request->handler_id  = $handler;
+            $request->status      = ChatRequestModel::STATUS_AGREE;
             $request->update_time = time() * 1000;
             $request->save();
 
@@ -236,17 +236,17 @@ class Chat
             $storage = Storage::create();
 
             $chatSession = $result->data;
-            $avatar = $request->chatroomAvatar;
+            $avatar      = $request->chatroomAvatar;
 
             // 补充一些信息
-            $chatSession['title'] = $request->chatroomName;
-            $chatSession['avatarThumbnail'] = $storage->getThumbnailUrl($avatar);
+            $chatSession['title']                = $request->chatroomName;
+            $chatSession['avatarThumbnail']      = $storage->getThumbnailUrl($avatar);
             $chatSession['data']['chatroomType'] = ChatroomModel::TYPE_GROUP_CHAT;
 
             $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
-            $request->chatroomAvatar = $storage->getUrl($avatar);
-            $request->chatroomAvatarThumbnail = $chatSession['avatarThumbnail'];
-            $request->handlerNickname = UserService::getByKey('id', $handler, 'nickname');
+            $request->chatroomAvatar           = $storage->getUrl($avatar);
+            $request->chatroomAvatarThumbnail  = $chatSession['avatarThumbnail'];
+            $request->handlerNickname          = UserService::getByKey('id', $handler, 'nickname');
 
             Db::commit();
 
@@ -320,11 +320,11 @@ class Chat
             $readedList[] = $handler;
         }
 
-        $request->readed_list = array_values($readedList);
+        $request->readed_list   = array_values($readedList);
         $request->reject_reason = $reason;
-        $request->status = ChatRequestModel::STATUS_REJECT;
-        $request->handler_id = $handler;
-        $request->update_time = time() * 1000;
+        $request->status        = ChatRequestModel::STATUS_REJECT;
+        $request->handler_id    = $handler;
+        $request->update_time   = time() * 1000;
         $request->save();
 
         ChatSessionService::showChatroomNotice($request->chatroom_id, $request->requester_id);
@@ -332,9 +332,9 @@ class Chat
         $storage = Storage::create();
 
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
-        $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($request->chatroomAvatar);
-        $request->chatroomAvatar = $storage->getUrl($request->chatroomAvatar);
-        $request->handlerNickname = UserService::getByKey('id', $handler, 'nickname');
+        $request->chatroomAvatarThumbnail  = $storage->getThumbnailUrl($request->chatroomAvatar);
+        $request->chatroomAvatar           = $storage->getUrl($request->chatroomAvatar);
+        $request->handlerNickname          = UserService::getByKey('id', $handler, 'nickname');
 
         return Result::success($request);
     }
@@ -398,7 +398,7 @@ class Chat
             return Result::create(Result::CODE_PARAM_ERROR);
         }
 
-        $storage = Storage::create();
+        $storage                           = Storage::create();
         $request->requesterAvatarThumbnail = $storage->getThumbnailUrl($request->requesterAvatarThumbnail);
 
         return Result::success($request);
@@ -411,7 +411,7 @@ class Chat
      */
     public function getReceiveRequests(): Result
     {
-        $userId = UserService::getId();
+        $userId  = UserService::getId();
         $storage = Storage::create();
 
         $data = ChatRequestModel::join('chat_member', 'chat_request.chatroom_id = chat_member.chatroom_id')
@@ -475,7 +475,7 @@ class Chat
         $storage = Storage::create();
 
         $request->chatroomAvatarThumbnail = $storage->getThumbnailUrl($request->chatroomAvatar);
-        $request->chatroomAvatar = $storage->getUrl($request->chatroomAvatar);
+        $request->chatroomAvatar          = $storage->getUrl($request->chatroomAvatar);
 
         return Result::success($request);
     }
@@ -506,7 +506,7 @@ class Chat
 
         foreach ($data as $item) {
             $item->chatroomAvatarThumbnail = $storage->getThumbnailUrl($item->chatroomAvatar);
-            $item->chatroomAvatar = $storage->getUrl($item->chatroomAvatar);
+            $item->chatroomAvatar          = $storage->getUrl($item->chatroomAvatar);
         }
 
         return Result::success($data);

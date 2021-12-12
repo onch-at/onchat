@@ -79,7 +79,7 @@ class ChatSession
                     }
 
                     $table = ChatRecordModel::getTableNameById($chatroomId);
-                    $on = 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id = ' . $chatroomId;
+                    $on    = 'chat_member.user_id = chat_record.user_id AND chat_member.chatroom_id = ' . $chatroomId;
 
                     if (!$query) {
                         $query = ChatRecordModel::opt($chatroomId)
@@ -148,8 +148,8 @@ class ChatSession
                     if ($item->data->chatroomType === ChatroomModel::TYPE_PRIVATE_CHAT && $friendInfo) {
                         $info = $friendInfo->where('chatroom_id', '=', $item->data->chatroomId)->shift();
                         if ($info) {
-                            $item->data->userId = $info->user_id;
-                            $item->title = $info->nickname;
+                            $item->data->userId    = $info->user_id;
+                            $item->title           = $info->nickname;
                             $item->avatarThumbnail = $storage->getThumbnailUrl($info->avatar);
                         }
                     }

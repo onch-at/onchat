@@ -25,7 +25,7 @@ class Token
     public function __construct(Config $config)
     {
         $this->privateKey = FileUtils::read(root_path() . 'private-key.pem');
-        $this->publicKey = FileUtils::read(root_path() . 'public-key.pem');
+        $this->publicKey  = FileUtils::read(root_path() . 'public-key.pem');
 
         $this->config = $config;
     }
@@ -43,7 +43,7 @@ class Token
     {
         ['iss' => $issuer, 'aud' => $audience] = $this->config->get('jwt');
 
-        $payload = TokenPayload::create($subject, $ttl);
+        $payload      = TokenPayload::create($subject, $ttl);
         $payload->iss = $issuer;
         $payload->aud = $audience;
 
@@ -91,7 +91,7 @@ class Token
      */
     public function parse(string $jwt): TokenPayload
     {
-        $key = new Key($this->publicKey, self::ALG);
+        $key     = new Key($this->publicKey, self::ALG);
         $payload = JWT::decode($jwt, $key);
 
         return TokenPayload::from($payload);

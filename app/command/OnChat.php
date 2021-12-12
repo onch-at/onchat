@@ -16,7 +16,7 @@ use think\swoole\command\Server as ServerCommand;
 class OnChat extends ServerCommand
 {
     const ACTION_START = 'start';
-    const ACTION_INIT = 'init';
+    const ACTION_INIT  = 'init';
 
     public function configure()
     {
@@ -57,10 +57,10 @@ class OnChat extends ServerCommand
 
     protected function init()
     {
-        $default = Config::get('database.default');
-        $config = Config::get('database.connections.' . $default);
-        $host = $config['hostname'];
-        $port = $config['hostport'];
+        $default  = Config::get('database.default');
+        $config   = Config::get('database.connections.' . $default);
+        $host     = $config['hostname'];
+        $port     = $config['hostport'];
         $username = $config['username'];
         $password = $config['password'];
         $database = $config['database'];
@@ -75,8 +75,8 @@ class OnChat extends ServerCommand
         $dbh->exec(StrUtils::assign($sql, ['database' => $database]));
 
         $path = resource_path('sql/table');
-        $dir = scandir($path);
-        $dir = array_filter($dir, function ($file) {
+        $dir  = scandir($path);
+        $dir  = array_filter($dir, function ($file) {
             return preg_match('/(.sql)$/', $file);
         });
 

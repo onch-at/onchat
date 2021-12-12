@@ -26,7 +26,7 @@ class ChatRecord extends Model
      */
     public static function opt(int $chatroomId)
     {
-        $model = new static();
+        $model        = new static();
         $model->table = self::getTableNameById($chatroomId);
 
         return $model;

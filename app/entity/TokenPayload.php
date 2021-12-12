@@ -75,16 +75,16 @@ class TokenPayload
     public static function create(int $subject, int $ttl): self
     {
         $redis = Redis::create();
-        $key = RedisPrefix::JWT_ID . $subject;
-        $jti = $redis->get($key);
-        $time = time();
+        $key   = RedisPrefix::JWT_ID . $subject;
+        $jti   = $redis->get($key);
+        $time  = time();
 
         if (!$jti) {
             $jti = md5(uniqid((string) $subject, true));
             $redis->set($key, $jti, $ttl);
         }
 
-        $payload = new self();
+        $payload      = new self();
         $payload->sub = $subject;
         $payload->iat = $time;
         $payload->nbf = $time;
@@ -104,7 +104,7 @@ class TokenPayload
      */
     public static function from($data): self
     {
-        $data = (array) $data;
+        $data    = (array) $data;
         $payload = new self();
 
         foreach ($data as $key => $value) {

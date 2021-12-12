@@ -26,8 +26,8 @@ class Date
     public static function getConstellation(int $birthday): int
     {
         $birthday = getdate($birthday);
-        $month = $birthday['mon'];
-        $day = $birthday['mday'];
+        $month    = $birthday['mon'];
+        $day      = $birthday['mday'];
 
         // [
         //     "水瓶座", "双鱼座", "白羊座", "金牛座", "双子座", "巨蟹座",
