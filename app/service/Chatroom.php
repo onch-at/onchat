@@ -166,14 +166,14 @@ class Chatroom
                 ['chat_member.user_id', '<>', $userId],
             ])->field(['chat_member.nickname', 'user_info.avatar'])->find();
 
-            $chatroom->name = $friendInfo->nickname;
+            $chatroom->name   = $friendInfo->nickname;
             $chatroom->avatar = $friendInfo->avatar;
         }
 
         $storage = Storage::create();
 
         $chatroom->avatarThumbnail = $storage->getThumbnailUrl($chatroom->avatar);
-        $chatroom->avatar = $storage->getUrl($chatroom->avatar);
+        $chatroom->avatar          = $storage->getUrl($chatroom->avatar);
 
         return Result::success($chatroom);
     }
@@ -199,14 +199,14 @@ class Chatroom
 
         if ($description) {
             $description = trim($description);
-            $length = StrUtils::length($description);
+            $length      = StrUtils::length($description);
             // 如果长度超出
             if ($length < ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH || $length > ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH) {
                 return Result::create(self::CODE_DESCRIPTION_IRREGULAR, '聊天室介绍长度必须在' . ONCHAT_CHATROOM_DESCRIPTION_MIN_LENGTH . '~' . ONCHAT_CHATROOM_DESCRIPTION_MAX_LENGTH . '位字符之间');
             }
         }
 
-        $timestamp = time() * 1000;
+        $timestamp   = time() * 1000;
         $peopleLimit = [
             ChatroomModel::TYPE_SINGLE_CHAT  => 1,
             ChatroomModel::TYPE_PRIVATE_CHAT => 2,
@@ -224,14 +224,14 @@ class Chatroom
         ]);
 
         if ($type === ChatroomModel::TYPE_GROUP_CHAT) {
-            $storage = Storage::create();
+            $storage   = Storage::create();
             $identicon = new Identicon(new ImageMagickGenerator());
 
             // 根据用户ID创建哈希头像
             $imageData = $identicon->getImageData($chatroom->id, 256, null, '#f5f5f5');
-            $path = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
-            $file = md5((string) DateUtils::now()) . '.png';
-            $result = $storage->save($path, $file, $imageData);
+            $path      = $storage->getRootPath() . 'avatar/chatroom/' . $chatroom->id . '/';
+            $file      = md5((string) DateUtils::now()) . '.png';
+            $result    = $storage->save($path, $file, $imageData);
 
             if ($result->isFail()) {
                 return $result;
@@ -244,7 +244,7 @@ class Chatroom
                 'avatar' => $filename,
             ]);
 
-            $chatroom->avatar = $storage->getUrl($filename);
+            $chatroom->avatar          = $storage->getUrl($filename);
             $chatroom->avatarThumbnail = $storage->getThumbnailUrl($filename);
         }
 
@@ -302,10 +302,10 @@ class Chatroom
             $websocket = Container::getInstance()->make(Websocket::class);
 
             // 添加入群消息
-            $msg = new Message(MessageType::TIPS);
-            $msg->userId = $userId;
+            $msg             = new Message(MessageType::TIPS);
+            $msg->userId     = $userId;
             $msg->chatroomId = $id;
-            $msg->data = new JoinRoomTipsMessage();
+            $msg->data       = new JoinRoomTipsMessage();
 
             $result = ChatRecordService::addRecord($msg);
 
@@ -366,8 +366,8 @@ class Chatroom
             $data = $result->data;
 
             // 补充一些信息
-            $data['title'] = $name;
-            $data['avatarThumbnail'] = $chatroom['avatarThumbnail'];
+            $data['title']                = $name;
+            $data['avatarThumbnail']      = $chatroom['avatarThumbnail'];
             $data['data']['chatroomType'] = ChatroomModel::TYPE_GROUP_CHAT;
 
             Db::commit();
@@ -428,9 +428,9 @@ class Chatroom
     {
         try {
             $storage = Storage::create();
-            $image = Request::file('image');
-            $path = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
-            $file = $image->md5() . '.' . $image->getOriginalExtension();
+            $image   = Request::file('image');
+            $path    = $storage->getRootPath() . 'avatar/chatroom/' . $id . '/';
+            $file    = $image->md5() . '.' . $image->getOriginalExtension();
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
@@ -442,7 +442,7 @@ class Chatroom
             $filename = $path . $file;
 
             // 更新新头像
-            $chatroom = ChatroomModel::field('avatar')->find($id);
+            $chatroom         = ChatroomModel::field('avatar')->find($id);
             $chatroom->avatar = $filename;
             $chatroom->save();
 
@@ -544,7 +544,7 @@ class Chatroom
         $storage = Storage::create();
 
         $expression = "%{$keyword}%";
-        $data = ChatroomModel::where('type', '=', ChatroomModel::TYPE_GROUP_CHAT)
+        $data       = ChatroomModel::where('type', '=', ChatroomModel::TYPE_GROUP_CHAT)
             ->where(function ($query) use ($expression) {
                 $query->whereOr([
                     ['name', 'LIKE', $expression],
@@ -557,7 +557,7 @@ class Chatroom
 
         foreach ($data as $item) {
             $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatar);
-            $item->avatar = $storage->getUrl($item->avatar);
+            $item->avatar          = $storage->getUrl($item->avatar);
         }
 
         return Result::success($data);

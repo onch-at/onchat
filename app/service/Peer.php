@@ -39,7 +39,7 @@ class Peer
 
         foreach ($data as $user) {
             $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-            $user->avatar = $storage->getUrl($user->avatar);
+            $user->avatar          = $storage->getUrl($user->avatar);
         }
 
         // [requester, target]

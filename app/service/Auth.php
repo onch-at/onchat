@@ -35,7 +35,7 @@ class Auth
             }
 
             $payload = $this->tokenService->refresh($payload);
-            $token = $this->tokenService->issue($payload);
+            $token   = $this->tokenService->issue($payload);
 
             return Result::success($token);
         } catch (\Exception $e) {
@@ -50,14 +50,14 @@ class Auth
      */
     public function info(): Result
     {
-        $token = Request::header('Authorization');
+        $token   = Request::header('Authorization');
         $payload = $this->tokenService->parse($token);
-        $fields = User::USER_FIELDS;
-        $user = UserService::getByKey('id', $payload->sub, $fields);
+        $fields  = User::USER_FIELDS;
+        $user    = UserService::getByKey('id', $payload->sub, $fields);
         $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar = $storage->getUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
@@ -69,7 +69,7 @@ class Auth
      */
     public function logout(): void
     {
-        $token = Request::header('Authorization');
+        $token   = Request::header('Authorization');
         $payload = $this->tokenService->parse($token);
 
         $this->tokenService->disuse($payload);

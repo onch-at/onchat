@@ -14,6 +14,6 @@ class TextMessage
     public function __construct(string $content, ?bool $emoji = null)
     {
         $this->content = $content;
-        $this->emoji = $emoji;
+        $this->emoji   = $emoji;
     }
 }

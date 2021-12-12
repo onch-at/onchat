@@ -35,7 +35,7 @@ class Message
 
     public function toArray(): array
     {
-        $that = $this;
+        $that       = $this;
         $that->data = (array) $this->data;
 
         return (array) $that;

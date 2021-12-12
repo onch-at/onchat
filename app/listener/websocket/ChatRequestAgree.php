@@ -40,7 +40,7 @@ class ChatRequestAgree extends SocketEventHandler
             return false;
         }
 
-        $chatSession = $result->data[1];
+        $chatSession  = $result->data[1];
         $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $chatSession['userId']);
 
         foreach ($requesterFds as $fd) {

@@ -17,8 +17,8 @@ class VoiceMessage
 
     public function __construct(string $filename, $duration)
     {
-        $this->filename = $filename;
-        $this->duration = $duration >= 1 ? (int) $duration : +number_format($duration, 1);
+        $this->filename   = $filename;
+        $this->duration   = $duration >= 1 ? (int) $duration : +number_format($duration, 1);
         $this->readedList = [];
     }
 }

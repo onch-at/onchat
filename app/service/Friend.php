@@ -75,12 +75,12 @@ class Friend
 
         // 如果之前已经申请过，但对方没有同意，就把对方的状态设置成等待验证
         if ($request) {
-            $request->request_reason = $reason;
-            $request->target_alias = $targetAlias;
+            $request->request_reason   = $reason;
+            $request->target_alias     = $targetAlias;
             $request->requester_readed = true;
-            $request->target_readed = false;
-            $request->status = FriendRequestModel::STATUS_WAIT;
-            $request->update_time = $timestamp;
+            $request->target_readed    = false;
+            $request->status           = FriendRequestModel::STATUS_WAIT;
+            $request->update_time      = $timestamp;
             $request->save();
         } else {
             $request = FriendRequestModel::create([
@@ -108,10 +108,10 @@ class Friend
 
             if ($userInfo->user_id === $requesterId) {
                 $request->requesterAvatarThumbnail = $avatarThumbnail;
-                $request->requesterNickname = $userInfo->nickname;
+                $request->requesterNickname        = $userInfo->nickname;
             } else {
                 $request->targetAvatarThumbnail = $avatarThumbnail;
-                $request->targetNickname = $userInfo->nickname;
+                $request->targetNickname        = $userInfo->nickname;
             }
         }
 
@@ -150,7 +150,7 @@ class Friend
      */
     public function getReceiveRequests(): Result
     {
-        $targetId = UserService::getId();
+        $targetId       = UserService::getId();
         $targetNickname = UserService::getByKey('id', $targetId, 'nickname');
 
         // 找到自己被申请的
@@ -168,7 +168,7 @@ class Friend
 
         foreach ($requests as $item) {
             $item->requesterAvatarThumbnail = $storage->getThumbnailUrl($item->requesterAvatarThumbnail);
-            $item->targetNickname = $targetNickname;
+            $item->targetNickname           = $targetNickname;
         }
 
         return Result::success($requests);
@@ -181,7 +181,7 @@ class Friend
      */
     public function getSendRequests(): Result
     {
-        $requesterId = UserService::getId();
+        $requesterId       = UserService::getId();
         $requesterNickname = UserService::getByKey('id', $requesterId, 'nickname');
 
         $requests = FriendRequestModel::join('user_info', 'friend_request.target_id = user_info.user_id')
@@ -198,7 +198,7 @@ class Friend
 
         foreach ($requests as $item) {
             $item->targetAvatarThumbnail = $storage->getThumbnailUrl($item->targetAvatarThumbnail);
-            $item->requesterNickname = $requesterNickname;
+            $item->requesterNickname     = $requesterNickname;
         }
 
         return Result::success($requests);
@@ -278,11 +278,11 @@ class Friend
         Db::startTrans();
 
         try {
-            $request->status = FriendRequestModel::STATUS_AGREE;
-            $request->requester_alias = $requesterAlias;
-            $request->target_readed = true;
+            $request->status           = FriendRequestModel::STATUS_AGREE;
+            $request->requester_alias  = $requesterAlias;
+            $request->target_readed    = true;
             $request->requester_readed = true;
-            $request->update_time = time() * 1000;
+            $request->update_time      = time() * 1000;
             $request->save();
 
             // 去找一下有没有自己申请加对方的申请记录
@@ -381,11 +381,11 @@ class Friend
         Db::startTrans();
 
         try {
-            $request->status = FriendRequestModel::STATUS_REJECT;
-            $request->target_readed = true;
+            $request->status           = FriendRequestModel::STATUS_REJECT;
+            $request->target_readed    = true;
             $request->requester_readed = false;
-            $request->reject_reason = $reason;
-            $request->update_time = time() * 1000;
+            $request->reject_reason    = $reason;
+            $request->update_time      = time() * 1000;
             $request->save();
 
             // 去找一下有没有自己申请加对方的申请记录
@@ -409,10 +409,10 @@ class Friend
                 $avatarThumbnail = $storage->getThumbnailUrl($userInfo->avatar);
 
                 if ($userInfo->user_id === $targetId) {
-                    $request->targetNickname = $userInfo->nickname;
+                    $request->targetNickname        = $userInfo->nickname;
                     $request->targetAvatarThumbnail = $avatarThumbnail;
                 } else {
-                    $request->requesterNickname = $userInfo->nickname;
+                    $request->requesterNickname        = $userInfo->nickname;
                     $request->requesterAvatarThumbnail = $avatarThumbnail;
                 }
             }

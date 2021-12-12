@@ -179,7 +179,7 @@ class User
 
             unset($user->password); // 删掉密码
 
-            $userInfo['avatar'] = $storage->getUrl($filename);
+            $userInfo['avatar']          = $storage->getUrl($filename);
             $userInfo['avatarThumbnail'] = $storage->getThumbnailUrl($filename);
 
             // 创建一个聊天室通知会话
@@ -192,8 +192,8 @@ class User
                 'update_time' => $timestamp,
             ]);
 
-            $tokenFolder = $this->issueTokens($user->id, $username);
-            $user->access = $tokenFolder->access;
+            $tokenFolder   = $this->issueTokens($user->id, $username);
+            $user->access  = $tokenFolder->access;
             $user->refresh = $tokenFolder->refresh;
 
             // 提交事务
@@ -227,7 +227,7 @@ class User
             return Result::create(Result::CODE_PARAM_ERROR, self::MSG[$result]);
         }
 
-        $fields = self::USER_FIELDS;
+        $fields   = self::USER_FIELDS;
         $fields[] = 'user.password';
 
         $user = $this->getByKey('username', $username, $fields);
@@ -245,10 +245,10 @@ class User
         $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar = $storage->getUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
-        $tokenFolder = $this->issueTokens($user->id, $username);
-        $user->access = $tokenFolder->access;
+        $tokenFolder   = $this->issueTokens($user->id, $username);
+        $user->access  = $tokenFolder->access;
         $user->refresh = $tokenFolder->refresh;
 
         return Result::success($user);
@@ -278,13 +278,13 @@ class User
         }
 
         $newPassword = StrUtils::trimAll($newPassword);
-        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $hash        = password_hash($newPassword, PASSWORD_DEFAULT);
 
         if (!$hash) { // 如果密码散列创建失败
             return Result::unknown('密码散列创建失败');
         }
 
-        $user->password = $hash;
+        $user->password    = $hash;
         $user->update_time = time() * 1000;
         $user->save();
 
@@ -342,13 +342,13 @@ class User
         }
 
         $password = StrUtils::trimAll($password);
-        $hash = password_hash($password, PASSWORD_DEFAULT);
+        $hash     = password_hash($password, PASSWORD_DEFAULT);
 
         if (!$hash) { // 如果密码散列创建失败
             return Result::unknown('密码散列创建失败');
         }
 
-        $user->password = $hash;
+        $user->password    = $hash;
         $user->update_time = time() * 1000;
         $user->save();
 
@@ -369,13 +369,13 @@ class User
         $tokenService = TokenService::instance();
 
         // 首先生成续签令牌，保证JTI的缓存时间
-        $payload = $tokenService->generate($id, ONCHAT_REFRESH_TOKEN_TTL);
+        $payload      = $tokenService->generate($id, ONCHAT_REFRESH_TOKEN_TTL);
         $payload->usr = ['username' => $username];
         $refreshToken = $tokenService->issue($payload);
 
-        $payload = $tokenService->generate($id, ONCHAT_ACCESS_TOKEN_TTL);
+        $payload      = $tokenService->generate($id, ONCHAT_ACCESS_TOKEN_TTL);
         $payload->usr = ['username' => $username];
-        $accessToken = $tokenService->issue($payload);
+        $accessToken  = $tokenService->issue($payload);
 
         return new TokenFolder($accessToken, $refreshToken);
     }
@@ -423,7 +423,7 @@ class User
         $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar = $storage->getUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
@@ -447,7 +447,7 @@ class User
         $storage = Storage::create();
 
         $user->avatarThumbnail = $storage->getThumbnailUrl($user->avatar);
-        $user->avatar = $storage->getUrl($user->avatar);
+        $user->avatar          = $storage->getUrl($user->avatar);
 
         return Result::success($user);
     }
@@ -521,9 +521,9 @@ class User
 
         try {
             $storage = Storage::create();
-            $image = Request::file('image');
-            $path = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
-            $file = $image->md5() . '.' . $image->getOriginalExtension();
+            $image   = Request::file('image');
+            $path    = $storage->getRootPath() . 'avatar/user/' . $userId . '/';
+            $file    = $image->md5() . '.' . $image->getOriginalExtension();
 
             $result = $storage->save($path, $file, $image);
             $storage->clear($path, Storage::AVATAR_MAX_COUNT);
@@ -568,7 +568,7 @@ class User
      */
     public function getPrivateChatrooms(): Result
     {
-        $userId = $this->getId();
+        $userId  = $this->getId();
         $storage = Storage::create();
 
         $data = ChatMemberModel::join('user_info', 'user_info.user_id = chat_member.user_id')
@@ -594,8 +594,8 @@ class User
 
         foreach ($data as $item) {
             $item->userId = $userId;
-            $item->type = ChatSessionModel::TYPE_CHATROOM;
-            $item->data = [
+            $item->type   = ChatSessionModel::TYPE_CHATROOM;
+            $item->data   = [
                 'chatroomId'   => $item->chatroom_id,
                 'chatroomType' => ChatroomModel::TYPE_PRIVATE_CHAT,
                 'userId'       => $item->friendId,
@@ -615,7 +615,7 @@ class User
      */
     public function getGroupChatrooms(): Result
     {
-        $userId = $this->getId();
+        $userId  = $this->getId();
         $storage = Storage::create();
 
         $data = ChatMemberModel::join('chatroom', 'chatroom.id = chat_member.chatroom_id')
@@ -636,8 +636,8 @@ class User
 
         foreach ($data as $item) {
             $item->userId = $userId;
-            $item->type = ChatSessionModel::TYPE_CHATROOM;
-            $item->data = [
+            $item->type   = ChatSessionModel::TYPE_CHATROOM;
+            $item->data   = [
                 'chatroomId'   => $item->chatroom_id,
                 'chatroomType' => ChatroomModel::TYPE_GROUP_CHAT,
             ];
@@ -658,11 +658,11 @@ class User
     {
         $userId = $this->getId();
 
-        $nickname = Request::param('nickname/s') ?: $this->getUsername();
-        $signature = Request::param('signature/s');
-        $mood = Request::param('mood/d');
-        $birthday = Request::param('birthday/d');
-        $gender = Request::param('gender/d');
+        $nickname      = Request::param('nickname/s') ?: $this->getUsername();
+        $signature     = Request::param('signature/s');
+        $mood          = Request::param('mood/d');
+        $birthday      = Request::param('birthday/d');
+        $gender        = Request::param('gender/d');
         $constellation = isset($birthday) ? DateUtils::getConstellation((int) $birthday / 1000) : null;
 
         if ($signature) {
@@ -743,7 +743,7 @@ class User
         $storage = Storage::create();
 
         $expression = "%{$keyword}%";
-        $data = UserModel::join('user_info', 'user.id = user_info.user_id')->whereOr([
+        $data       = UserModel::join('user_info', 'user.id = user_info.user_id')->whereOr([
             ['user_info.nickname', 'LIKE', $expression],
             ['user.username', 'LIKE', $expression],
             ['user.id', 'LIKE', $expression],
@@ -753,7 +753,7 @@ class User
 
         foreach ($data as $item) {
             $item->avatarThumbnail = $storage->getThumbnailUrl($item->avatar);
-            $item->avatar = $storage->getUrl($item->avatar);
+            $item->avatar          = $storage->getUrl($item->avatar);
         }
 
         return Result::success($data);

@@ -38,12 +38,12 @@ class SocketEventDispatcher
         Container $container,
         Config $config
     ) {
-        $this->websocket = $websocket;
-        $this->fd = $websocket->getSender();
-        $this->userTable = $userTable;
+        $this->websocket     = $websocket;
+        $this->fd            = $websocket->getSender();
+        $this->userTable     = $userTable;
         $this->throttleTable = $throttleTable;
-        $this->container = $container;
-        $this->config = $config;
+        $this->container     = $container;
+        $this->config        = $config;
     }
 
     /**
@@ -74,8 +74,8 @@ class SocketEventDispatcher
             // do something...
         }
 
-        $eventName = StrUtils::studly($event->type);
-        $eventData = $event->data[0];
+        $eventName    = StrUtils::studly($event->type);
+        $eventData    = $event->data[0];
         $handlerClass = $this->config->get('swoole.websocket.listen.Event:' . $eventName);
 
         // 如果没有这个事件处理类

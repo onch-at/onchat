@@ -44,9 +44,9 @@ class InviteJoinChatroom extends SocketEventHandler
             return false;
         }
 
-        $message = new MessageEntity(MessageType::CHAT_INVITATION);
+        $message         = new MessageEntity(MessageType::CHAT_INVITATION);
         $message->userId = $user['id'];
-        $message->data = new ChatInvitationMessage($chatroomId);
+        $message->data   = new ChatInvitationMessage($chatroomId);
 
         // 给每个受邀者发消息
         foreach ($result->data as $chatroomId) {
