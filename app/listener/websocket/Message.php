@@ -34,7 +34,7 @@ class Message extends SocketEventHandler
      */
     public function handle(ChatRecordService $chatRecordService, MessageService $messageService, array $event)
     {
-        // 语音，图片消息等只能通过HTTP API来上传并发送
+        // 语音，图片消息等只能通过 HTTP API 来上传并发送
         if (in_array($event['type'], [MessageType::VOICE, MessageType::IMAGE, MessageType::TIPS])) {
             $result = Result::create(Result::CODE_PARAM_ERROR, '该类型的消息不允许通过WS通道发送');
 

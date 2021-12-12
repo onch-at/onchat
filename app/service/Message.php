@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use HTMLPurifier;
+use HTMLPurifier_Config as HTMLPurifierConfig;
 use app\constant\MessageType;
 use app\core\Result;
 use app\entity\Message as MessageEntity;
 use app\entity\RichTextMessage;
 use app\entity\TextMessage;
 use app\utils\Str as StrUtils;
-use HTMLPurifier;
-use HTMLPurifier_Config as HTMLPurifierConfig;
 
 class Message
 {
@@ -40,7 +40,10 @@ class Message
                 }
 
                 $message->type = MessageType::TEXT;
-                $message->data = new TextMessage(htmlspecialchars($content));
+                $message->data = new TextMessage(
+                    htmlspecialchars($content),
+                    StrUtils::length(preg_replace('/^([^-\p{L}\x00-\x7F]+)+$/um', '', $content)) === 0
+                );
                 break;
 
             case MessageType::RICH_TEXT:
@@ -93,10 +96,10 @@ class Message
                 return Result::create(Result::CODE_PARAM_ERROR, '不支持处理该类消息');
         }
 
-        $message->userId = $msg['userId'];
+        $message->userId     = $msg['userId'];
         $message->chatroomId = $msg['chatroomId'];
-        $message->replyId = isset($msg['replyId']) && is_int($msg['replyId']) ? $msg['replyId'] : null;
-        $message->tempId = $msg['tempId'];
+        $message->replyId    = isset($msg['replyId']) && is_int($msg['replyId']) ? $msg['replyId'] : null;
+        $message->tempId     = $msg['tempId'];
 
         return Result::success($message);
     }
