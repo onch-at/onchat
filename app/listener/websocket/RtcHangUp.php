@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\core\Result;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class RtcHangUp extends SocketEventHandler
@@ -25,11 +26,11 @@ class RtcHangUp extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(array $event)
+    public function handle(Websocket $socket, array $event)
     {
-        $event['senderId'] = $this->getUser()['id'];
+        $event['senderId'] = $this->getUser($socket)['id'];
 
-        $this->websocket
+        $socket
             ->to(SocketRoomPrefix::USER . $event['targetId'])
             ->emit(SocketEvent::RTC_HANG_UP, Result::success($event));
     }

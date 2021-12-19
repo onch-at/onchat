@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Chat as ChatService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class ChatRequestAgree extends SocketEventHandler
@@ -25,15 +26,15 @@ class ChatRequestAgree extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatService $chatService, array $event)
+    public function handle(Websocket $socket, ChatService $chatService, array $event)
     {
         ['requestId' => $requestId] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $chatService->agree($requestId, $user['id']);
 
-        $this->websocket->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
+        $socket->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
 
         // 如果成功同意申请，则尝试给申请人推送消息
         if ($result->isFail()) {
@@ -47,7 +48,7 @@ class ChatRequestAgree extends SocketEventHandler
             $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatSession['data']['chatroomId']);
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER . $chatSession['userId'])
+        $socket->to(SocketRoomPrefix::USER . $chatSession['userId'])
             ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
     }
 }

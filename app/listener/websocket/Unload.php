@@ -7,37 +7,33 @@ namespace app\listener\websocket;
 use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\User as UserService;
+use think\swoole\Websocket;
 
 class Unload extends SocketEventHandler
 {
-    public function verify(array $data): bool
-    {
-        return true;
-    }
-
     /**
      * 事件监听处理.
      *
      * @return mixed
      */
-    public function handle(UserService $userService)
+    public function handle(Websocket $socket, UserService $userService)
     {
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         if ($user) {
             $userId = $user['id'];
 
-            $this->userTable->del($this->fd);
+            $this->userTable->del($socket->getSender());
             $this->throttleTable->del($userId);
 
             $chatrooms = $userService->getChatrooms($userId);
 
             // 退出房间
             foreach ($chatrooms as $chatroom) {
-                $this->websocket->leave(SocketRoomPrefix::CHATROOM . $chatroom->id);
+                $socket->leave(SocketRoomPrefix::CHATROOM . $chatroom->id);
             }
 
-            $this->websocket->leave(SocketRoomPrefix::USER . $userId);
+            $socket->leave(SocketRoomPrefix::USER . $userId);
         }
     }
 }

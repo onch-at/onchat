@@ -7,8 +7,8 @@ namespace app\controller;
 use app\core\Result;
 use app\middleware\Jsonify;
 use app\service\Index as IndexService;
-use think\captcha\facade\Captcha;
 use think\Response;
+use think\captcha\facade\Captcha;
 
 class Index
 {
@@ -23,7 +23,7 @@ class Index
 
     public function index()
     {
-        dump(null ?? 666);
+        dump([]);
     }
 
     /**

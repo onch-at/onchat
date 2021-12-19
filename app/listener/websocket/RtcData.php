@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\core\Result;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class RtcData extends SocketEventHandler
@@ -27,11 +28,11 @@ class RtcData extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(array $event)
+    public function handle(Websocket $socket, array $event)
     {
-        $event['senderId'] = $this->getUser()['id'];
+        $event['senderId'] = $this->getUser($socket)['id'];
 
-        $this->websocket
+        $socket
             ->to(SocketRoomPrefix::USER . $event['targetId'])
             ->emit(SocketEvent::RTC_DATA, Result::success($event));
     }

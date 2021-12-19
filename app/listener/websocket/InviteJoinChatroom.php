@@ -13,6 +13,7 @@ use app\entity\Message as MessageEntity;
 use app\service\Chat as ChatService;
 use app\service\ChatRecord as ChatRecordService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class InviteJoinChatroom extends SocketEventHandler
@@ -30,15 +31,15 @@ class InviteJoinChatroom extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatService $chatService, ChatRecordService $chatRecordService, $event)
+    public function handle(Websocket $socket, ChatService $chatService, ChatRecordService $chatRecordService, array $event)
     {
         ['chatroomId' => $chatroomId, 'chatroomIdList' => $chatroomIdList] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $chatService->invite($user['id'], $chatroomId, $chatroomIdList);
 
-        $this->websocket->emit(SocketEvent::INVITE_JOIN_CHATROOM, $result);
+        $socket->emit(SocketEvent::INVITE_JOIN_CHATROOM, $result);
 
         if ($result->isFail()) {
             return false;
@@ -51,7 +52,7 @@ class InviteJoinChatroom extends SocketEventHandler
         // 给每个受邀者发消息
         foreach ($result->data as $chatroomId) {
             $message->chatroomId = $chatroomId;
-            $this->websocket
+            $socket
                 ->to(SocketRoomPrefix::CHATROOM . $chatroomId)
                 ->emit(SocketEvent::MESSAGE, $chatRecordService->addRecord($message));
         }

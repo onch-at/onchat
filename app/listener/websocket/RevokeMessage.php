@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\ChatRecord as ChatRecordService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class RevokeMessage extends SocketEventHandler
@@ -26,14 +27,14 @@ class RevokeMessage extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatRecordService $chatRecordService, $event)
+    public function handle(Websocket $socket, ChatRecordService $chatRecordService, array $event)
     {
         ['chatroomId' => $chatroomId, 'id' => $id] = $event;
 
-        $user   = $this->getUser();
+        $user   = $this->getUser($socket);
         $result = $chatRecordService->revokeRecord($id, $user['id'], $chatroomId);
 
-        $this->websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)
+        $socket->to(SocketRoomPrefix::CHATROOM . $chatroomId)
             ->emit(SocketEvent::REVOKE_MESSAGE, $result);
     }
 }

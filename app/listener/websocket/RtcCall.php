@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Peer as PeerService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class RtcCall extends SocketEventHandler
@@ -25,15 +26,15 @@ class RtcCall extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(PeerService $peerService, array $event)
+    public function handle(Websocket $socket, PeerService $peerService, array $event)
     {
-        $result = $peerService->call($this->getUser()['id'], $event['chatroomId']);
+        $result = $peerService->call($this->getUser($socket)['id'], $event['chatroomId']);
 
         if ($result->isFail()) {
-            return $this->websocket->emit(SocketEvent::RTC_CALL, $result);
+            return $socket->emit(SocketEvent::RTC_CALL, $result);
         }
 
-        $this->websocket
+        $socket
             ->to(SocketRoomPrefix::CHATROOM . $event['chatroomId'])
             ->emit(SocketEvent::RTC_CALL, $result);
     }

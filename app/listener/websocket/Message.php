@@ -12,6 +12,7 @@ use app\core\Result;
 use app\service\ChatRecord as ChatRecordService;
 use app\service\Message as MessageService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class Message extends SocketEventHandler
@@ -32,30 +33,30 @@ class Message extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatRecordService $chatRecordService, MessageService $messageService, array $event)
+    public function handle(Websocket $socket, ChatRecordService $chatRecordService, MessageService $messageService, array $event)
     {
         // 语音，图片消息等只能通过 HTTP API 来上传并发送
         if (in_array($event['type'], [MessageType::VOICE, MessageType::IMAGE, MessageType::TIPS])) {
             $result = Result::create(Result::CODE_PARAM_ERROR, '该类型的消息不允许通过WS通道发送');
 
-            return $this->websocket->emit(SocketEvent::MESSAGE, $result);
+            return $socket->emit(SocketEvent::MESSAGE, $result);
         }
 
-        $event['userId'] = $this->getUser()['id'];
+        $event['userId'] = $this->getUser($socket)['id'];
         $result          = $messageService->handle($event);
 
         if ($result->isFail()) {
-            return $this->websocket->emit(SocketEvent::MESSAGE, $result);
+            return $socket->emit(SocketEvent::MESSAGE, $result);
         }
 
         $result = $chatRecordService->addRecord($result->data);
 
         if ($result->isFail()) {
-            return $this->websocket->emit(SocketEvent::MESSAGE, $result);
+            return $socket->emit(SocketEvent::MESSAGE, $result);
         }
 
         // TODO 群聊的头像
-        $this->websocket
+        $socket
             ->to(SocketRoomPrefix::CHATROOM . $event['chatroomId'])
             ->emit(SocketEvent::MESSAGE, $result);
     }

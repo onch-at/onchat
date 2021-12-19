@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Friend as FriendService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class FriendRequestReject extends SocketEventHandler
@@ -26,22 +27,22 @@ class FriendRequestReject extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(FriendService $friendService, $event)
+    public function handle(Websocket $socket, FriendService $friendService, $event)
     {
         ['requestId' => $requestId, 'reason' => $reason] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $friendService->reject($requestId, $user['id'], $reason);
 
-        $this->websocket->emit(SocketEvent::FRIEND_REQUEST_REJECT, $result);
+        $socket->emit(SocketEvent::FRIEND_REQUEST_REJECT, $result);
 
         // 如果成功拒绝申请，则尝试给申请人推送消息
         if ($result->isFail()) {
             return false;
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER . $result->data['requesterId'])
+        $socket->to(SocketRoomPrefix::USER . $result->data['requesterId'])
             ->emit(SocketEvent::FRIEND_REQUEST_REJECT, $result);
     }
 }

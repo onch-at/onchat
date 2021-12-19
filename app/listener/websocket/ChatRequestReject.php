@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Chat as ChatService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class ChatRequestReject extends SocketEventHandler
@@ -26,22 +27,22 @@ class ChatRequestReject extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatService $chatService, $event)
+    public function handle(Websocket $socket, ChatService $chatService, $event)
     {
         ['requestId' => $requestId, 'reason' => $reason] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $chatService->reject($requestId, $user['id'], $reason);
 
-        $this->websocket->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
+        $socket->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
 
         // 如果成功拒绝申请，则尝试给申请人推送消息
         if ($result->isFail()) {
             return false;
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER . $result->data['requesterId'])
+        $socket->to(SocketRoomPrefix::USER . $result->data['requesterId'])
             ->emit(SocketEvent::CHAT_REQUEST_REJECT, $result);
     }
 }

@@ -11,50 +11,44 @@ use app\core\Result;
 use app\model\UserInfo as UserInfoModel;
 use app\service\Token as TokenService;
 use app\service\User as UserService;
-use think\Request;
+use think\swoole\Websocket;
 
 class Init extends SocketEventHandler
 {
-    public function verify(array $data): bool
-    {
-        return true;
-    }
-
     /**
      * 事件监听处理.
      *
      * @return mixed
      */
-    public function handle(UserService $userService, TokenService $tokenService, Request $request)
-    {
-        $token = $request->param('token');
-
-        if (!$token) {
-            return $this->websocket->close();
-        }
-
+    public function handle(
+        array $event,
+        Websocket $socket,
+        UserService $userService,
+        TokenService $tokenService
+    ) {
         try {
+            $token   = $event['auth'];
             $payload = $tokenService->parse($token);
         } catch (\Exception $e) {
-            $this->websocket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
+            $socket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
 
-            return $this->websocket->close();
+            return $socket->close();
         }
 
         $userId    = $payload->sub;
         $chatrooms = $userService->getChatrooms($userId);
 
-        $this->userTable->set($this->fd, $payload);
+        $this->userTable->set($socket->getSender(), $payload);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {
-            $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroom->id);
+            $socket->join(SocketRoomPrefix::CHATROOM . $chatroom->id);
         }
 
         // 加入用户房间
-        $this->websocket->join(SocketRoomPrefix::USER . $userId);
+        $socket->join(SocketRoomPrefix::USER . $userId);
 
-        $this->websocket->emit(SocketEvent::INIT, Result::success());
+        $socket->emit(SocketEvent::INIT, Result::success());
 
         UserInfoModel::update([
             'login_time' => time() * 1000,

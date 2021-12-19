@@ -14,21 +14,16 @@ use think\swoole\websocket\Room;
  */
 abstract class SocketEventHandler
 {
-    protected $websocket;
     protected $room;
-    protected $fd;
     protected $userTable;
     protected $throttleTable;
 
     public function __construct(
-        Websocket $websocket,
         Room $room,
         UserTable $userTable,
         ThrottleTable $throttleTable
     ) {
-        $this->websocket     = $websocket;
         $this->room          = $room;
-        $this->fd            = $websocket->getSender();
         $this->userTable     = $userTable;
         $this->throttleTable = $throttleTable;
     }
@@ -36,11 +31,13 @@ abstract class SocketEventHandler
     /**
      * 获取当前user.
      *
+     * @param Websocket $socket
+     *
      * @return array|false
      */
-    protected function getUser()
+    protected function getUser(Websocket $socket)
     {
-        return $this->userTable->get($this->fd);
+        return $this->userTable->get($socket->getSender());
     }
 
     /**
@@ -50,5 +47,8 @@ abstract class SocketEventHandler
      *
      * @return bool
      */
-    abstract public function verify(array $data): bool;
+    public function verify(array $data): bool
+    {
+        return true;
+    }
 }

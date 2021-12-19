@@ -4,25 +4,24 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use FFMpeg\FFMpeg;
+use FFMpeg\Format\Audio\Mp3;
 use app\constant\MessageType;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
 use app\core\Result;
+use app\core\Socket;
 use app\core\storage\Storage;
 use app\entity\ImageMessage;
 use app\entity\Message;
 use app\entity\VoiceMessage;
 use app\facade\UserService;
 use app\model\ChatRecord as ChatRecordModel;
-use app\model\Chatroom as ChatroomModel;
 use app\model\ChatSession as ChatSessionModel;
+use app\model\Chatroom as ChatroomModel;
 use app\model\UserInfo as UserInfoModel;
-use FFMpeg\FFMpeg;
-use FFMpeg\Format\Audio\Mp3;
-use think\Container;
 use think\facade\Db;
 use think\facade\Request;
-use think\swoole\Websocket;
 
 class ChatRecord
 {
@@ -301,7 +300,7 @@ class ChatRecord
     public function image(int $chatroomId): Result
     {
         $userId    = UserService::getId();
-        $websocket = Container::getInstance()->make(Websocket::class);
+        $socket = Socket::getInstance();
         $image     = Request::file('image');
 
         try {
@@ -325,9 +324,9 @@ class ChatRecord
             $result = $this->addRecord($msg);
 
             if ($result->isSuccess()) {
-                $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
+                $socket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
+                $socket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;
@@ -346,7 +345,7 @@ class ChatRecord
     public function voice(int $chatroomId): Result
     {
         $userId    = UserService::getId();
-        $websocket = Container::getInstance()->make(Websocket::class);
+        $socket    = Socket::getInstance();
         $voice     = Request::file('voice');
         $file      = $voice->md5() . '.mp3';
         $temp      = sys_get_temp_dir() . '/' . $file; // 存到临时目录中
@@ -383,9 +382,9 @@ class ChatRecord
             $result = $this->addRecord($msg);
 
             if ($result->isSuccess()) {
-                $websocket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
+                $socket->to(SocketRoomPrefix::CHATROOM . $chatroomId)->emit(SocketEvent::MESSAGE, $result);
             } else {
-                $websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
+                $socket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::MESSAGE, $result);
             }
 
             return $result;

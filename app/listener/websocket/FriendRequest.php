@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Friend as FriendService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class FriendRequest extends SocketEventHandler
@@ -27,11 +28,11 @@ class FriendRequest extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(FriendService $friendService, $event)
+    public function handle(Websocket $socket, FriendService $friendService, $event)
     {
         ['targetId' => $targetId, 'targetAlias' => $targetAlias, 'reason' => $reason] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $friendService->request(
             $user['id'],
@@ -40,11 +41,11 @@ class FriendRequest extends SocketEventHandler
             $targetAlias
         );
 
-        $this->websocket->emit(SocketEvent::FRIEND_REQUEST, $result);
+        $socket->emit(SocketEvent::FRIEND_REQUEST, $result);
 
         // 如果成功发出申请，则尝试给被申请人推送消息
         if ($result->isSuccess()) {
-            $this->websocket->to(SocketRoomPrefix::USER . $targetId)
+            $socket->to(SocketRoomPrefix::USER . $targetId)
                 ->emit(SocketEvent::FRIEND_REQUEST, $result);
         }
     }

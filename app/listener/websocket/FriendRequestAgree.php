@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Friend as FriendService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class FriendRequestAgree extends SocketEventHandler
@@ -26,17 +27,17 @@ class FriendRequestAgree extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(FriendService $friendService, $event)
+    public function handle(Websocket $socket, FriendService $friendService, $event)
     {
         ['requestId' => $requestId, 'requesterAlias' => $requesterAlias] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $friendService->agree($requestId, $user['id'], $requesterAlias);
 
         $chatroomId = $result->data['chatroomId'];
-        $this->websocket->join(SocketRoomPrefix::CHATROOM . $chatroomId);
-        $this->websocket->emit(SocketEvent::FRIEND_REQUEST_AGREE, $result);
+        $socket->join(SocketRoomPrefix::CHATROOM . $chatroomId);
+        $socket->emit(SocketEvent::FRIEND_REQUEST_AGREE, $result);
 
         // 如果成功同意申请，则尝试给申请人推送消息
         if ($result->isFail()) {
@@ -52,7 +53,7 @@ class FriendRequestAgree extends SocketEventHandler
             $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatroomId);
         }
 
-        $this->websocket->to(SocketRoomPrefix::USER . $requestId)
+        $socket->to(SocketRoomPrefix::USER . $requestId)
             ->emit(SocketEvent::CHAT_REQUEST_AGREE, $result);
     }
 }

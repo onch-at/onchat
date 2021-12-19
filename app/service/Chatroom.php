@@ -4,26 +4,25 @@ declare(strict_types=1);
 
 namespace app\service;
 
+use Identicon\Identicon;
 use app\constant\MessageType;
 use app\constant\SocketEvent;
 use app\constant\SocketRoomPrefix;
-use app\core\identicon\ImageMagickGenerator;
 use app\core\Result;
+use app\core\Socket;
+use app\core\identicon\ImageMagickGenerator;
 use app\core\storage\Storage;
 use app\entity\JoinRoomTipsMessage;
 use app\entity\Message;
 use app\facade\ChatRecordService;
 use app\facade\UserService;
 use app\model\ChatMember as ChatMemberModel;
-use app\model\Chatroom as ChatroomModel;
 use app\model\ChatSession as ChatSessionModel;
+use app\model\Chatroom as ChatroomModel;
 use app\utils\Date as DateUtils;
 use app\utils\Str as StrUtils;
-use Identicon\Identicon;
-use think\Container;
 use think\facade\Db;
 use think\facade\Request;
-use think\swoole\Websocket;
 
 class Chatroom
 {
@@ -183,7 +182,7 @@ class Chatroom
      *
      * @param string $name        聊天室名称
      * @param int    $type        聊天室类型
-     * @param int    $description 聊天室描述、简介
+     * @param string description 聊天室描述、简介
      *
      * @return Result
      */
@@ -299,7 +298,7 @@ class Chatroom
 
         // 非私聊则发送入群消息
         if ($chatroom->type !== ChatroomModel::TYPE_PRIVATE_CHAT) {
-            $websocket = Container::getInstance()->make(Websocket::class);
+            $socket = Socket::getInstance();
 
             // 添加入群消息
             $msg             = new Message(MessageType::TIPS);
@@ -310,7 +309,7 @@ class Chatroom
             $result = ChatRecordService::addRecord($msg);
 
             if ($result->isSuccess()) {
-                $websocket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
+                $socket->to(SocketRoomPrefix::CHATROOM . $id)->emit(SocketEvent::MESSAGE, $result);
             }
         }
 

@@ -24,36 +24,21 @@ use think\swoole\websocket\Event as WebsocketEvent;
  */
 class SocketEventDispatcher
 {
-    protected $websocket;
-    protected $fd;
     protected $userTable;
     protected $throttleTable;
     protected $container;
     protected $config;
 
     public function __construct(
-        Websocket $websocket,
+        Config $config,
         UserTable $userTable,
-        ThrottleTable $throttleTable,
         Container $container,
-        Config $config
+        ThrottleTable $throttleTable
     ) {
-        $this->websocket     = $websocket;
-        $this->fd            = $websocket->getSender();
-        $this->userTable     = $userTable;
-        $this->throttleTable = $throttleTable;
-        $this->container     = $container;
         $this->config        = $config;
-    }
-
-    /**
-     * 获取当前user.
-     *
-     * @return array|false
-     */
-    private function getUser()
-    {
-        return $this->userTable->get($this->fd);
+        $this->userTable     = $userTable;
+        $this->container     = $container;
+        $this->throttleTable = $throttleTable;
     }
 
     /**
@@ -61,14 +46,14 @@ class SocketEventDispatcher
      *
      * @return mixed
      */
-    public function handle(WebsocketEvent $event)
+    public function handle(Websocket $socket, WebsocketEvent $event)
     {
-        $user = $this->getUser();
+        $user = $this->userTable->get($socket->getSender());
 
         if ($user) {
             // 检测频率，排除 RTC 传输数据的情况
             if ($event->type !== SocketEvent::RTC_DATA && !$this->throttleTable->try($user['id'])) {
-                return $this->websocket->emit($event->type, Result::create(Result::CODE_ACCESS_OVERCLOCK));
+                return $socket->emit($event->type, Result::create(Result::CODE_ACCESS_OVERCLOCK));
             }
 
             // do something...
@@ -80,7 +65,7 @@ class SocketEventDispatcher
 
         // 如果没有这个事件处理类
         if (!$handlerClass) {
-            return $this->websocket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
+            return $socket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
         }
 
         /** @var SocketEventHandler */
@@ -88,7 +73,7 @@ class SocketEventDispatcher
 
         // 数据校验失败
         if (!$handler->verify($eventData ?? [])) {
-            return $this->websocket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
+            return $socket->emit($event->type, Result::create(Result::CODE_PARAM_ERROR));
         }
 
         Event::trigger('swoole.websocket.Event:' . $eventName, $eventData);

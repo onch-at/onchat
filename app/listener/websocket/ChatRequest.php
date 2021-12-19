@@ -10,6 +10,7 @@ use app\contract\SocketEventHandler;
 use app\service\Chat as ChatService;
 use app\service\Chatroom as ChatroomService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class ChatRequest extends SocketEventHandler
@@ -27,22 +28,26 @@ class ChatRequest extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatService $chatService, ChatroomService $chatroomService, array $event)
-    {
+    public function handle(
+        array $event,
+        Websocket $socket,
+        ChatService $chatService,
+        ChatroomService $chatroomService
+    ) {
         ['chatroomId' => $chatroomId, 'reason' => $reason] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $chatService->request($user['id'], $chatroomId, $reason);
 
-        $this->websocket->emit(SocketEvent::CHAT_REQUEST, $result);
+        $socket->emit(SocketEvent::CHAT_REQUEST, $result);
 
         // 如果成功发出申请，则尝试给群主和群管理推送消息
         if ($result->isSuccess()) {
             $userIdList = $chatroomService->getHostAndManagerIdList($chatroomId);
 
             foreach ($userIdList as $userId) {
-                $this->websocket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::CHAT_REQUEST, $result);
+                $socket->to(SocketRoomPrefix::USER . $userId)->emit(SocketEvent::CHAT_REQUEST, $result);
             }
         }
     }

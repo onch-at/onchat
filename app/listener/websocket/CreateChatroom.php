@@ -9,6 +9,7 @@ use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\Chatroom as ChatroomService;
 use think\facade\Validate;
+use think\swoole\Websocket;
 use think\validate\ValidateRule;
 
 class CreateChatroom extends SocketEventHandler
@@ -26,18 +27,18 @@ class CreateChatroom extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(ChatroomService $chatroomService, $event)
+    public function handle(Websocket $socket, ChatroomService $chatroomService, array $event)
     {
         ['name' => $name, 'description' => $description] = $event;
 
-        $user = $this->getUser();
+        $user = $this->getUser($socket);
 
         $result = $chatroomService->create($name, $description, $user['id'], $user['username']);
 
-        $this->websocket->emit(SocketEvent::CREATE_CHATROOM, $result);
+        $socket->emit(SocketEvent::CREATE_CHATROOM, $result);
 
         if ($result->isSuccess()) {
-            $this->websocket->join(SocketRoomPrefix::CHATROOM . $result->data['data']['chatroomId']);
+            $socket->join(SocketRoomPrefix::CHATROOM . $result->data['data']['chatroomId']);
         }
     }
 }
