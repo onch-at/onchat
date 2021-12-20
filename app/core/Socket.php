@@ -9,13 +9,13 @@ use think\swoole\Websocket;
 
 class Socket
 {
-  /**
-   * get WebSocket instance
-   *
-   * @return Websocket
-   */
-  public static function getInstance(): Websocket
-  {
-    return Container::getInstance()->make(Websocket::class);
-  }
+    /**
+     * get WebSocket instance.
+     *
+     * @return Websocket
+     */
+    public static function getInstance(): Websocket
+    {
+        return Container::getInstance()->make(Websocket::class);
+    }
 }

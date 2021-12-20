@@ -180,8 +180,8 @@ class Chatroom
     /**
      * 创建一个聊天室.
      *
-     * @param string $name        聊天室名称
-     * @param int    $type        聊天室类型
+     * @param string $name 聊天室名称
+     * @param int    $type 聊天室类型
      * @param string description 聊天室描述、简介
      *
      * @return Result
