@@ -300,7 +300,7 @@ class ChatRecord
     public function image(int $chatroomId): Result
     {
         $userId    = UserService::getId();
-        $socket = Socket::getInstance();
+        $socket    = Socket::getInstance();
         $image     = Request::file('image');
 
         try {
