@@ -21,7 +21,7 @@ class Init extends SocketEventHandler
      * @return mixed
      */
     public function handle(
-        array $event,
+        ?array $event,
         Websocket $socket,
         UserService $userService,
         TokenService $tokenService
