@@ -28,11 +28,11 @@ class FriendRequest extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(Websocket $socket, FriendService $friendService, $event)
+    public function handle(Websocket $socket, FriendService $friendService, array $event)
     {
         ['targetId' => $targetId, 'targetAlias' => $targetAlias, 'reason' => $reason] = $event;
 
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         $result = $friendService->request(
             $user['id'],

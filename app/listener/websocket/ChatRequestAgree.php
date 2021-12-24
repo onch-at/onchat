@@ -10,6 +10,7 @@ use app\contract\SocketEventHandler;
 use app\service\Chat as ChatService;
 use think\facade\Validate;
 use think\swoole\Websocket;
+use think\swoole\websocket\Room;
 use think\validate\ValidateRule;
 
 class ChatRequestAgree extends SocketEventHandler
@@ -26,11 +27,11 @@ class ChatRequestAgree extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(Websocket $socket, ChatService $chatService, array $event)
+    public function handle(Websocket $socket, ChatService $chatService, Room $room, array $event)
     {
         ['requestId' => $requestId] = $event;
 
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         $result = $chatService->agree($requestId, $user['id']);
 
@@ -42,10 +43,10 @@ class ChatRequestAgree extends SocketEventHandler
         }
 
         $chatSession  = $result->data[1];
-        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $chatSession['userId']);
+        $requesterFds = $room->getClients(SocketRoomPrefix::USER . $chatSession['userId']);
 
         foreach ($requesterFds as $fd) {
-            $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatSession['data']['chatroomId']);
+            $room->add($fd, SocketRoomPrefix::CHATROOM . $chatSession['data']['chatroomId']);
         }
 
         $socket->to(SocketRoomPrefix::USER . $chatSession['userId'])

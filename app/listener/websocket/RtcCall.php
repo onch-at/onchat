@@ -28,7 +28,7 @@ class RtcCall extends SocketEventHandler
      */
     public function handle(Websocket $socket, PeerService $peerService, array $event)
     {
-        $result = $peerService->call($this->getUser($socket)['id'], $event['chatroomId']);
+        $result = $peerService->call($this->getUser()['id'], $event['chatroomId']);
 
         if ($result->isFail()) {
             return $socket->emit(SocketEvent::RTC_CALL, $result);

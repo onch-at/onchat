@@ -7,6 +7,8 @@ namespace app\listener\websocket;
 use app\constant\SocketRoomPrefix;
 use app\contract\SocketEventHandler;
 use app\service\User as UserService;
+use app\table\Throttle as ThrottleTable;
+use app\table\User as UserTable;
 use think\swoole\Websocket;
 
 class Unload extends SocketEventHandler
@@ -16,15 +18,15 @@ class Unload extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(Websocket $socket, UserService $userService)
+    public function handle(Websocket $socket, UserService $userService, UserTable $userTable, ThrottleTable $throttleTable)
     {
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         if ($user) {
             $userId = $user['id'];
 
-            $this->userTable->del($socket->getSender());
-            $this->throttleTable->del($userId);
+            $userTable->del($socket->getSender());
+            $throttleTable->del($userId);
 
             $chatrooms = $userService->getChatrooms($userId);
 

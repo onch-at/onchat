@@ -24,21 +24,13 @@ use think\swoole\websocket\Event as WebsocketEvent;
  */
 class SocketEventDispatcher
 {
-    protected $userTable;
-    protected $throttleTable;
     protected $container;
     protected $config;
 
-    public function __construct(
-        Config $config,
-        UserTable $userTable,
-        Container $container,
-        ThrottleTable $throttleTable
-    ) {
-        $this->config        = $config;
-        $this->userTable     = $userTable;
-        $this->container     = $container;
-        $this->throttleTable = $throttleTable;
+    public function __construct(Config $config, Container $container)
+    {
+        $this->config    = $config;
+        $this->container = $container;
     }
 
     /**
@@ -46,13 +38,13 @@ class SocketEventDispatcher
      *
      * @return mixed
      */
-    public function handle(Websocket $socket, WebsocketEvent $event)
+    public function handle(UserTable $userTable, ThrottleTable $throttleTable, Websocket $socket, WebsocketEvent $event)
     {
-        $user = $this->userTable->get($socket->getSender());
+        $user = $userTable->get($socket->getSender());
 
         if ($user) {
             // 检测频率，排除 RTC 传输数据的情况
-            if ($event->type !== SocketEvent::RTC_DATA && !$this->throttleTable->try($user['id'])) {
+            if ($event->type !== SocketEvent::RTC_DATA && !$throttleTable->try($user['id'])) {
                 return $socket->emit($event->type, Result::create(Result::CODE_ACCESS_OVERCLOCK));
             }
 

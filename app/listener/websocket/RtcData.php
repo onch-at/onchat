@@ -30,7 +30,7 @@ class RtcData extends SocketEventHandler
      */
     public function handle(Websocket $socket, array $event)
     {
-        $event['senderId'] = $this->getUser($socket)['id'];
+        $event['senderId'] = $this->getUser()['id'];
 
         $socket
             ->to(SocketRoomPrefix::USER . $event['targetId'])

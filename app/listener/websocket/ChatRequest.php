@@ -28,15 +28,11 @@ class ChatRequest extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(
-        array $event,
-        Websocket $socket,
-        ChatService $chatService,
-        ChatroomService $chatroomService
-    ) {
+    public function handle(Websocket $socket, ChatService $chatService, ChatroomService $chatroomService, array $event)
+    {
         ['chatroomId' => $chatroomId, 'reason' => $reason] = $event;
 
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         $result = $chatService->request($user['id'], $chatroomId, $reason);
 

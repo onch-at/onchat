@@ -35,7 +35,7 @@ class InviteJoinChatroom extends SocketEventHandler
     {
         ['chatroomId' => $chatroomId, 'chatroomIdList' => $chatroomIdList] = $event;
 
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         $result = $chatService->invite($user['id'], $chatroomId, $chatroomIdList);
 

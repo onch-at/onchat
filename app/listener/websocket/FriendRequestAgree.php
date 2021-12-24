@@ -10,6 +10,7 @@ use app\contract\SocketEventHandler;
 use app\service\Friend as FriendService;
 use think\facade\Validate;
 use think\swoole\Websocket;
+use think\swoole\websocket\Room;
 use think\validate\ValidateRule;
 
 class FriendRequestAgree extends SocketEventHandler
@@ -27,11 +28,11 @@ class FriendRequestAgree extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(Websocket $socket, FriendService $friendService, $event)
+    public function handle(Websocket $socket, FriendService $friendService, Room $room, array $event)
     {
         ['requestId' => $requestId, 'requesterAlias' => $requesterAlias] = $event;
 
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         $result = $friendService->agree($requestId, $user['id'], $requesterAlias);
 
@@ -46,11 +47,11 @@ class FriendRequestAgree extends SocketEventHandler
 
         // 拿到申请人的FD
         $requestId    = $result->data['requesterId'];
-        $requesterFds = $this->room->getClients(SocketRoomPrefix::USER . $requestId);
+        $requesterFds = $room->getClients(SocketRoomPrefix::USER . $requestId);
 
         // 加入新的聊天室
         foreach ($requesterFds as $fd) {
-            $this->room->add($fd, SocketRoomPrefix::CHATROOM . $chatroomId);
+            $room->add($fd, SocketRoomPrefix::CHATROOM . $chatroomId);
         }
 
         $socket->to(SocketRoomPrefix::USER . $requestId)

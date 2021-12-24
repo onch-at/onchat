@@ -11,6 +11,8 @@ use app\core\Result;
 use app\model\UserInfo as UserInfoModel;
 use app\service\Token as TokenService;
 use app\service\User as UserService;
+use app\table\User as UserTable;
+use think\Request;
 use think\swoole\Websocket;
 
 class Init extends SocketEventHandler
@@ -20,14 +22,17 @@ class Init extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(
-        ?array $event,
-        Websocket $socket,
-        UserService $userService,
-        TokenService $tokenService
-    ) {
+    public function handle(Request $request, Websocket $socket, UserService $userService, TokenService $tokenService, UserTable $userTable, ?array $event)
+    {
+        // TODO: 不再兼容旧版认证方式
+        $token = $request->param('token');
+
+        if (!$token) {
+            $token = $event['auth'];
+        }
+
         try {
-            $token   = $event['auth'];
+            // $token   = $event['auth'];
             $payload = $tokenService->parse($token);
         } catch (\Exception $e) {
             $socket->emit(SocketEvent::INIT, Result::unauth($e->getMessage()));
@@ -38,7 +43,7 @@ class Init extends SocketEventHandler
         $userId    = $payload->sub;
         $chatrooms = $userService->getChatrooms($userId);
 
-        $this->userTable->set($socket->getSender(), $payload);
+        $userTable->set($socket->getSender(), $payload);
 
         // 批量加入所有房间
         foreach ($chatrooms as $chatroom) {

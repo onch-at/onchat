@@ -4,40 +4,32 @@ declare(strict_types=1);
 
 namespace app\contract;
 
-use app\table\Throttle as ThrottleTable;
 use app\table\User as UserTable;
+use think\Container;
 use think\swoole\Websocket;
-use think\swoole\websocket\Room;
 
 /**
  * Socket 事件处理程序.
  */
 abstract class SocketEventHandler
 {
-    protected $room;
-    protected $userTable;
-    protected $throttleTable;
+    protected $container;
 
-    public function __construct(
-        Room $room,
-        UserTable $userTable,
-        ThrottleTable $throttleTable
-    ) {
-        $this->room          = $room;
-        $this->userTable     = $userTable;
-        $this->throttleTable = $throttleTable;
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
     }
 
     /**
      * 获取当前user.
      *
-     * @param Websocket $socket
-     *
      * @return array|false
      */
-    protected function getUser(Websocket $socket)
+    protected function getUser()
     {
-        return $this->userTable->get($socket->getSender());
+        return $this->container->invoke(function (Websocket $socket, UserTable $table) {
+            return $table->get($socket->getSender());
+        });
     }
 
     /**

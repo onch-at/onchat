@@ -27,11 +27,11 @@ class ChatRequestReject extends SocketEventHandler
      *
      * @return mixed
      */
-    public function handle(Websocket $socket, ChatService $chatService, $event)
+    public function handle(Websocket $socket, ChatService $chatService, array $event)
     {
         ['requestId' => $requestId, 'reason' => $reason] = $event;
 
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         $result = $chatService->reject($requestId, $user['id'], $reason);
 

@@ -31,7 +31,7 @@ class CreateChatroom extends SocketEventHandler
     {
         ['name' => $name, 'description' => $description] = $event;
 
-        $user = $this->getUser($socket);
+        $user = $this->getUser();
 
         $result = $chatroomService->create($name, $description, $user['id'], $user['username']);
 

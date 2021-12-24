@@ -42,7 +42,7 @@ class Message extends SocketEventHandler
             return $socket->emit(SocketEvent::MESSAGE, $result);
         }
 
-        $event['userId'] = $this->getUser($socket)['id'];
+        $event['userId'] = $this->getUser()['id'];
         $result          = $messageService->handle($event);
 
         if ($result->isFail()) {
