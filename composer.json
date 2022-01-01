@@ -16,20 +16,20 @@
     ],
     "require": {
         "php": ">=7.4.0",
-        "topthink/framework": "6.0.9",
-        "topthink/think-orm": "2.0.45",
+        "topthink/framework": "6.0.10",
+        "topthink/think-orm": "2.0.47",
         "topthink/think-captcha": "3.0.3",
         "topthink/think-swoole": "4.0.6",
         "topthink/think-queue": "3.0.6",
         "aliyuncs/oss-sdk-php": "2.4.3",
         "yzalis/identicon": "2.0.0",
-        "ezyang/htmlpurifier": "4.13.0",
+        "ezyang/htmlpurifier": "4.14.0",
         "phpmailer/phpmailer": "6.5.3",
         "php-ffmpeg/php-ffmpeg": "0.19.0",
         "firebase/php-jwt": "5.5.1"
     },
     "require-dev": {
-        "symfony/var-dumper": "5.4.1",
+        "symfony/var-dumper": "5.4.2",
         "topthink/think-trace": "1.4"
     },
     "autoload": {
