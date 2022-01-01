@@ -40,6 +40,8 @@ class SocketEventDispatcher
      */
     public function handle(UserTable $userTable, ThrottleTable $throttleTable, Websocket $socket, WebsocketEvent $event)
     {
+        output($event->type);
+
         $user = $userTable->get($socket->getSender());
 
         if ($user) {

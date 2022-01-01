@@ -40,10 +40,7 @@ class Message
                 }
 
                 $message->type = MessageType::TEXT;
-                $message->data = new TextMessage(
-                    htmlspecialchars($content),
-                    StrUtils::length(preg_replace('/^([^-\p{L}\x00-\x7F]+)+$/um', '', $content)) === 0
-                );
+                $message->data = new TextMessage($content);
                 break;
 
             case MessageType::RICH_TEXT:
