@@ -5,7 +5,7 @@ You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the On
 
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 ![StyleCI](https://github.styleci.io/repos/7548986/shield?style=flat&branch=6.x)
-[![CodeFactor](https://www.codefactor.io/repository/github/hyperlife1119/onchat/badge)](https://www.codefactor.io/repository/github/hyperlife1119/onchat)
+[![CodeFactor](https://www.codefactor.io/repository/github/onch-at/onchat/badge)](https://www.codefactor.io/repository/github/onch-at/onchat)
 
 OnChat currently supports the following chat modes:
 
