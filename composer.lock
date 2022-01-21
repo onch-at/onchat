@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c0452a0cf062c08e3787b7615621bdb",
+    "content-hash": "2153fc5c4225b9930019a508cb06abd2",
     "packages": [
         {
             "name": "alchemy/binary-driver",
@@ -2557,16 +2557,16 @@
         },
         {
             "name": "topthink/framework",
-            "version": "v6.0.11",
+            "version": "v6.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/framework.git",
-                "reference": "d9cadb6971ae92ff85ba5f2be77a40b0ad5718fb"
+                "reference": "e478316ac843c1a884a3b3a7a94db17c4001ff5c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/framework/zipball/d9cadb6971ae92ff85ba5f2be77a40b0ad5718fb",
-                "reference": "d9cadb6971ae92ff85ba5f2be77a40b0ad5718fb",
+                "url": "https://api.github.com/repos/top-think/framework/zipball/e478316ac843c1a884a3b3a7a94db17c4001ff5c",
+                "reference": "e478316ac843c1a884a3b3a7a94db17c4001ff5c",
                 "shasum": ""
             },
             "require": {
@@ -2618,9 +2618,9 @@
             ],
             "support": {
                 "issues": "https://github.com/top-think/framework/issues",
-                "source": "https://github.com/top-think/framework/tree/v6.0.11"
+                "source": "https://github.com/top-think/framework/tree/v6.0.12"
             },
-            "time": "2021-12-31T09:14:28+00:00"
+            "time": "2022-01-21T06:31:07+00:00"
         },
         {
             "name": "topthink/think-captcha",
