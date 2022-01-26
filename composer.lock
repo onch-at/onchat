@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c0452a0cf062c08e3787b7615621bdb",
+    "content-hash": "cff66e9475c1dac011171b90a6e5681e",
     "packages": [
         {
             "name": "alchemy/binary-driver",
@@ -2729,16 +2729,16 @@
         },
         {
             "name": "topthink/think-orm",
-            "version": "v2.0.50",
+            "version": "v2.0.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/think-orm.git",
-                "reference": "091ad5e023c15fcce4ceaea2f3814bdf71045cde"
+                "reference": "407a60658f37fc57422ab95a9922c6f69af90f46"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/think-orm/zipball/091ad5e023c15fcce4ceaea2f3814bdf71045cde",
-                "reference": "091ad5e023c15fcce4ceaea2f3814bdf71045cde",
+                "url": "https://api.github.com/repos/top-think/think-orm/zipball/407a60658f37fc57422ab95a9922c6f69af90f46",
+                "reference": "407a60658f37fc57422ab95a9922c6f69af90f46",
                 "shasum": ""
             },
             "require": {
@@ -2778,9 +2778,9 @@
             ],
             "support": {
                 "issues": "https://github.com/top-think/think-orm/issues",
-                "source": "https://github.com/top-think/think-orm/tree/v2.0.50"
+                "source": "https://github.com/top-think/think-orm/tree/v2.0.52"
             },
-            "time": "2022-01-06T02:48:16+00:00"
+            "time": "2022-01-25T06:00:05+00:00"
         },
         {
             "name": "topthink/think-queue",
