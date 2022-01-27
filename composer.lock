@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c0452a0cf062c08e3787b7615621bdb",
+    "content-hash": "615da3fcfd88eb81ba5b44ebeeb8b9fb",
     "packages": [
         {
             "name": "alchemy/binary-driver",
@@ -2624,23 +2624,17 @@
         },
         {
             "name": "topthink/think-captcha",
-            "version": "v3.0.3",
+            "version": "v3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/top-think/think-captcha.git",
-                "reference": "1eef3717c1bcf4f5bbe2d1a1c704011d330a8b55"
+                "reference": "db5be361d3cd664d236fb95d5dffe93a117283ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/top-think/think-captcha/zipball/1eef3717c1bcf4f5bbe2d1a1c704011d330a8b55",
-                "reference": "1eef3717c1bcf4f5bbe2d1a1c704011d330a8b55",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/top-think/think-captcha/zipball/db5be361d3cd664d236fb95d5dffe93a117283ad",
+                "reference": "db5be361d3cd664d236fb95d5dffe93a117283ad",
+                "shasum": ""
             },
             "require": {
                 "topthink/framework": "^6.0.0"
@@ -2677,9 +2671,9 @@
             "description": "captcha package for thinkphp",
             "support": {
                 "issues": "https://github.com/top-think/think-captcha/issues",
-                "source": "https://github.com/top-think/think-captcha/tree/v3.0.3"
+                "source": "https://github.com/top-think/think-captcha/tree/v3.0.4"
             },
-            "time": "2020-05-19T10:55:45+00:00"
+            "time": "2022-01-07T06:34:19+00:00"
         },
         {
             "name": "topthink/think-helper",
