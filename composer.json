@@ -19,7 +19,7 @@
         "topthink/framework": "6.0.11",
         "topthink/think-orm": "2.0.50",
         "topthink/think-captcha": "3.0.3",
-        "topthink/think-swoole": "4.0.6",
+        "topthink/think-swoole": "4.0.7",
         "topthink/think-queue": "3.0.6",
         "aliyuncs/oss-sdk-php": "2.4.3",
         "yzalis/identicon": "2.0.0",
