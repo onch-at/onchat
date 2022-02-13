@@ -1,10 +1,12 @@
 # OnChat
 
-A simple, beautiful, mobile-first instant messaging progressive web application build with [ThinkPHP6](https://github.com/top-think/framework) and [Swoole](https://github.com/swoole/swoole-src).
-You can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the OnChat front-end code repository.
+> ⚠️ Migrating to Spring Boot...
+
+A simple, beautiful, mobile-first instant messaging progressive web application build
+with [ThinkPHP6](https://github.com/top-think/framework) and [Swoole](https://github.com/swoole/swoole-src). You
+can [click here](https://github.com/HyperLife1119/OnChat-Web) to view the OnChat front-end code repository.
 
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
-![StyleCI](https://github.styleci.io/repos/7548986/shield?style=flat&branch=6.x)
 [![CodeFactor](https://www.codefactor.io/repository/github/onch-at/onchat/badge)](https://www.codefactor.io/repository/github/onch-at/onchat)
 
 OnChat currently supports the following chat modes:
@@ -18,11 +20,14 @@ OnChat currently supports the following chat modes:
 
 ## Features
 
-- ⚡️ **Lightning fast** - The server adopts [Swoole](https://www.swoole.co.uk/) programmatic server with asynchronous IO, coroutine and Fibers, with excellent performance.
-- ⛰ **Stable as Mount Tai** - The client is built using [Angular](https://angular.io/), which has better scalability, maintainability and stability.
+- ⚡️ **Lightning fast** - The server adopts [Swoole](https://www.swoole.co.uk/) programmatic server with asynchronous
+  IO, coroutine and Fibers, with excellent performance.
+- ⛰ **Stable as Mount Tai** - The client is built using [Angular](https://angular.io/), which has better scalability,
+  maintainability and stability.
 - ✨ **Small and exquisite** - There are no complicated functions and focus on online social chat.
 - 🔼 **Progressive** - Compared with ordinary Web App, PWA is faster, more powerful, more reliable and installable.
-- 📲 **Mobile first** - The user interface is specifically designed for mobile devices, the interactive experience is good.
+- 📲 **Mobile first** - The user interface is specifically designed for mobile devices, the interactive experience is
+  good.
 
 ## Quick experience
 
@@ -30,7 +35,8 @@ Visit the official [OnChat](https://chat.hypergo.net) site to quickly start your
 
 ## Documentation
 
-For the full OnChat documentation, please visit [https://docs.chat.hypergo.net/docs/intro](https://docs.chat.hypergo.net/docs/intro).
+For the full OnChat documentation, please
+visit [https://docs.chat.hypergo.net/docs/intro](https://docs.chat.hypergo.net/docs/intro).
 
 ## Support
 
