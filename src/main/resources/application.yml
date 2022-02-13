@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/onchat?useUnicode=yes&characterEncoding=UTF-8&useSSL=false&rewriteBatchedStatements=true
+    username: root
+    password: root
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    properties:
+      format_sql: true
