@@ -39,6 +39,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+      
+    - name: Setup Java JDK
+      uses: actions/setup-java@v2.5.0
+      with:
+        # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
+        java-version: 17
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
