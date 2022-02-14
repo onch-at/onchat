@@ -45,6 +45,7 @@ jobs:
       with:
         # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
         java-version: 17
+        distribution: microsoft
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
